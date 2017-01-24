@@ -1,4 +1,5 @@
 # SSD-Resources-Demo
+#Getting Set up
 install required tools and managers
 $npm install -g firebase-tools polymer-cli bower
 
