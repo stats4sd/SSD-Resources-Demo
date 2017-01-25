@@ -18,6 +18,11 @@ $firebase deploy
 Note - project structure not ideal (currently way too much sitting in public folder as testing ground).
 Links to $firebase serve command, ideally should have precompile before from higher level
 
+#Add a page
+1. create a new html doc in the src folder. naming convention is ssd-[name].html
+2. copy ssd-viewTemplate contents to new page and update necessary code
+3. provide a reference for the menu in ssd-app.html <iron-pages> and <iron-selector> sections
+
 
 #Learn more about the code used
 
