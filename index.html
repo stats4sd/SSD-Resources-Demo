@@ -17,7 +17,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <title>SSD Resources Demo</title>
     <meta name="description" content="SSD Resources Demo - ">
-
     <link rel="icon" href="/images/favicon.ico">
 
     <!-- See https://goo.gl/OOhYW5 -->
@@ -58,7 +57,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       // Web Components
       (function() {
         'use strict';
-
         var onload = function() {
           // For native Imports, manually fire WebComponentsReady so user code
           // can use the same code path for native and polyfill'd imports.
@@ -86,14 +84,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       })();
 
-      // Load pre-caching Service Worker
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/service-worker.js');
-        });
-      }
+      // Load pre-caching Service Worker 
+      // if ('serviceWorker' in navigator) {
+      //   window.addEventListener('load', function() {
+      //     navigator.serviceWorker.register('/service-worker.js');
+      //   });
+      // }
     </script>
-
+    <link rel="import" href="bower_components/platinum-sw/platinum-sw-elements.html">  
     <link rel="import" href="/src/ssd-app.html">
 
     <style>
@@ -107,6 +105,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
   </head>
   <body>
+    <!--register service worker-->
+    <platinum-sw-register
+      auto-register
+      skip-waiting
+      clients-claim
+      reload-on-install
+      href="sw-import.js">
+    <platinum-sw-cache
+        default-cache-strategy="networkFirst">
+    </platinum-sw-cache>
+  </platinum-sw-register>
+  <!--firebase app register-->
+  <firebase-app
+      name="notes"
+      api-key="AIzaSyCfl_Pe6Fb8KzIQRV1P2RIwwhN8Jl6BACo"
+      auth-domain="ssd-resources-demo.firebaseapp.com"
+      database-url="https://ssd-resources-demo.firebaseio.com">
+    </firebase-app>
     <ssd-app></ssd-app>
     <!-- Built with love using Polymer Starter Kit -->
   </body>

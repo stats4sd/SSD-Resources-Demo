@@ -1,15 +1,43 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/note-app-elements/na-elements.html">
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 
 <dom-module id="ssd-note-page">
   <template>
+    <style include="note-app-shared-styles"></style>
     <style include="shared-styles">
       :host {
         display: block;
-
         padding: 10px;
       }
     </style>
+    <na-toolbar></na-toolbar>
+    
+    <firebase-query
+        id="query"
+        app-name="notes"
+        log=true
+        data="{{data}}">
+    </firebase-query>
+    <app-indexeddb-mirror
+        session="8he0pAlW8DPwnKRGiS0HCjaTIui2"
+        key="notes"
+        data="{{data}}"
+        persisted-data="{{persistedData}}">
+    </app-indexeddb-mirror>
+
+    <div class="notes">
+      <!--<template is="dom-repeat" items="[[persistedData]]" as="note">
+        <na-note
+            id$="[[note.$key]]"
+            title="[[note.title]]"
+            body="[[note.body]]"
+            on-tap="edit">
+        </na-note>
+      </template>-->
+    </div>
 
     <div class="card">
       <div class="circle">Note</div>
@@ -22,6 +50,13 @@
   <script>
     Polymer({
       is: 'ssd-note-page',
+      data: {
+      type: Object,
+      observer: 'dataChanged'
+    },
+    dataChanged: function (newData, oldData) {
+    console.log('data changed')
+  }
     });
   </script>
 </dom-module>
