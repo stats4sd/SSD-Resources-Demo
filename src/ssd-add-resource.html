@@ -1,0 +1,99 @@
+<!--See form docs at: https://elements.polymer-project.org/elements/iron-form-->
+
+<!--import polymer html and shared styles-->
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/iron-form/demo/simple-element.html">
+<link rel="import" href="../bower_components/firebase-storage-upload/firebase-storage-upload.html">
+
+<link rel="import" href="shared-styles.html">
+
+<!--give id reference of page name-->
+<dom-module id="ssd-add-resource">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+      paper-material {
+        display: inline-block;
+        background: white;
+        box-sizing: border-box;
+        width:100%;
+        margin: 8px;
+        padding: 16px;
+        border-radius: 2px;
+      }
+      paper-progress {
+        width: 100%
+      }
+    </style>
+<paper-material elevation="1">
+  <form is="iron-form" method="get" action="/" id="basic">
+    <paper-input name="name" label="Name" required></paper-input>
+    <br>
+    <input type="checkbox" name="food" value="donuts" checked> I like donuts<br>
+    <input type="checkbox" name="food" value="pizza" required> I like pizza<br>
+    <paper-checkbox name="food" value="cheese" required>I like cheese</paper-checkbox><br>
+    <paper-dropdown-menu label="Cars" name="cars" required>
+      <paper-menu class="dropdown-content">
+        <paper-item value="volvo">Volvo</paper-item>
+        <paper-item value="saab">Saab</paper-item>
+        <paper-item value="fiat">Fiat</paper-item>
+        <paper-item value="audi">Audi</paper-item>
+      </paper-menu>
+    </paper-dropdown-menu>
+    <paper-button raised onclick="_submit(event)">Submit</paper-button>
+    <paper-button raised onclick="_reset(event)">Reset</paper-button>
+    <div class="output"></div>
+  </form>
+</paper-material>  
+<p>Simple uploader to firebase</p>
+  <firebase-storage-upload
+    name="upload-input"
+    label="Upload label"
+    ref="/tests/"
+    accept="image/jpeg,image/jpeg,image/png,application/pdf"
+    max-file-size="6000"
+    progress="{{progress}}">
+    <paper-progress value="[[progress]]"></paper-progress>
+    <label for="upload-input">Some nice label</label>
+  </firebase-storage-upload>
+<script>
+  function _submit(event) {
+    Polymer.dom(event).localTarget.parentElement.submit();
+    console.log('submitted')
+  }
+  function _reset(event) {
+    var form = Polymer.dom(event).localTarget.parentElement
+    form.reset();
+    form.querySelector('.output').innerHTML = '';
+  }
+  basic.addEventListener('iron-form-submit', function(event) {
+    this.querySelector('.output').innerHTML = JSON.stringify(event.detail);
+  });
+</script>
+</template>
+  
+
+  <script>
+//give element selector name here
+    Polymer({
+      is: 'ssd-add-resource',
+    });
+  </script>
+</dom-module>
