@@ -2,22 +2,9 @@
 
 <!--import polymer html and shared styles-->
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/paper-material/paper-material.html">
-<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
-<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
-<link rel="import" href="../bower_components/paper-styles/color.html">
-<link rel="import" href="../bower_components/paper-styles/typography.html">
-<link rel="import" href="../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../bower_components/iron-form/demo/simple-element.html">
-<link rel="import" href="../bower_components/firebase-storage-upload/firebase-storage-upload.html">
 
 <link rel="import" href="shared-styles.html">
 
@@ -62,17 +49,7 @@
     <div class="output"></div>
   </form>
 </paper-material>  
-<p>Simple uploader to firebase</p>
-  <firebase-storage-upload
-    name="upload-input"
-    label="Upload label"
-    ref="/tests/"
-    accept="image/jpeg,image/jpeg,image/png,application/pdf"
-    max-file-size="6000"
-    progress="{{progress}}">
-    <paper-progress value="[[progress]]"></paper-progress>
-    <label for="upload-input">Some nice label</label>
-  </firebase-storage-upload>
+
 <script>
   function _submit(event) {
     Polymer.dom(event).localTarget.parentElement.submit();

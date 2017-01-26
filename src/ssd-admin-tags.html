@@ -1,0 +1,98 @@
+<!--import polymer html and shared styles-->
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/note-app-elements/na-elements.html">
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/juicy-jsoneditor/juicy-jsoneditor.html">
+<link rel="import" href="shared-styles.html">
+
+<!--give id reference of page name-->
+<dom-module id="ssd-admin-tags">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+    </style>
+    <!--Add template content here-->
+    <div class="card">
+      <h1>Tags</h1>
+      <p>Add or remove tags from the list below<br> (note, existing resources will not be automatically changed)</p>
+
+      <firebase-document app="notes" app-name="notes" path="/testTags" data="{{allTags}}">
+      </firebase-document>
+
+      <template is="dom-repeat" items="[[allTags]]" as="tag">
+        <li on-tap="edit" id="li-{{index}}">{{tag}}</li>
+      </template>
+
+      <paper-input id="tag-input" name="tag-input" label="Add/Edit Tag" value="{{tagInput}}" <!--max="100" char-counter-->
+        >
+      </paper-input>
+      <paper-button raised on-tap="addTag">Save</paper-button>
+      <paper-button raised on-tap="removeTag">Remove</paper-button>
+
+      <!--<juicy-jsoneditor json="{{fireTags}}"></juicy-jsoneditor>-->
+  </template>
+  </div>
+  </template>
+
+  <script>
+//give element selector name here
+    Polymer({
+      is: 'ssd-admin-tags',
+      properties:{
+        uid:String,
+        allTags:{
+          type:Object,
+          observer:'dataChanged'
+        }
+      },
+      dataChanged:function(newData,oldData){
+        //console.log(newData)
+      },
+      edit:function(e){
+        this.tagId = parseInt(e.srcElement.id.split("-")[1])
+        this.tagInput=this.allTags[this.tagId]
+      },
+      addTag:function(){
+        console.log(this.tagInput)
+        if(this.tagInput!=null){
+          if(this.allTags.length==undefined){console.log('empty json');this.allTags=[]}
+          if (this.allTags.indexOf(this.tagInput)>-1){
+          console.log('duplicate tag')
+        }
+        else{
+          if(this.tagId>-1){this.allTags.splice(this.tagId,1)}
+          var newTags=this.allTags
+          newTags.push(this.tagInput)
+          //empty and refill to force data system to reevaluate
+          this.set('allTags',[])
+          this.set('allTags',newTags) 
+        }
+        this.tagId=-1
+        this.tagInput=null
+        }
+      },
+      removeTag:function(){
+        if(this.tagId>-1){
+          var newTags=this.allTags;
+          newTags.splice(this.tagId,1);
+          this.allTags=[];
+          this.allTags=newTags;
+        }
+        this.tagInput=null
+      },
+      _toArray: function(obj) {
+            return Object.keys(obj).map(function(key) {
+                return {
+                    name: key,
+                    value: obj[key]
+                };
+            });
+        },
+    });
+  </script>
+</dom-module>
