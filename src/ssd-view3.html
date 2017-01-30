@@ -44,7 +44,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <iron-ajax
       id="getFiles"
       handle-as="json"
-      url="https://www.googleapis.com/drive/v3/files"
       on-response="_filesReceived"
       on-error="_handleAjaxPostError"
       >
@@ -97,9 +96,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.getToken.generateRequest()
       },
       _getFiles:function(){
+        var query="https://www.googleapis.com/drive/v2/files?access_token="+this.token
         var headers={Authorization:"Bearer "+this.token}
-        console.log(headers)
-        this.$.headers=headers
+        this.$.getFiles.url=query
         this.$.getFiles.generateRequest()
       }
       
