@@ -10,6 +10,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/paper-elements/paper-elements.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<script src="../bower_components/kjur-jsrsasign/jsrsasign-latest-all-min.js"></script>
 
 <dom-module id="ssd-view3">
   <template>
@@ -23,15 +26,83 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="card">
       <div class="circle">3</div>
-      <h1>View Three</h1>
-      <p>Modus commodo minimum eum te, vero utinam assueverit per eu.</p>
-      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.Has at minim mucius aliquam, est id tempor laoreet.Pro saepe pertinax ei, ad pri animal labores suscipiantur.</p>
+      <h1>View Three - google service account oAuth</h1>
+      <p>This view is currently being used to test google OAuth for service accounts</p>
+      <p>Click the button to generate an access token</p>
     </div>
+    <paper-button raised on-click="_getToken">Get Token</paper-button>
+    <paper-button raised on-click="_getFiles">List Files</paper-button>
+    <iron-ajax
+      id="getToken"
+      method="POST"
+      content-type="application/x-www-form-urlencoded"
+      handle-as="json"
+      on-response="_tokenReceived"
+      on-error="_handleAjaxPostError"
+      >
+    </iron-ajax>
+    <iron-ajax
+      id="getFiles"
+      handle-as="json"
+      url="https://www.googleapis.com/drive/v3/files"
+      on-response="_filesReceived"
+      on-error="_handleAjaxPostError"
+      >
+    </iron-ajax>
+
+
+
   </template>
+
+   
 
   <script>
     Polymer({
       is: 'ssd-view3',
+      _handleAjaxPostError:function(e, request){
+        console.log(e.detail.request.xhr.response)
+      },
+      _tokenReceived:function(e, request){
+        var res =e.detail.response
+        console.log(res)
+        this.token=res.access_token
+      },
+      _filesReceived:function(e, request){
+        var res =e.detail.response
+        console.log(res)
+      },
+      _getToken:function(){
+        var header={"alg":"RS256","typ":"JWT"}
+        // var headerEnc=btoa(JSON.stringify(header));
+        var epochNow=Math.floor(Date.now() / 1000)
+        var epochExp=epochNow+3000
+        var claim={
+          "iss":"google-drive-service-account@ssd-resources-demo.iam.gserviceaccount.com",
+          "scope":"https://www.googleapis.com/auth/drive.file",
+          "aud":"https://www.googleapis.com/oauth2/v4/token",
+          "exp":epochExp,
+          "iat":epochNow
+        }
+        var sHeader = JSON.stringify(header);
+        var sPayload = JSON.stringify(claim);
+        //should move out of code for security
+        var prvKey="-----BEGIN PRIVATE KEY-----MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDALXv+BMxN6UDVDeP1glBguo/ZC4gp8QfzwI+EjDfWaZXgXOrya9vruv6sEHHJ8M/FfFuGHWR23jaloRQ8AnBKUx1Grp5kXAFa5N3UDShb4SEIynRf5Bie8jn82RUw2V5i9bGmJN5lnowtUqW0+uNwz8V/7Yec0I0/LgVg/zEkn7W8CzbCVlI9qD1Lu9BP0CF3rau8pRM16gGg0RFB6RKbNosEXtSxxWOkC4Lh9AXsv/I4wLQSmR1LLWmXyzl+S4+uaOiNhbxgaVqXrrCuwwroj3w7Pa7ffsWNRO4OSqKsAH0jRtSvB1mmTt2UUDW0Ou8kQ9asqmlGK6Y9/VKVPPGRAgMBAAECggEADPhE4Pzj6PIwDPD2DJCx6gVNRgGwO9xng/zf8rsf3ZmcotrChH/hBMTHAUfO1ikpbJOa/a8oI5mVqJH5cp9bgrifRjDswasv8Dl3+yK0MZc9CoHXXs1fGAMTBMyF0Jkq9JTOW38rf0I3BawJQPCZvvhWxO5784pjrfrmJAi1AVqkEYjkr1Nq8v/JKsCTjo4wlo+Bw63QLKMrPHAtUTiYXZGj/pIPVbTNkO0mAT2JoTsDUA0oC8Nw5Zfc8nfDtJph/n4+wb19hS01mcPJPRhDSQ28vCBVfo9KBqRnsStEZcZv/X+/rYks0+RHn7vuoA6eVeDt7hmODFQr0U7MTyc2/QKBgQDfzyrJvT+d11Mpc5Mpu5Ca61mMwuzkv+o+XOuidaMYukuKlzJ2gnp71GuhhElFfzfEa53SDlqW6gStsrpaSHy2wvsyrjPDpN5n9HG4jldS5cTwcvQVSQTrwdOTK4hvOKZOYkjO4G1ihfhZHMmcsyJw31SgHZitO0IdEcRJwi8ErwKBgQDb0Z4kMfBuOdao2jMNE12dTyUL3VM/n//ixjdnbJqel+6OvUZrR2uXbrF6yASHqWZYkgOuKVEQ4fRSa2ud191l+oVtLUTvBzTk6/hTAQVsk24gBOITbgfpFCwN34UMNLyIeG1Bo0IkNdziHWAlIW+i/mwR3Jlz7onpKq6q1NF9vwKBgQCZ+q0kiPiYvskvbp2kC7CMdTlyF7XmF4ewijtv1WF1pM5ONoH4eQKN6XJ3eEz07HbQw32cRFXdGHpJivqdHNv43aL3llR02RxPByWqZPv9Q6nACEaX0ln5XawTx9KhOqdorEQNWOjI7QUVQjIPhks+vtg5JMOjA28UEuIqINg6bwKBgG2psqJOA6uJ0UxlpuhUC/TpwgqcPObV9Ht29bb0GGMcWtf9Fz933vYqNAKT/KaNXVC8b3eYhyfMAe6IRqT1Ry+T/rKLzgMNblbyXe1S6hjTqDHzHbIhx3KBLMUzCJYhTRksMx12zA1yjaKEky2S87W2BcYXbrrGeyjGsWLqTyTTAoGASGU5iH84araAACG4di3vQ03QAWefEHwIMS52sRKcJ3e8ti29sTAl1t/9udH4h14f0q8Em0Jzvjh0csJhBquzLsnrhcryHPjNLQeksxEWL/2RJXV6twAMiMnVMTynhCX9ChDe5lYM42l9zfgexS8auITWaLFnrqKQRKYgAoHoBEY=-----END PRIVATE KEY-----"    
+        var sJWS = KJUR.jws.JWS.sign("RS256", sHeader, sPayload, prvKey);
+        var params = {
+          "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer", 
+          "assertion": sJWS 
+        };
+        this.$.getToken.url="https://www.googleapis.com/oauth2/v4/token";
+        this.$.getToken.body=params;
+        this.$.getToken.generateRequest()
+      },
+      _getFiles:function(){
+        var headers={Authorization:"Bearer "+this.token}
+        console.log(headers)
+        this.$.headers=headers
+        this.$.getFiles.generateRequest()
+      }
+      
     });
   </script>
 </dom-module>
