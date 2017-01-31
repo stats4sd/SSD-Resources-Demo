@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">  
 <script src="../bower_components/kjur-jsrsasign/jsrsasign-latest-all-min.js"></script>
 
 <dom-module id="ssd-view3">
@@ -32,6 +33,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
     <paper-button raised on-click="_getToken">Get Token</paper-button>
     <paper-button raised on-click="_getFiles">List Files</paper-button>
+    <paper-button raised on-click="_getFilesFire">List Firebase Files</paper-button>
     <iron-ajax
       id="getToken"
       method="POST"
@@ -96,10 +98,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.getToken.generateRequest()
       },
       _getFiles:function(){
-        var query="https://www.googleapis.com/drive/v2/files?access_token="+this.token
+        var query="https://www.googleapis.com/drive/v2/about?access_token="+this.token
         var headers={Authorization:"Bearer "+this.token}
         this.$.getFiles.url=query
         this.$.getFiles.generateRequest()
+      },
+      _getFilesFire:function(){
+        var storage = firebase.storage();
+        var storageRef=storage.ref();
+        var imagesList = storageRef.child('images')
+        var testImage=storageRef.child('images/SSD structure.png')
+        testImage.getMetadata().then(function(metadata){
+          console.log(metadata)
+          }).catch(function(err){console.log(err)})
       }
       
     });

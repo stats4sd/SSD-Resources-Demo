@@ -5,6 +5,7 @@
 <link rel="import" href="../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../bower_components/iron-form/demo/simple-element.html">
+<link rel="import" href="../bower_components/vaadin-upload/vaadin-upload.html">
 
 <link rel="import" href="shared-styles.html">
 
@@ -16,41 +17,45 @@
         display: block;
         padding: 10px;
       }
+      
       paper-material {
         display: inline-block;
         background: white;
         box-sizing: border-box;
-        width:100%;
+        width: 100%;
         margin: 8px;
         padding: 16px;
         border-radius: 2px;
       }
+      
       paper-progress {
         width: 100%
       }
     </style>
-<paper-material elevation="1">
-  <form is="iron-form" method="get" action="/" id="basic">
-    <paper-input name="name" label="Name" required></paper-input>
-    <br>
-    <input type="checkbox" name="food" value="donuts" checked> I like donuts<br>
-    <input type="checkbox" name="food" value="pizza" required> I like pizza<br>
-    <paper-checkbox name="food" value="cheese" required>I like cheese</paper-checkbox><br>
-    <paper-dropdown-menu label="Cars" name="cars" required>
-      <paper-menu class="dropdown-content">
-        <paper-item value="volvo">Volvo</paper-item>
-        <paper-item value="saab">Saab</paper-item>
-        <paper-item value="fiat">Fiat</paper-item>
-        <paper-item value="audi">Audi</paper-item>
-      </paper-menu>
-    </paper-dropdown-menu>
-    <paper-button raised onclick="_submit(event)">Submit</paper-button>
-    <paper-button raised onclick="_reset(event)">Reset</paper-button>
-    <div class="output"></div>
-  </form>
-</paper-material>  
+    <paper-material elevation="1">
+      <form is="iron-form" method="get" action="/" id="basic">
+        <paper-input name="name" label="Name" required></paper-input>
+        <br>
+        <input type="checkbox" name="food" value="donuts" checked> I like donuts<br>
+        <input type="checkbox" name="food" value="pizza" required> I like pizza<br>
+        <paper-checkbox name="food" value="cheese" required>I like cheese</paper-checkbox><br>
+        <paper-dropdown-menu label="Cars" name="cars" required>
+          <paper-menu class="dropdown-content">
+            <paper-item value="volvo">Volvo</paper-item>
+            <paper-item value="saab">Saab</paper-item>
+            <paper-item value="fiat">Fiat</paper-item>
+            <paper-item value="audi">Audi</paper-item>
+          </paper-menu>
+        </paper-dropdown-menu>
+        <paper-button raised onclick="_submit(event)">Submit</paper-button>
+        <paper-button raised onclick="_reset(event)">Reset</paper-button>
+        <div class="output"></div>
+        <vaadin-upload id="ssdResourceUpload"></vaadin-upload>
+      </form>
 
-<script>
+    </paper-material>
+
+    <script>
   function _submit(event) {
     Polymer.dom(event).localTarget.parentElement.submit();
     console.log('submitted')
@@ -63,9 +68,37 @@
   basic.addEventListener('iron-form-submit', function(event) {
     this.querySelector('.output').innerHTML = JSON.stringify(event.detail);
   });
+
+  var upload1 = document.querySelector('vaadin-upload#ssdResourceUpload');
+  upload1.addEventListener('upload-before', function(event) {
+    console.log('upload xhr before open: ', event.detail.xhr);
+    // Prevent the upload request:
+    var file = event.detail.file;
+    console.log(file)
+    
+    // Custom upload request url for file
+    file.uploadTarget = upload1.target + '/' + file.name;
+    var ssdResourcesApp=firebase.app("SSD-Resources")
+    var ref = firebase.storage(ssdResourcesApp).ref().child('uploads'+file.uploadTarget)
+    console.log('uploads'+file.uploadTarget)
+    ref.put(file).then(function(snapshot) {
+      console.log('Uploaded a blob or file!');
+    });
+    // Custom name in the Content-Disposition header
+    file.formDataName = 'attachment';
+  });
+  upload1.addEventListener('upload-request', function(event) {
+    event.preventDefault();
+    console.log('upload xhr after open: ', event.detail.xhr);
+    event.detail.xhr.setRequestHeader('X-File-Name', event.detail.file.name);
+    event.detail.formData.append('documentId', 1234);
+  });
+  upload1.addEventListener('upload-start', function(event) {
+    console.log('upload xhr after send: ', event.detail.xhr);
+  });
 </script>
-</template>
-  
+  </template>
+
 
   <script>
 //give element selector name here

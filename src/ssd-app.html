@@ -16,7 +16,8 @@
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-elements/paper-elements.html">
+<link rel="import" href="../bower_components/login-fire/login-fire.html">
 
 <link rel="import" href="../bower_components/note-app-elements/na-elements.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
@@ -86,14 +87,17 @@
 
       <!-- Main content -->
       <app-header-layout has-scrolling-region>
-
         <app-header condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
             <div main-title>SSD Resources Demo</div>
+            <paper-icon-button icon="lock-outline" title="Login" on-tap="_login" hidden$="[[signedIn]]"></paper-icon-button>
+            <paper-icon-button icon="lock-open" title="Logout" on-tap="_logout" hidden$="[[!signedIn]]"></paper-icon-button>
           </app-toolbar>
+          <template is="dom-if" if="[[signedIn]]">
+            <div>signed in as [[user.displayName]]</div>
+          </template>
         </app-header>
-
         <iron-pages
             selected="[[page]]"
             attr-for-selected="name"
@@ -110,21 +114,36 @@
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
+
+    <paper-dialog id="login" with-backdrop center>
+        <paper-dialog-scrollable>
+          <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
+          <email-login-fire debug app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}"></login-fire>
+        </paper-dialog-scrollable>
+      </paper-dialog>
+
+
   </template>
 
   <script>
     Polymer({
       is: 'ssd-app',
-
-      
-
       properties: {
         page: {
           type: String,
           reflectToAttribute: true,
           observer: '_pageChanged',
         },
+        user:{
+          type:Object,
+          observer:'userChanged'
+        },
+        signedIn:{
+          type:Boolean,
+          observer:'_logStatus'
+        }
       },
+      userChanged:function(user){console.log(user)},
 
       observers: [
         '_routePageChanged(routeData.page)',
@@ -147,6 +166,16 @@
       _showPage404: function() {
         this.page = 'view404';
       },
+      _login:function(){
+        login.open();
+      },
+      _logout:function(){
+        this.$$('email-login-fire').signOut();
+        console.log('logged out');
+      },
+      _logStatus:function(){
+        if(this.signedIn){this.$$('paper-dialog').close()}
+      }
     });
   </script>
 </dom-module>

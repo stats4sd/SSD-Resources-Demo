@@ -19,7 +19,8 @@
     "vaadin-upload": "vaadin/vaadin-upload#^1.1.1",
     "juicy-jsoneditor": "Juicy/juicy-jsoneditor#^1.1.0",
     "kjur-jsrsasign": "jsrsasign#^7.1.0",
-    "iron-ajax": "PolymerElements/iron-ajax#^1.4.3"
+    "iron-ajax": "PolymerElements/iron-ajax#^1.4.3",
+    "login-fire": "^0.1.4"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"
