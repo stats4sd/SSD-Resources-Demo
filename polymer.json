@@ -2,7 +2,7 @@
   "entrypoint": "index.html",
   "shell": "src/ssd-app.html",
   "fragments": [
-    "src/ssd-view1.html",
+    "src/ssd-resources.html",
     "src/ssd-view2.html",
     "src/ssd-view3.html",
     "src/note-page.html",

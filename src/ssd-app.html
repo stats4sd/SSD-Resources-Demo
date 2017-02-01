@@ -1,8 +1,7 @@
-
 <!--Few extra imports here due to bug building https://github.com/Polymer/polymer-cli/issues/347-->
 <!--web-animations script still needs to be manually added to polymer build-->
 <link rel="import" href="../bower_components/platinum-sw/platinum-sw-elements.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-app.html">  
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <!--<script src="../bower_components/web-animations-js/web-animations-next.min.js"></script>-->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
@@ -31,22 +30,22 @@
       :host {
         --app-primary-color: #4285f4;
         --app-secondary-color: black;
-
         display: block;
       }
-
+      
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
       }
+      
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
-
+      
       .drawer-list {
         margin: 0 20px;
       }
-
+      
       .drawer-list a {
         display: block;
         padding: 0 16px;
@@ -54,34 +53,34 @@
         color: var(--app-secondary-color);
         line-height: 40px;
       }
-
+      
       .drawer-list a.iron-selected {
         color: black;
         font-weight: bold;
       }
     </style>
     <style include="note-app-shared-styles"></style>
-      
+
     <app-location route="{{route}}"></app-location>
-    <app-route
-        route="{{route}}"
-        pattern="/:page"
-        data="{{routeData}}"
-        tail="{{subroute}}"></app-route>
+    <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+
 
     <app-drawer-layout fullbleed>
       <!-- Drawer content -->
       <app-drawer id="drawer">
         <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="view1" href="/view1">View One</a>
+          <a name="resources" href="/resources">All Resources</a>
           <a name="view2" href="/view2">View Two</a>
           <a name="view3" href="/view3">View Three</a>
-          <a name="dbsync-demo" href="/dbsync-demo">DB Sync Demo</a>
-          <a name="note-page" href="/note-page">Note Page</a>
-          <p>Admin Pages</p>
-          <a name="add-resource" href="/add-resource">Add Resource</a>
-          <a name="admin-tags" href="/admin-tags">Tags</a>
+          <!--<a name="dbsync-demo" href="/dbsync-demo">DB Sync Demo</a>
+          <a name="note-page" href="/note-page">Note Page</a>-->
+          <div hidden$="{{!signedIn}}">
+            <p>Admin Pages</p>
+            <a name="add-resource" href="/add-resource">Add Resource</a>
+            <a name="admin-tags" href="/admin-tags">Tags</a>
+          </div>
+
         </iron-selector>
       </app-drawer>
 
@@ -98,29 +97,29 @@
             <div>signed in as [[user.displayName]]</div>
           </template>
         </app-header>
-        <iron-pages
-            selected="[[page]]"
-            attr-for-selected="name"
-            fallback-selection="view404"
-            role="main">
-          <ssd-view1 name="view1"></ssd-view1>
+        <!--after main header pages get loaded-->
+        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
+          <ssd-resources name="resources"></ssd-resources>
           <ssd-view2 name="view2"></ssd-view2>
           <ssd-view3 name="view3"></ssd-view3>
-          <ssd-note-page name="note-page"></ssd-note-page>
-          <ssd-dbsync-demo name="dbsync-demo"></ssd-dbsync-demo>
+          <!--<ssd-note-page name="note-page"></ssd-note-page>
+          <ssd-dbsync-demo name="dbsync-demo"></ssd-dbsync-demo>-->
+          <ssd-view404 name="view404"></ssd-view404>
+        </iron-pages>
+        <iron-pages hidden$="{{!signedIn}}" selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
           <ssd-add-resource name="add-resource"></ssd-add-resource>
           <ssd-admin-tags name="admin-tags"></ssd-admin-tags>
-          <ssd-view404 name="view404"></ssd-view404>
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
 
     <paper-dialog id="login" with-backdrop center>
-        <paper-dialog-scrollable>
-          <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
-          <email-login-fire debug app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}"></login-fire>
-        </paper-dialog-scrollable>
-      </paper-dialog>
+      <paper-dialog-scrollable>
+        <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
+        <email-login-fire debug app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+          </login-fire>
+      </paper-dialog-scrollable>
+    </paper-dialog>
 
 
   </template>
@@ -150,7 +149,7 @@
       ],
 
       _routePageChanged: function(page) {
-        this.page = page || 'view1';
+        this.page = page || 'resources';
 
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
