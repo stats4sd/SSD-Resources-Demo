@@ -21,7 +21,7 @@
       <h1>Tags</h1>
       <p>Add or remove tags from the list below<br> (note, existing resources will not be automatically changed)</p>
 
-      <firebase-document app="notes" app-name="notes" path="/testTags" data="{{allTags}}">
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/testTags" data="{{allTags}}">
       </firebase-document>
 
       <template is="dom-repeat" items="[[allTags]]" as="tag">

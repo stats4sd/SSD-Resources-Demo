@@ -104,7 +104,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.getFiles.generateRequest()
       },
       _getFilesFire:function(){
-        var storage = firebase.storage();
+        var ssdResourcesApp=firebase.app("SSD-Resources")
+        var storage = firebase.storage(ssdResourcesApp);
         var storageRef=storage.ref();
         var imagesList = storageRef.child('images')
         var testImage=storageRef.child('images/SSD structure.png')
