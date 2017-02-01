@@ -1,3 +1,16 @@
+<!--
+
+ TO DO :
+
+   - Generalise tag syncing for different types of metadata:
+        - topics
+        - Resource types
+        - collections
+        - etc???
+
+-->
+
+
 <!--import polymer html and shared styles-->
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/note-app-elements/na-elements.html">
@@ -6,6 +19,7 @@
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/juicy-jsoneditor/juicy-jsoneditor.html">
 <link rel="import" href="shared-styles.html">
+
 
 <!--give id reference of page name-->
 <dom-module id="ssd-admin-tags">
@@ -17,10 +31,34 @@
       }
     </style>
     <!--Add template content here-->
-    <div class="card">
-      <h1>Tags</h1>
-      <p>Add or remove tags from the list below<br> (note, existing resources will not be automatically changed)</p>
+    <!-- Get the list of all Topic tags and bind it to {{allTags}} -->
+    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{allTags}}" log=true>
+    </firebase-document>
+    <h1>Administration - Metadata</h1>
+    <p>Use this page to modify the lists of tags, collections etc that can be attached to resources.</p>
+    <!-- #################Topics################ -->
+    <a class="btn btn-default" role="button" data-toggle="collapse" href="#main_topics" aria-expanded="false" aria-controls="main_topics">Topic Tags</a>
+    <div class='row collapse' id='main_topics'>
+      <div class="col-md-6">
+        <div class="card">
+          <h2>Topics</h2>
+          <p>The first collection of "tags" is topics.  What is the resource about? In this early stage, this is just an unstructured list.</p>
+          <h4>Instructions</h4>
+          <ul><li>Add new topics using the text box below.</li>
+            <li>To edit an existing tag, click on it in the list.</li>
+          </ul>
+          <paper-input id="tag-input" name="tag-input" label="Add/Edit Tag" value="{{tagInput}}" <!--max="100" char-counter-->
+            >
+          </paper-input>
+          <paper-button raised on-tap="addTag">Save</paper-button>
+          <paper-button raised on-tap="removeTag">Remove</paper-button>
+        </div>
+      </div>
+      <div class='col-md-6'>
+        <div class='card'>
+          <h3>Topics List</h3>
 
+<<<<<<< HEAD
       <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/testTags" data="{{allTags}}">
       </firebase-document>
 
@@ -36,6 +74,16 @@
 
       <!--<juicy-jsoneditor json="{{fireTags}}"></juicy-jsoneditor>-->
   </template>
+=======
+          <div class='list-group'>
+            <!-- use a dom-repeat to list every element in the {{allTags}} object -->
+            <template is="dom-repeat" items="{{allTags}}" as="tag">
+              <button type="button" class="list-group-item" on-tap="edit" id="li-{{index}}"><span class="badge">{{index}}</span>[[tag]]</button>
+            </template>
+          </div>
+      </div>
+    </div>
+>>>>>>> fd7d8a2af5319c217058634a7c2fc09daa38c65d
   </div>
   </template>
 
@@ -54,23 +102,28 @@
         //console.log(newData)
       },
       edit:function(e){
+        $(".list-group-item-info").removeClass("list-group-item-info");
+        e.srcElement.className += " editing list-group-item-info";
         this.tagId = parseInt(e.srcElement.id.split("-")[1])
         this.tagInput=this.allTags[this.tagId]
       },
       addTag:function(){
         console.log(this.tagInput)
         if(this.tagInput!=null){
-          if(this.allTags.length==undefined){console.log('empty json');this.allTags=[]}
-          if (this.allTags.indexOf(this.tagInput)>-1){
-          console.log('duplicate tag')
-        }
+          if(this.allTags.length==undefined){
+            console.log('empty json');
+            this.allTags=[]
+          }
+          if(this.allTags.indexOf(this.tagInput)>-1){
+            console.log('duplicate tag')
+          }
         else{
           if(this.tagId>-1){this.allTags.splice(this.tagId,1)}
           var newTags=this.allTags
           newTags.push(this.tagInput)
           //empty and refill to force data system to reevaluate
           this.set('allTags',[])
-          this.set('allTags',newTags) 
+          this.set('allTags',newTags)
         }
         this.tagId=-1
         this.tagInput=null

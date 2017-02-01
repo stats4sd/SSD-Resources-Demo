@@ -20,7 +20,9 @@
     "juicy-jsoneditor": "Juicy/juicy-jsoneditor#^1.1.0",
     "kjur-jsrsasign": "jsrsasign#^7.1.0",
     "iron-ajax": "PolymerElements/iron-ajax#^1.4.3",
-    "login-fire": "^0.1.4"
+    "login-fire": "^0.1.4",
+    "bootstrap": "boostrap#^3.3.7",
+    "jquery": "^3.1.1"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"
