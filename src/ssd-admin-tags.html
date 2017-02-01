@@ -1,14 +1,4 @@
-<!--
 
- TO DO :
-
-   - Generalise tag syncing for different types of metadata:
-        - topics
-        - Resource types
-        - collections
-        - etc???
-
--->
 
 
 <!--import polymer html and shared styles-->
@@ -23,6 +13,7 @@
 
 <!--give id reference of page name-->
 <dom-module id="ssd-admin-tags">
+  <!-- topicS -->
   <template>
     <style include="shared-styles">
       :host {
@@ -31,61 +22,141 @@
       }
     </style>
     <!--Add template content here-->
-    <!-- Get the list of all Topic tags and bind it to {{allTags}} -->
-    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{allTags}}" log=true>
+    <!-- Get the list of all topic tags and bind it to {{allTags}} -->
+    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{alltopics}}" log=true>
     </firebase-document>
     <h1>Administration - Metadata</h1>
     <p>Use this page to modify the lists of tags, collections etc that can be attached to resources.</p>
-    <!-- #################Topics################ -->
-    <a class="btn btn-default" role="button" data-toggle="collapse" href="#main_topics" aria-expanded="false" aria-controls="main_topics">Topic Tags</a>
-    <div class='row collapse' id='main_topics'>
+    <p>We've started with a few types of tag, to help organise and guide our development. If you want to create tags that don't fit into these boxes, use the "uncategorised tags" at the bottom of the page.  New tag types may naturally form out of them as we develop the database.</p>
+      <!-- #################topics################ -->
+    <div class='row' id='main_topics'>
+        <div class="col-md-6">
+          <div class='card'>
+            <h2>Topics</h2>
+            <p>The first collection of tags is "topics".  What is the resource about? In this early stage, this is just an unstructured list. Later, we may consider sub-lists (e.g. General Linear Models and Multiple Regression are also both "Modelling").</p>
+            <h4>Instructions</h4>
+            <ul><li>Add new topics using the text box below.</li>
+              <li>To edit an existing tag, click on it in the list, then make the edit in the text box. Click save to overwrite that tag.</li>
+              <li>To remove a tag, click on it in the list, then click the 'remove' button.</li>
+            </ul>
+            <paper-input id="topic-input" name="topic-input" label="Add/Edit topic" value="{{topicInput}}" on-keypress="_topicPressed" <!--max="100" char-counter-->
+              >
+            </paper-input>
+            <paper-button raised on-tap="addtopic">Save</paper-button>
+            <paper-button raised on-tap="removetopic">Remove</paper-button>
+          </div>
+        </div>
+        <div class='col-md-6'>
+          <div class='card'>
+            <h3>Topics List</h3>
+
+            <div class='list-group'>
+              <!-- use a dom-repeat to list every element in the {{alltopics}} object -->
+              <template is="dom-repeat" items="{{alltopics}}" as="topic">
+                <button type="button" class="list-group-item" on-tap="edittopic" id="li-{{index}}"><span class="badge">{{index}}</span>[[topic]]</button>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- Resource Types -->
+
+    <!--Add template content here-->
+    <!-- Get the list of all rType tags and bind it to {{allTags}} -->
+    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/rTypes" data="{{allrTypes}}" log=true>
+    </firebase-document>
+
+    <!-- #################rTypes################ -->
+    <div class='row' id='main_rTypes'>
       <div class="col-md-6">
         <div class="card">
-          <h2>Topics</h2>
-          <p>The first collection of "tags" is topics.  What is the resource about? In this early stage, this is just an unstructured list.</p>
-          <h4>Instructions</h4>
-          <ul><li>Add new topics using the text box below.</li>
-            <li>To edit an existing tag, click on it in the list.</li>
-          </ul>
-          <paper-input id="tag-input" name="tag-input" label="Add/Edit Tag" value="{{tagInput}}" <!--max="100" char-counter-->
+          <h2>Resource Types</h2>
+          <p>What type of resource is it? This is more than just the file-type - think about how resources will be used (For training, or as a software / setup guide, or a reference manual etc)</p>
+          <paper-input id="rType-input" name="rType-input" label="Add/Edit rType" value="{{rTypeInput}}" on-keypress="_rTypePressed" <!--max="100" char-counter-->
             >
           </paper-input>
-          <paper-button raised on-tap="addTag">Save</paper-button>
-          <paper-button raised on-tap="removeTag">Remove</paper-button>
+          <paper-button raised on-tap="addrType">Save</paper-button>
+          <paper-button raised on-tap="removerType">Remove</paper-button>
         </div>
       </div>
       <div class='col-md-6'>
         <div class='card'>
-          <h3>Topics List</h3>
-
-<<<<<<< HEAD
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/testTags" data="{{allTags}}">
-      </firebase-document>
-
-      <template is="dom-repeat" items="[[allTags]]" as="tag">
-        <li on-tap="edit" id="li-{{index}}">{{tag}}</li>
-      </template>
-
-      <paper-input id="tag-input" name="tag-input" label="Add/Edit Tag" value="{{tagInput}}" <!--max="100" char-counter-->
-        >
-      </paper-input>
-      <paper-button raised on-tap="addTag">Save</paper-button>
-      <paper-button raised on-tap="removeTag">Remove</paper-button>
-
-      <!--<juicy-jsoneditor json="{{fireTags}}"></juicy-jsoneditor>-->
-  </template>
-=======
+          <h3>Resource Types List</h3>
           <div class='list-group'>
-            <!-- use a dom-repeat to list every element in the {{allTags}} object -->
-            <template is="dom-repeat" items="{{allTags}}" as="tag">
-              <button type="button" class="list-group-item" on-tap="edit" id="li-{{index}}"><span class="badge">{{index}}</span>[[tag]]</button>
+            <!-- use a dom-repeat to list every element in the {{allrTypes}} object -->
+            <template is="dom-repeat" items="{{allrTypes}}" as="rType">
+              <button type="button" class="list-group-item" on-tap="editrType" id="li-{{index}}"><span class="badge">{{index}}</span>[[rType]]</button>
             </template>
           </div>
       </div>
     </div>
->>>>>>> fd7d8a2af5319c217058634a7c2fc09daa38c65d
   </div>
+
+  <!-- Collections -->
+
+    <!--Add template content here-->
+    <!-- Get the list of all collection tags and bind it to {{allTags}} -->
+    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/collections" data="{{allcollections}}" log=true>
+    </firebase-document>
+
+    <!-- #################collections################ -->
+    <div class='row' id='main_collections'>
+      <div class="col-md-6">
+        <div class="card">
+          <h2>collections</h2>
+          <p>Collections can be materials from a particular course (e.g. eSIAC), a set of resources written for a specific contract, or a compiled set of resources used at a workshop.  For example, all the resources used and referenced at the Kenya workshop (Feb 2017) might be put into a new collection.</p>
+          <paper-input id="collection-input" name="collection-input" label="Add/Edit collection" value="{{collectionInput}}" on-keypress="_collectionPressed" <!--max="100" char-counter-->
+            >
+          </paper-input>
+          <paper-button raised on-tap="addcollection">Save</paper-button>
+          <paper-button raised on-tap="removecollection">Remove</paper-button>
+        </div>
+      </div>
+      <div class='col-md-6'>
+        <div class='card'>
+          <h3>collections List</h3>
+
+          <div class='list-group'>
+            <!-- use a dom-repeat to list every element in the {{allcollections}} object -->
+            <template is="dom-repeat" items="{{allcollections}}" as="collection">
+              <button type="button" class="list-group-item" on-tap="editcollection" id="li-{{index}}"><span class="badge">{{index}}</span>[[collection]]</button>
+            </template>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/others" data="{{allothers}}" log=true>
+  </firebase-document>
+  <div class='row' id='main_others'>
+    <div class="col-md-6">
+      <div class="card">
+        <h2>others</h2>
+        <p>If you want to add tags that don't fit into the groups above, add them here.  This group will be reviewed regularly to see if new tag groups are needed. </p>
+        <paper-input id="other-input" name="other-input" label="Add/Edit other" value="{{otherInput}}" on-keypress="_otherPressed" <!--max="100" char-counter-->
+          >
+        </paper-input>
+        <paper-button raised on-tap="addother">Save</paper-button>
+        <paper-button raised on-tap="removeother">Remove</paper-button>
+      </div>
+    </div>
+    <div class='col-md-6'>
+      <div class='card'>
+        <h3>others List</h3>
+
+        <div class='list-group'>
+          <!-- use a dom-repeat to list every element in the {{allothers}} object -->
+          <template is="dom-repeat" items="{{allothers}}" as="other">
+            <button type="button" class="list-group-item" on-tap="editother" id="li-{{index}}"><span class="badge">{{index}}</span>[[other]]</button>
+          </template>
+        </div>
+    </div>
+  </div>
+</div>
   </template>
+
 
   <script>
 //give element selector name here
@@ -93,7 +164,15 @@
       is: 'ssd-admin-tags',
       properties:{
         uid:String,
-        allTags:{
+        allTopics:{
+          type:Object,
+          observer:'dataChanged'
+        },
+        allrTypes:{
+          type:Object,
+          observer:'dataChanged'
+        },
+        allcollections:{
           type:Object,
           observer:'dataChanged'
         }
@@ -101,42 +180,153 @@
       dataChanged:function(newData,oldData){
         //console.log(newData)
       },
-      edit:function(e){
+      edittopic:function(e){
         $(".list-group-item-info").removeClass("list-group-item-info");
         e.srcElement.className += " editing list-group-item-info";
-        this.tagId = parseInt(e.srcElement.id.split("-")[1])
-        this.tagInput=this.allTags[this.tagId]
+        this.topicId = parseInt(e.srcElement.id.split("-")[1])
+        this.topicInput=this.alltopics[this.topicId]
       },
-      addTag:function(){
-        console.log(this.tagInput)
-        if(this.tagInput!=null){
-          if(this.allTags.length==undefined){
+      editrType:function(e){
+        $(".list-group-item-info").removeClass("list-group-item-info");
+        e.srcElement.className += " editing list-group-item-info";
+        this.rTypeId = parseInt(e.srcElement.id.split("-")[1]);
+        this.rTypeInput=this.allrTypes[this.rTypeId];
+      },
+      editcollection:function(e){
+        $(".list-group-item-info").removeClass("list-group-item-info");
+        e.srcElement.className += " editing list-group-item-info";
+        this.collectionId = parseInt(e.srcElement.id.split("-")[1]);
+        this.collectionInput=this.allcollections[this.collectionId];
+      },
+      editother:function(e){
+        $(".list-group-item-info").removeClass("list-group-item-info");
+        e.srcElement.className += " editing list-group-item-info";
+        this.otherId = parseInt(e.srcElement.id.split("-")[1]);
+        this.otherInput=this.allothers[this.otherId];
+      },
+      addtopic:function(){
+        console.log(this.topicInput)
+        if(this.topicInput!=null){
+          if(this.alltopics.length==undefined){
             console.log('empty json');
-            this.allTags=[]
+            this.alltopics=[]
           }
-          if(this.allTags.indexOf(this.tagInput)>-1){
-            console.log('duplicate tag')
+          if(this.alltopics.indexOf(this.topicInput)>-1){
+            console.log('duplicate topic')
           }
         else{
-          if(this.tagId>-1){this.allTags.splice(this.tagId,1)}
-          var newTags=this.allTags
-          newTags.push(this.tagInput)
+          if(this.topicId>-1){this.alltopics.splice(this.topicId,1)}
+          var newtopics=this.alltopics
+          newtopics.push(this.topicInput)
           //empty and refill to force data system to reevaluate
-          this.set('allTags',[])
-          this.set('allTags',newTags)
+          this.set('alltopics',[])
+          this.set('alltopics',newtopics)
         }
-        this.tagId=-1
-        this.tagInput=null
+        this.topicId=-1
+        this.topicInput=null
         }
       },
-      removeTag:function(){
-        if(this.tagId>-1){
-          var newTags=this.allTags;
-          newTags.splice(this.tagId,1);
-          this.allTags=[];
-          this.allTags=newTags;
+      addrType:function(){
+        console.log(this.rTypeInput)
+        if(this.rTypeInput!=null){
+          if(this.allrTypes.length==undefined){
+            console.log('empty json');
+            this.allrTypes=[]
+          }
+          if(this.allrTypes.indexOf(this.rTypeInput)>-1){
+            console.log('duplicate rType')
+          }
+        else{
+          if(this.rTypeId>-1){this.allrTypes.splice(this.rTypeId,1)}
+          var newrTypes=this.allrTypes
+          newrTypes.push(this.rTypeInput)
+          //empty and refill to force data system to reevaluate
+          this.set('allrTypes',[])
+          this.set('allrTypes',newrTypes)
         }
-        this.tagInput=null
+        this.rTypeId=-1
+        this.rTypeInput=null
+        }
+      },
+      addcollection:function(){
+        console.log(this.collectionInput)
+        if(this.collectionInput!=null){
+          if(this.allcollections.length==undefined){
+            console.log('empty json');
+            this.allcollections=[]
+          }
+          if(this.allcollections.indexOf(this.collectionInput)>-1){
+            console.log('duplicate collection')
+          }
+        else{
+          if(this.collectionId>-1){this.allcollections.splice(this.collectionId,1)}
+          var newcollections=this.allcollections
+          newcollections.push(this.collectionInput)
+          //empty and refill to force data system to reevaluate
+          this.set('allcollections',[])
+          this.set('allcollections',newcollections)
+        }
+        this.collectionId=-1
+        this.collectionInput=null
+        }
+      },
+      addother:function(){
+        console.log(this.otherInput)
+        if(this.otherInput!=null){
+          if(this.allothers.length==undefined){
+            console.log('empty json');
+            this.allothers=[]
+          }
+          if(this.allothers.indexOf(this.otherInput)>-1){
+            console.log('duplicate other')
+          }
+        else{
+          if(this.otherId>-1){this.allothers.splice(this.otherId,1)}
+          var newothers=this.allothers
+          newothers.push(this.otherInput)
+          //empty and refill to force data system to reevaluate
+          this.set('allothers',[])
+          this.set('allothers',newothers)
+        }
+        this.otherId=-1
+        this.otherInput=null
+        }
+      },
+      removetopic:function(){
+        if(this.topicId>-1){
+          var newtopics=this.alltopics;
+          newtopics.splice(this.topicId,1);
+          this.alltopics=[];
+          this.alltopics=newtopics;
+        }
+        this.topicInput=null
+      },
+      removerType:function(){
+        if(this.rTypeId>-1){
+          var newrTypes=this.allrTypes;
+          newrTypes.splice(this.rTypeId,1);
+          this.allrTypes=[];
+          this.allrTypes=newrTypes;
+        }
+        this.rTypeInput=null
+      },
+      removecollection:function(){
+        if(this.collectionId>-1){
+          var newcollections=this.allcollections;
+          newcollections.splice(this.collectionId,1);
+          this.allcollections=[];
+          this.allcollections=newcollections;
+        }
+        this.collectionInput=null
+      },
+      removeother:function(){
+        if(this.otherId>-1){
+          var newothers=this.allothers;
+          newothers.splice(this.otherId,1);
+          this.allothers=[];
+          this.allothers=newothers;
+        }
+        this.otherInput=null
       },
       _toArray: function(obj) {
             return Object.keys(obj).map(function(key) {
@@ -145,6 +335,29 @@
                     value: obj[key]
                 };
             });
+        },
+
+        _topicPressed: function(e) {
+          console.log("yay, a keyboard press")
+          console.log(e.charCode);
+          if( 13 === e.charCode) {
+            this.addtopic();
+          }
+        },
+        _rTypePressed: function(e) {
+          if( 13 === e.charCode) {
+            this.addrType();
+          }
+        },
+        _collectionPressed: function(e) {
+          if( 13 === e.charCode) {
+            this.addcollection();
+          }
+        },
+        _otherPressed: function(e) {
+          if( 13 === e.charCode) {
+            this.addother();
+          }
         },
     });
   </script>
