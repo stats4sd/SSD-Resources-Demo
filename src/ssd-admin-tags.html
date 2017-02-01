@@ -1,14 +1,4 @@
-<!--
 
- TO DO :
-
-   - Generalise tag syncing for different types of metadata:
-        - rTypes
-        - Resource types
-        - collections
-        - etc???
-
--->
 
 
 <!--import polymer html and shared styles-->
@@ -94,24 +84,6 @@
       <div class='col-md-6'>
         <div class='card'>
           <h3>Resource Types List</h3>
-
-<<<<<<< HEAD
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/testTags" data="{{allTags}}">
-      </firebase-document>
-
-      <template is="dom-repeat" items="[[allTags]]" as="tag">
-        <li on-tap="edit" id="li-{{index}}">{{tag}}</li>
-      </template>
-
-      <paper-input id="tag-input" name="tag-input" label="Add/Edit Tag" value="{{tagInput}}" <!--max="100" char-counter-->
-        >
-      </paper-input>
-      <paper-button raised on-tap="addTag">Save</paper-button>
-      <paper-button raised on-tap="removeTag">Remove</paper-button>
-
-      <!--<juicy-jsoneditor json="{{fireTags}}"></juicy-jsoneditor>-->
-  </template>
-=======
           <div class='list-group'>
             <!-- use a dom-repeat to list every element in the {{allrTypes}} object -->
             <template is="dom-repeat" items="{{allrTypes}}" as="rType">
@@ -120,7 +92,6 @@
           </div>
       </div>
     </div>
->>>>>>> fd7d8a2af5319c217058634a7c2fc09daa38c65d
   </div>
 
   <!-- Collections -->
