@@ -34,7 +34,7 @@
     </style>
     <paper-material elevation="1">
       <form is="iron-form" method="get" action="/" id="basic">
-        <paper-input name="name" label="Name" required></paper-input>
+        <paper-input name="title" label="Title" required auto-validate pattern="[a-zA-Z0-9 ']*" error-message="no special characters!"></paper-input>
         <br>
         <input type="checkbox" name="food" value="donuts" checked> I like donuts<br>
         <input type="checkbox" name="food" value="pizza" required> I like pizza<br>
