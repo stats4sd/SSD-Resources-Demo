@@ -6,7 +6,7 @@
         - topics
         - Resource types
         - collections
-        - etc??? 
+        - etc???
 
 -->
 
@@ -32,7 +32,7 @@
     </style>
     <!--Add template content here-->
     <!-- Get the list of all Topic tags and bind it to {{allTags}} -->
-    <firebase-document app="notes" app-name="notes" path="/tags" data="{{allTags}}" log=true>
+    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{allTags}}" log=true>
     </firebase-document>
     <h1>Administration - Metadata</h1>
     <p>Use this page to modify the lists of tags, collections etc that can be attached to resources.</p>
@@ -67,46 +67,7 @@
       </div>
     </div>
   </div>
-
-  <!-- #################Resource Types################ -->
-  <!-- <a class="btn btn-default" role="button" data-toggle="collapse" href="#main_topics" aria-expanded="false" aria-controls="main_topics">Resource Types</a>
-  <div class='row collapse' id='main_topics'>
-    <div class="col-md-6">
-      <div class="card">
-        <h2>Resource Types</h2>
-        <p>Resource Types are tracked seperately to 'file type'.  E.g. a checklist and a book can both be .pdf or .doc.</p>
-        <h4>Instructions</h4>
-        <ul><li>Add new resource types using the text box below.</li>
-          <li>To edit an existing tag, click on it in the list.</li>
-        </ul>
-        <paper-input id="rtype-input" name="rtype-input" label="Add/Edit Tag" value="{{rtypeInput}}" <!--max="100" char-counter-->
-          <!-- >
-        </paper-input>
-        <paper-button raised on-tap="addTag">Save</paper-button>
-        <paper-button raised on-tap="removeTag">Remove</paper-button>
-      </div>
-    </div>
-    <div class='col-md-6'>
-      <div class='card'>
-        <h3>Topics List</h3>
-
-        <div class='list-group'>
-          <!-- use a dom-repeat to list every element in the {{allTags}} object -->
-          <!-- <template is="dom-repeat" items="[[allTags]]" as="tag">
-            <button type="button" class="list-group-item" on-tap="edit" id="li-{{index}}"><span class="badge">{{index}}</span>[[tag]]</button>
-          </template>
-        </div>
-    </div>
-  </div>
-  </div> --> --> -->
-
-      <!--<juicy-jsoneditor json="{{fireTags}}"></juicy-jsoneditor>-->
   </template>
-  </div>
-</div>
-
-  </template>
-
 
   <script>
 //give element selector name here
@@ -123,7 +84,7 @@
         //console.log(newData)
       },
       edit:function(e){
-        $(".list-group-item-info").removeClass("list-group-item-info")
+        $(".list-group-item-info").removeClass("list-group-item-info");
         e.srcElement.className += " editing list-group-item-info";
         this.tagId = parseInt(e.srcElement.id.split("-")[1])
         this.tagInput=this.allTags[this.tagId]
