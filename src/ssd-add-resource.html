@@ -11,7 +11,7 @@
 
 <!--give id reference of page name-->
 <dom-module id="ssd-add-resource">
-  <template>
+  <template is="dom-bind">
     <style include="shared-styles">
       :host {
         display: block;
@@ -32,78 +32,115 @@
         width: 100%
       }
     </style>
+
     <paper-material elevation="1">
       <form is="iron-form" method="get" action="/" id="basic">
         <paper-input name="title" label="Title" required auto-validate pattern="[a-zA-Z0-9 ']*" error-message="no special characters!"></paper-input>
-        <br>
-        <input type="checkbox" name="food" value="donuts" checked> I like donuts<br>
-        <input type="checkbox" name="food" value="pizza" required> I like pizza<br>
-        <paper-checkbox name="food" value="cheese" required>I like cheese</paper-checkbox><br>
-        <paper-dropdown-menu label="Cars" name="cars" required>
-          <paper-menu class="dropdown-content">
-            <paper-item value="volvo">Volvo</paper-item>
-            <paper-item value="saab">Saab</paper-item>
-            <paper-item value="fiat">Fiat</paper-item>
-            <paper-item value="audi">Audi</paper-item>
-          </paper-menu>
-        </paper-dropdown-menu>
-        <paper-button raised onclick="_submit(event)">Submit</paper-button>
-        <paper-button raised onclick="_reset(event)">Reset</paper-button>
-        <div class="output"></div>
-        <vaadin-upload id="ssdResourceUpload"></vaadin-upload>
+        <paper-button raised onclick="collections.open()">Collections</paper-button>
       </form>
+      <vaadin-upload id="ssdResourceUpload"></vaadin-upload>
+      <br>
+      <paper-button raised on-tap="_submit">Submit</paper-button>
+      <paper-button raised onclick="_reset(event)">Reset</paper-button>
+      <div class="output">
+
+        <paper-dialog id="collections">
+      <h2>Collections</h2>
+      <paper-dialog-scrollable>
+        <template is="dom-repeat" items="[[persistedCollections]]" as="collection">
+          <paper-checkbox value="{{collection.$val}}" checked="{{checked[collection.$key]}}">{{collection.$val}}</paper-checkbox>
+        </template>
+        <!--<template is="dom-repeat" items="[[items]]" as="item">
+          <p>{{item}}</p>
+        </template>-->
+      </paper-dialog-scrollable>
+      <paper-button autofocus onclick="collections.close()">Close</paper-button>
+    </paper-dialog>
 
     </paper-material>
 
+    
+
+    <firebase-query id="query" app-name="SSD-Resources" path="/collections" data="{{allCollections}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedCollections" data="{{allCollections}}" persisted-data="{{persistedCollections}}"></app-indexeddb-mirror>
+    <firebase-query id="query" app-name="SSD-Resources" path="/rTypes" data="{{allrTypes}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedrTypes" data="{{allrTypes}}" persisted-data="{{persistedrTypes}}"></app-indexeddb-mirror>
+
     <script>
-  function _submit(event) {
-    Polymer.dom(event).localTarget.parentElement.submit();
-    console.log('submitted')
-  }
+  // function _submit(event) {
+  //   Polymer.dom(event).localTarget.parentElement.submit();
+  //   console.log('submitted')
+  // }
   function _reset(event) {
     var form = Polymer.dom(event).localTarget.parentElement
     form.reset();
     form.querySelector('.output').innerHTML = '';
   }
-  basic.addEventListener('iron-form-submit', function(event) {
-    this.querySelector('.output').innerHTML = JSON.stringify(event.detail);
-  });
 
+  //hack around vaadin upload to use firebase file put
+  //can be improved on with full rewrite of vaadin-upload
   var upload1 = document.querySelector('vaadin-upload#ssdResourceUpload');
   upload1.addEventListener('upload-before', function(event) {
-    console.log('upload xhr before open: ', event.detail.xhr);
-    // Prevent the upload request:
+    event.preventDefault();
+    if(!this.myfiles){this.myFiles=[]}
+    // if(document.getElementById('fileList')){document.getElementById('fileList').remove();}    
     var file = event.detail.file;
-    console.log(file)
-    
-    // Custom upload request url for file
-    file.uploadTarget = upload1.target + '/' + file.name;
+    var index=this.myFiles.length
+    this.myFiles.push(file)
     var ssdResourcesApp=firebase.app("SSD-Resources")
     var ref = firebase.storage(ssdResourcesApp).ref().child('uploads'+file.uploadTarget)
-    console.log('uploads'+file.uploadTarget)
-    ref.put(file).then(function(snapshot) {
-      console.log('Uploaded a blob or file!');
-    });
-    // Custom name in the Content-Disposition header
-    file.formDataName = 'attachment';
-  });
-  upload1.addEventListener('upload-request', function(event) {
-    event.preventDefault();
-    console.log('upload xhr after open: ', event.detail.xhr);
-    event.detail.xhr.setRequestHeader('X-File-Name', event.detail.file.name);
-    event.detail.formData.append('documentId', 1234);
-  });
-  upload1.addEventListener('upload-start', function(event) {
-    console.log('upload xhr after send: ', event.detail.xhr);
-  });
-</script>
-  </template>
+    var uploadTask=ref.put(file);
+    uploadTask.on('state_changed',function(snapshot,i=index){
+      var newIndex=i +this.myFiles.length-1
+      var progressBars = document.querySelectorAll('paper-progress');
+      var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      progressBars[newIndex].set('value',progress)
+      switch (snapshot.state) {
+        case firebase.storage.TaskState.PAUSED: // or 'paused'
+          break;
+        case firebase.storage.TaskState.RUNNING: // or 'running'
+          break;
+    }
+  }.bind(this), function(error) {
+    console.log(error)
+    // Handle unsuccessful uploads
+  }, function(success, i=index) {
+    var newIndex=i +this.myFiles.length-1
+    var vaadinFiles=document.querySelectorAll('vaadin-upload-file')
+    vaadinFiles[newIndex].set('file.complete',true)
+    var downloadURL = uploadTask.snapshot.downloadURL;
+    }.bind(this));
+    }.bind(this));
 
+  
+  </script>
 
   <script>
-//give element selector name here
+    this.checked={0:true,1:false}
+  </script>
+  </template>
+  
+
+  <script>
+  
     Polymer({
       is: 'ssd-add-resource',
+      properties:{
+        items:{
+          type:Object,
+          observer:'itemChanged'
+        },
+        checked:{
+          type:Object,
+          observer:'checkChanged'
+        }
+      },
+      checkChanged:function(){console.log(this.checked)},
+      itemChanged:function(e){console.log('items changed',this.items)},
+      _submit:function(){
+        console.log('submitted')
+      this.querySelector('.output').innerHTML = JSON.stringify(event.detail);}
     });
   </script>
+  
 </dom-module>
