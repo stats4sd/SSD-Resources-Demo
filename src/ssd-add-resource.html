@@ -28,10 +28,16 @@
         padding: 16px;
         border-radius: 2px;
       }
+      .yellow-button {
+        text-transform: none;
+        color: #eeff41;
+      }
+      
 
       paper-progress {
         width: 100%
       }
+
     </style>
 
     <paper-material elevation="1">
@@ -84,7 +90,6 @@
       <!-- <vaadin-upload id="ssdResourceUpload"></vaadin-upload> -->
       <br>
       <paper-button raised on-tap="submit" >Submit</paper-button>
-      <paper-button raised onclick="_reset(event)">Reset</paper-button>
       <div class="output">
       </div>
     <!-- </form> -->
@@ -108,62 +113,82 @@
 
 
     <script>
+    //fit toast to container
+      nameWarning.fitInto = ssdResourceUpload;
+    </script>
+
+    <script>
   // function _submit(event) {
   //   Polymer.dom(event).localTarget.parentElement.submit();
   //   console.log('submitted')
   // }
-  function _reset(event) {
-    var form = Polymer.dom(event).localTarget.parentElement
-    form.reset();
-    form.querySelector('.output').innerHTML = '';
-  }
 
   // hack around vaadin upload to use firebase file put
   // can be improved on with full rewrite of vaadin-upload
   var upload1 = document.querySelector('vaadin-upload#ssdResourceUpload');
   upload1.addEventListener('upload-before', function(event) {
-    event.preventDefault();
-    if(!this.myfiles){this.myFiles=[]}
-    // if(document.getElementById('fileList')){document.getElementById('fileList').remove();}
+    event.preventDefault();  
+    //check resource name exists, give warning and remove files if not
+    var resourceName=document.querySelector('paper-input#resourceName').get('value')
+    if(resourceName==undefined){
+      var vaadinUploads=document.querySelector('vaadin-upload')
+      vaadinUploads.set('files',[])
+      document.querySelector('paper-toast#nameWarning').open()
+      return
+      }
+    //create file upload task
     var file = event.detail.file;
-    var index=this.myFiles.length
-    this.myFiles.push(file)
     var ssdResourcesApp=firebase.app("SSD-Resources")
-    var ref = firebase.storage(ssdResourcesApp).ref().child('uploads'+file.uploadTarget)
+    var ref = firebase.storage(ssdResourcesApp).ref().child('uploads/'+resourceName+'/'+file.name)
     var uploadTask=ref.put(file);
-    uploadTask.on('state_changed',function(snapshot,i=index){
-      var newIndex=i +this.myFiles.length-1
+    //add watch features
+    uploadTask.on('state_changed',function(snapshot){
       var progressBars = document.querySelectorAll('paper-progress');
       var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      progressBars[newIndex].set('value',progress)
-      switch (snapshot.state) {
-        case firebase.storage.TaskState.PAUSED: // or 'paused'
-          break;
-        case firebase.storage.TaskState.RUNNING: // or 'running'
-          break;
-    }
-  }.bind(this), function(error) {
+      var vaadinUploads=document.querySelector('vaadin-upload')
+      var uploadsMeta=vaadinUploads.get('files');
+      var index=_getCurrentIndex(file,uploadsMeta)
+      progressBars[index].set('value',progress)
+      // switch (snapshot.state) {
+      //   case firebase.storage.TaskState.PAUSED: // or 'paused'
+      //     break;
+      //   case firebase.storage.TaskState.RUNNING: // or 'running'
+      //     break;
+    // }
+  }, function(error) {
     console.log(error)
     // Handle unsuccessful uploads
-  }, function(success, i=index) {
-    var newIndex=i +this.myFiles.length-1
+  }, function() {
+    console.log('uploadTask',uploadTask)
+    // //set progress bar to complete
+    var vaadinUploads=document.querySelector('vaadin-upload')
+    var uploadsMeta=vaadinUploads.get('files');
     var vaadinFiles=document.querySelectorAll('vaadin-upload-file')
-    vaadinFiles[newIndex].set('file.complete',true)
+    var index=_getCurrentIndex(file,uploadsMeta)
+    vaadinFiles[index].set('file.complete',true);
+    vaadinFiles[index].set('file.loaded',100);
+    //append download url to file detail - still need to ensure correct for multiple
     var downloadURL = uploadTask.snapshot.downloadURL;
-    }.bind(this));
-    }.bind(this));
+    vaadinFiles[index].set('file.downloadURL',downloadURL);
+    console.log('uploads meta',uploadsMeta)
+    });
+    });
 
-
+    function _getCurrentIndex(thisFile,fileList){
+      var index=-1
+      for (var i=0;i<fileList.length;i++){
+        var name=fileList[i].name
+        if(thisFile.name==name){
+          index=i
+        }
+      }
+      return(index)
+    }
   </script>
 
-  <script>
-    this.checked={0:true,1:false}
-   </script>
   </template>
 
-
-  <script>
-
+  <script>  
     Polymer({
       is: 'ssd-add-resource',
       properties:{
@@ -171,8 +196,13 @@
           type:Object,
           observer:'itemChanged'
         },
-        checked:{
+        resource:{
           type:Object,
+          value:function(){return{}}
+        },
+        uploadedFiles:{
+          type:Object,
+          observer:'_uploadChange'
           observer:'checkChanged'
         },
         topicAdd:{
@@ -192,14 +222,17 @@
           value: {}
         }
       },
+      observers:['_resourceChange(resource.name)'],
 
+      _resourceChange:function(newValue){
+         console.log(this.resource)
+        },
+      _uploadChange:function(){
+        console.log(this.uploadedFiles)
+        },  
 
       checkChanged:function(){console.log(this.checked)},
       itemChanged:function(e){console.log('items changed',this.items)},
-      computeTopic:function(changeRecord) {
-        return changeRecord
-      },
-
       _toggleTags:function(e) {
         var section = e.srcElement.getAttribute("value");
         console.log(section);
@@ -247,6 +280,38 @@
          });
     }
 
+
+
+      _submit:function(){
+        console.log(this);
+        console.log(this.resource)
+        //should have better data binding throughout to make easier to reload and edit
+        //initiate res
+        var res={
+          name:'',
+          collections:[],
+          uploads:[],
+          tags:[]
+        }
+        //get checkbox values and assign to fields
+        var checkboxes=document.querySelectorAll('paper-checkbox');
+        for(var i=0;i<checkboxes.length;i++){
+          if(checkboxes[i].get('checked')==true){
+            var meta=checkboxes[i].get('value').split('_-_')
+            var field=meta[0]
+            var val = meta[1]
+            res[field].push(val)
+            }
+        }
+        //get resource name
+        var name=document.querySelector('paper-input#resourceName').get('value')
+        res.name=name
+        //get resource files
+        var uploads=document.querySelector('vaadin-upload#ssdResourceUpload').get('files')
+        res.uploads=uploads
+        console.log('res',res)
+      //this.querySelector('.output').innerHTML = JSON.stringify(event.detail);
+      }
     });
   </script>
 

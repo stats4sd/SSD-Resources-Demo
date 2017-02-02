@@ -22,6 +22,8 @@
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 
+<link rel="import" href="SSD Components/ssd-email-login-fire.html">
+
 <link rel="import" href="my-icons.html">
 
 <dom-module id="ssd-app">
@@ -58,6 +60,17 @@
         color: black;
         font-weight: bold;
       }
+      .user-name{
+        text-align: right;
+        padding-right:16px;
+      }
+      .admin-pages{
+        color:white!important;
+        background-color: #DD3333!important;
+        padding:4px 0 4px 0;
+        font-weight: 200;
+        padding-left:16px;
+      }
     </style>
     <style include="note-app-shared-styles"></style>
 
@@ -71,12 +84,8 @@
         <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="resources" href="/resources">All Resources</a>
-          <a name="view2" href="/view2">View Two</a>
-          <a name="view3" href="/view3">View Three</a>
-          <!--<a name="dbsync-demo" href="/dbsync-demo">DB Sync Demo</a>
-          <a name="note-page" href="/note-page">Note Page</a>-->
           <div hidden$="{{!signedIn}}">
-            <p>Admin Pages</p>
+            <div class="admin-pages">Admin Pages</div>
             <a name="add-resource" href="/add-resource">Add Resource</a>
             <a name="admin-tags" href="/admin-tags">Tags</a>
           </div>
@@ -90,22 +99,21 @@
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
             <div main-title>SSD Resources Demo</div>
+            <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
+            <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
             <paper-icon-button icon="lock-outline" title="Login" on-tap="_login" hidden$="[[signedIn]]"></paper-icon-button>
             <paper-icon-button icon="lock-open" title="Logout" on-tap="_logout" hidden$="[[!signedIn]]"></paper-icon-button>
           </app-toolbar>
           <template is="dom-if" if="[[signedIn]]">
-            <div>signed in as [[user.displayName]]</div>
+            <div class="user-name">signed in as [[user.displayName]]</div>
           </template>
         </app-header>
         <!--after main header pages get loaded-->
         <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
           <ssd-resources name="resources"></ssd-resources>
-          <ssd-view2 name="view2"></ssd-view2>
-          <ssd-view3 name="view3"></ssd-view3>
-          <!--<ssd-note-page name="note-page"></ssd-note-page>
-          <ssd-dbsync-demo name="dbsync-demo"></ssd-dbsync-demo>-->
           <ssd-view404 name="view404"></ssd-view404>
         </iron-pages>
+        <!--pages to only show when signed in-->
         <iron-pages hidden$="{{!signedIn}}" selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
           <ssd-add-resource name="add-resource"></ssd-add-resource>
           <ssd-admin-tags name="admin-tags"></ssd-admin-tags>
@@ -116,8 +124,8 @@
     <paper-dialog id="login" with-backdrop center>
       <paper-dialog-scrollable>
         <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
-        <email-login-fire debug app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
-          </login-fire>
+        <ssd-email-login-fire app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+          </ssd-email-login-fire>
       </paper-dialog-scrollable>
     </paper-dialog>
 
@@ -127,6 +135,7 @@
   <script>
     Polymer({
       is: 'ssd-app',
+      behaviors: [Polymer.AppNetworkStatusBehavior],
       properties: {
         page: {
           type: String,
@@ -169,7 +178,7 @@
         login.open();
       },
       _logout:function(){
-        this.$$('email-login-fire').signOut();
+        this.$$('ssd-email-login-fire').signOut();
         console.log('logged out');
       },
       _logStatus:function(){
