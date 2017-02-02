@@ -35,13 +35,24 @@
       paper-progress {
         width: 100%
       }
+      #collections{
+        margin:0;
+        z-index: 9999;
+      }
+      paper-checkbox{
+        display:block
+      }
 
     </style>
 
     <paper-material elevation="1">
       <form is="iron-form" method="get" action="/" id="basic">
         <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required auto-validate pattern="[a-zA-Z0-9 ']*" error-message="no special characters!"></paper-input>
-        <paper-button raised onclick="collections.open()">Collections</paper-button>
+         <paper-input id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required></paper-input>
+        <paper-button raised onclick="topicsDialog.open()">Topics</paper-button>
+        <paper-button raised onclick="collectionsDialog.open()">Collections</paper-button>
+        <paper-button raised onclick="typeDialog.open()">Type</paper-button>
+        <p>Pin to upcoming events?</p>
       </form>
       <!--error message-->
       <paper-toast id="nameWarning" duration="0" text="Give the resource title before uploading files (manually remove pending downloads)">
@@ -51,18 +62,17 @@
       <br>
       <paper-button raised on-tap="_submit">Submit</paper-button>
       <div class="output">
+    </paper-material>
 
-     <paper-dialog id="collections">
+    <paper-dialog id="collectionsDialog">
       <h2>Collections</h2>
       <paper-dialog-scrollable>
         <template is="dom-repeat" id="collectionCheckboxes" items="[[persistedCollections]]" as="collection">
           <paper-checkbox value="collections_-_[[collection.$val]]">{{collection.$val}}</paper-checkbox>
         </template>
       </paper-dialog-scrollable>
-      <paper-button autofocus onclick="collections.close()">Close</paper-button>
+      <paper-button autofocus onclick="collectionsDialog.close()">Close</paper-button>
     </paper-dialog>
-
-    </paper-material>
     
     <firebase-query id="query" app-name="SSD-Resources" path="/collections" data="{{allCollections}}"></firebase-query>
     <app-indexeddb-mirror key="persistedCollections" data="{{allCollections}}" persisted-data="{{persistedCollections}}"></app-indexeddb-mirror>
@@ -72,6 +82,7 @@
     <script>
     //fit toast to container
       nameWarning.fitInto = ssdResourceUpload;
+      collectionsDialog.fitInto = basic;      
     </script>
 
     <script>
@@ -166,18 +177,16 @@
       observers:['_resourceChange(resource.name)'],
 
       _resourceChange:function(newValue){
-         console.log(this.resource)
+         
         },
       _uploadChange:function(){
-        console.log(this.uploadedFiles)
+        
         },  
 
       checkChanged:function(){console.log(this.checked)},
       itemChanged:function(e){console.log('items changed',this.items)},
 
       _submit:function(){
-        console.log(this);
-        console.log(this.resource)
         //should have better data binding throughout to make easier to reload and edit
         //initiate res
         var res={
