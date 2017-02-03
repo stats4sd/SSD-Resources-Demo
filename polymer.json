@@ -3,9 +3,8 @@
   "shell": "src/ssd-app.html",
   "fragments": [
     "src/ssd-resources.html",
-    "src/ssd-view2.html",
-    "src/ssd-view3.html",
-    "src/note-page.html",
+    "src/ssd-admin-tags.html",
+    "src/ssd-add-resource.html",
     "src/ssd-view404.html"
   ],
   "sourceGlobs": [
@@ -16,6 +15,9 @@
   "includeDependencies": [
     "manifest.json",
     "bower_components/webcomponentsjs/webcomponents-lite.min.js",
+    "bower_components/jquery/dist/jquery.min.js",
+    "bower_components/bootstrap/dist/css/bootstrap.min.css",
+    "bower_components/bootstrap/dist/js/bootstrap.js",
     "sw-import.js"
   ]
 }
