@@ -255,27 +255,6 @@
         console.log(this[collectionName])
       },
 
-
-      submit:function(){
-        console.log('submitted')
-      //this.querySelector('.output').innerHTML = JSON.stringify(event.detail);
-
-        //create object to push to database
-        console.log(this.$.resourceQuery.ref)
-        console.log(this.$.title.value);
-        console.log(this.collectionAdd);
-
-         this.$.resourceQuery.ref.push({
-          title : this.$.title.value ,
-          collections : this.collectionAdd,
-          topics : this.topicAdd,
-          tags : this.tagAdd ,
-          rTypes : this.rTypeAdd
-         });
-    }
-
-
-
       _submit:function(){
         if(basic.validate()==false){return}
         //should have better data binding throughout to make easier to reload and edit
