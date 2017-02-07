@@ -1,5 +1,9 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/paper-elements/paper-elements.html">
+<link rel="import" href="../bower_components/iron-elements/iron-elements.html">
+
+<!-- <test-element obj='{"testOne":{"name":"HI","description":"Hi in detail"},"testTwo":{"name":"Hi2","description":"Hi for the 2nd time"}}'></test-element> -->
 
 <dom-module id="ssd-resources">
   <template>
@@ -14,16 +18,100 @@
     <div class="card">
       <h1>Resources</h1>
       <p>Welcome to the SSD Resources demo.</p>
-      <p>Usually this will display a list of all of the resources, but it's currently under construction</p>
-      <p>For now you can log in using the padlock in the top-right, and explore a couple of the admin pages</p>
+      <p>Resources should be displayed below with some info.  Click one to learn more.</p>
+      <p>To access the admin pages, please login using the padlock in the top-right of the page.</p>
       <p class="login-details">username: <strong>admin@test.com</strong><br>password: <strong>test123</strong></p>
-
     </div>
+
+    <!--  SETTING UP RESOURCES -->
+
+    <div class='card'>
+        <h4>Filter by Topic</h4>
+        <paper-radio-group>
+          <template is="dom-repeat" items="{{topics}}">
+            <paper-radio-button name="{{item}}" on-change='topicTapped'>{{item}}</paper-radio-button>
+          </template>
+        </paper-radio-group>
+    </div>
+
+    <template id="resourceList" is="dom-repeat" items="{{_toArray(resources)}}" as="resource" filter="_filter">
+      <div class="card">
+
+        <p>Resource {{index}}</p>
+
+        <h3>{{resource.value.name}}</h3>
+        <p><span class='bold'>Description: </span>{{resource.value.description}}</p>
+        <ul>
+          <li>
+            <span class='bold'>Topics: </span>
+            <template is="dom-repeat" items="{{resource.value.topics}}" as="topic">
+              <span>{{topic}}; </span>
+            </template>
+          </li>
+        </ul>
+      </div>
+    </template>
+
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/resources" data="{{resources}}" log=true>
+      </firebase-document>
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{topics}}" log=true>
+      </firebase-document>
+
+
   </template>
 
   <script>
     Polymer({
       is: 'ssd-resources',
-    });
+
+      properties: {
+        resources: Object,
+        obj: Object,
+        topic: {
+          type: String,
+          value: "",
+          observer: "topicChanged"
+        }
+      },
+
+      topicChanged: function() {
+        console.log(this.topic);
+        this.$.resourceList.render();
+      },
+
+      _toArray: function(obj) {
+            return Object.keys(obj).map(function(key) {
+                return {
+                    name: key,
+                    value: obj[key]
+                };
+            });
+        },
+
+        _console: function() {
+          console.log(this.$.test_1)
+        },
+
+        _filter: function(item) {
+            if(!item) return true;
+
+            if(item.value.topics.indexOf(this.topic) != -1) {
+              return true;
+            }
+            else {
+              return false;
+            }
+          },
+
+        topicTapped: function(event) {
+          var res = event.target.innerText || event.target.textContent;
+           this.topic = res;
+           console.log(this.topic)
+        }
+
+    }
+
+
+  );
   </script>
 </dom-module>
