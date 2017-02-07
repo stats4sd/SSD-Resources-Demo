@@ -25,37 +25,53 @@
 
     <!--  SETTING UP RESOURCES -->
 
-    <div class='card'>
-        <h4>Filter by Topic</h4>
-        <paper-radio-group>
-          <template is="dom-repeat" items="{{topics}}">
-            <paper-radio-button name="{{item}}" on-change='topicTapped'>{{item}}</paper-radio-button>
-          </template>
-        </paper-radio-group>
-    </div>
-
-    <template id="resourceList" is="dom-repeat" items="{{_toArray(resources)}}" as="resource" filter="_filter">
-      <div class="card">
-
-        <p>Resource {{index}}</p>
-
-        <h3>{{resource.value.name}}</h3>
-        <p><span class='bold'>Description: </span>{{resource.value.description}}</p>
-        <ul>
-          <li>
-            <span class='bold'>Topics: </span>
-            <template is="dom-repeat" items="{{resource.value.topics}}" as="topic">
-              <span>{{topic}}; </span>
-            </template>
-          </li>
-        </ul>
+    <div class='row'>
+      <div class='col-sm-4'>
+        <div class='card'>
+          <paper-button toggles active="{{topicActive}}" raised>Filter by Topic</paper-button>
+          <iron-collapse id="topicCollapse" opened="{{topicActive}}">
+            <!-- <paper-radio-group> -->
+              <template is="dom-repeat" items="{{topics}}">
+                <paper-checkbox name="{{item}}" on-change='topicTapped'>{{item}}</paper-radio-button>
+              </template>
+            <!-- </paper-radio-group> -->
+          </iron-collapse>
+        </div>
       </div>
-    </template>
 
+
+
+      <div class='col-sm-8'>
+        <h1>Resource List</h1>
+        <template id="resourceList" is="dom-repeat" items="{{_toArray(resources)}}" as="resource" filter="_filter" observe="topicFilter resource.value.topics">
+          <div class="card">
+            <h3>{{resource.value.name}}</h3>
+            <p><span class='bold'>Description: </span>{{resource.value.description}}</p>
+            <ul>
+              <li>
+                <span class='bold'>Topics: </span>
+                <template is="dom-repeat" items="{{resource.value.topics}}" as="topic">
+                  <span>{{topic}}; </span>
+                </template>
+              </li>
+            </ul>
+          </div>
+        </template>
+
+        <template id="selectedTopics" is="dom-repeat" items={{topicFilter}}>
+          <h4>{{item}}</h4>
+        </template>
+
+      </div>
+
+      <!-- FIREBASE DOCUMENTS TO PULL IN STUFF FROM DB  -->
       <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/resources" data="{{resources}}" log=true>
       </firebase-document>
       <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{topics}}" log=true>
       </firebase-document>
+
+      <!-- ARRAY SELECTOR(S)  -->
+      <array-selector id='testSelector' items="{{topics}}" selected="{{topicFilter}}" multi toggle></array-selector>
 
 
   </template>
@@ -67,17 +83,24 @@
       properties: {
         resources: Object,
         obj: Object,
-        topic: {
-          type: String,
-          value: "",
-          observer: "topicChanged"
+        topics: Object,
+        topicFilter: Array,
+        topicActive: {
+          type: Boolean,
+          value: false
         }
       },
 
-      topicChanged: function() {
-        console.log(this.topic);
-        this.$.resourceList.render();
-      },
+      // topicChanged: function() {
+      //   console.log(this.topicFilter);
+      // },
+
+      // toggle: function(e){
+      //   var name = e.srcElement.name;
+      //   console.log(e.srcElement);
+      //   console.log(name);
+      //   this.$[name].toggle();
+      // },
 
       _toArray: function(obj) {
             return Object.keys(obj).map(function(key) {
@@ -88,25 +111,39 @@
             });
         },
 
-        _console: function() {
+        _console: function(topic) {
           console.log(this.$.test_1)
         },
 
         _filter: function(item) {
-            if(!item) return true;
-
-            if(item.value.topics.indexOf(this.topic) != -1) {
-              return true;
+          console.log(this.topicFilter);
+          var filter = true;
+          console.log(filter)
+          if(!this.topicFilter == []) {
+            for(i=0; i<this.topicFilter.length; i++) {
+              if(item.value.topics.indexOf(this.topicFilter[i])== -1) {
+                filter = false;
+              }
             }
-            else {
-              return false;
-            }
-          },
+          }
+          console.log(filter)
+          return filter;
+        },
 
         topicTapped: function(event) {
+
+
           var res = event.target.innerText || event.target.textContent;
-           this.topic = res;
-           console.log(this.topic)
+          this.$.testSelector.select(res);
+          console.log(this.topicFilter);
+          this.$.resourceList.render();
+
+          //
+          // if(this.topicFilter.res) {
+          //   this.topicFilter.res = true
+          // }
+          //
+          //  console.log(this.topicFilter)
         }
 
     }
