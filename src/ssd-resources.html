@@ -41,7 +41,28 @@
                 </div>
               </template>
             </iron-collapse>
-            
+            <!-- rType Filter -->
+            <div class='list-group-item'>
+              <paper-button toggles active="{{rTypeActive}}" raised>Filter by Resource Type</paper-button>
+            </div>
+            <iron-collapse id="rTypeCollapse" opened="{{rTypeActive}}">
+              <template is="dom-repeat" items="{{rTypes}}">
+                <div class='list-group-item'>
+                  <paper-checkbox name="{{item}}" on-change='rTypeTapped'>{{item}}</paper-radio-button>
+                </div>
+              </template>
+            </iron-collapse>
+            <!-- Tags filter -->
+            <div class='list-group-item'>
+              <paper-button toggles active="{{tagActive}}" raised>Filter by Tag</paper-button>
+            </div>
+            <iron-collapse id="tagCollapse" opened="{{tagActive}}">
+              <template is="dom-repeat" items="{{tags}}">
+                <div class='list-group-item'>
+                  <paper-checkbox name="{{item}}" on-change='tagTapped'>{{item}}</paper-radio-button>
+                </div>
+              </template>
+            </iron-collapse>
           </div>
         </div>
       </div>
@@ -62,7 +83,22 @@
                     <span>{{topic}}; </span>
                   </template>
                 </li>
+                <li>
+                  <span class='bold'>Resource Type(s): </span>
+                  <template is="dom-repeat" items="{{resource.value.rTypes}}" as="topic">
+                    <span>{{topic}}; </span>
+                  </template>
+                </li>
+                <li>
+                  <span class='bold'>Tags: </span>
+                  <template is="dom-repeat" items="{{resource.value.tags}}" as="topic">
+                    <span>{{topic}}; </span>
+                  </template>
+                </li>
               </ul>
+              <template is='dom-repeat' items="{{resource.value.uploads}}" as="upload">
+                <paper-button raised><a href="{{upload.downloadURL}}">DOWNLOAD FILE </paper-button>
+              </template>
             </div>
           </div>
         </template>
@@ -78,9 +114,15 @@
       </firebase-document>
       <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{topics}}" log=true>
       </firebase-document>
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/rTypes" data="{{rTypes}}" log=true>
+      </firebase-document>
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{tags}}" log=true>
+      </firebase-document>
 
       <!-- ARRAY SELECTOR(S)  -->
-      <array-selector id='testSelector' items="{{topics}}" selected="{{topicFilter}}" multi toggle></array-selector>
+      <array-selector id='topicSelector' items="{{topics}}" selected="{{topicFilter}}" multi toggle></array-selector>
+      <array-selector id='rTypeSelector' items="{{rTypes}}" selected="{{rTypeFilter}}" multi toggle></array-selector>
+      <array-selector id='tagSelector' items="{{tags}}" selected="{{tagFilter}}" multi toggle></array-selector>
 
 
   </template>
@@ -94,22 +136,21 @@
         obj: Object,
         topics: Object,
         topicFilter: Array,
+        rTypeFilter: Array,
+        tagFilter: Array,
         topicActive: {
+          type: Boolean,
+          value: false
+        },
+        rTypeActive: {
+          type: Boolean,
+          value: false
+        },
+        tagActive: {
           type: Boolean,
           value: false
         }
       },
-
-      // topicChanged: function() {
-      //   console.log(this.topicFilter);
-      // },
-
-      // toggle: function(e){
-      //   var name = e.srcElement.name;
-      //   console.log(e.srcElement);
-      //   console.log(name);
-      //   this.$[name].toggle();
-      // },
 
       _toArray: function(obj) {
             return Object.keys(obj).map(function(key) {
@@ -120,39 +161,80 @@
             });
         },
 
-        _console: function(topic) {
-          console.log(this.$.test_1)
-        },
-
         _filter: function(item) {
           console.log(this.topicFilter);
+
+          //begin by assuming you WILL show the item
           var filter = true;
           console.log(filter)
+
+          //if a topic filter is selected...
+          // // check item against every chosen topic.
+          // // // if that topic is NOT present, set filter to false and return. (no more checking needed)
           if(!this.topicFilter == []) {
-            for(i=0; i<this.topicFilter.length; i++) {
-              if(item.value.topics.indexOf(this.topicFilter[i])== -1) {
-                filter = false;
+              for(i=0; i<this.topicFilter.length; i++) {
+                if(item.value.topics == [] || item.value.topics.indexOf(this.topicFilter[i])== -1) {
+                  filter = false;
+                  return filter;
               }
             }
           }
           console.log(filter)
+
+          //Do the same for resource type...
+          if(!this.rTypeFilter == []) {
+              for(i=0; i<this.rTypeFilter.length; i++) {
+                if(item.value.rTypes == [] || item.value.rTypes.indexOf(this.rTypeFilter[i])== -1) {
+                  filter = false;
+                  return filter;
+              }
+            }
+          }
+          //... and tags
+          if(!this.tagFilter == []) {
+              for(i=0; i<this.tagFilter.length; i++) {
+                if(item.value.tags == [] || item.value.tags.indexOf(this.tagFilter[i])== -1) {
+                  filter = false;
+                  return filter;
+              }
+            }
+          }
+          //If you reach this point, the item matches all selected filters, so just return.
           return filter;
         },
 
+
+        //When selecting an item from the Topic Filters list
         topicTapped: function(event) {
-
-
+          //grab the correct filter text
           var res = event.target.innerText || event.target.textContent;
-          this.$.testSelector.select(res);
+          //and use select() on the arraySelector to toggle the filter on or off
+          this.$.topicSelector.select(res);
           console.log(this.topicFilter);
+          //finally, tell the dom-repeat resource list to re-render (needed to trigger the _filter again)
           this.$.resourceList.render();
+        },
 
-          //
-          // if(this.topicFilter.res) {
-          //   this.topicFilter.res = true
-          // }
-          //
-          //  console.log(this.topicFilter)
+        //When selecting an item from the rType Filters list
+        rTypeTapped: function(event) {
+          //grab the correct filter text
+          var res = event.target.innerText || event.target.textContent;
+          //and use select() on the arraySelector to toggle the filter on or off
+          this.$.rTypeSelector.select(res);
+          console.log(this.rTypeFilter);
+          //finally, tell the dom-repeat resource list to re-render (needed to trigger the _filter again)
+          this.$.resourceList.render();
+        },
+
+        //When selecting an item from the tag Filters list
+        tagTapped: function(event) {
+          //grab the correct filter text
+          var res = event.target.innerText || event.target.textContent;
+          //and use select() on the arraySelector to toggle the filter on or off
+          this.$.tagSelector.select(res);
+          console.log(this.tagFilter);
+          //finally, tell the dom-repeat resource list to re-render (needed to trigger the _filter again)
+          this.$.resourceList.render();
         }
 
     }
