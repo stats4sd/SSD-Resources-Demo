@@ -173,7 +173,12 @@
           // // // if that topic is NOT present, set filter to false and return. (no more checking needed)
           if(!this.topicFilter == []) {
               for(i=0; i<this.topicFilter.length; i++) {
-                if(item.value.topics == [] || item.value.topics.indexOf(this.topicFilter[i])== -1) {
+                if(item.value.topics == [] || item.value.topics == undefined )
+                {
+                  filter = false;
+                  return;
+                }
+                else if (item.value.topics.indexOf(this.topicFilter[i])== -1) {
                   filter = false;
                   return filter;
               }
@@ -184,7 +189,11 @@
           //Do the same for resource type...
           if(!this.rTypeFilter == []) {
               for(i=0; i<this.rTypeFilter.length; i++) {
-                if(item.value.rTypes == [] || item.value.rTypes.indexOf(this.rTypeFilter[i])== -1) {
+                if(item.value.rTypes == [] || item.value.rTypes == undefined ) {
+                  filter = false;
+                  return filter;
+                }
+                else if(item.value.rTypes.indexOf(this.rTypeFilter[i])== -1) {
                   filter = false;
                   return filter;
               }
@@ -193,7 +202,11 @@
           //... and tags
           if(!this.tagFilter == []) {
               for(i=0; i<this.tagFilter.length; i++) {
-                if(item.value.tags == [] || item.value.tags.indexOf(this.tagFilter[i])== -1) {
+                if(item.value.tags == [] || item.value.tags == undefined  ) {
+                  filter = false;
+                  return filter;
+                }
+                else if(item.value.tags.indexOf(this.tagFilter[i])== -1) {
                   filter = false;
                   return filter;
               }
