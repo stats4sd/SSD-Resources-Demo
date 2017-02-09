@@ -312,7 +312,8 @@
             tags:res.tags,
             events:res.events
           })
-          console.log
+          this.$.alertNote.innerHTML = "<div class='alert alert-success' role='alert'>Resource Uploaded</div>";
+
         //this.querySelector('.output').innerHTML = JSON.stringify(event.detail);
         }
       }
