@@ -13,6 +13,7 @@
         padding: 10px;
       }
       .login-details{color:var(--paper-red-500)};
+
     </style>
 
     <div class="card">
@@ -27,15 +28,21 @@
 
     <div class='row'>
       <div class='col-sm-4'>
+        <h1>Filters</h1>
         <div class='card'>
-          <paper-button toggles active="{{topicActive}}" raised>Filter by Topic</paper-button>
-          <iron-collapse id="topicCollapse" opened="{{topicActive}}">
-            <!-- <paper-radio-group> -->
+          <div class='list-group'>
+            <div class='list-group-item'>
+              <paper-button toggles active="{{topicActive}}" raised>Filter by Topic</paper-button>
+            </div>
+            <iron-collapse id="topicCollapse" opened="{{topicActive}}">
               <template is="dom-repeat" items="{{topics}}">
-                <paper-checkbox name="{{item}}" on-change='topicTapped'>{{item}}</paper-radio-button>
+                <div class='list-group-item'>
+                  <paper-checkbox name="{{item}}" on-change='topicTapped'>{{item}}</paper-radio-button>
+                </div>
               </template>
-            <!-- </paper-radio-group> -->
-          </iron-collapse>
+            </iron-collapse>
+            
+          </div>
         </div>
       </div>
 
@@ -44,17 +51,19 @@
       <div class='col-sm-8'>
         <h1>Resource List</h1>
         <template id="resourceList" is="dom-repeat" items="{{_toArray(resources)}}" as="resource" filter="_filter" observe="topicFilter resource.value.topics">
-          <div class="card">
-            <h3>{{resource.value.name}}</h3>
-            <p><span class='bold'>Description: </span>{{resource.value.description}}</p>
-            <ul>
-              <li>
-                <span class='bold'>Topics: </span>
-                <template is="dom-repeat" items="{{resource.value.topics}}" as="topic">
-                  <span>{{topic}}; </span>
-                </template>
-              </li>
-            </ul>
+          <div class='col-lg-6'>
+            <div class="card">
+              <h3>{{resource.value.name}}</h3>
+              <p><span class='bold'>Description: </span>{{resource.value.description}}</p>
+              <ul>
+                <li>
+                  <span class='bold'>Topics: </span>
+                  <template is="dom-repeat" items="{{resource.value.topics}}" as="topic">
+                    <span>{{topic}}; </span>
+                  </template>
+                </li>
+              </ul>
+            </div>
           </div>
         </template>
 
