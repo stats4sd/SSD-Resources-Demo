@@ -71,47 +71,46 @@
 
       <div class='col-sm-8'>
         <h1>Resource List</h1>
-        <template id="resourceList" is="dom-repeat" items="{{_toArray(resources)}}" as="resource" filter="_filter" observe="topicFilter resource.value.topics">
+        <template id="resourceList" is="dom-repeat" items="{{resources}}" as="resource" filter="_filter" observe="topicFilter resource.topics">
           <div class='col-lg-6'>
             <div class="card">
-              <h3>{{resource.value.name}}</h3>
-              <p><span class='bold'>Description: </span>{{resource.value.description}}</p>
+              <h3>{{resource.name}}</h3>
+                <paper-button raised hidden$="{{!signedIn}}">Edit resource</paper-button>
+              <p><span class='bold'>Description: </span>{{resource.description}}</p>
               <ul>
                 <li>
                   <span class='bold'>Topics: </span>
-                  <template is="dom-repeat" items="{{resource.value.topics}}" as="topic">
+                  <template is="dom-repeat" items="{{resource.topics}}" as="topic">
                     <span>{{topic}}; </span>
                   </template>
                 </li>
                 <li>
                   <span class='bold'>Resource Type(s): </span>
-                  <template is="dom-repeat" items="{{resource.value.rTypes}}" as="topic">
+                  <template is="dom-repeat" items="{{resource.rTypes}}" as="topic">
                     <span>{{topic}}; </span>
                   </template>
                 </li>
                 <li>
                   <span class='bold'>Tags: </span>
-                  <template is="dom-repeat" items="{{resource.value.tags}}" as="topic">
+                  <template is="dom-repeat" items="{{resource.tags}}" as="topic">
                     <span>{{topic}}; </span>
                   </template>
                 </li>
               </ul>
-              <template is='dom-repeat' items="{{resource.value.uploads}}" as="upload">
+              <template is='dom-repeat' items="{{resource.uploads}}" as="upload">
                 <paper-button raised><a href="{{upload.downloadURL}}">DOWNLOAD FILE </paper-button>
               </template>
             </div>
           </div>
         </template>
 
-        <template id="selectedTopics" is="dom-repeat" items={{topicFilter}}>
-          <h4>{{item}}</h4>
-        </template>
+
 
       </div>
 
       <!-- FIREBASE DOCUMENTS TO PULL IN STUFF FROM DB  -->
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/resources" data="{{resources}}" log=true>
-      </firebase-document>
+      <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}" log=true>
+      </firebase-query>
       <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{topics}}" log=true>
       </firebase-document>
       <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/rTypes" data="{{rTypes}}" log=true>
@@ -132,7 +131,10 @@
       is: 'ssd-resources',
 
       properties: {
-        resources: Object,
+        resources: {
+          Object,
+          observer: 'dataChanged'
+        },
         obj: Object,
         topics: Object,
         topicFilter: Array,
@@ -149,9 +151,17 @@
         tagActive: {
           type: Boolean,
           value: false
+        },
+        SignedIn: {
+          type: Boolean,
+          reflectToAttribute: true
         }
       },
 
+      dataChanged: function(newData, oldData) {
+        this.$.resourceList.render();
+
+      },
       _toArray: function(obj) {
             return Object.keys(obj).map(function(key) {
                 return {
@@ -173,12 +183,12 @@
           // // // if that topic is NOT present, set filter to false and return. (no more checking needed)
           if(!this.topicFilter == []) {
               for(i=0; i<this.topicFilter.length; i++) {
-                if(item.value.topics == [] || item.value.topics == undefined )
+                if(item.topics == [] || item.topics == undefined )
                 {
                   filter = false;
                   return;
                 }
-                else if (item.value.topics.indexOf(this.topicFilter[i])== -1) {
+                else if (item.topics.indexOf(this.topicFilter[i])== -1) {
                   filter = false;
                   return filter;
               }
@@ -189,11 +199,11 @@
           //Do the same for resource type...
           if(!this.rTypeFilter == []) {
               for(i=0; i<this.rTypeFilter.length; i++) {
-                if(item.value.rTypes == [] || item.value.rTypes == undefined ) {
+                if(item.rTypes == [] || item.rTypes == undefined ) {
                   filter = false;
                   return filter;
                 }
-                else if(item.value.rTypes.indexOf(this.rTypeFilter[i])== -1) {
+                else if(item.rTypes.indexOf(this.rTypeFilter[i])== -1) {
                   filter = false;
                   return filter;
               }
@@ -202,11 +212,11 @@
           //... and tags
           if(!this.tagFilter == []) {
               for(i=0; i<this.tagFilter.length; i++) {
-                if(item.value.tags == [] || item.value.tags == undefined  ) {
+                if(item.tags == [] || item.tags == undefined  ) {
                   filter = false;
                   return filter;
                 }
-                else if(item.value.tags.indexOf(this.tagFilter[i])== -1) {
+                else if(item.tags.indexOf(this.tagFilter[i])== -1) {
                   filter = false;
                   return filter;
               }
