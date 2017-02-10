@@ -1,0 +1,50 @@
+<!--import polymer html and shared styles-->
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="shared-styles.html">
+
+<!--give id reference of page name-->
+<dom-module id="ssd-home">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+      .link{
+        text-decoration:none;
+      }
+      .green{
+        background-color: var(--paper-green-500);
+        color: white;
+      }
+      .indigo{
+        background-color: var(--paper-indigo-500);
+        color: white;
+      }
+    </style>
+
+    <div class="card">
+      <h2>RMS Resources</h2>
+      <a href="/resources" tabindex="-1">
+        <paper-button class="indigo" raised>
+          <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
+      </a>
+
+      <h2>Event Resources</h2>
+      <a href="/resources/maanzoni2017" tabindex="-1">
+        <paper-button class="green" raised>
+          <iron-icon icon="search"></iron-icon>Maanzoni Workshop 2017</paper-button>
+      </a>
+
+      <!--<p>To access the admin pages, please login using the padlock in the top-right of the page.</p>
+      <p class="login-details">username: <strong>admin@test.com</strong><br>password: <strong>test123</strong></p>-->
+    </div>
+  </template>
+
+  <script>
+    //give element selector name here
+    Polymer({
+      is: 'ssd-home',
+    });
+  </script>
+</dom-module>
