@@ -1,0 +1,106 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-elements/paper-elements.html">
+<link rel="import" href="../bower_components/iron-elements/iron-elements.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="ssd-resource">
+  <template>
+    <template is="dom-if" if="[[!editable]]">
+    <style include="shared-styles">
+    </style>
+      <div class="card">
+        <h3>[[name]]</h3>
+        <paper-button raised hidden$="{{!signedIn}}" on-tap="edit">Edit resource</paper-button>
+        <p><span class='bold'>Description: </span>[[description]]</p>
+        <ul>
+          <li>
+            <span class='bold'>Topics: </span>
+            <template is="dom-repeat" items="[[topics]]" as="topic">
+              <span>[[topic]]; </span>
+            </template>
+          </li>
+          <li>
+            <span class='bold'>Resource Type(s): </span>
+            <template is="dom-repeat" items="[[rTypes]]" as="rType">
+              <span>[[rType]]; </span>
+            </template>
+          </li>
+          <li>
+            <span class='bold'>Tags: </span>
+            <template is="dom-repeat" items="[[tags]]" as="tag">
+              <span>[[tag]]; </span>
+            </template>
+          </li>
+        </ul>
+        <template is='dom-repeat' items="[[uploads]]" as="upload">
+          <paper-button raised><a href="[[upload.downloadURL]]">DOWNLOAD FILE </paper-button>
+        </template>
+      </div>
+    </template>
+
+    <!-- NOW FOR THE EDITABLE VERSION -->
+    <template is="dom-if" if="[[editable]]">
+      <div class="card" id$="[[id]]">
+        <input is"iron-input" bind-value="{{name}}"></input>
+        <input is="iron-input" bind-value="{{description}}"></input>
+        <ul>
+          <li>
+            <span class='bold'>Topics: </span>
+            <template is="dom-repeat" items="[[topics]]" as="topic">
+              <span>[[topic]]; </span>
+            </template>
+          </li>
+          <li>
+            <span class='bold'>Resource Type(s): </span>
+            <template is="dom-repeat" items="[[rTypes]]" as="rType">
+              <span>[[rType]]; </span>
+            </template>
+          </li>
+          <li>
+            <span class='bold'>Tags: </span>
+            <template is="dom-repeat" items="[[resource.tags]]" as="tag">
+              <span>[[tag]]; </span>
+            </template>
+          </li>
+        </ul>
+        <template is='dom-repeat' items="[[resource.uploads]]" as="upload">
+          <paper-button raised><a href="[[upload.downloadURL]]">DOWNLOAD FILE </paper-button>
+        </template>
+      </div>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      is: 'ssd-resource',
+      properties: {
+        name: {
+          type: String,
+          notify: true
+        },
+        description: {
+          type: String,
+          notify: true
+        },
+        topics: {
+          type: Array,
+          notify: true
+        },
+        rTypes: {
+          type: Array,
+          notify: true
+        },
+        tags: {
+          type: Array,
+          notify: true
+        },
+        editable: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
+        }
+
+      },
+    })
+
+  </script>
+</dom-module>

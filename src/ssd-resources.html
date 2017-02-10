@@ -2,8 +2,8 @@
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../bower_components/iron-elements/iron-elements.html">
-
-<!-- <test-element obj='{"testOne":{"name":"HI","description":"Hi in detail"},"testTwo":{"name":"Hi2","description":"Hi for the 2nd time"}}'></test-element> -->
+<link rel="import" href="SSD Components/ssd-resource.html">
+<link rel="import" href="SSD Components/ssd-resource-editor.html">
 
 <dom-module id="ssd-resources">
   <template>
@@ -71,52 +71,51 @@
 
       <div class='col-sm-8'>
         <h1>Resource List</h1>
-        <template id="resourceList" is="dom-repeat" items="{{resources}}" as="resource" filter="_filter" observe="topicFilter resource.topics">
-          <div class='col-lg-6'>
-            <div class="card">
-              <h3>{{resource.name}}</h3>
-                <paper-button raised hidden$="{{!signedIn}}">Edit resource</paper-button>
-              <p><span class='bold'>Description: </span>{{resource.description}}</p>
-              <ul>
-                <li>
-                  <span class='bold'>Topics: </span>
-                  <template is="dom-repeat" items="{{resource.topics}}" as="topic">
-                    <span>{{topic}}; </span>
-                  </template>
-                </li>
-                <li>
-                  <span class='bold'>Resource Type(s): </span>
-                  <template is="dom-repeat" items="{{resource.rTypes}}" as="topic">
-                    <span>{{topic}}; </span>
-                  </template>
-                </li>
-                <li>
-                  <span class='bold'>Tags: </span>
-                  <template is="dom-repeat" items="{{resource.tags}}" as="topic">
-                    <span>{{topic}}; </span>
-                  </template>
-                </li>
-              </ul>
-              <template is='dom-repeat' items="{{resource.uploads}}" as="upload">
-                <paper-button raised><a href="{{upload.downloadURL}}">DOWNLOAD FILE </paper-button>
-              </template>
-            </div>
-          </div>
+        <template id="resourceList" is="dom-repeat" items="{{persistedResources}}" as="resource" filter="_filter" observe="topicFilter resource.topics">
+          <ssd-resource
+          id$="[[resource.$key]]"
+          name="[[resource.name]]"
+          description="[[resource.description]]"
+          topics="[[resource.topics]]"
+          r-types="[[resource.rTypes]]"
+          tags="[[resource.tags]]"
+          uploads="[[resource.uploads]]"
+          on-tap='edit'
+          ></ssd-resource>
         </template>
 
 
 
       </div>
 
-      <!-- FIREBASE DOCUMENTS TO PULL IN STUFF FROM DB  -->
+
+
+
+      <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB  -->
       <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}" log=true>
       </firebase-query>
+      <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
+
+      <!-- USING FIREBASE DOCUMENTS FOR TAGS -->
+      <!-- ## It might be worth changing these to queries at some point, but that's only if we can be bothered to change from using flat arrays to key-value object arrays for the tags.  Useful if we want to do things like translations later on, or include other tag "properties" beyond name. -->
+
       <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{topics}}" log=true>
       </firebase-document>
+      <app-indexeddb-mirror key="persistedTopics" data="{{topics}}" persisted-data="{{persistedTopics}}"></app-indexeddb-mirror>
+
       <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/rTypes" data="{{rTypes}}" log=true>
       </firebase-document>
+      <app-indexeddb-mirror key="persistedRTypes" data="{{rTypes}}" persisted-data="{{persistedRTypes}}"></app-indexeddb-mirror>
+
       <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{tags}}" log=true>
       </firebase-document>
+      <app-indexeddb-mirror key="persistedTags" data="{{tags}}" persisted-data="{{persistedTags}}"></app-indexeddb-mirror>
+
+      <!--FIREBASE DOCUMENT FOR THE EDITABLE RESOURCE -->
+      <firebase-document id="editingResource" app="SSD-Resources" app-name="SSD-Resources" path="[[editableResourceID]]" data="{{editableResource}}"><firebase-document>
+      <!-- hidden editor (until it's not hidden...) -->
+
+      <ssd-resource-editor id="editor" resource="{{editableResource}}" on-close="commitChange"></ssd-resource-editor>
 
       <!-- ARRAY SELECTOR(S)  -->
       <array-selector id='topicSelector' items="{{topics}}" selected="{{topicFilter}}" multi toggle></array-selector>
@@ -152,24 +151,28 @@
           type: Boolean,
           value: false
         },
-        SignedIn: {
+        signedIn: {
           type: Boolean,
           reflectToAttribute: true
+        },
+        editableResourceID: {
+          type: String,
+          notify: true
         }
       },
 
       dataChanged: function(newData, oldData) {
         this.$.resourceList.render();
-
+        console.log(this.resources)
       },
-      _toArray: function(obj) {
-            return Object.keys(obj).map(function(key) {
-                return {
-                    name: key,
-                    value: obj[key]
-                };
-            });
-        },
+      // _toArray: function(obj) {
+      //       return Object.keys(obj).map(function(key) {
+      //           return {
+      //               name: key,
+      //               value: obj[key]
+      //           };
+      //       });
+      //   },
 
         _filter: function(item) {
           console.log(this.topicFilter);
@@ -258,8 +261,24 @@
           console.log(this.tagFilter);
           //finally, tell the dom-repeat resource list to re-render (needed to trigger the _filter again)
           this.$.resourceList.render();
-        }
+        },
 
+        //Next bits rely heavily on pasted code from notes-app...
+
+        edit: function(event) {
+
+          var card = Polymer.dom(event).localTarget;
+          console.log(card);
+          console.log(card.id)
+          console.log("tapped to edit");
+          this.editableResourceID = "/resources/"+card.id;
+          console.log(this.editableResourceID)
+          this.$.editingResource.transactionsComplete.then(function() {
+            console.log(this.editableResource)
+
+            this.$.editor.open(card);
+          }.bind(this));
+        }
     }
 
 
