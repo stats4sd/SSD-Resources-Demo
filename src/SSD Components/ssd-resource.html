@@ -3,14 +3,19 @@
 <link rel="import" href="../bower_components/iron-elements/iron-elements.html">
 <link rel="import" href="../shared-styles.html">
 
+
 <dom-module id="ssd-resource">
   <template>
     <template is="dom-if" if="[[!editable]]">
     <style include="shared-styles">
+    .totallyEditable:hover {
+      border: #3577f6 1px solid;
+      background-color: #d3eaf6;
+      cursor: pointer;
+    }
     </style>
-      <div class="card">
+      <div class$="[[checkedView(view)]]">
         <h3>[[name]]</h3>
-        <paper-button raised hidden$="{{!signedIn}}" on-tap="edit">Edit resource</paper-button>
         <p><span class='bold'>Description: </span>[[description]]</p>
         <ul>
           <li>
@@ -41,33 +46,62 @@
     <!-- NOW FOR THE EDITABLE VERSION -->
     <template is="dom-if" if="[[editable]]">
       <div class="card" id$="[[id]]">
-        <input is"iron-input" bind-value="{{name}}"></input>
-        <input is="iron-input" bind-value="{{description}}"></input>
-        <ul>
-          <li>
-            <span class='bold'>Topics: </span>
-            <template is="dom-repeat" items="[[topics]]" as="topic">
-              <span>[[topic]]; </span>
-            </template>
-          </li>
-          <li>
-            <span class='bold'>Resource Type(s): </span>
-            <template is="dom-repeat" items="[[rTypes]]" as="rType">
-              <span>[[rType]]; </span>
-            </template>
-          </li>
-          <li>
-            <span class='bold'>Tags: </span>
-            <template is="dom-repeat" items="[[resource.tags]]" as="tag">
-              <span>[[tag]]; </span>
-            </template>
-          </li>
-        </ul>
-        <template is='dom-repeat' items="[[resource.uploads]]" as="upload">
-          <paper-button raised><a href="[[upload.downloadURL]]">DOWNLOAD FILE </paper-button>
-        </template>
+        <paper-input id="resourceName" value="{{name}}" name="title" label="Title of Resource" required auto-validate pattern="[a-zA-Z0-9 ']*" error-message="no special characters!"></paper-input>
+        <paper-textarea id="resourceDescription" value="{{description}}" name="description" label="Brief Description" required></paper-textarea>
+        <br>
+        <paper-tabs selected="{{tabSelected}}">
+          <paper-tab>Topics</paper-tab>
+          <paper-tab>Collections</paper-tab>
+          <paper-tab>Type</paper-tab>
+          <paper-tab>Tags</paper-tab>
+        </paper-tabs>
+        <br>
+        <iron-pages selected="{{tabSelected}}">
+          <div>
+            <div class='list-group'>
+              <div class='list-group-item-heading'>All Topics</div>
+              <template is="dom-repeat" id="topicCheckboxes" items="[[persistedTopics]]" as="topic">
+                <div class='list-group-item'>
+                  <paper-checkbox id$="topics_-_[[topic]]" value="topics_-_[[topic]]" checked="[[_checked(topics, topic)]]" on-change="checkTopic">{{topic}}</paper-checkbox>
+                </div>
+              </template>
+            </div>
+          </div>
+          <div>
+            <div class='list-group'>
+              <template is="dom-repeat" id="collectionCheckboxes" items="[[persistedCollections]]" as="collection">
+                <div class='list-group-item'>
+                  <paper-checkbox value="collections_-_[[collection]]"  checked="[[_checked(collections, collection)]]" on-change="checkCollection">{{collection}}</paper-checkbox>
+                </div>
+              </template>
+            </div>
+          </div>
+          <div>
+            <div class='list-group'>
+              <template is="dom-repeat" id="rTypeCheckboxes" items="[[persistedRTypes]]" as="rType">
+                <div class='list-group-item'>
+                  <paper-checkbox value="rTypes_-_[[rType]]" checked="[[_checked(rTypes, rType)]]" on-change="checkrType">{{rType}}</paper-checkbox>
+                </div>
+              </template>
+            </div>
+          </div>
+          <div>
+            <div class='list-group'>
+              <template is="dom-repeat" id="tagCheckboxes" items="[[persistedTags]]" as="tag">
+                <div class='list-group-item'>
+                  <paper-checkbox value="tags_-_[[tag]]" checked="[[_checked(tags, tag)]]" on-change="checkTag">{{tag}}</paper-checkbox>
+                </div>
+              </template>
+            </div>
+          </div>
+        </iron-pages>
+        <br><br>
+        <p>Pin to upcoming events?</p>
+        <paper-checkbox value="events_-_RM Workshop Kenya">RM Workshop Kenya</paper-checkbox>
       </div>
+
     </template>
+
   </template>
   <script>
     Polymer({
@@ -97,9 +131,83 @@
           type: Boolean,
           reflectToAttribute: true,
           value: false
+        },
+        tabSelected:{
+          value:0
+        },
+        persistedTopics:{
+          type:Array,
+          notify:true
         }
-
       },
+
+      checkedView: function(view) {
+        if(view) {
+          return "card totallyEditable"
+        }
+        else {
+          return "card"
+        }
+      },
+
+      _checked: function(topics, topic) {
+        console.log(topic)
+        console.log(topics)
+        if(topics.indexOf(topic)!=-1) {
+          return true;
+          console.log("checked-true");
+        }
+        else {
+          console.log("checked-false")
+          return false;
+        }
+      },
+
+      checkTopic: function(e) {
+        var selected = document.getElementById("topicCheckboxes").itemForElement(e.srcElement)
+        if(e.srcElement.checked==true) {
+          this.push("topics", selected)
+        }
+        else {
+          var index = this.topics.indexOf(selected)
+          this.splice("topics",index,1);
+        }
+      },
+
+      checkCollection: function(e) {
+        var selected = document.getElementById("collectionCheckboxes").itemForElement(e.srcElement)
+        if(e.srcElement.checked==true) {
+          this.push("collections", selected)
+        }
+        else {
+          var index = this.collections.indexOf(selected)
+          this.splice("collections",index,1);
+        }
+      },
+
+      checkrType: function(e) {
+        var selected = document.getElementById("rTypeCheckboxes").itemForElement(e.srcElement)
+        if(e.srcElement.checked==true) {
+          this.push("rTypes", selected)
+        }
+        else {
+          var index = this.rTypes.indexOf(selected)
+          this.splice("rTypes",index,1);
+        }
+      },
+
+      checkTags: function(e) {
+        var selected = document.getElementById("tagCheckboxes").itemForElement(e.srcElement)
+        if(e.srcElement.checked==true) {
+          this.push("tags", selected)
+        }
+        else {
+          var index = this.tags.indexOf(selected)
+          this.splice("tags",index,1);
+        }
+      }
+
+
     })
 
   </script>

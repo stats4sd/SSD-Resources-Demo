@@ -17,7 +17,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: none;
         position: absolute;
         overflow: hidden;
-        top: 100px;
+        top: 85px;
         left: 0;
         right: 0;
         bottom: 0;
@@ -27,10 +27,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
       }
       :host(.open) {
-        background-color: var(--paper-purple-500);
+        background-color: #3577f6;
       }
       paper-button {
-        color: var(--paper-purple-50);
+        color: #3577f6;
       }
       #background {
         display: block;
@@ -39,8 +39,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         left: 0;
         border-radius: 512px;
         width: 256px;
-        height: 256px;
-        background-color: var(--paper-purple-500);
+        height: 100%;
+        background-color: #3577f6;
         transform-origin: 128px 128px;
       }
       ssd-resource {
@@ -80,6 +80,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     r-types="{{resource.rTypes}}"
     tags="{{resource.tags}}"
     uploads="{{resource.uploads}}"
+    persisted-topics="[[persistedTopics]]"
+    persisted-r-types="[[persistedRTypes]]"
+    persisted-tags="[[persistedTags]]"
+    persisted-collections="[[persistedCollections]]"
     editable
     ></ssd-resource>
     <div class="controls">

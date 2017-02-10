@@ -13,7 +13,10 @@
         padding: 10px;
       }
       .login-details{color:var(--paper-red-500)};
-
+      /*.totallyEditable {
+        border: 1px red solid;
+        background-color: #ffc6cb;
+      }*/
     </style>
 
     <div class="card">
@@ -71,19 +74,26 @@
 
       <div class='col-sm-8'>
         <h1>Resource List</h1>
-        <template id="resourceList" is="dom-repeat" items="{{persistedResources}}" as="resource" filter="_filter" observe="topicFilter resource.topics">
-          <ssd-resource
-          id$="[[resource.$key]]"
-          name="[[resource.name]]"
-          description="[[resource.description]]"
-          topics="[[resource.topics]]"
-          r-types="[[resource.rTypes]]"
-          tags="[[resource.tags]]"
-          uploads="[[resource.uploads]]"
-          on-tap='edit'
-          ></ssd-resource>
-        </template>
-
+        <paper-button raised class='alert alert-info' toggles active="{{editMode}}" >
+          <span hidden$="{{editMode}}">Enable Editing Mode</span>
+          <span hidden$="{{!editMode}}">Disable Editing Mode</span>
+        </paper-button>
+        <p class='alert alert-warning' hidden$="{{!editMode}}">EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
+        <div class$="[[checkedView(editMode)]]">
+          <template  id="resourceList" is="dom-repeat" items="{{persistedResources}}" as="resource" filter="_filter" observe="topicFilter resource.topics">
+            <ssd-resource
+            view="[[editMode]]"
+            id$="[[resource.$key]]"
+            name="[[resource.name]]"
+            description="[[resource.description]]"
+            topics="[[resource.topics]]"
+            r-types="[[resource.rTypes]]"
+            tags="[[resource.tags]]"
+            uploads="[[resource.uploads]]"
+            on-tap='edit'
+            ></ssd-resource>
+          </template>
+        </div>
 
 
       </div>
@@ -92,30 +102,42 @@
 
 
       <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB  -->
-      <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}" log=true>
+      <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}">
       </firebase-query>
       <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
 
       <!-- USING FIREBASE DOCUMENTS FOR TAGS -->
       <!-- ## It might be worth changing these to queries at some point, but that's only if we can be bothered to change from using flat arrays to key-value object arrays for the tags.  Useful if we want to do things like translations later on, or include other tag "properties" beyond name. -->
 
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{topics}}" log=true>
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{topics}}">
       </firebase-document>
       <app-indexeddb-mirror key="persistedTopics" data="{{topics}}" persisted-data="{{persistedTopics}}"></app-indexeddb-mirror>
 
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/rTypes" data="{{rTypes}}" log=true>
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/rTypes" data="{{rTypes}}">
       </firebase-document>
       <app-indexeddb-mirror key="persistedRTypes" data="{{rTypes}}" persisted-data="{{persistedRTypes}}"></app-indexeddb-mirror>
 
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{tags}}" log=true>
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{tags}}">
       </firebase-document>
       <app-indexeddb-mirror key="persistedTags" data="{{tags}}" persisted-data="{{persistedTags}}"></app-indexeddb-mirror>
+
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/collections" data="{{collections}}">
+      </firebase-document>
+      <app-indexeddb-mirror key="persistedTags" data="{{collections}}" persisted-data="{{persistedCollections}}"></app-indexeddb-mirror>
 
       <!--FIREBASE DOCUMENT FOR THE EDITABLE RESOURCE -->
       <firebase-document id="editingResource" app="SSD-Resources" app-name="SSD-Resources" path="[[editableResourceID]]" data="{{editableResource}}"><firebase-document>
       <!-- hidden editor (until it's not hidden...) -->
 
-      <ssd-resource-editor id="editor" resource="{{editableResource}}" on-close="commitChange"></ssd-resource-editor>
+      <ssd-resource-editor
+        id="editor"
+        resource="{{editableResource}}"
+        on-close="commitChange"
+        persisted-topics="[[persistedTopics]]"
+        persisted-r-types="[[persistedRTypes]]"
+        persisted-tags="[[persistedTags]]"
+        persisted-collections="[[persistedCollections]]">
+      </ssd-resource-editor>
 
       <!-- ARRAY SELECTOR(S)  -->
       <array-selector id='topicSelector' items="{{topics}}" selected="{{topicFilter}}" multi toggle></array-selector>
@@ -158,8 +180,30 @@
         editableResourceID: {
           type: String,
           notify: true
+        },
+        editMode: {
+          type: Boolean,
+          value: false
         }
       },
+
+      checkedView: function(editMode) {
+        if(editMode) {
+          return "alert alert-warning"
+        }
+        else {
+          return ""
+        }
+      },
+
+      // _showEdit: function(editMode) {
+      //   if(editMode) {
+      //     return true
+      //   } else
+      //   {
+      //     return false
+      //   }
+      // },
 
       dataChanged: function(newData, oldData) {
         this.$.resourceList.render();
@@ -266,18 +310,20 @@
         //Next bits rely heavily on pasted code from notes-app...
 
         edit: function(event) {
+          if(this.editMode) {
+            var card = Polymer.dom(event).localTarget;
+            console.log(card);
+            console.log(card.id)
+            console.log("tapped to edit");
+            this.editableResourceID = "/resources/"+card.id;
+            console.log(this.editableResourceID)
+            this.$.editingResource.transactionsComplete.then(function() {
+              console.log(this.editableResource)
 
-          var card = Polymer.dom(event).localTarget;
-          console.log(card);
-          console.log(card.id)
-          console.log("tapped to edit");
-          this.editableResourceID = "/resources/"+card.id;
-          console.log(this.editableResourceID)
-          this.$.editingResource.transactionsComplete.then(function() {
-            console.log(this.editableResource)
+              this.$.editor.open(card);
+            }.bind(this));
+          }
 
-            this.$.editor.open(card);
-          }.bind(this));
         }
     }
 
