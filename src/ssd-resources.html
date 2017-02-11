@@ -14,25 +14,25 @@
 
     <!--  SETTING UP RESOURCES -->
     <!--can add multi to listbox but will need to change default fire event-->
-    <paper-dropdown-menu label="Topics" value="{{filter_topics}}" no-animations>
-      <paper-listbox class="dropdown-content">
-        <paper-item></paper-item>
+    <paper-dropdown-menu label="Topics" value="{{filter_topics}}" no-animations placeholder="(all)">
+      <paper-listbox selected="0" class="dropdown-content">
+        <paper-item>(all)</paper-item>
         <template is="dom-repeat" items="{{persistedTopics}}">
           <paper-item>{{item.$val}}</paper-item>
         </template>
       </paper-listbox>
     </paper-dropdown-menu>
-    <paper-dropdown-menu label="Resource Types" value="{{filter_rTypes}}" no-animations>
-      <paper-listbox class="dropdown-content">
-        <paper-item></paper-item>
+    <paper-dropdown-menu label="Resource Types" value="{{filter_rTypes}}" no-animations placeholder="(all)">
+      <paper-listbox selected="0" class="dropdown-content">
+        <paper-item>(all)</paper-item>
         <template is="dom-repeat" items="{{persistedrTypes}}">
           <paper-item>{{item.$val}}</paper-item>
         </template>
       </paper-listbox>
     </paper-dropdown-menu>
-    <paper-dropdown-menu label="Tags" value="{{filter_tags}}" no-animations>
-      <paper-listbox class="dropdown-content">
-        <paper-item></paper-item>
+    <paper-dropdown-menu label="Tags" value="{{filter_tags}}" no-animations placeholder="(all)">
+      <paper-listbox selected="0" class="dropdown-content">
+        <paper-item>(all)</paper-item>
         <template is="dom-repeat" items="{{persistedtags}}">
           <paper-item>{{item.$val}}</paper-item>
         </template>
@@ -40,69 +40,63 @@
     </paper-dropdown-menu>
 
 
-    <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{allResources}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedResources" data="{{allResources}}" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
-
-
-    <firebase-query id="query" app-name="SSD-Resources" path="/collections" data="{{allCollections}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedCollections" data="{{allCollections}}" persisted-data="{{persistedCollections}}"></app-indexeddb-mirror>
-
-    <firebase-query id="query" app-name="SSD-Resources" path="/rTypes" data="{{allrTypes}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedrTypes" data="{{allrTypes}}" persisted-data="{{persistedrTypes}}"></app-indexeddb-mirror>
-
-    <firebase-query id="query" app-name="SSD-Resources" path="/topics" data="{{allTopics}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedTopics" data="{{allTopics}}" persisted-data="{{persistedTopics}}"></app-indexeddb-mirror>
-
-    <firebase-query id="query" app-name="SSD-Resources" path="/events" data="{{allEvents}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedEvents" data="{{allEvents}}" persisted-data="{{persistedEvents}}"></app-indexeddb-mirror>
-
-    <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedtags" data="{{alltags}}" persisted-data="{{persistedtags}}"></app-indexeddb-mirror>
-
-    <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedtags" data="{{alltags}}" persisted-data="{{persistedtags}}"></app-indexeddb-mirror>
-
-    <script>
-      this.filteredResources=[{description:'loading resources'}]
-    </script>
-
-        <h1>Resources</h1>
-        <!--should work back in proper filter function-->
-        <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" filter="filterResources" as="resource" >
-          <div class='col-lg-6 resourceCard'>
-            <div class="card">
-              <h3>{{resource.name}}</h3>
-              <p><span class='bold'>Description: </span>{{resource.description}}</p>
-              <ul>
-                <li>
-                  <span class='bold'>Topics: </span>
-                  <template is="dom-repeat" items="{{resource.topics}}" as="topic">
-                    <span>{{topic}}; </span>
-                  </template>
-                </li>
-                <li>
-                  <span class='bold'>Resource Type(s): </span>
-                  <template is="dom-repeat" items="{{resource.rTypes}}" as="topic">
-                    <span>{{topic}}; </span>
-                  </template>
-                </li>
-                <li>
-                  <span class='bold'>Tags: </span>
-                  <template is="dom-repeat" items="{{resource.tags}}" as="topic">
-                    <span>{{topic}}; </span>
-                  </template>
-                </li>
-              </ul>
-              <template is='dom-repeat' items="{{resource.uploads}}" as="upload">
-                <paper-button raised><a href="{{upload.downloadURL}}">DOWNLOAD FILE </paper-button>
+    <h1>Resources</h1>
+    <!--should work back in proper filter function-->
+    <h3 $hidden="gotResources">Getting Resources</h3>
+    <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" filter="filterResources" as="resource">
+      <div class='col-lg-6 resourceCard'>
+        <div class="card">
+          <h3>{{resource.name}}</h3>
+          <p><span class='bold'>Description: </span>{{resource.description}}</p>
+          <ul>
+            <li>
+              <span class='bold'>Topics: </span>
+              <template is="dom-repeat" items="{{resource.topics}}" as="topic">
+                <span>{{topic}}; </span>
+              </template>
+            </li>
+            <li>
+              <span class='bold'>Resource Type(s): </span>
+              <template is="dom-repeat" items="{{resource.rTypes}}" as="topic">
+                <span>{{topic}}; </span>
+              </template>
+            </li>
+            <li>
+              <span class='bold'>Tags: </span>
+              <template is="dom-repeat" items="{{resource.tags}}" as="topic">
+                <span>{{topic}}; </span>
+              </template>
+            </li>
+          </ul>
+          <template is='dom-repeat' items="{{resource.uploads}}" as="upload">
+            <paper-button raised><a href="{{upload.downloadURL}}">DOWNLOAD FILE </paper-button>
               </template>
             </div>
           </div>
         </template>
 
-        <template id="selectedTopics" is="dom-repeat" items={{topicFilter}}>
+        <!--<template id="selectedTopics" is="dom-repeat" items={{topicFilter}}>
           <h4>{{item}}</h4>
-        </template>
+        </template>-->
+
+    <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{allResources}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedResources" data="{{allResources}}" persisted-data="{{persistedResources}}" session="keepAlways"></app-indexeddb-mirror>
+
+    <firebase-query id="query" app-name="SSD-Resources" path="/collections" data="{{allCollections}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedCollections" data="{{allCollections}}" persisted-data="{{persistedCollections}}" session="keepAlways"></app-indexeddb-mirror>
+
+    <firebase-query id="query" app-name="SSD-Resources" path="/rTypes" data="{{allrTypes}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedrTypes" data="{{allrTypes}}" persisted-data="{{persistedrTypes}}" session="keepAlways"></app-indexeddb-mirror>
+
+    <firebase-query id="query" app-name="SSD-Resources" path="/topics" data="{{allTopics}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedTopics" data="{{allTopics}}" persisted-data="{{persistedTopics}}" session="keepAlways"></app-indexeddb-mirror>
+
+    <firebase-query id="query" app-name="SSD-Resources" path="/events" data="{{allEvents}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedEvents" data="{{allEvents}}" persisted-data="{{persistedEvents}}" session="keepAlways"></app-indexeddb-mirror>
+
+    <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedtags" data="{{alltags}}" persisted-data="{{persistedtags}}" session="keepAlways"></app-indexeddb-mirror>
+
 
       </div>
 
@@ -159,26 +153,26 @@
           type: Object,
           observer: 'filterChange'
         },
-        persistedResources:{
-          type:Object,
-          observer:'persistedChange'
-        }
       },
 
 
-      filterChange:function(){
-        var temp=this.persistedResources
-        var filtersList=['topics','rTypes','tags']
-        this.activeFilters={}
+      filterChange: function () {
+        console.log('filters updated')
+        var temp = this.persistedResources
+        var filtersList = ['topics', 'rTypes', 'tags']
+        this.activeFilters = {}
         //populate filter list with currently selected - should be moved out to only calculate on change
-        for (let filter of filtersList){
-          var string ='filter_'+filter
-          if(this[string]!=undefined && this[string]!=''){
-            this.activeFilters[filter]=this[string]
+        for (let filter of filtersList) {
+          var string = 'filter_' + filter
+          if (this[string] != undefined && this[string] != '') {
+            if(this[string]!="(all)"){
+              this.activeFilters[filter] = this[string]
             }
-        } 
-        this.persistedResources=[]
-        this.persistedResources=temp
+            
+          }
+        }
+        this.persistedResources = []
+        this.persistedResources = temp
       },
 
       filterResources: function (resource) {
@@ -186,25 +180,27 @@
         // var ssdResourcesApp=firebase.app("SSD-Resources")
         // var ref = ssdResourcesApp.database().ref('/resources')
         // ssdResourcesApp.database.Query
-        
-        //iterate over each resource, check if matches filters
-        return this._testFilters(resource,this.activeFilters)
-        },
 
-      _testFilters:function(resource,activeFilters){
+        console.log('total resources',this.persistedResources.length)
+        return this._testFilters(resource, this.activeFilters)
+        //remove getting resources message - not perfect as still getting more but don't know when complete
+        
+      },
+
+      _testFilters: function (resource, activeFilters) {
         //test each filter. first time any filter fails return false
-        for (let key in activeFilters){
-          var value=activeFilters[key]
+        for (let key in activeFilters) {
+          var value = activeFilters[key]
           //return if doesn't have anything saved to filter field
-          if(!resource.hasOwnProperty(key)){
+          if (!resource.hasOwnProperty(key)) {
             return false
-            }
-          
-            if(resource[key].indexOf(value)==-1){
-              return false
-            }
           }
-          return true
+
+          if (resource[key].indexOf(value) == -1) {
+            return false
+          }
+        }
+        return true
       },
 
       // _filterByKey: function (data, key, value) {
