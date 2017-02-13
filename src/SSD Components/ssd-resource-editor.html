@@ -117,20 +117,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         } else {
           this.create();
         }
-
-        //Add bit to initialise empty arrays for tags
-        if(!this.resources.topics) {
-          this.resources.topics = [];
-          console.log("no topics so created empty array")
-        }
-        if(this.resources.rTypes = []) {
-          thie.resources.rTypes = [];
-          console.log("no resource types were found so created empty array");
-        }
       },
       create: function() {
         this._setOpened(true);
-        this.resource = { title: '', body: '' };
+        this.resource = {
+          name: '',
+          description: '',
+          topics: [],
+          rTypes: [],
+          collections: [],
+          tags: [],
+          events: [],
+          uploads: {}
+        };
         this.transitionInFrom(this.getBoundingClientRect());
       },
       save: function() {

@@ -4,6 +4,7 @@
 <link rel="import" href="../bower_components/iron-elements/iron-elements.html">
 <link rel="import" href="SSD Components/ssd-resource.html">
 <link rel="import" href="SSD Components/ssd-resource-editor.html">
+<link ref="import" href="../bower_components/paper-fab/index.html">
 
 <dom-module id="ssd-resources">
   <template>
@@ -12,6 +13,8 @@
         display: block;
         padding: 10px;
       }
+
+
     </style>
 
     <!--  SETTING UP RESOURCES -->
@@ -78,7 +81,10 @@
           <span hidden$="{{editMode}}">Enable Editing Mode</span>
           <span hidden$="{{!editMode}}">Disable Editing Mode</span>
         </paper-button>
-        <p class='alert alert-warning' hidden$="{{!editMode}}">EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
+        <div hidden$="{{!editMode}}" class='alert alert-info well well-sm'>
+          <p class='alert alert-warning'>EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
+          <paper-button raised on-tap="create" class='alert alert-success'>Add new resource</paper-button>
+        </div>
 
         <div class$="[[checkedView(editMode)]]">
           <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" as="resource" filter="filterResources">
@@ -129,13 +135,15 @@
       persisted-topics="[[persistedTopics]]"
       persisted-r-types="[[persistedrTypes]]"
       persisted-tags="[[persistedTags]]"
-      persisted-collections="[[persistedCollections]]">
+      persisted-collections="[[persistedCollections]]"
+      on-close="commitChange">
     </ssd-resource-editor>
 
     <!-- ARRAY SELECTOR(S)  -->
     <!--<array-selector id='topicSelector' items="{{topics}}" selected="{{topicFilter}}" multi toggle></array-selector>
       <array-selector id='rTypeSelector' items="{{rTypes}}" selected="{{rTypeFilter}}" multi toggle></array-selector>
       <array-selector id='tagSelector' items="{{tags}}" selected="{{tagFilter}}" multi toggle></array-selector>-->
+
 
 
   </template>
@@ -361,6 +369,57 @@
             }.bind(this));
           }
 
+        },
+
+        //function to create a new resource (called from new-resource button)
+        create: function() {
+          //if Edit mode is enabled
+          if (this.editMode) {
+            //set editable Note ID to null (so no resource is overwritten)
+            this.editableResourceID = null;
+            //open editor with null ID.
+            this.$.editor.open();
+          }
+        },
+
+        commitChange: function(event) {
+          var changeCommits;
+
+          switch(event.detail) {
+            case 'save':
+              changeCommits = this.save();
+              break;
+            case 'delete':
+              changeCommits = this.delete();
+              break;
+            default:
+              changeComits = Promise.resolve();
+              break;
+            }
+
+            // i have no idea what this does.
+            if (this.$.query && this.$.query.refresh) {
+              changeCommits.then(function() {
+                this.$.query.refresh();
+              }.bind(this));
+            }
+          },
+
+        save: function() {
+          if (this.$.editingResource.isNew &&
+              (this.editableResource.name ||
+               this.editableResource.description ||
+                this.editableResource.upload)) {
+
+                  console.log("editableResourceID = " +this.editableResourceID);
+                  console.log("editingResource = " +this.editingResource);
+                  console.log("editableResource = " +this.editableResource);
+
+            return this.$.editingResource.save("/resources").then(function() {
+              this.$.editingResource.reset();
+            }.bind(this));
+          }
+          return Promise.resolve();
         },
     });
   </script>
