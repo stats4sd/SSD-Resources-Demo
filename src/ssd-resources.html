@@ -45,8 +45,7 @@
     <h1>Resources</h1>
     <!--should work back in proper filter function-->
     <h3 $hidden="gotResources">Getting Resources</h3>
-    <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" filter="filterResources" as="resource">
-      <div class='col-lg-6 resourceCard'>
+      <!-- <div class='col-lg-6 resourceCard'>
         <div class="card">
           <h3>{{resource.name}}</h3>
           <p><span class='bold'>Description: </span>{{resource.description}}</p>
@@ -69,20 +68,19 @@
                 <span>{{topic}}; </span>
               </template>
           </div>
-        </div>
-      </div>
+        </div> -->
+      <!-- </div> -->
 
 
 
-      <div class='col-sm-8'>
         <h1>Resource List</h1>
         <paper-button raised class='alert alert-info' toggles active="{{editMode}}" >
           <span hidden$="{{editMode}}">Enable Editing Mode</span>
           <span hidden$="{{!editMode}}">Disable Editing Mode</span>
         </paper-button>
         <p class='alert alert-warning' hidden$="{{!editMode}}">EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
-        <div class$="[[checkedView(editMode)]]">
-          <template  id="resourceList" is="dom-repeat" items="{{persistedResources}}" as="resource" filter="_filter" observe="topicFilter resource.topics">
+        <div>
+          <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" as="resource" filter="filterResources">
             <ssd-resource
             view="[[editMode]]"
             id$="[[resource.$key]]"
@@ -96,13 +94,9 @@
             ></ssd-resource>
           </template>
         </div>
-
         <!--<template id="selectedTopics" is="dom-repeat" items={{topicFilter}}>
           <h4>{{item}}</h4>
         </template>-->
-
-    <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{allResources}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedResources" data="{{allResources}}" persisted-data="{{persistedResources}}" session="keepAlways"></app-indexeddb-mirror>
 
     <firebase-query id="query" app-name="SSD-Resources" path="/collections" data="{{allCollections}}"></firebase-query>
     <app-indexeddb-mirror key="persistedCollections" data="{{allCollections}}" persisted-data="{{persistedCollections}}" session="keepAlways"></app-indexeddb-mirror>
@@ -120,11 +114,6 @@
     <app-indexeddb-mirror key="persistedtags" data="{{alltags}}" persisted-data="{{persistedtags}}" session="keepAlways"></app-indexeddb-mirror>
 
 
-      </div>
-
-
-
-
       <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB  -->
       <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}">
       </firebase-query>
@@ -133,7 +122,6 @@
       <!-- USING FIREBASE DOCUMENTS FOR TAGS -->
       <!-- ## It might be worth changing these to queries at some point, but that's only if we can be bothered to change from using flat arrays to key-value object arrays for the tags.  Useful if we want to do things like translations later on, or include other tag "properties" beyond name. -->
 
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{topics}}">
     <!-- FIREBASE DOCUMENTS TO PULL IN STUFF FROM DB  -->
     <!--<firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/resources" data="{{resources}}" log=true>
       </firebase-document>
@@ -162,14 +150,15 @@
 
       properties: {
         resources: {
-          Object,
+          type: Object,
+          observer: 'dataChanged'
+        },
+        persistedResources: {
+          type: Object,
           observer: 'dataChanged'
         },
         obj: Object,
         topics: Object,
-
-        rTypeFilter: Array,
-        tagFilter: Array,
         topicActive: {
           type: Boolean,
           value: false
@@ -209,7 +198,7 @@
             if(this[string]!="(all)"){
               this.activeFilters[filter] = this[string]
             }
-            
+
           }
         }
         this.persistedResources = []
@@ -225,7 +214,7 @@
         console.log('total resources',this.persistedResources.length)
         return this._testFilters(resource, this.activeFilters)
         //remove getting resources message - not perfect as still getting more but don't know when complete
-        
+
       },
 
       _testFilters: function (resource, activeFilters) {
@@ -244,6 +233,20 @@
         return true
       },
 
+      checkedView: function(editMode) {
+        if(editMode) {
+          return "alert alert-warning"
+        }
+        else {
+          return ""
+        }
+      },
+
+      dataChanged: function(newData, oldData) {
+        this.$.resourceList.render();
+        console.log(this.resources)
+
+      },
       // _filterByKey: function (data, key, value) {
 
       // },
@@ -362,10 +365,7 @@
             }.bind(this));
           }
 
-        }
-    }
-
-
-    );
+        },
+    });
   </script>
 </dom-module>
