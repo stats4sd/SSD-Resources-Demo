@@ -35,7 +35,7 @@
     <paper-dropdown-menu label="Tags" value="{{filter_tags}}" no-animations placeholder="(all)">
       <paper-listbox selected="0" class="dropdown-content">
         <paper-item>(all)</paper-item>
-        <template is="dom-repeat" items="{{persistedtags}}">
+        <template is="dom-repeat" items="{{persistedTags}}">
           <paper-item>{{item.$val}}</paper-item>
         </template>
       </paper-listbox>
@@ -79,7 +79,8 @@
           <span hidden$="{{!editMode}}">Disable Editing Mode</span>
         </paper-button>
         <p class='alert alert-warning' hidden$="{{!editMode}}">EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
-        <div>
+
+        <div class$="[[checkedView(editMode)]]">
           <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" as="resource" filter="filterResources">
             <ssd-resource
             view="[[editMode]]"
@@ -111,7 +112,7 @@
     <app-indexeddb-mirror key="persistedEvents" data="{{allEvents}}" persisted-data="{{persistedEvents}}" session="keepAlways"></app-indexeddb-mirror>
 
     <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedtags" data="{{alltags}}" persisted-data="{{persistedtags}}" session="keepAlways"></app-indexeddb-mirror>
+    <app-indexeddb-mirror key="persistedTags" data="{{alltags}}" persisted-data="{{persistedTags}}" session="keepAlways"></app-indexeddb-mirror>
 
 
       <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB  -->
@@ -119,22 +120,17 @@
       </firebase-query>
       <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
 
-      <!-- USING FIREBASE DOCUMENTS FOR TAGS -->
-      <!-- ## It might be worth changing these to queries at some point, but that's only if we can be bothered to change from using flat arrays to key-value object arrays for the tags.  Useful if we want to do things like translations later on, or include other tag "properties" beyond name. -->
+    <!-- FIREBASE DOCUMENTS TO PULL IN Individual resource for editing  -->
+    <firebase-document id="editingResource" app="SSD-Resources" app-name="SSD-Resources" path="[[editableResourceID]]" data="{{editableResource}}"><firebase-document>
 
-    <!-- FIREBASE DOCUMENTS TO PULL IN STUFF FROM DB  -->
-    <!--<firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/resources" data="{{resources}}" log=true>
-      </firebase-document>
-      <app-indexeddb-mirror key="persistedTopics" data="{{topics}}" persisted-data="{{persistedTopics}}"></app-indexeddb-mirror>
-
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/rTypes" data="{{rTypes}}">
-      </firebase-document>
-      <app-indexeddb-mirror key="persistedRTypes" data="{{rTypes}}" persisted-data="{{persistedRTypes}}"></app-indexeddb-mirror>
-
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{tags}}">
-      </firebase-document>
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{tags}}" log=true>
-      </firebase-document>-->
+    <ssd-resource-editor
+      id="editor"
+      resource="{{editableResource}}"
+      persisted-topics="[[persistedTopics]]"
+      persisted-r-types="[[persistedrTypes]]"
+      persisted-tags="[[persistedTags]]"
+      persisted-collections="[[persistedCollections]]">
+    </ssd-resource-editor>
 
     <!-- ARRAY SELECTOR(S)  -->
     <!--<array-selector id='topicSelector' items="{{topics}}" selected="{{topicFilter}}" multi toggle></array-selector>

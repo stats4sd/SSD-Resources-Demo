@@ -26,11 +26,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       :host([opened]) {
         display: block;
       }
-      :host(.open) {
-        background-color: #3577f6;
+      :host([opened]) {
+        background-color: #413F54;
       }
       paper-button {
-        color: #3577f6;
+        color: #DB2A27;
       }
       #background {
         display: block;
@@ -40,7 +40,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         border-radius: 512px;
         width: 256px;
         height: 100%;
-        background-color: #3577f6;
+        background-color: #413F54;
         transform-origin: 128px 128px;
       }
       ssd-resource {
@@ -48,11 +48,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         position: absolute;
         top: 0px;
         left: 0px;
+        width: 90%;
+        margin: 20px auto;
       }
-      :host(.open) ssd-resource {
+      :host([opened]) ssd-resource {
         position: relative;
         margin: auto;
-        width: calc(100vw - 20px);
+        width: 90%;
         max-width: 480px;
       }
       .controls {
@@ -67,7 +69,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         transition: opacity 0.3s;
         opacity: 0;
       }
-      :host(.open) .controls {
+      :host([opened]) .controls {
         opacity: 1;
       }
     </style>
@@ -115,6 +117,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         } else {
           this.create();
         }
+
+        //Add bit to initialise empty arrays for tags
+        if(!this.resources.topics) {
+          this.resources.topics = [];
+          console.log("no topics so created empty array")
+        }
+        if(this.resources.rTypes = []) {
+          thie.resources.rTypes = [];
+          console.log("no resource types were found so created empty array");
+        }
       },
       create: function() {
         this._setOpened(true);
@@ -133,10 +145,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.__editedresourceElement = null;
         }
         this.fire('close', detail, { bubbles: false });
-        this.transitionOut().then(function() {
+        // this.transitionOut().then(function() {
           Polymer.dom(this).classList.remove('open');
           this._setOpened(false);
-        }.bind(this));
+        // }.bind(this));
       },
       transitionInFrom: function(rect) {
         var targetRect = this.getBoundingClientRect();

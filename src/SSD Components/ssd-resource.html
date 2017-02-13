@@ -13,6 +13,10 @@
       background-color: #d3eaf6;
       cursor: pointer;
     }
+    .editing {
+      width: 90%;
+      margin: 15px auto;
+    }
     </style>
       <div class$="[[checkedView(view)]]">
         <h3>[[name]]</h3>
@@ -45,7 +49,7 @@
 
     <!-- NOW FOR THE EDITABLE VERSION -->
     <template is="dom-if" if="[[editable]]">
-      <div class="card" id$="[[id]]">
+      <div class="card editing" id$="[[id]]">
         <paper-input id="resourceName" value="{{name}}" name="title" label="Title of Resource" required auto-validate pattern="[a-zA-Z0-9 ']*" error-message="no special characters!"></paper-input>
         <paper-textarea id="resourceDescription" value="{{description}}" name="description" label="Brief Description" required></paper-textarea>
         <br>
@@ -62,7 +66,7 @@
               <div class='list-group-item-heading'>All Topics</div>
               <template is="dom-repeat" id="topicCheckboxes" items="[[persistedTopics]]" as="topic">
                 <div class='list-group-item'>
-                  <paper-checkbox id$="topics_-_[[topic]]" value="topics_-_[[topic]]" checked="[[_checked(topics, topic)]]" on-change="checkTopic">{{topic}}</paper-checkbox>
+                  <paper-checkbox id$="topics_-_[[topic.$val]]" value="topics_-_[[topic.$val]]" checked="[[_checked(topics, topic.$val)]]" on-change="checkTopic">[[topic.$val]]</paper-checkbox>
                 </div>
               </template>
             </div>
@@ -71,7 +75,7 @@
             <div class='list-group'>
               <template is="dom-repeat" id="collectionCheckboxes" items="[[persistedCollections]]" as="collection">
                 <div class='list-group-item'>
-                  <paper-checkbox value="collections_-_[[collection]]"  checked="[[_checked(collections, collection)]]" on-change="checkCollection">{{collection}}</paper-checkbox>
+                  <paper-checkbox value="collections_-_[[collection.$val]]"  checked="[[_checked(collections, collection.$val)]]" on-change="checkCollection">{{collection.$val}}</paper-checkbox>
                 </div>
               </template>
             </div>
@@ -80,7 +84,7 @@
             <div class='list-group'>
               <template is="dom-repeat" id="rTypeCheckboxes" items="[[persistedRTypes]]" as="rType">
                 <div class='list-group-item'>
-                  <paper-checkbox value="rTypes_-_[[rType]]" checked="[[_checked(rTypes, rType)]]" on-change="checkrType">{{rType}}</paper-checkbox>
+                  <paper-checkbox value="rTypes_-_[[rType.$val]]" checked="[[_checked(rTypes, rType.$val)]]" on-change="checkrType">{{rType.$val}}</paper-checkbox>
                 </div>
               </template>
             </div>
@@ -89,7 +93,7 @@
             <div class='list-group'>
               <template is="dom-repeat" id="tagCheckboxes" items="[[persistedTags]]" as="tag">
                 <div class='list-group-item'>
-                  <paper-checkbox value="tags_-_[[tag]]" checked="[[_checked(tags, tag)]]" on-change="checkTag">{{tag}}</paper-checkbox>
+                  <paper-checkbox value="tags_-_[[tag.$val]]" checked="[[_checked(tags, tag.$val)]]" on-change="checkTag">{{tag.$val}}</paper-checkbox>
                 </div>
               </template>
             </div>
@@ -124,6 +128,10 @@
           notify: true
         },
         tags: {
+          type: Array,
+          notify: true
+        },
+        collections: {
           type: Array,
           notify: true
         },
@@ -166,10 +174,16 @@
       checkTopic: function(e) {
         var selected = document.getElementById("topicCheckboxes").itemForElement(e.srcElement)
         if(e.srcElement.checked==true) {
-          this.push("topics", selected)
+          if(this.topics) {
+            this.push("topics", selected.$val)
+          }
+          else {
+            this.topics = [selected.$val]
+          }
+
         }
         else {
-          var index = this.topics.indexOf(selected)
+          var index = this.topics.indexOf(selected.$val)
           this.splice("topics",index,1);
         }
       },
@@ -177,10 +191,15 @@
       checkCollection: function(e) {
         var selected = document.getElementById("collectionCheckboxes").itemForElement(e.srcElement)
         if(e.srcElement.checked==true) {
-          this.push("collections", selected)
+          if(this.collections) {
+            this.push("collections", selected.$val)
+          }
+          else {
+            this.collections = [selected.$val]
+          }
         }
         else {
-          var index = this.collections.indexOf(selected)
+          var index = this.collections.indexOf(selected.$val)
           this.splice("collections",index,1);
         }
       },
@@ -188,21 +207,31 @@
       checkrType: function(e) {
         var selected = document.getElementById("rTypeCheckboxes").itemForElement(e.srcElement)
         if(e.srcElement.checked==true) {
-          this.push("rTypes", selected)
+          if(this.rTypes) {
+            this.push("rTypes", selected.$val)
+          }
+          else {
+            this.rTypes = [selected.$val]
+          }
         }
         else {
-          var index = this.rTypes.indexOf(selected)
+          var index = this.rTypes.indexOf(selected.$val)
           this.splice("rTypes",index,1);
         }
       },
 
-      checkTags: function(e) {
+      checkTag: function(e) {
         var selected = document.getElementById("tagCheckboxes").itemForElement(e.srcElement)
         if(e.srcElement.checked==true) {
-          this.push("tags", selected)
+          if(this.tags) {
+            this.push("tags", selected.$val)
+          }
+          else {
+            this.tags = [selected.$val]
+          }
         }
         else {
-          var index = this.tags.indexOf(selected)
+          var index = this.tags.indexOf(selected.$val)
           this.splice("tags",index,1);
         }
       }
