@@ -22,6 +22,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         right: 0;
         bottom: 0;
         z-index: 1;
+        height: 1000px;
+
       }
       :host([opened]) {
         display: block;
@@ -39,7 +41,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         left: 0;
         border-radius: 512px;
         width: 256px;
-        height: 100%;
         background-color: #413F54;
         transform-origin: 128px 128px;
       }
@@ -56,6 +57,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: auto;
         width: 90%;
         max-width: 480px;
+
       }
       .controls {
         display: block;
@@ -76,12 +78,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="background"></div>
     <ssd-resource
     id="resource"
+    resource-id="[[resourceId]]"
     name="{{resource.name}}"
     description="{{resource.description}}"
     topics="{{resource.topics}}"
     r-types="{{resource.rTypes}}"
     tags="{{resource.tags}}"
-    uploads="{{resource.uploads}}"
+    uploaded-files="{{resource.uploadedFiles}}"
     persisted-topics="[[persistedTopics]]"
     persisted-r-types="[[persistedRTypes]]"
     persisted-tags="[[persistedTags]]"
@@ -107,8 +110,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           readOnly: true,
           value: false
         },
+        resourceId: {
+          type: String,
+          notify: true
+        }
       },
       open: function(resourceElement) {
+        console.log(this.resource)
         this._setOpened(true);
         this.__editedresourceElement = resourceElement;
         if (resourceElement) {
@@ -128,7 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           collections: [],
           tags: [],
           events: [],
-          uploads: {}
+          uploadedFiles: []
         };
         this.transitionInFrom(this.getBoundingClientRect());
       },

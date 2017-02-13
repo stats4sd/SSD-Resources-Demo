@@ -1,6 +1,8 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../../bower_components/iron-elements/iron-elements.html">
+<link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
+
 <link rel="import" href="../shared-styles.html">
 
 
@@ -49,7 +51,8 @@
 
     <!-- NOW FOR THE EDITABLE VERSION -->
     <template is="dom-if" if="[[editable]]">
-      <div class="card editing" id$="[[id]]">
+      <div class="card editing" id$="[[resourceId]]">
+        <h1>ID = [[resourceId]]</h1>
         <paper-input id="resourceName" value="{{name}}" name="title" label="Title of Resource" required auto-validate pattern="[a-zA-Z0-9 ']*" error-message="no special characters!"></paper-input>
         <paper-textarea id="resourceDescription" value="{{description}}" name="description" label="Brief Description" required></paper-textarea>
         <br>
@@ -103,6 +106,38 @@
         <p>Pin to upcoming events?</p>
         <paper-checkbox value="events_-_RM Workshop Kenya">RM Workshop Kenya</paper-checkbox>
       </div>
+      <div class='card editing'>
+        <h2>File Uploads</h2>
+        <vaadin-upload id="ssdResourceUpload" files="[[uploadedFiles]]" on-upload-before="fileupload" on-upload-progress="statechanged"></vaadin-upload>
+      </div>
+
+      <firebase-query id="allDocs" app-name="SSD-Resources" path="[[resourceId]]/uploadedFiles" data="{{uploadedFiles}}">
+      </firebase-query>
+
+      <firebase-document id="oneDoc" app-name="SSD-Resources" path="[[resourceId]]/uploadedFiles/[[fileId]]" data="{{editingFile}}"></firebase-document>
+        <script>
+      // function _submit(event) {
+      //   Polymer.dom(event).localTarget.parentElement.submit();
+      //   console.log('submitted')
+      // }
+
+      // hack around vaadin upload to use firebase file put
+      // // can be improved on with full rewrite of vaadin-upload
+      // var upload1 = document.querySelector('vaadin-upload#ssdResourceUpload');
+      // console.log(upload1)
+      // upload1.addEventListener('upload-before', function(event) {
+      function _getCurrentIndex(file, uploadsMeta) {
+        var index=-1
+        for (var i=0;i<uploadsMeta.length;i++){
+          var name=uploadsMeta[i].name
+          if(file.name==name){
+            index=i
+          }
+        }
+        return index;
+      }
+      </script>
+
 
     </template>
 
@@ -145,6 +180,18 @@
         },
         persistedTopics:{
           type:Array,
+          notify:true
+        },
+        uploadedFiles:{
+          type:Array,
+          notify:true
+        },
+        editingFile:{
+          Type:Array,
+          notify:true
+        },
+        fileId:{
+          Type:String,
           notify:true
         }
       },
@@ -234,7 +281,76 @@
           var index = this.tags.indexOf(selected.$val)
           this.splice("tags",index,1);
         }
-      }
+      },
+
+      fileupload: function(event) {
+        event.preventDefault();
+        //check resource name exists, give warning and remove files if not
+
+        //create file upload task
+        var file = event.detail.file;
+        console.log(file)
+        var ssdResourcesApp=firebase.app("SSD-Resources")
+        console.log(ssdResourcesApp)
+        var ref = firebase.storage(ssdResourcesApp).ref().child(this.resourceId+'/'+file.name)
+        console.log(ref)
+        var uploadTask=ref.put(file);
+        uploadTask.on('state_changed',function(snapshot){
+            var progressBars = document.querySelectorAll('paper-progress');
+            console.log(progressBars);
+            var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            var vaadinUploads=document.querySelector('vaadin-upload')
+            console.log(vaadinUploads)
+            var uploadsMeta=vaadinUploads.get('files');
+            var index=_getCurrentIndex(file,uploadsMeta)
+            console.log(index)
+            progressBars[index].set('value',progress)
+        }, function(error) {
+          console.log(error)
+          // Handle unsuccessful uploads
+        }, function() {
+          console.log('uploadTask',uploadTask)
+          // //set progress bar to complete
+          var vaadinUploads=document.querySelector('vaadin-upload')
+          var uploadsMeta=vaadinUploads.get('files');
+          console.log(uploadsMeta);
+          console.log(vaadinUploads);
+          var vaadinFiles=document.querySelectorAll('vaadin-upload-file')
+          var index=_getCurrentIndex(file,uploadsMeta)
+          vaadinFiles[index].set('file.complete',true);
+          vaadinFiles[index].set('file.loaded',100);
+
+          if(!document.querySelector("ssd-resource").uploadedFiles){
+            document.querySelector("ssd-resource").uploadedFiles = []
+          }
+          // just pushing the new file item to the uploadedFiles array loses a bunch of the file metadata (I guess the perils of forcing a file object into a database array?)  So - terrible hack time:
+
+          var fileItem = [];
+          fileItem.name = vaadinUploads.files[index].name;
+          fileItem.lastModified = vaadinUploads.files[index].lastModifiedDate;
+          fileItem.size = vaadinUploads.files[index].size;
+          console.log(fileItem);
+
+          //set or create the file to edit (should always be create, as files need to be removed and re-uploaded instead of editing)
+          //fileID = null so firebase-document object creates new item (I think)
+          document.querySelector("ssd-resource").fileId = null;
+
+          //add new fileItem
+          document.querySelector("ssd-resource").set("editingFile",fileItem);
+
+          console.log(document.querySelector("ssd-resource").uploadedFiles);
+
+
+          });
+        },
+
+        statechanged: function(event) {
+          console.log(event.detail.file);
+        },
+
+
+
+
 
 
     })

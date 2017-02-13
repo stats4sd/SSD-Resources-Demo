@@ -131,6 +131,7 @@
 
     <ssd-resource-editor
       id="editor"
+      resource-id="[[editableResourceID]]"
       resource="{{editableResource}}"
       persisted-topics="[[persistedTopics]]"
       persisted-r-types="[[persistedrTypes]]"
@@ -397,7 +398,6 @@
               break;
             }
 
-            // i have no idea what this does.
             if (this.$.query && this.$.query.refresh) {
               changeCommits.then(function() {
                 this.$.query.refresh();
