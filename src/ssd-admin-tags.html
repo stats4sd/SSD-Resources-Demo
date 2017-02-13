@@ -23,7 +23,7 @@
     </style>
     <!--Add template content here-->
     <!-- Get the list of all topic tags and bind it to {{allTags}} -->
-    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{alltopics}}" log=true>
+    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{alltopics}}">
     </firebase-document>
     <h1>Administration - Metadata</h1>
     <p>Use this page to modify the lists of tags, collections etc that can be attached to resources.</p>
@@ -65,7 +65,7 @@
 
     <!--Add template content here-->
     <!-- Get the list of all rType tags and bind it to {{allTags}} -->
-    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/rTypes" data="{{allrTypes}}" log=true>
+    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/rTypes" data="{{allrTypes}}">
     </firebase-document>
 
     <!-- #################rTypes################ -->
@@ -98,7 +98,7 @@
 
     <!--Add template content here-->
     <!-- Get the list of all collection tags and bind it to {{allTags}} -->
-    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/collections" data="{{allcollections}}" log=true>
+    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/collections" data="{{allcollections}}">
     </firebase-document>
 
     <!-- #################collections################ -->
@@ -128,7 +128,7 @@
     </div>
   </div>
 
-  <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{alltags}}" log=true>
+  <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{alltags}}">
   </firebase-document>
   <div class='row' id='main_tags'>
     <div class="col-md-6">

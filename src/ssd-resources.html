@@ -1,7 +1,9 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="shared-styles.html">
-
-<!-- <test-element obj='{"testOne":{"name":"HI","description":"Hi in detail"},"testTwo":{"name":"Hi2","description":"Hi for the 2nd time"}}'></test-element> -->
+<link rel="import" href="../bower_components/paper-elements/paper-elements.html">
+<link rel="import" href="../bower_components/iron-elements/iron-elements.html">
+<link rel="import" href="SSD Components/ssd-resource.html">
+<link rel="import" href="SSD Components/ssd-resource-editor.html">
 
 <dom-module id="ssd-resources">
   <template>
@@ -66,14 +68,34 @@
               <template is="dom-repeat" items="{{resource.tags}}" as="topic">
                 <span>{{topic}}; </span>
               </template>
-            </li>
-          </ul>
-          <template is='dom-repeat' items="{{resource.uploads}}" as="upload">
-            <paper-button raised><a href="{{upload.downloadURL}}">DOWNLOAD FILE </paper-button>
-              </template>
-            </div>
           </div>
-        </template>
+        </div>
+      </div>
+
+
+
+      <div class='col-sm-8'>
+        <h1>Resource List</h1>
+        <paper-button raised class='alert alert-info' toggles active="{{editMode}}" >
+          <span hidden$="{{editMode}}">Enable Editing Mode</span>
+          <span hidden$="{{!editMode}}">Disable Editing Mode</span>
+        </paper-button>
+        <p class='alert alert-warning' hidden$="{{!editMode}}">EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
+        <div class$="[[checkedView(editMode)]]">
+          <template  id="resourceList" is="dom-repeat" items="{{persistedResources}}" as="resource" filter="_filter" observe="topicFilter resource.topics">
+            <ssd-resource
+            view="[[editMode]]"
+            id$="[[resource.$key]]"
+            name="[[resource.name]]"
+            description="[[resource.description]]"
+            topics="[[resource.topics]]"
+            r-types="[[resource.rTypes]]"
+            tags="[[resource.tags]]"
+            uploads="[[resource.uploads]]"
+            on-tap='edit'
+            ></ssd-resource>
+          </template>
+        </div>
 
         <!--<template id="selectedTopics" is="dom-repeat" items={{topicFilter}}>
           <h4>{{item}}</h4>
@@ -100,12 +122,28 @@
 
       </div>
 
+
+
+
+      <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB  -->
+      <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}">
+      </firebase-query>
+      <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
+
+      <!-- USING FIREBASE DOCUMENTS FOR TAGS -->
+      <!-- ## It might be worth changing these to queries at some point, but that's only if we can be bothered to change from using flat arrays to key-value object arrays for the tags.  Useful if we want to do things like translations later on, or include other tag "properties" beyond name. -->
+
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{topics}}">
     <!-- FIREBASE DOCUMENTS TO PULL IN STUFF FROM DB  -->
     <!--<firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/resources" data="{{resources}}" log=true>
       </firebase-document>
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{topics}}" log=true>
+      <app-indexeddb-mirror key="persistedTopics" data="{{topics}}" persisted-data="{{persistedTopics}}"></app-indexeddb-mirror>
+
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/rTypes" data="{{rTypes}}">
       </firebase-document>
-      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/rTypes" data="{{rTypes}}" log=true>
+      <app-indexeddb-mirror key="persistedRTypes" data="{{rTypes}}" persisted-data="{{persistedRTypes}}"></app-indexeddb-mirror>
+
+      <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{tags}}">
       </firebase-document>
       <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/tags" data="{{tags}}" log=true>
       </firebase-document>-->
@@ -123,7 +161,10 @@
       is: 'ssd-resources',
 
       properties: {
-        resources: Object,
+        resources: {
+          Object,
+          observer: 'dataChanged'
+        },
         obj: Object,
         topics: Object,
 
@@ -304,6 +345,24 @@
       //   this.$.resourceList.render();
       // }
 
+        //Next bits rely heavily on pasted code from notes-app...
+
+        edit: function(event) {
+          if(this.editMode) {
+            var card = Polymer.dom(event).localTarget;
+            console.log(card);
+            console.log(card.id)
+            console.log("tapped to edit");
+            this.editableResourceID = "/resources/"+card.id;
+            console.log(this.editableResourceID)
+            this.$.editingResource.transactionsComplete.then(function() {
+              console.log(this.editableResource)
+
+              this.$.editor.open(card);
+            }.bind(this));
+          }
+
+        }
     }
 
 

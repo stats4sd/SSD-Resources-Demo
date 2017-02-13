@@ -107,6 +107,33 @@
         <div class="user-name">signed in as [[user.displayName]]</div>
       </template>
     </app-header>
+      <!-- Main content -->
+      <app-header-layout has-scrolling-region>
+        <app-header condenses reveals effects="waterfall">
+          <app-toolbar>
+            <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
+            <div main-title>SSD Resources Demo</div>
+            <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
+            <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
+            <paper-icon-button icon="lock-outline" title="Login" on-tap="_login" hidden$="[[signedIn]]"></paper-icon-button>
+            <paper-icon-button icon="lock-open" title="Logout" on-tap="_logout" hidden$="[[!signedIn]]"></paper-icon-button>
+          </app-toolbar>
+          <template is="dom-if" if="[[signedIn]]">
+            <div class="user-name">signed in as [[user.displayName]]</div>
+          </template>
+        </app-header>
+        <!--after main header pages get loaded-->
+        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
+          <ssd-resources name="resources" signed-in="[[signedIn]]"></ssd-resources>
+          <ssd-view404 name="view404"></ssd-view404>
+        </iron-pages>
+        <!--pages to only show when signed in-->
+        <iron-pages hidden$="{{!signedIn}}" selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
+          <ssd-add-resource name="add-resource"></ssd-add-resource>
+          <ssd-admin-tags name="admin-tags"></ssd-admin-tags>
+        </iron-pages>
+      </app-header-layout>
+    </app-drawer-layout>
 
     <!--after main header pages get loaded-->
     <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
