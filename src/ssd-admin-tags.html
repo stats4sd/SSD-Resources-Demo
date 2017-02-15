@@ -7,6 +7,7 @@
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <!-- <link rel="import" href="../bower_components/juicy-jsoneditor/juicy-jsoneditor.html"> -->
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/polymer-bootstrap/polymer-bootstrap.html">
@@ -21,7 +22,7 @@
         padding: 10px;
       }
     </style>
-    <style include="polymer-boostrap"></style>
+    <style include="polymer-bootstrap"></style>
     <!--Add template content here-->
     <!-- Get the list of all topic tags and bind it to {{allTags}} -->
     <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{allTopics}}">
@@ -177,6 +178,10 @@
           type:Object,
           observer:'dataChanged'
         },
+        allTags:{
+          type:Object,
+          observer:'dataChanged'
+        },
         topicInput:{
           type:String,
         },
@@ -207,25 +212,34 @@
         //console.log(newData)
       },
       edittopic:function(e){
-        // document.querySelector(".list-group-item-info").removeClass("list-group-item-info");
-        // e.srcElement.className += " editing list-group-item-info";
+        if(document.querySelector(".list-group-item-info") != undefined) {
+          document.querySelector(".list-group-item-info").className = ("list-group-item style-scope ssd-admin-tags");
+        }
+
+        e.srcElement.className += " editing list-group-item-info";
         this.topicId = parseInt(e.srcElement.id.split("-")[1])
         this.topicInput=this.allTopics[this.topicId]
       },
       editrType:function(e){
-        document.querySelector(".list-group-item-info").removeClass("list-group-item-info");
+        if(document.querySelector(".list-group-item-info") != undefined) {
+          document.querySelector(".list-group-item-info").className = ("list-group-item style-scope ssd-admin-tags");
+        }
         e.srcElement.className += " editing list-group-item-info";
         this.rTypeId = parseInt(e.srcElement.id.split("-")[1]);
         this.rTypeInput=this.allrTypes[this.rTypeId];
       },
       editcollection:function(e){
-        document.querySelector(".list-group-item-info").removeClass("list-group-item-info");
+        if(document.querySelector(".list-group-item-info") != undefined) {
+          document.querySelector(".list-group-item-info").className = ("list-group-item style-scope ssd-admin-tags");
+        }
         e.srcElement.className += " editing list-group-item-info";
         this.collectionId = parseInt(e.srcElement.id.split("-")[1]);
         this.collectionInput=this.allcollections[this.collectionId];
       },
       edittag:function(e){
-        document.querySelector(".list-group-item-info").removeClass("list-group-item-info");
+        if(document.querySelector(".list-group-item-info") != undefined) {
+          document.querySelector(".list-group-item-info").className = ("list-group-item style-scope ssd-admin-tags");
+        }
         e.srcElement.className += " editing list-group-item-info";
         this.tagId = parseInt(e.srcElement.id.split("-")[1]);
         this.tagInput=this.alltags[this.tagId];
