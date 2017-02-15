@@ -22,7 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         right: 0;
         bottom: 0;
         z-index: 1;
-        height: 1000px;
+        height: 2000px;
 
       }
       :host([opened]) {
@@ -77,7 +77,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
     <div id="background"></div>
     <ssd-resource
-    id="resource"
+    id="activeResource"
     resource-id="[[resourceId]]"
     name="{{resource.name}}"
     description="{{resource.description}}"
@@ -120,6 +120,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._setOpened(true);
         this.__editedresourceElement = resourceElement;
         if (resourceElement) {
+          //reset file uploader (vaadin uploader is a one-way street)
+          this.resource.uploadingFiles = [];
           resourceElement.style.opacity = 0;
           this.transitionInFrom(resourceElement.getBoundingClientRect());
         } else {
@@ -136,10 +138,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           collections: [],
           tags: [],
           events: [],
-          uploadedFiles: []
+          uploadedFiles: [],
+          uploadingFiles: []
         };
         this.transitionInFrom(this.getBoundingClientRect());
       },
+
       save: function() {
         this.close('save');
       },
@@ -163,7 +167,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             targetRect.width / 2 - 240 : 10;
         var targetWidth = targetRect.width > 500 ?
             '480px' : 'calc(100vw - 20px)'
-        var resourceAnimation = this.$.resource.animate([{
+        var resourceAnimation = this.$.activeResource.animate([{
           transform: `translate(${rect.left}px,${rect.top - 46}px)`,
           width: `${rect.width}px`,
           easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
