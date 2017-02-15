@@ -391,7 +391,7 @@
           //  if(this.$.query && this.$.query.refresh) {
               commitNew.then(function() {
                   console.log(this.editableResourceID)
-                  this.editableResourceID = this.$.editingResource.path.slice(11,this.$.editingResource.path.length)
+                  this.editableResourceID = this.$.editingResource.path
                   console.log(this.editableResourceID)
 
                   this.$.editor.open();

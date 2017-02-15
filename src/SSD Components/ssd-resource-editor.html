@@ -92,7 +92,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     editable
     ></ssd-resource>
     <div class="controls">
-      <paper-button on-tap="delete">Delete</paper-button>
+      <!-- <paper-button on-tap="delete">Delete</paper-button> -->
       <paper-button on-tap="save">Done</paper-button>
     </div>
   </template>
@@ -151,6 +151,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.close('delete');
       },
       close: function(detail) {
+        //reset file uploader
+        document.querySelector("#ssdResourceUpload").files = [];
         if (this.__editedresourceElement) {
           this.__editedresourceElement.style.opacity = 1;
           this.__editedresourceElement = null;
