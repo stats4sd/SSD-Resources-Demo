@@ -5,6 +5,9 @@
 <link rel="import" href="SSD Components/ssd-resource.html">
 <link rel="import" href="SSD Components/ssd-resource-editor.html">
 <link ref="import" href="../bower_components/paper-fab/index.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+
 
 <dom-module id="ssd-resources">
   <template>
@@ -47,7 +50,7 @@
 
     <h1>Resources</h1>
     <!--should work back in proper filter function-->
-    <h3 $hidden="gotResources">Getting Resources</h3>
+    <!-- <h3 $hidden="gotResources">Getting Resources</h3> -->
       <!-- <div class='col-lg-6 resourceCard'>
         <div class="card">
           <h3>{{resource.name}}</h3>
@@ -77,16 +80,17 @@
 
 
         <h1>Resource List</h1>
-        <paper-button raised class='alert alert-info' toggles active="{{editMode}}" >
-          <span hidden$="{{editMode}}">Enable Editing Mode</span>
-          <span hidden$="{{!editMode}}">Disable Editing Mode</span>
-        </paper-button>
-        <div hidden$="{{!editMode}}" class='alert alert-info well well-sm'>
-          <p class='alert alert-warning'>EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
-          <paper-button raised on-tap="create" class='alert alert-success'>Add new resource</paper-button>
-        </div>
-
-        <div class$="[[checkedView(editMode)]]">
+        <template is='dom-if' if="[[signedIn]]">
+          <paper-button raised class='alert alert-info' toggles active="{{editMode}}" >
+            <span hidden$="{{editMode}}">Enable Editing Mode</span>
+            <span hidden$="{{!editMode}}">Disable Editing Mode</span>
+          </paper-button>
+          <div hidden$="{{!editMode}}" class='alert alert-info well well-sm'>
+            <p class='alert alert-warning'>EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
+            <paper-button raised on-tap="create" class='alert alert-success'>Add new resource</paper-button>
+          </div>
+        </template>
+        <div>
           <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" as="resource" filter="filterResources">
             <ssd-resource
             view="[[editMode]]"
@@ -96,7 +100,7 @@
             topics="[[resource.topics]]"
             r-types="[[resource.rTypes]]"
             tags="[[resource.tags]]"
-            uploads="[[resource.uploads]]"
+            uploaded-files="[[resource.uploadedFiles]]"
             on-tap='edit'
             ></ssd-resource>
           </template>
@@ -155,6 +159,9 @@
       is: 'ssd-resources',
 
       properties: {
+        signedIn: {
+          type: Boolean
+        },
         resources: {
           type: Object,
           observer: 'dataChanged'
@@ -189,6 +196,37 @@
           type: Object,
           observer: 'filterChange'
         },
+        persistedTopics:{
+          type:Object
+        },
+        persistedrTypes:{
+          type:Object
+        },
+        persistedCollections:{
+          type:Object
+        },
+        persistedTags:{
+          type:Object
+        },
+        allTopics:{
+          type:Object
+        },
+        allrTypes:{
+          type:Object
+        },
+        allCollections:{
+          type:Object
+        },
+        allTags:{
+          type:Object
+        },
+        allEvents:{
+          type:Object
+        },
+        persistedEvents:{
+          type:Object
+        }
+
       },
 
 
@@ -239,14 +277,14 @@
         return true
       },
 
-      checkedView: function(editMode) {
-        if(editMode) {
-          return "alert alert-warning"
-        }
-        else {
-          return ""
-        }
-      },
+      // checkedView: function(editMode) {
+      //   if(editMode) {
+      //     return "alert alert-warning"
+      //   }
+      //   else {
+      //     return ""
+      //   }
+      // },
 
       dataChanged: function(newData, oldData) {
         this.$.resourceList.render();

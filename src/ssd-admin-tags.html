@@ -3,11 +3,11 @@
 
 <!--import polymer html and shared styles-->
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/note-app-elements/na-elements.html">
+<!-- <link rel="import" href="../bower_components/note-app-elements/na-elements.html"> -->
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/juicy-jsoneditor/juicy-jsoneditor.html">
+<!-- <link rel="import" href="../bower_components/juicy-jsoneditor/juicy-jsoneditor.html"> -->
 <link rel="import" href="shared-styles.html">
 
 
@@ -23,7 +23,7 @@
     </style>
     <!--Add template content here-->
     <!-- Get the list of all topic tags and bind it to {{allTags}} -->
-    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{alltopics}}">
+    <firebase-document app="SSD-Resources" app-name="SSD-Resources" path="/topics" data="{{allTopics}}">
     </firebase-document>
     <h1>Administration - Metadata</h1>
     <p>Use this page to modify the lists of tags, collections etc that can be attached to resources.</p>
@@ -51,9 +51,9 @@
             <h3>Topics List</h3>
 
             <div class='list-group'>
-              <!-- use a dom-repeat to list every element in the {{alltopics}} object -->
-              <template is="dom-repeat" items="{{alltopics}}" as="topic">
-                <button type="button" class="list-group-item" on-tap="edittopic" id="li-{{index}}"><span class="badge">{{index}}</span>[[topic]]</button>
+              <!-- use a dom-repeat to list every element in the {{allTopics}} object -->
+              <template is="dom-repeat" items="{{allTopics}}" as="topic">
+                <button type="button" class="list-group-item" on-tap="edittopic" id="li-{{index}}">[[topic]]</button>
               </template>
             </div>
           </div>
@@ -87,7 +87,7 @@
           <div class='list-group'>
             <!-- use a dom-repeat to list every element in the {{allrTypes}} object -->
             <template is="dom-repeat" items="{{allrTypes}}" as="rType">
-              <button type="button" class="list-group-item" on-tap="editrType" id="li-{{index}}"><span class="badge">{{index}}</span>[[rType]]</button>
+              <button type="button" class="list-group-item" on-tap="editrType" id="li-{{index}}">[[rType]]</button>
             </template>
           </div>
       </div>
@@ -121,7 +121,7 @@
           <div class='list-group'>
             <!-- use a dom-repeat to list every element in the {{allcollections}} object -->
             <template is="dom-repeat" items="{{allcollections}}" as="collection">
-              <button type="button" class="list-group-item" on-tap="editcollection" id="li-{{index}}"><span class="badge">{{index}}</span>[[collection]]</button>
+              <button type="button" class="list-group-item" on-tap="editcollection" id="li-{{index}}">[[collection]]</button>
             </template>
           </div>
       </div>
@@ -149,7 +149,7 @@
         <div class='list-group'>
           <!-- use a dom-repeat to list every element in the {{alltags}} object -->
           <template is="dom-repeat" items="{{alltags}}" as="tag">
-            <button type="button" class="list-group-item" on-tap="edittag" id="li-{{index}}"><span class="badge">{{index}}</span>[[tag]]</button>
+            <button type="button" class="list-group-item" on-tap="edittag" id="li-{{index}}">[[tag]]</button>
           </template>
         </div>
     </div>
@@ -175,31 +175,56 @@
         allcollections:{
           type:Object,
           observer:'dataChanged'
-        }
+        },
+        topicInput:{
+          type:String,
+        },
+        rTypeInput:String,
+        collectionInput:String,
+        allTags:{
+          type:Object,
+          observer:'dataChanged'
+        },
+        persistedTopics:{
+          type:Object,
+          observer:'dataChanged'
+        },
+        persistedrTypes:{
+          type:Object,
+          observer:'dataChanged'
+        },
+        persistedTags:{
+          type:Object,
+          observer:'dataChanged'
+        },
+        persistedCollections:{
+          type:Object,
+          observer:'dataChanged'
+        },
       },
       dataChanged:function(newData,oldData){
         //console.log(newData)
       },
       edittopic:function(e){
-        $(".list-group-item-info").removeClass("list-group-item-info");
-        e.srcElement.className += " editing list-group-item-info";
+        // document.querySelector(".list-group-item-info").removeClass("list-group-item-info");
+        // e.srcElement.className += " editing list-group-item-info";
         this.topicId = parseInt(e.srcElement.id.split("-")[1])
-        this.topicInput=this.alltopics[this.topicId]
+        this.topicInput=this.allTopics[this.topicId]
       },
       editrType:function(e){
-        $(".list-group-item-info").removeClass("list-group-item-info");
+        document.querySelector(".list-group-item-info").removeClass("list-group-item-info");
         e.srcElement.className += " editing list-group-item-info";
         this.rTypeId = parseInt(e.srcElement.id.split("-")[1]);
         this.rTypeInput=this.allrTypes[this.rTypeId];
       },
       editcollection:function(e){
-        $(".list-group-item-info").removeClass("list-group-item-info");
+        document.querySelector(".list-group-item-info").removeClass("list-group-item-info");
         e.srcElement.className += " editing list-group-item-info";
         this.collectionId = parseInt(e.srcElement.id.split("-")[1]);
         this.collectionInput=this.allcollections[this.collectionId];
       },
       edittag:function(e){
-        $(".list-group-item-info").removeClass("list-group-item-info");
+        document.querySelector(".list-group-item-info").removeClass("list-group-item-info");
         e.srcElement.className += " editing list-group-item-info";
         this.tagId = parseInt(e.srcElement.id.split("-")[1]);
         this.tagInput=this.alltags[this.tagId];
@@ -207,20 +232,20 @@
       addtopic:function(){
         console.log(this.topicInput)
         if(this.topicInput!=null){
-          if(this.alltopics.length==undefined){
+          if(this.allTopics.length==undefined){
             console.log('empty json');
-            this.alltopics=[]
+            this.allTopics=[]
           }
-          if(this.alltopics.indexOf(this.topicInput)>-1){
+          if(this.allTopics.indexOf(this.topicInput)>-1){
             console.log('duplicate topic')
           }
         else{
-          if(this.topicId>-1){this.alltopics.splice(this.topicId,1)}
-          var newtopics=this.alltopics
+          if(this.topicId>-1){this.allTopics.splice(this.topicId,1)}
+          var newtopics=this.allTopics
           newtopics.push(this.topicInput)
           //empty and refill to force data system to reevaluate
-          this.set('alltopics',[])
-          this.set('alltopics',newtopics)
+          this.set('allTopics',[])
+          this.set('allTopics',newtopics)
         }
         this.topicId=-1
         this.topicInput=null
@@ -294,10 +319,10 @@
       },
       removetopic:function(){
         if(this.topicId>-1){
-          var newtopics=this.alltopics;
+          var newtopics=this.allTopics;
           newtopics.splice(this.topicId,1);
-          this.alltopics=[];
-          this.alltopics=newtopics;
+          this.allTopics=[];
+          this.allTopics=newtopics;
         }
         this.topicInput=null
       },

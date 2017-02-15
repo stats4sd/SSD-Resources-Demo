@@ -20,7 +20,8 @@
       margin: 15px auto;
     }
     .fileDownload {
-      display: block;
+      display: inline-block;
+      min-width: 220px;
       margin: 5px;
       padding: 0;
       box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
@@ -35,7 +36,7 @@
 
     }
     </style>
-      <div class$="[[checkedView(view)]]">
+      <div class="card">
         <h3>[[name]]</h3>
         <p><span class='bold'>Description: </span>[[description]]</p>
         <ul>
@@ -58,8 +59,15 @@
             </template>
           </li>
         </ul>
-        <template is='dom-repeat' items="[[uploads]]" as="upload">
-          <paper-button raised><a href="[[upload.url]]">DOWNLOAD FILE </paper-button>
+        <h4>Files:</h4>
+        <p>Click on any of the file cards to download it</p>
+        <template is='dom-repeat' items="[[_toArray(uploadedFiles)]]" as="file">
+          <a class='fileDownload' href="[[file.value.url]]">
+              <p style="margin-bottom:2px">[[file.value.name]]</p>
+              <ul><li><h5 style="margin:2px">Size = [[toMb(file.value.size)]]</h5> </li>
+                <li><h5 style="margin:2px">Uploaded date = [[toDateString(file.value.lastModified)]]</h5></li>
+              </ul>
+          </a>
         </template>
       </div>
     </template>
@@ -264,14 +272,6 @@
       //   return resourcdId + "/uploadedFiles/" + fileId;
       // },
 
-      checkedView: function(view) {
-        if(view) {
-          return "card totallyEditable"
-        }
-        else {
-          return "card"
-        }
-      },
 
       _checked: function(topics, topic) {
         console.log(topic)
@@ -362,7 +362,7 @@
         console.log(ssdResourcesApp)
         filenumber = this._toArray(this.uploadedFiles).length;
         console.log(filenumber)
-        
+
         var ref = firebase.storage(ssdResourcesApp).ref().child(this.resourceId+'/'+filenumber+"/"+file.name)
         console.log(ref)
         var uploadTask=ref.put(file);
