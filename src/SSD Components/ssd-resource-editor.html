@@ -22,6 +22,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         right: 0;
         bottom: 0;
         z-index: 1;
+        height: 2000px;
+
       }
       :host([opened]) {
         display: block;
@@ -39,7 +41,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         left: 0;
         border-radius: 512px;
         width: 256px;
-        height: 100%;
         background-color: #413F54;
         transform-origin: 128px 128px;
       }
@@ -56,6 +57,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: auto;
         width: 90%;
         max-width: 480px;
+
       }
       .controls {
         display: block;
@@ -75,13 +77,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
     <div id="background"></div>
     <ssd-resource
-    id="resource"
+    id="activeResource"
+    resource-id="[[resourceId]]"
     name="{{resource.name}}"
     description="{{resource.description}}"
     topics="{{resource.topics}}"
     r-types="{{resource.rTypes}}"
     tags="{{resource.tags}}"
-    uploads="{{resource.uploads}}"
+    uploaded-files="{{resource.uploadedFiles}}"
     persisted-topics="[[persistedTopics]]"
     persisted-r-types="[[persistedRTypes]]"
     persisted-tags="[[persistedTags]]"
@@ -89,7 +92,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     editable
     ></ssd-resource>
     <div class="controls">
-      <paper-button on-tap="delete">Delete</paper-button>
+      <!-- <paper-button on-tap="delete">Delete</paper-button> -->
       <paper-button on-tap="save">Done</paper-button>
     </div>
   </template>
@@ -107,11 +110,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           readOnly: true,
           value: false
         },
+        resourceId: {
+          type: String,
+          notify: true
+        }
       },
       open: function(resourceElement) {
+        console.log(this.resource)
         this._setOpened(true);
         this.__editedresourceElement = resourceElement;
         if (resourceElement) {
+          //reset file uploader (vaadin uploader is a one-way street)
+          this.resource.uploadingFiles = [];
           resourceElement.style.opacity = 0;
           this.transitionInFrom(resourceElement.getBoundingClientRect());
         } else {
@@ -128,10 +138,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           collections: [],
           tags: [],
           events: [],
-          uploads: {}
+          uploadedFiles: [],
+          uploadingFiles: []
         };
         this.transitionInFrom(this.getBoundingClientRect());
       },
+
       save: function() {
         this.close('save');
       },
@@ -139,6 +151,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.close('delete');
       },
       close: function(detail) {
+        //reset file uploader
+        document.querySelector("#ssdResourceUpload").files = [];
         if (this.__editedresourceElement) {
           this.__editedresourceElement.style.opacity = 1;
           this.__editedresourceElement = null;
@@ -155,7 +169,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             targetRect.width / 2 - 240 : 10;
         var targetWidth = targetRect.width > 500 ?
             '480px' : 'calc(100vw - 20px)'
-        var resourceAnimation = this.$.resource.animate([{
+        var resourceAnimation = this.$.activeResource.animate([{
           transform: `translate(${rect.left}px,${rect.top - 46}px)`,
           width: `${rect.width}px`,
           easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
