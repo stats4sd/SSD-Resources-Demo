@@ -10,6 +10,8 @@
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/editor-icons.html">
 <link rel="import" href="../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../bower_components/login-fire/login-fire.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
@@ -26,25 +28,25 @@
 <dom-module id="ssd-app">
   <template>
     <style>
-      :host {
+       :host {
         --app-primary-color: #DD3333;
         --app-secondary-color: black;
         display: block;
       }
-
+      
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
       }
-
+      
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
-
+      
       .drawer-list {
         margin: 0 20px;
       }
-
+      
       .drawer-list a {
         display: block;
         padding: 0 16px;
@@ -52,146 +54,206 @@
         color: var(--app-secondary-color);
         line-height: 40px;
       }
-
+      
       .drawer-list a.iron-selected {
         color: black;
         font-weight: bold;
       }
-      .user-name{
+      
+      .user-name {
         text-align: right;
-        padding-right:16px;
+        padding-right: 16px;
       }
-      .admin-pages{
-        color:white!important;
+      
+      .admin-pages {
+        color: white!important;
         background-color: var(--paper-red-700);
-        padding:4px 0 4px 0;
+        padding: 4px 0 4px 0;
         font-weight: 200;
-        padding-left:16px;
+        padding-left: 16px;
       }
-      .admin-page{
+      
+      .admin-page {
         background-color: var(--paper-red-100);
       }
-      .login-details{color:var(--paper-red-500)};
+      
+      .login-details {
+        color: var(--paper-red-500)
+      }
+      
+      .footer {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        padding: 1rem 1rem 8rem 1rem;
+        text-align: center;
+        /*color: var(--group-colour-900);*/
+      }
+      
+      .enableEditing {
+        background-color: var(--paper-red-900);
+        color: var(--paper-red-50)
+      }
+      
+      .disableEditing {
+        background-color: var(--paper-blue-900);
+        color: var(--paper-blue-50)
+      }
+      .addResource{
+        background-color: var(--paper-green-900); 
+        color: var(--paper-green-50)
+      }
+      .adminButton{
+        width:100%;
+        margin:5px;
+      }
+      
+      ;
     </style>
-<!--<style include="note-app-shared-styles"></style>-->
+    <!--<style include="note-app-shared-styles"></style>-->
 
-<app-location route="{{route}}"></app-location>
-<app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
-
-
-<app-drawer-layout fullbleed>
-  <!-- Drawer content -->
-  <app-drawer id="drawer">
-    <app-toolbar>Menu</app-toolbar>
-    <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-      <a name="home" href="/home">Home</a>
-      <a name="resources" href="/resources">All Resources</a>
-    </iron-selector>
-    <iron-selector hidden$="{{!signedIn}}" selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-      <div class="admin-pages">Admin Pages</div>
-      <!-- <a class="admin-page" name="add-resource" href="/add-resource">Add Resource</a> -->
-      <a class="admin-page" name="admin-tags" href="/admin-tags">Tags</a>
-    </iron-selector>
-  </app-drawer>
-
-  <!-- Main content -->
-  <app-header-layout has-scrolling-region>
-    <app-header condenses reveals effects="waterfall">
-      <app-toolbar>
-        <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
-        <div main-title>SSD Resources Demo</div>
-        <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
-        <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
-        <paper-icon-button icon="lock-outline" title="Login" on-tap="_login" hidden$="[[signedIn]]"></paper-icon-button>
-        <paper-icon-button icon="lock-open" title="Logout" on-tap="_logout" hidden$="[[!signedIn]]"></paper-icon-button>
-      </app-toolbar>
-      <template is="dom-if" if="[[signedIn]]">
-        <div class="user-name">signed in as [[user.displayName]]</div>
-      </template>
-    </app-header>
-    <!--after main header pages get loaded-->
-    <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-      <ssd-home name="home"></ssd-home>
-      <ssd-resources name="resources" signed-in="[[signedIn]]"></ssd-resources>
-      <ssd-view404 name="view404"></ssd-view404>
-    </iron-pages>
-    <!--pages to only show when signed in-->
-    <iron-pages hidden$="{{!signedIn}}" selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-      <!-- <ssd-add-resource name="add-resource"></ssd-add-resource> -->
-      <ssd-admin-tags name="admin-tags"></ssd-admin-tags>
-    </iron-pages>
-</app-drawer-layout>
-
-<paper-dialog id="login" with-backdrop center>
-  <paper-dialog-scrollable>
-    <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
-    <ssd-email-login-fire app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
-    </ssd-email-login-fire>
-  </paper-dialog-scrollable>
-</paper-dialog>
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
 
+    <app-drawer-layout fullbleed>
+      <!-- Drawer content -->
+      <app-drawer id="drawer">
+        <app-toolbar>Menu</app-toolbar>
+        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+          <a name="home" href="/home">Home</a>
+          <a name="resources" href="/resources">All Resources</a>
+        </iron-selector>
+        <iron-selector hidden$="{{!signedIn}}" selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+          <div class="admin-pages">Admin Pages</div>
+          <!-- <a class="admin-page" name="add-resource" href="/add-resource">Add Resource</a> -->
+          <a class="admin-page" name="admin-tags" href="/admin-tags">Tags</a>
+        </iron-selector>
+        <div class="footer" hidden$="{{!signedIn}}">
+          <paper-button raised hidden$="{{editingMode}}" class="enableEditing adminButton" on-tap='toggleEditing'>
+            <iron-icon icon="editor:mode-edit" hidden$="[[!online]]"></iron-icon>
+            Enable editing
+          </paper-button>
+          <paper-button raised hidden$="{{!editingMode}}" class="disableEditing adminButton" on-tap='toggleEditing'>
+            <iron-icon icon="editor:mode-edit" hidden$="[[!online]]"></iron-icon>
+            Disable editing
+          </paper-button>
+          <paper-button raised hidden$="{{!editingMode}}" class="addResource adminButton" on-tap='addResource'>
+            <iron-icon icon="add" hidden$="[[!online]]"></iron-icon>
+            Add Resource
+          </paper-button>
+        </div>
+      </app-drawer>
 
-</template>
+      <!-- Main content -->
+      <app-header-layout has-scrolling-region>
+        <app-header condenses reveals effects="waterfall">
+          <app-toolbar>
+            <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
+            <div main-title>SSD Resources Demo</div>
+            <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
+            <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
+            <paper-icon-button icon="lock-outline" title="Login" on-tap="_login" hidden$="[[signedIn]]"></paper-icon-button>
+            <paper-icon-button icon="lock-open" title="Logout" on-tap="_logout" hidden$="[[!signedIn]]"></paper-icon-button>
+          </app-toolbar>
+          <template is="dom-if" if="[[signedIn]]">
+            <div class="user-name">signed in as [[user.displayName]]</div>
+          </template>
+        </app-header>
+        <!--after main header pages get loaded-->
+        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
+          <ssd-home name="home"></ssd-home>
+          <ssd-resources name="resources" signed-in="[[signedIn]]" edit-mode="[[editingMode]]"></ssd-resources>
+          <ssd-view404 name="view404"></ssd-view404>
+        </iron-pages>
+        <!--pages to only show when signed in-->
+        <iron-pages hidden$="{{!signedIn}}" selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
+          <!-- <ssd-add-resource name="add-resource"></ssd-add-resource> -->
+          <ssd-admin-tags name="admin-tags"></ssd-admin-tags>
+        </iron-pages>
+    </app-drawer-layout>
 
-<script>
-  Polymer({
-    is: 'ssd-app',
-    behaviors: [Polymer.AppNetworkStatusBehavior],
-    properties: {
-      routeData: {
-        type: String
+    <paper-dialog id="login" with-backdrop center>
+      <paper-dialog-scrollable>
+        <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
+        <ssd-email-login-fire app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+        </ssd-email-login-fire>
+      </paper-dialog-scrollable>
+    </paper-dialog>
+
+
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'ssd-app',
+      behaviors: [Polymer.AppNetworkStatusBehavior],
+      properties: {
+        routeData: {
+          type: String
+        },
+        subroute: {
+          type: String
+        },
+        page: {
+          type: String,
+          reflectToAttribute: true,
+          observer: '_pageChanged',
+        },
+        user: {
+          type: Object,
+          observer: 'userChanged'
+        },
+        signedIn: {
+          type: Boolean,
+          observer: '_logStatus'
+        },
+        editingMode: {
+          type: Boolean,
+          value: false,
+          notify: true,
+        }
       },
-      subroute: {
-        type: String
+      userChanged: function (user) { console.log('user signed in', user) },
+      observers: [
+        '_routePageChanged(routeData.page)',
+      ],
+      toggleEditing: function () {
+        this.set('editingMode', !this.editingMode)
       },
-      page: {
-        type: String,
-        reflectToAttribute: true,
-        observer: '_pageChanged',
+      addResource:function(){
+        document.querySelector('ssd-resources').addResource();
       },
-      user: {
-        type: Object,
-        observer: 'userChanged'
+
+      _routePageChanged: function (page) {
+        this.page = page || 'home';
+
+        if (!this.$.drawer.persistent) {
+          this.$.drawer.close();
+        }
       },
-      signedIn: {
-        type: Boolean,
-        observer: '_logStatus'
+
+      _pageChanged: function (page) {
+        // Load page import on demand. Show 404 page if fails
+        var resolvedPageUrl = this.resolveUrl('ssd-' + page + '.html');
+        this.importHref(resolvedPageUrl, null, this._showPage404, true);
+      },
+
+      _showPage404: function () {
+        this.page = 'view404';
+      },
+      _login: function () {
+        login.open();
+      },
+      _logout: function () {
+        this.$$('ssd-email-login-fire').signOut();
+        console.log('logged out');
+      },
+      _logStatus: function () {
+        if (this.signedIn) { this.$$('paper-dialog').close() }
       }
-    },
-    userChanged: function (user) { console.log('user signed in', user) },
-
-    observers: [
-      '_routePageChanged(routeData.page)',
-    ],
-
-    _routePageChanged: function (page) {
-      this.page = page || 'home';
-
-      if (!this.$.drawer.persistent) {
-        this.$.drawer.close();
-      }
-    },
-
-    _pageChanged: function (page) {
-      // Load page import on demand. Show 404 page if fails
-      var resolvedPageUrl = this.resolveUrl('ssd-' + page + '.html');
-      this.importHref(resolvedPageUrl, null, this._showPage404, true);
-    },
-
-    _showPage404: function () {
-      this.page = 'view404';
-    },
-    _login: function () {
-      login.open();
-    },
-    _logout: function () {
-      this.$$('ssd-email-login-fire').signOut();
-      console.log('logged out');
-    },
-    _logStatus: function () {
-      if (this.signedIn) { this.$$('paper-dialog').close() }
-    }
-  });
-</script>
+    });
+  </script>
 </dom-module>

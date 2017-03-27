@@ -1,0 +1,61 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-elements/paper-elements.html">
+<link rel="import" href="../../bower_components/iron-elements/iron-elements.html">
+
+<link rel="import" href="../shared-styles.html">
+
+
+<dom-module id="ssd-search">
+  <template>
+    <style include="shared-styles">
+
+    </style>
+    <div class="card resource-card-small">
+      Search box
+    </div>
+    <paper-dropdown-menu label="Topics" value="{{filter_topics}}" no-animations placeholder="(all)">
+      <paper-listbox selected="0" class="dropdown-content">
+        <paper-item>(all)</paper-item>
+        <template is="dom-repeat" items="{{persistedTopics}}">
+          <paper-item>{{item.$val}}</paper-item>
+        </template>
+      </paper-listbox>
+    </paper-dropdown-menu>
+    <paper-dropdown-menu label="Resource Types" value="{{filter_rTypes}}" no-animations placeholder="(all)">
+      <paper-listbox selected="0" class="dropdown-content">
+        <paper-item>(all)</paper-item>
+        <template is="dom-repeat" items="{{persistedrTypes}}">
+          <paper-item>{{item.$val}}</paper-item>
+        </template>
+      </paper-listbox>
+    </paper-dropdown-menu>
+    <paper-dropdown-menu label="Tags" value="{{filter_tags}}" no-animations placeholder="(all)">
+      <paper-listbox selected="0" class="dropdown-content">
+        <paper-item>(all)</paper-item>
+        <template is="dom-repeat" items="{{persistedTags}}">
+          <paper-item>{{item.$val}}</paper-item>
+        </template>
+      </paper-listbox>
+    </paper-dropdown-menu>
+
+  </template>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'ssd-search',
+      properties: {
+        resource: {
+          type: Object,
+          readOnly: false,
+          notify: false
+        },
+      },
+      getMainImage: function (resource) {
+        //console.log('no predefined image', resource)
+        return '/images/placeholder.png'
+      }
+
+    })
+  </script>
+</dom-module>

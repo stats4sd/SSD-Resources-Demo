@@ -4,6 +4,7 @@
 <link rel="import" href="../bower_components/iron-elements/iron-elements.html">
 <link rel="import" href="SSD Components/ssd-resource.html">
 <link rel="import" href="SSD Components/ssd-resource-small.html">
+<link rel="import" href="SSD Components/ssd-resource-full.html">
 <link rel="import" href="SSD Components/ssd-resource-editor.html">
 <link ref="import" href="../bower_components/paper-fab/index.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
@@ -13,16 +14,22 @@
 <dom-module id="ssd-resources">
   <template>
     <style include="shared-styles">
-      :host {
+       :host {
         display: block;
         padding: 10px;
       }
-      .resources-container{
-        display:flex;
-        flex-wrap:wrap;
+      
+      .resources-container {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        -ms-overflow-style: -ms-autohiding-scrollbar;
       }
-
-
+      
+      h1 {
+        margin: 0
+      }
     </style>
 
     <!--  SETTING UP RESOURCES -->
@@ -52,64 +59,69 @@
       </paper-listbox>
     </paper-dropdown-menu>
 
-    <h1>Resources</h1>
-        <template is='dom-if' if="[[signedIn]]">
-          <paper-button raised class='alert alert-info' toggles active="{{editMode}}" >
-            <span hidden$="{{editMode}}">Enable Editing Mode</span>
-            <span hidden$="{{!editMode}}">Disable Editing Mode</span>
-          </paper-button>
-          <div hidden$="{{!editMode}}" class='alert alert-info well well-sm'>
-            <p class='alert alert-warning'>EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
-            <paper-button raised on-tap="create" class='alert alert-success'>Add new resource</paper-button>
-          </div>
-        </template>
-        <div>
-          <div class="resources-container">
-          <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" as="resource" filter="filterResources">
-            <ssd-resource-small
-            resource='[[resource]]'
-            hidden$='[[!resource.name]]'
-            on-tap='resourceTap'
-            ></ssd-resource-small>
-          </template>
-          </div>
-        </div>
 
-    <firebase-query id="query" app-name="SSD-Resources" path="/collections" data="{{allCollections}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedCollections" data="{{allCollections}}" persisted-data="{{persistedCollections}}" session="keepAlways"></app-indexeddb-mirror>
+    <template is='dom-if' if="[[signedIn]]">
+      <div hidden$="{{!editMode}}" class='alert alert-info well well-sm'>
+        <p class='alert alert-warning'>EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
+        <paper-button raised on-tap="create" class='alert alert-success'>Add new resource</paper-button>
+      </div>
+    </template>
 
-    <firebase-query id="query" app-name="SSD-Resources" path="/rTypes" data="{{allrTypes}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedrTypes" data="{{allrTypes}}" persisted-data="{{persistedrTypes}}" session="keepAlways"></app-indexeddb-mirror>
+    <h1>Latest Resources</h1>
+    <div class="resources-container">
+      <template id="resourceList" is="dom-repeat" items="[[newestResources]]" as="resource" sort="_sortNewest">
+        <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
+      </template>
+    </div>
 
-    <firebase-query id="query" app-name="SSD-Resources" path="/topics" data="{{allTopics}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedTopics" data="{{allTopics}}" persisted-data="{{persistedTopics}}" session="keepAlways"></app-indexeddb-mirror>
+    <!--<h1>All resources</h1>
 
-    <firebase-query id="query" app-name="SSD-Resources" path="/events" data="{{allEvents}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedEvents" data="{{allEvents}}" persisted-data="{{persistedEvents}}" session="keepAlways"></app-indexeddb-mirror>
+    <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" as="resource" filter="filterResources" sort="_sortNewest">
+      <ssd-resource-small resource='[[resource]]' on-tap='resourceTap'></ssd-resource-small>
+    </template>-->
 
-    <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedTags" data="{{alltags}}" persisted-data="{{persistedTags}}" session="keepAlways"></app-indexeddb-mirror>
+    <h1>Selected Resource</h1>
+    <ssd-resource-full resource='[[selectedResource]]'></ssd-resource-small>
+
+
+      <!--<div class="resources-container">
+      <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" as="resource" filter="filterResources">
+        <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
+      </template>
+    </div>-->
+
+      <firebase-query id="query" app-name="SSD-Resources" path="/collections" data="{{allCollections}}"></firebase-query>
+      <app-indexeddb-mirror key="persistedCollections" data="{{allCollections}}" persisted-data="{{persistedCollections}}" session="keepAlways"></app-indexeddb-mirror>
+
+      <firebase-query id="query" app-name="SSD-Resources" path="/rTypes" data="{{allrTypes}}"></firebase-query>
+      <app-indexeddb-mirror key="persistedrTypes" data="{{allrTypes}}" persisted-data="{{persistedrTypes}}" session="keepAlways"></app-indexeddb-mirror>
+
+      <firebase-query id="query" app-name="SSD-Resources" path="/topics" data="{{allTopics}}"></firebase-query>
+      <app-indexeddb-mirror key="persistedTopics" data="{{allTopics}}" persisted-data="{{persistedTopics}}" session="keepAlways"></app-indexeddb-mirror>
+
+      <firebase-query id="query" app-name="SSD-Resources" path="/events" data="{{allEvents}}"></firebase-query>
+      <app-indexeddb-mirror key="persistedEvents" data="{{allEvents}}" persisted-data="{{persistedEvents}}" session="keepAlways"></app-indexeddb-mirror>
+
+      <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>
+      <app-indexeddb-mirror key="persistedTags" data="{{alltags}}" persisted-data="{{persistedTags}}" session="keepAlways"></app-indexeddb-mirror>
 
 
       <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB  -->
-      <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}">
-      </firebase-query>
+      <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}"></firebase-query>
       <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
 
-    <!-- FIREBASE DOCUMENTS TO PULL IN Individual resource for editing  -->
-    <firebase-document id="editingResource" app="SSD-Resources" app-name="SSD-Resources" path="{{editableResourceID}}" data="{{editableResource}}"><firebase-document>
+      <!-- FIREBASE QUERY TO PULL IN newest FROM DB  -->
+      <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="6"></firebase-query>
+      <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
 
-    <ssd-resource-editor
-      id="editor"
-      resource-id="[[editableResourceID]]"
-      resource="{{editableResource}}"
-      persisted-topics="[[persistedTopics]]"
-      persisted-r-types="[[persistedrTypes]]"
-      persisted-tags="[[persistedTags]]"
-      persisted-collections="[[persistedCollections]]"
-      on-close="commitChange"
-      >
-    </ssd-resource-editor>
+      <!-- FIREBASE DOCUMENTS TO PULL IN Individual resource for editing  -->
+      <firebase-document id="editingResource" app="SSD-Resources" app-name="SSD-Resources" path="{{editableResourceID}}" data="{{editableResource}}">
+        <firebase-document>
+
+          <ssd-resource-editor id="editor" resource-id="[[editableResourceID]]" resource="{{editableResource}}" persisted-topics="[[persistedTopics]]"
+            persisted-r-types="[[persistedrTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]"
+            on-close="commitChange">
+          </ssd-resource-editor>
 
 
 
@@ -125,11 +137,11 @@
         },
         resources: {
           type: Object,
-          observer: 'dataChanged'
+          observer: 'resourcesChange'
         },
         persistedResources: {
           type: Object,
-          observer: 'dataChanged'
+          value: [],
         },
         obj: Object,
         topics: Object,
@@ -157,14 +169,36 @@
           type: Object,
           observer: 'filterChange'
         },
-    
-
+        latestResources: {
+          type: Object,
+          value: []
+        },
+        selectedResource: {
+          type: Object,
+          value: [],
+          notify: true
+        },
+        editMode:{
+          type:Boolean,
+          value:false,
+          notify:true,
+          observer:'editingModeChange'
+        }
       },
 
-      resourceTap:function(e){
-        console.log('resource',e.model.resource)
+      resourceTap: function (e) {
+        console.log('resource', e.model.resource)
+        this.set('selectedResource', e.model.resource)
       },
-
+      resourcesChange: function (resources) {
+        console.log('resources changed', resources)
+      },
+      editingModeChange:function(){
+        console.log('editing mode from resource page',this.editMode)
+      },
+      addResource:function(){
+        console.log('resource notified in resources')
+      },
 
       filterChange: function () {
         console.log('filters updated')
@@ -175,7 +209,7 @@
         for (let filter of filtersList) {
           var string = 'filter_' + filter
           if (this[string] != undefined && this[string] != '') {
-            if(this[string]!="(all)"){
+            if (this[string] != "(all)") {
               this.activeFilters[filter] = this[string]
             }
 
@@ -190,11 +224,23 @@
         // var ssdResourcesApp=firebase.app("SSD-Resources")
         // var ref = ssdResourcesApp.database().ref('/resources')
         // ssdResourcesApp.database.Query
-
-        console.log('total resources',this.persistedResources.length)
-        return this._testFilters(resource, this.activeFilters)
+        // console.log('total resources', this.persistedResources.length)
+        // return true
+        //return this._testFilters(resource, this.activeFilters)
         //remove getting resources message - not perfect as still getting more but don't know when complete
 
+      },
+      //compares key strings (replacing special characters first) returns newest first
+      //**note, inefficient when we have lots of resources
+      _sortNewest: function (a, b) {
+        let str1 = a.$key.replace(/\W/g, '')
+        let str2 = b.$key.replace(/\W/g, '')
+        if (str1 > str2) { return -1 }
+        if (str1 < str2) { return 1 }
+      },
+
+      _filterNewest: function (res, index) {
+        console.log('index', index)
       },
 
       _testFilters: function (resource, activeFilters) {
@@ -213,114 +259,106 @@
         return true
       },
 
-      // checkedView: function(editMode) {
-      //   if(editMode) {
-      //     return "alert alert-warning"
-      //   }
-      //   else {
-      //     return ""
-      //   }
-      // },
 
-      dataChanged: function(newData, oldData) {
-        this.$.resourceList.render();
-        console.log(this.resources)
+      dataChanged: function (newData, oldData) {
+        // this.$.resourceList.render();
+        console.log('data changed', newData, oldData)
 
       },
-    
 
-        //Next bits rely heavily on pasted code from notes-app...
 
-        edit: function(event) {
-          if(this.editMode) {
-            var card = Polymer.dom(event).localTarget;
-            console.log(card);
-            console.log(card.id)
-            console.log("tapped to edit");
-            this.editableResourceID = "/resources/"+card.id;
-            console.log(this.editableResourceID)
-            this.$.editingResource.transactionsComplete.then(function() {
-              console.log(this.editableResource)
+      //Next bits rely heavily on pasted code from notes-app...
 
-              this.$.editor.open(card);
-            }.bind(this));
-          }
+      edit: function (event) {
+        if (this.editMode) {
+          var card = Polymer.dom(event).localTarget;
+          console.log(card);
+          console.log(card.id)
+          console.log("tapped to edit");
+          this.editableResourceID = "/resources/" + card.id;
+          console.log(this.editableResourceID)
+          this.$.editingResource.transactionsComplete.then(function () {
+            console.log(this.editableResource)
 
-        },
+            this.$.editor.open(card);
+          }.bind(this));
+        }
 
-        //function to create a new resource (called from new-resource button)
-        create: function() {
-          //if Edit mode is enabled
-          if (this.editMode) {
-            //set editable Note ID to null (so no resource is overwritten)
-            this.editableResourceID = null;
-            this.editableResource.name = "New Resource";
-            console.log(this.editableResource);
-            //open editor with null ID.
-            //
+      },
 
-            // if(this.$.query && this.$.query.refresh) {
-            var commitNew;
-            commitNew = this.save();
+      //function to create a new resource (called from new-resource button)
+      create: function () {
+        //if Edit mode is enabled
+        if (this.editMode) {
+          //set editable Note ID to null (so no resource is overwritten)
+          this.editableResourceID = null;
+          this.editableResource.name = "New Resource";
+          console.log(this.editableResource);
+          //open editor with null ID.
+          //
+
+          // if(this.$.query && this.$.query.refresh) {
+          var commitNew;
+          commitNew = this.save();
 
           //  if(this.$.query && this.$.query.refresh) {
-              commitNew.then(function() {
-                  console.log(this.editableResourceID)
-                  this.editableResourceID = this.$.editingResource.path
-                  console.log(this.editableResourceID)
+          commitNew.then(function () {
+            console.log(this.editableResourceID)
+            this.editableResourceID = this.$.editingResource.path
+            console.log(this.editableResourceID)
 
-                  this.$.editor.open();
-                  this.$.query.refresh();
+            this.$.editor.open();
+            this.$.query.refresh();
 
-              }.bind(this));
+          }.bind(this));
           //  }
-            // }
-          }
-        },
+          // }
+        }
+      },
 
-        commitChange: function(event) {
-          var changeCommits;
+      commitChange: function (event) {
+        var changeCommits;
 
-          switch(event.detail) {
-            case 'save':
-              changeCommits = this.save();
-              break;
-            case 'delete':
-              changeCommits = this.delete();
-              break;
-            default:
-              changeComits = Promise.resolve();
-              break;
-            }
+        switch (event.detail) {
+          case 'save':
+            changeCommits = this.save();
+            break;
+          case 'delete':
+            changeCommits = this.delete();
+            break;
+          default:
+            changeComits = Promise.resolve();
+            break;
+        }
 
-            if (this.$.query && this.$.query.refresh) {
-              changeCommits.then(function() {
-                this.$.editingResource.reset();
-                this.$.query.refresh();
-              }.bind(this));
-            }
-          },
+        if (this.$.query && this.$.query.refresh) {
+          changeCommits.then(function () {
+            this.$.editingResource.reset();
+            this.$.query.refresh();
+          }.bind(this));
+        }
+      },
 
-        save: function() {
-          if (this.$.editingResource.isNew &&
-              (this.editableResource.name ||
-               this.editableResource.description ||
-                this.editableResource.upload)) {
+      save: function () {
+        if (this.$.editingResource.isNew &&
+          (this.editableResource.name ||
+            this.editableResource.description ||
+            this.editableResource.upload)) {
 
-                  console.log("editableResourceID = " +this.editableResourceID);
-                  console.log("editableResource = " +this.editableResource);
+          console.log("editableResourceID = " + this.editableResourceID);
+          console.log("editableResource = " + this.editableResource);
 
-            return this.$.editingResource.save("/resources").then(function() {
-              console.log(this.$.editingResource.data);
-              console.log(this.$.editingResource.path);
+          return this.$.editingResource.save("/resources").then(function () {
+            console.log(this.$.editingResource.data);
+            console.log(this.$.editingResource.path);
 
-              console.log("editableResourceID = " +this.editableResourceID);
-              console.log("editableResource = " +this.editableResource);
-              //this.$.editingResource.reset();
-            }.bind(this));
-          }
-          return Promise.resolve();
-        },
+            console.log("editableResourceID = " + this.editableResourceID);
+            console.log("editableResource = " + this.editableResource);
+            //this.$.editingResource.reset();
+          }.bind(this));
+        }
+        return Promise.resolve();
+      },
     });
   </script>
 </dom-module>
