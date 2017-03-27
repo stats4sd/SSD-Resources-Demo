@@ -1,0 +1,129 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-elements/paper-elements.html">
+<link rel="import" href="../../bower_components/iron-elements/iron-elements.html">
+<link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
+
+<link rel="import" href="../shared-styles.html">
+
+
+<dom-module id="ssd-resource-small">
+  <template>
+    <style include="shared-styles">
+      .resource-card-small {
+        width: 300px;
+        height: 240px;
+        padding: 0;
+        cursor: pointer;
+      }
+      
+      h3 {
+        margin: 10px
+      }
+      
+      img {
+        height: 150px;
+        width: 100%;
+        margin: auto;
+        object-fit: cover;
+      }
+      
+      .overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #008CBA;
+        overflow: hidden;
+        width: 100%;
+        height: 0;
+        transition: .5s ease;
+
+      }
+      
+      .text {
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width:100%;
+        height:100%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        height:
+        
+      }
+      
+      .resource-info {
+        height: 150px;
+        width: 100%;
+        position: relative;
+      }
+      p{
+        padding:10px;
+        text-overflow: ellipsis;
+        margin:0;
+        overflow-y:auto;
+      }
+      
+      .resource-card-small:hover .overlay {
+        height: 100%
+      }
+    </style>
+    <div class="card resource-card-small">
+      <div class=resource-info>
+      <img src="{{getMainImage(resource)}}">
+      <h3>[[resource.name]]</h3>
+      
+        <div class="overlay">
+          <div class="text">
+            <p>[[resource.description]]</p>
+            </div>
+        </div>
+
+        <!--<p><span class='bold'>Description: </span>[[resource.description]]</p>-->
+        
+
+        <!--<ul>
+          <li>
+            <span class='bold'>Topics: </span>
+            <template is="dom-repeat" items="[[resource.topics]]" as="topic">
+              <span>[[topic]]; </span>
+            </template>
+          </li>
+          <li>
+            <span class='bold'>Resource Type(s): </span>
+            <template is="dom-repeat" items="[[resource.rTypes]]" as="rType">
+              <span>[[rType]]; </span>
+            </template>
+          </li>
+          <li>
+            <span class='bold'>Tags: </span>
+            <template is="dom-repeat" items="[[resource.tags]]" as="tag">
+              <span>[[tag]]; </span>
+            </template>
+          </li>
+        </ul>-->
+      </div>
+    </div>
+
+  </template>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'ssd-resource-small',
+      properties: {
+        resource: {
+          type: Object,
+          readOnly: false,
+          notify: false
+        },
+      },
+      getMainImage: function (resource) {
+        console.log('no predefined image', resource)
+        return '/images/placeholder.png'
+      }
+
+    })
+  </script>
+</dom-module>
