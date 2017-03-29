@@ -10,6 +10,9 @@
   <template>
     <template is="dom-if" if="[[!editable]]">
       <style include="shared-styles">
+        :host {
+          opacity: 0;
+        } 
          :host([opened]) {
           opacity: 1;
           position: absolute;
@@ -23,12 +26,6 @@
           background-color: var(--paper-red-700);
           transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           z-index: 1;
-          color: var(--paper-purple-50);
-        }
-        
-         :host(.card) {
-          opacity: 0;
-          pointer-events: none;
         }
         
         .card {
@@ -283,10 +280,12 @@
       },
 
       openChange: function () {
-        console.log('opening', this.resource)
+        console.log('open changed', this.opened)
+
       },
       closeResource:function(){
         this.set('opened',false)
+        console.log('resource close function')
       },
 
       _toArray: function (obj) {
