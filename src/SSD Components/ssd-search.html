@@ -38,7 +38,7 @@
       close
     </paper-button>
 
-    <paper-input id="searchBox" value="{{search.text}}" name="search" label="search words" required auto-validate pattern="[a-zA-Z0-9 ']*"
+    <paper-input id="searchBox" value="{{searchText}}" name="search" label="search words" required auto-validate pattern="[a-zA-Z0-9 ']*"
       error-message="no special characters!"></paper-input>
     <paper-dropdown-menu label="Topics" value="{{filter_topics}}" no-animations placeholder="(all)">
       <paper-listbox selected="{{search.topics}}" class="dropdown-content">
@@ -48,7 +48,7 @@
         </template>
       </paper-listbox>
     </paper-dropdown-menu>
-    <paper-dropdown-menu label="Resource Types" value="{{search.rTypes}}" no-animations placeholder="(all)">
+    <paper-dropdown-menu label="Resource Types" value="{{filter_rTypes}}" no-animations placeholder="(all)">
       <paper-listbox selected="0" class="dropdown-content">
         <paper-item>(all)</paper-item>
         <template is="dom-repeat" items="{{persistedRTypes}}">
@@ -56,7 +56,7 @@
         </template>
       </paper-listbox>
     </paper-dropdown-menu>
-    <paper-dropdown-menu label="Tags" value="{{search.tags}}" no-animations placeholder="(all)">
+    <paper-dropdown-menu label="Tags" value="{{filter_tags}}" no-animations placeholder="(all)">
       <paper-listbox selected="0" class="dropdown-content">
         <paper-item>(all)</paper-item>
         <template is="dom-repeat" items="{{persistedTags}}">
@@ -65,7 +65,7 @@
       </paper-listbox>
     </paper-dropdown-menu>
     <div class="resources-container">
-      <template id="filteredResources" is="dom-repeat" items="[[resources]]" as="resource" sort="">
+      <template id="filteredResources" is="dom-repeat" items="[[filteredResources]]" as="resource" sort="">
         <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
       </template>
     </div>
@@ -77,45 +77,37 @@
     Polymer({
       is: 'ssd-search',
       properties: {
-        resources: {
-          type: Object,
-          readOnly: false,
-          notify: false
-        },
         opened: {
           type: Boolean,
           value: false,
           notify: true,
           reflectToAttribute: true
         },
-        persistedTopics: {
+        filter_topics: {
           type: Object,
+          observer: 'filterChange',
+          value: '(all)'
         },
-        persistedRTypes: {
+        filter_rTypes: {
           type: Object,
+          observer: 'filterChange',
+          value: '(all)'
         },
-        persistedCollections: {
-          type: Object
-        },
-        persistedTags: {
-          type: Object
-        },
-        search: {
+        filter_tags: {
           type: Object,
-          value:function(){return {
-            name:'',
-            topics:"0",
-            rTypes:"0",
-            tags:"0"
-
-          };}
+          observer: 'filterChange',
+          value: '(all)'
         },
-        observers:[
-          'searchChanged(search.*)'
-        ]
+        searchText: {
+          type: String,
+          notify: true,
+          value: '',
+          observer: 'searchChanged'
+        },
       },
-      searchChanged:function(s){
-        console.log('new search',s)
+
+      searchChanged: function (s) {
+        console.log('new search', s)
       },
       open: function () {
         console.log('calling open from search component')
@@ -127,7 +119,49 @@
       getMainImage: function (resource) {
         //console.log('no predefined image', resource)
         return '/images/placeholder.png'
-      }
+      },
+      filterChange: function () {
+        var temp = this.allResources
+        //if statement in case all resources not yet defined/populated
+        if(temp){
+          if (!this.allResources) { this.allResources = this.resources }
+          var filtersList = ['topics', 'rTypes', 'tags']
+          let activeFilters = {}
+          //populate filter list with currently selected - should be moved out to only calculate on change
+          for (let filter of filtersList) {
+            var string = 'filter_' + filter
+            if (this[string] != undefined && this[string] != '') {
+              if (this[string] != "(all)") {
+                activeFilters[filter] = this[string]
+              }
+            }
+          }
+          console.log('temp', temp)
+
+          var temp = temp.filter(function (resource) {
+            for (let key in activeFilters) {
+              console.log('testing',key,activeFilters[key])
+              var value = activeFilters[key]
+              //return if doesn't have anything saved to filter field
+              if (!resource.hasOwnProperty(key)) {
+                console.log('no key, false')
+                return false
+              }
+              if (resource[key].indexOf(value) == -1) {
+                console.log('has key but not value, false')
+                return false
+              }
+            }
+            console.log('criteria matched, true')
+            return true
+          })
+          console.log('filtered', temp)
+          this.filteredResources = []
+          this.filteredResources = temp
+        }
+
+
+      },
 
     })
   </script>
