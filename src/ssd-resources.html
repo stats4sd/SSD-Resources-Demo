@@ -2,10 +2,11 @@
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../bower_components/iron-elements/iron-elements.html">
-<link rel="import" href="SSD Components/ssd-resource.html">
+
 <link rel="import" href="SSD Components/ssd-resource-small.html">
 <link rel="import" href="SSD Components/ssd-resource-full.html">
 <link rel="import" href="SSD Components/ssd-resource-editor.html">
+<link rel="import" href="SSD Components/ssd-search.html">
 <link ref="import" href="../bower_components/paper-fab/index.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
@@ -33,40 +34,18 @@
     </style>
 
     <!--  SETTING UP RESOURCES -->
-    <!--can add multi to listbox but will need to change default fire event-->
-    <paper-dropdown-menu label="Topics" value="{{filter_topics}}" no-animations placeholder="(all)">
-      <paper-listbox selected="0" class="dropdown-content">
-        <paper-item>(all)</paper-item>
-        <template is="dom-repeat" items="{{persistedTopics}}">
-          <paper-item>{{item.$val}}</paper-item>
-        </template>
-      </paper-listbox>
-    </paper-dropdown-menu>
-    <paper-dropdown-menu label="Resource Types" value="{{filter_rTypes}}" no-animations placeholder="(all)">
-      <paper-listbox selected="0" class="dropdown-content">
-        <paper-item>(all)</paper-item>
-        <template is="dom-repeat" items="{{persistedrTypes}}">
-          <paper-item>{{item.$val}}</paper-item>
-        </template>
-      </paper-listbox>
-    </paper-dropdown-menu>
-    <paper-dropdown-menu label="Tags" value="{{filter_tags}}" no-animations placeholder="(all)">
-      <paper-listbox selected="0" class="dropdown-content">
-        <paper-item>(all)</paper-item>
-        <template is="dom-repeat" items="{{persistedTags}}">
-          <paper-item>{{item.$val}}</paper-item>
-        </template>
-      </paper-listbox>
-    </paper-dropdown-menu>
-
-
-    <template is='dom-if' if="[[signedIn]]">
+    <!--<template is='dom-if' if="[[signedIn]]">
       <div hidden$="{{!editMode}}" class='alert alert-info well well-sm'>
         <p class='alert alert-warning'>EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
         <paper-button raised on-tap="create" class='alert alert-success'>Add new resource</paper-button>
       </div>
-    </template>
+    </template>-->
 
+    <paper-button raised on-tap='search'>
+      <iron-icon icon="search"></iron-icon>
+      Search
+    </paper-button>
+    
     <h1>Latest Resources</h1>
     <div class="resources-container">
       <template id="resourceList" is="dom-repeat" items="[[newestResources]]" as="resource" sort="_sortNewest">
@@ -74,15 +53,22 @@
       </template>
     </div>
 
-    <!--<h1>All resources</h1>
+    <ssd-resource-full resource='[[selectedResource]]' opened='{{resourceOpened}}' editable='{{editMode}}'></ssd-resource-full>
 
+      <ssd-resource-editor id="editor" resource-id="[[editableResourceID]]" resource="{{editableResource}}" persisted-topics="[[persistedTopics]]"
+        persisted-r-types="[[persistedrTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]"
+        on-close="commitChange">
+      </ssd-resource-editor>
+
+      <ssd-search id="search" resources="[[resources]]" persisted-topics="[[persistedTopics]]" persisted-r-types="[[persistedrTypes]]"
+        persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]">
+      </ssd-search>
+ 
+
+      <!--<h1>All resources</h1>
     <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" as="resource" filter="filterResources" sort="_sortNewest">
       <ssd-resource-small resource='[[resource]]' on-tap='resourceTap'></ssd-resource-small>
     </template>-->
-
-    
-    <ssd-resource-full resource='[[selectedResource]]' opened='{{resourceOpened}}'></ssd-resource-small>
-
 
       <!--<div class="resources-container">
       <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" as="resource" filter="filterResources">
@@ -111,17 +97,14 @@
       <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
 
       <!-- FIREBASE QUERY TO PULL IN newest FROM DB  -->
-      <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="6"></firebase-query>
+      <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="10"></firebase-query>
       <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
 
       <!-- FIREBASE DOCUMENTS TO PULL IN Individual resource for editing  -->
       <firebase-document id="editingResource" app="SSD-Resources" app-name="SSD-Resources" path="{{editableResourceID}}" data="{{editableResource}}">
         <firebase-document>
 
-          <ssd-resource-editor id="editor" resource-id="[[editableResourceID]]" resource="{{editableResource}}" persisted-topics="[[persistedTopics]]"
-            persisted-r-types="[[persistedrTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]"
-            on-close="commitChange">
-          </ssd-resource-editor>
+
 
 
 
@@ -143,10 +126,10 @@
           type: Object,
           value: [],
         },
-        resourceOpened:{
-          type:Boolean,
-          value:false,
-          notify:true
+        resourceOpened: {
+          type: Boolean,
+          value: false,
+          notify: true
         },
         topicActive: {
           type: Boolean,
@@ -192,18 +175,20 @@
       resourceTap: function (e) {
         console.log('resource', e.model.resource);
         this.set('selectedResource', e.model.resource);
-        this.set('resourceOpened',true);
+        this.set('resourceOpened', true);
       },
       resourcesChange: function (resources) {
-        console.log('resources changed', resources)
       },
       editingModeChange: function () {
-        console.log('editing mode from resource page', this.editMode)
       },
+      //responds to calls from add resource button and passes empty request to resource editor component
       addResource: function () {
-        console.log('resource notified in resources')
+        console.log('add resource called from button')
+        this.$.editor.open();
       },
-
+      search:function(){
+        this.$.search.open();
+      },
       filterChange: function () {
         console.log('filters updated')
         var temp = this.persistedResources

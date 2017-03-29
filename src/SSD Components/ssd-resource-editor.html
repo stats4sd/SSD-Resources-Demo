@@ -116,6 +116,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
       open: function(resourceElement) {
+        console.log('open function called on resource editor')
         console.log(this.resource)
         this._setOpened(true);
         this.__editedresourceElement = resourceElement;

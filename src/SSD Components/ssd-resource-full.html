@@ -12,14 +12,16 @@
       <style include="shared-styles">
         :host {
           opacity: 0;
+          display: none;
         } 
          :host([opened]) {
+          display:block;
           opacity: 1;
           position: absolute;
           /*top: 46px;*/
           /*top: calc(100vh - 100px);*/
           /*top:var(--top-padding-height);*/
-          top: 88px;
+          top: 64px;
           left: 0;
           right: 0;
           bottom: 0;
@@ -110,11 +112,11 @@
 
     <!-- NOW FOR THE EDITABLE VERSION -->
     <template is="dom-if" if="[[editable]]">
-      <div class="card editing" id$="[[resourceId]]">
-        <h1>ID = [[resourceId]]</h1>
-        <paper-input id="resourceName" value="{{name}}" name="title" label="Title of Resource" required auto-validate pattern="[a-zA-Z0-9 ']*"
+      <div class="card editing" id$="[[resource.$key]]">
+        <h1>ID = [[resource.$key]]</h1>
+        <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required auto-validate pattern="[a-zA-Z0-9 ']*"
           error-message="no special characters!"></paper-input>
-        <paper-textarea id="resourceDescription" value="{{description}}" name="description" label="Brief Description" required></paper-textarea>
+        <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required></paper-textarea>
         <br>
         <paper-tabs selected="{{tabSelected}}">
           <paper-tab>Topics</paper-tab>
@@ -129,7 +131,7 @@
               <div class='list-group-item-heading'>All Topics</div>
               <template is="dom-repeat" id="topicCheckboxes" items="[[persistedTopics]]" as="topic">
                 <div class='list-group-item'>
-                  <paper-checkbox id$="topics_-_[[topic.$val]]" value="topics_-_[[topic.$val]]" checked="[[_checked(topics, topic.$val)]]"
+                  <paper-checkbox id$="topics_-_[[topic.$val]]" value="topics_-_[[topic.$val]]" checked="[[_checked(resource.topics, topic.$val)]]"
                     on-change="checkTopic">[[topic.$val]]</paper-checkbox>
                 </div>
               </template>
@@ -139,7 +141,7 @@
             <div class='list-group'>
               <template is="dom-repeat" id="collectionCheckboxes" items="[[persistedCollections]]" as="collection">
                 <div class='list-group-item'>
-                  <paper-checkbox value="collections_-_[[collection.$val]]" checked="[[_checked(collections, collection.$val)]]" on-change="checkCollection">{{collection.$val}}</paper-checkbox>
+                  <paper-checkbox value="collections_-_[[collection.$val]]" checked="[[_checked(resource.collections, collection.$val)]]" on-change="checkCollection">{{collection.$val}}</paper-checkbox>
                 </div>
               </template>
             </div>
@@ -148,7 +150,7 @@
             <div class='list-group'>
               <template is="dom-repeat" id="rTypeCheckboxes" items="[[persistedRTypes]]" as="rType">
                 <div class='list-group-item'>
-                  <paper-checkbox value="rTypes_-_[[rType.$val]]" checked="[[_checked(rTypes, rType.$val)]]" on-change="checkrType">{{rType.$val}}</paper-checkbox>
+                  <paper-checkbox value="rTypes_-_[[rType.$val]]" checked="[[_checked(resource.Types, rType.$val)]]" on-change="checkrType">{{rType.$val}}</paper-checkbox>
                 </div>
               </template>
             </div>
@@ -157,7 +159,7 @@
             <div class='list-group'>
               <template is="dom-repeat" id="tagCheckboxes" items="[[persistedTags]]" as="tag">
                 <div class='list-group-item'>
-                  <paper-checkbox value="tags_-_[[tag.$val]]" checked="[[_checked(tags, tag.$val)]]" on-change="checkTag">{{tag.$val}}</paper-checkbox>
+                  <paper-checkbox value="tags_-_[[tag.$val]]" checked="[[_checked(resource.tags, tag.$val)]]" on-change="checkTag">{{tag.$val}}</paper-checkbox>
                 </div>
               </template>
             </div>
@@ -280,12 +282,10 @@
       },
 
       openChange: function () {
-        console.log('open changed', this.opened)
 
       },
       closeResource:function(){
         this.set('opened',false)
-        console.log('resource close function')
       },
 
       _toArray: function (obj) {

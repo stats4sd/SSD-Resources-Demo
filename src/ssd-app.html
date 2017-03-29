@@ -29,7 +29,7 @@
   <template>
     <style>
        :host {
-        --app-primary-color: #DD3333;
+        --app-primary-color: var(--paper-red-700);
         --app-secondary-color: black;
         display: block;
       }
@@ -63,6 +63,7 @@
       .user-name {
         text-align: right;
         padding-right: 16px;
+        font-size: medium;
       }
       
       .admin-pages {
@@ -100,13 +101,15 @@
         background-color: var(--paper-blue-900);
         color: var(--paper-blue-50)
       }
-      .addResource{
-        background-color: var(--paper-green-900); 
+      
+      .addResource {
+        background-color: var(--paper-green-900);
         color: var(--paper-green-50)
       }
-      .adminButton{
-        width:100%;
-        margin:5px;
+      
+      .adminButton {
+        width: 100%;
+        margin: 5px;
       }
       
       ;
@@ -135,13 +138,13 @@
             <iron-icon icon="editor:mode-edit" hidden$="[[!online]]"></iron-icon>
             Enable editing
           </paper-button>
-          <paper-button raised hidden$="{{!editingMode}}" class="disableEditing adminButton" on-tap='toggleEditing'>
-            <iron-icon icon="editor:mode-edit" hidden$="[[!online]]"></iron-icon>
-            Disable editing
-          </paper-button>
           <paper-button raised hidden$="{{!editingMode}}" class="addResource adminButton" on-tap='addResource'>
             <iron-icon icon="add" hidden$="[[!online]]"></iron-icon>
             Add Resource
+          </paper-button>
+          <paper-button raised hidden$="{{!editingMode}}" class="disableEditing adminButton" on-tap='toggleEditing'>
+            <iron-icon icon="editor:mode-edit" hidden$="[[!online]]"></iron-icon>
+            Disable editing
           </paper-button>
         </div>
       </app-drawer>
@@ -152,13 +155,14 @@
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
             <div main-title>SSD Resources Demo</div>
+            <span class="user-name" hidden$="[[!signedIn]]"> signed in as [[user.displayName]]</span>
             <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
             <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
             <paper-icon-button icon="lock-outline" title="Login" on-tap="_login" hidden$="[[signedIn]]"></paper-icon-button>
             <paper-icon-button icon="lock-open" title="Logout" on-tap="_logout" hidden$="[[!signedIn]]"></paper-icon-button>
           </app-toolbar>
           <template is="dom-if" if="[[signedIn]]">
-            <div class="user-name">signed in as [[user.displayName]]</div>
+
           </template>
         </app-header>
         <!--after main header pages get loaded-->
@@ -223,7 +227,7 @@
       toggleEditing: function () {
         this.set('editingMode', !this.editingMode)
       },
-      addResource:function(){
+      addResource: function () {
         document.querySelector('ssd-resources').addResource();
       },
 

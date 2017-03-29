@@ -8,28 +8,55 @@
 <dom-module id="ssd-search">
   <template>
     <style include="shared-styles">
-
+       :host {
+        opacity: 0;
+        display: none;
+      }
+      
+       :host([opened]) {
+        display: block;
+        opacity: 1;
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--paper-red-50);
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1;
+        color: black;
+      }
+      
+      .resources-container {
+        display: flex;
+        flex-wrap: wrap;
+      }
     </style>
-    <div class="card resource-card-small">
-      Search box
-    </div>
+    <h1>Search</h1>
+    <paper-button raised on-tap='close'>
+      <iron-icon icon="close"></iron-icon>
+      close
+    </paper-button>
+
+    <paper-input id="searchBox" value="{{search.text}}" name="search" label="search words" required auto-validate pattern="[a-zA-Z0-9 ']*"
+      error-message="no special characters!"></paper-input>
     <paper-dropdown-menu label="Topics" value="{{filter_topics}}" no-animations placeholder="(all)">
-      <paper-listbox selected="0" class="dropdown-content">
+      <paper-listbox selected="{{search.topics}}" class="dropdown-content">
         <paper-item>(all)</paper-item>
         <template is="dom-repeat" items="{{persistedTopics}}">
           <paper-item>{{item.$val}}</paper-item>
         </template>
       </paper-listbox>
     </paper-dropdown-menu>
-    <paper-dropdown-menu label="Resource Types" value="{{filter_rTypes}}" no-animations placeholder="(all)">
+    <paper-dropdown-menu label="Resource Types" value="{{search.rTypes}}" no-animations placeholder="(all)">
       <paper-listbox selected="0" class="dropdown-content">
         <paper-item>(all)</paper-item>
-        <template is="dom-repeat" items="{{persistedrTypes}}">
+        <template is="dom-repeat" items="{{persistedRTypes}}">
           <paper-item>{{item.$val}}</paper-item>
         </template>
       </paper-listbox>
     </paper-dropdown-menu>
-    <paper-dropdown-menu label="Tags" value="{{filter_tags}}" no-animations placeholder="(all)">
+    <paper-dropdown-menu label="Tags" value="{{search.tags}}" no-animations placeholder="(all)">
       <paper-listbox selected="0" class="dropdown-content">
         <paper-item>(all)</paper-item>
         <template is="dom-repeat" items="{{persistedTags}}">
@@ -37,19 +64,65 @@
         </template>
       </paper-listbox>
     </paper-dropdown-menu>
+    <div class="resources-container">
+      <template id="filteredResources" is="dom-repeat" items="[[resources]]" as="resource" sort="">
+        <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
+      </template>
+    </div>
 
-  </template>
+    <!--</template>-->
 
   </template>
   <script>
     Polymer({
       is: 'ssd-search',
       properties: {
-        resource: {
+        resources: {
           type: Object,
           readOnly: false,
           notify: false
         },
+        opened: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          reflectToAttribute: true
+        },
+        persistedTopics: {
+          type: Object,
+        },
+        persistedRTypes: {
+          type: Object,
+        },
+        persistedCollections: {
+          type: Object
+        },
+        persistedTags: {
+          type: Object
+        },
+        search: {
+          type: Object,
+          value:function(){return {
+            name:'',
+            topics:"0",
+            rTypes:"0",
+            tags:"0"
+
+          };}
+        },
+        observers:[
+          'searchChanged(search.*)'
+        ]
+      },
+      searchChanged:function(s){
+        console.log('new search',s)
+      },
+      open: function () {
+        console.log('calling open from search component')
+        this.set('opened', true)
+      },
+      close: function () {
+        this.set('opened', false)
       },
       getMainImage: function (resource) {
         //console.log('no predefined image', resource)
