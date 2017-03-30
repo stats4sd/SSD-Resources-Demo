@@ -34,79 +34,55 @@
     </style>
 
     <!--  SETTING UP RESOURCES -->
-    <!--<template is='dom-if' if="[[signedIn]]">
-      <div hidden$="{{!editMode}}" class='alert alert-info well well-sm'>
-        <p class='alert alert-warning'>EDIT MODE ACTIVE. Click on any of the resource cards to edit that resource.</p>
-        <paper-button raised on-tap="create" class='alert alert-success'>Add new resource</paper-button>
-      </div>
-    </template>-->
 
     <paper-button raised on-tap='search'>
       <iron-icon icon="search"></iron-icon>
       Search
     </paper-button>
-    
+    <paper-button raised on-tap='addResource'>
+      <iron-icon icon="add"></iron-icon>
+      Add resource
+    </paper-button>
+
     <h1>Latest Resources</h1>
     <div class="resources-container">
-      <template id="resourceList" is="dom-repeat" items="[[newestResources]]" as="resource" sort="_sortNewest">
+      <template id="resourceList" is="dom-repeat" items="[[persistedNewestResources]]" as="resource" sort="_sortNewest">
         <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
       </template>
     </div>
 
-    <ssd-resource-full resource='[[selectedResource]]' opened='{{resourceOpened}}' editable='{{editMode}}'></ssd-resource-full>
+    <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-topics="[[persistedTopics]]" persisted-r-types="[[persistedRTypes]]"
+      persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]">
+    </ssd-resource-full>
 
-      <ssd-resource-editor id="editor" resource-id="[[editableResourceID]]" resource="{{editableResource}}" persisted-topics="[[persistedTopics]]"
-        persisted-r-types="[[persistedrTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]"
-        on-close="commitChange">
-      </ssd-resource-editor>
-
-      <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-topics="[[persistedTopics]]" persisted-r-types="[[persistedrTypes]]"
-        persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]">
-      </ssd-search>
- 
-
-      <!--<h1>All resources</h1>
-    <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" as="resource" filter="filterResources" sort="_sortNewest">
-      <ssd-resource-small resource='[[resource]]' on-tap='resourceTap'></ssd-resource-small>
-    </template>-->
-
-      <!--<div class="resources-container">
-      <template id="resourceList" is="dom-repeat" items="[[persistedResources]]" as="resource" filter="filterResources">
-        <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
-      </template>
-    </div>-->
-
-      <firebase-query id="query" app-name="SSD-Resources" path="/collections" data="{{allCollections}}"></firebase-query>
-      <app-indexeddb-mirror key="persistedCollections" data="{{allCollections}}" persisted-data="{{persistedCollections}}" session="keepAlways"></app-indexeddb-mirror>
-
-      <firebase-query id="query" app-name="SSD-Resources" path="/rTypes" data="{{allrTypes}}"></firebase-query>
-      <app-indexeddb-mirror key="persistedrTypes" data="{{allrTypes}}" persisted-data="{{persistedrTypes}}" session="keepAlways"></app-indexeddb-mirror>
-
-      <firebase-query id="query" app-name="SSD-Resources" path="/topics" data="{{allTopics}}"></firebase-query>
-      <app-indexeddb-mirror key="persistedTopics" data="{{allTopics}}" persisted-data="{{persistedTopics}}" session="keepAlways"></app-indexeddb-mirror>
-
-      <firebase-query id="query" app-name="SSD-Resources" path="/events" data="{{allEvents}}"></firebase-query>
-      <app-indexeddb-mirror key="persistedEvents" data="{{allEvents}}" persisted-data="{{persistedEvents}}" session="keepAlways"></app-indexeddb-mirror>
-
-      <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>
-      <app-indexeddb-mirror key="persistedTags" data="{{alltags}}" persisted-data="{{persistedTags}}" session="keepAlways"></app-indexeddb-mirror>
+    <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-topics="[[persistedTopics]]"
+      persisted-r-types="[[persistedRTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]">
+    </ssd-search>
 
 
-      <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB  -->
-      <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}"></firebase-query>
-      <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
+    <firebase-query id="query" app-name="SSD-Resources" path="/collections" data="{{allCollections}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedCollections" data="{{allCollections}}" persisted-data="{{persistedCollections}}" session="keepAlways"></app-indexeddb-mirror>
 
-      <!-- FIREBASE QUERY TO PULL IN newest FROM DB  -->
-      <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="10"></firebase-query>
-      <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
+    <firebase-query id="query" app-name="SSD-Resources" path="/rTypes" data="{{allrTypes}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedRTypes" data="{{allrTypes}}" persisted-data="{{persistedRTypes}}" session="keepAlways"></app-indexeddb-mirror>
 
-      <!-- FIREBASE DOCUMENTS TO PULL IN Individual resource for editing  -->
-      <firebase-document id="editingResource" app="SSD-Resources" app-name="SSD-Resources" path="{{editableResourceID}}" data="{{editableResource}}">
-        <firebase-document>
+    <firebase-query id="query" app-name="SSD-Resources" path="/topics" data="{{allTopics}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedTopics" data="{{allTopics}}" persisted-data="{{persistedTopics}}" session="keepAlways"></app-indexeddb-mirror>
+
+    <firebase-query id="query" app-name="SSD-Resources" path="/events" data="{{allEvents}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedEvents" data="{{allEvents}}" persisted-data="{{persistedEvents}}" session="keepAlways"></app-indexeddb-mirror>
+
+    <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedTags" data="{{alltags}}" persisted-data="{{persistedTags}}" session="keepAlways"></app-indexeddb-mirror>
 
 
+    <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB  -->
+    <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
 
-
+    <!-- FIREBASE QUERY TO PULL IN newest FROM DB  -->
+    <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="10"></firebase-query>
+    <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
 
   </template>
 
@@ -122,10 +98,7 @@
           type: Object,
           observer: 'resourcesChange'
         },
-        persistedResources: {
-          type: Object,
-          value: [],
-        },
+
         resourceOpened: {
           type: Boolean,
           value: false,
@@ -145,18 +118,17 @@
         },
         filter_topics: {
           type: Object,
-          observer: 'filterChange'
+          observer: 'filterChange',
+          value: []
         },
         filter_rTypes: {
           type: Object,
-          observer: 'filterChange'
+          observer: 'filterChange',
+          value: []
         },
         filter_tags: {
           type: Object,
-          observer: 'filterChange'
-        },
-        latestResources: {
-          type: Object,
+          observer: 'filterChange',
           value: []
         },
         selectedResource: {
@@ -181,12 +153,12 @@
       },
       editingModeChange: function () {
       },
-      //responds to calls from add resource button and passes empty request to resource editor component
+      //responds to calls from add resource button and passes empty request to resource open
       addResource: function () {
         console.log('add resource called from button')
-        this.$.editor.open();
+        this.$.fullResource.open();
       },
-      search:function(){
+      search: function () {
         this.$.search.open();
       },
       filterChange: function () {

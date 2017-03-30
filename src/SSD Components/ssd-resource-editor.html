@@ -1,212 +1,279 @@
-<!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
-<link rel="import" href="../../bower_components/paper-styles/color.html">
-<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-elements/paper-elements.html">
+<link rel="import" href="../../bower_components/iron-elements/iron-elements.html">
+<link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
+
+<link rel="import" href="../shared-styles.html">
+
+
 <dom-module id="ssd-resource-editor">
   <template>
     <style include="shared-styles">
-      :host {
-        display: none;
-        position: absolute;
-        overflow: hidden;
-        top: 85px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 1;
-        height: 2000px;
 
-      }
-      :host([opened]) {
-        display: block;
-      }
-      :host([opened]) {
-        background-color: #413F54;
-      }
-      paper-button {
-        color: #DB2A27;
-      }
-      #background {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        border-radius: 512px;
-        width: 256px;
-        background-color: #413F54;
-        transform-origin: 128px 128px;
-      }
-      ssd-resource {
-        display: block;
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        width: 90%;
-        margin: 20px auto;
-      }
-      :host([opened]) ssd-resource {
-        position: relative;
-        margin: auto;
-        width: 90%;
-        max-width: 480px;
-
-      }
-      .controls {
-        display: block;
-        position: relative;
-        margin: 10px auto;
-        width: calc(100vw - 20px);
-        max-width: 480px;
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        justify-content: space-between;
-        transition: opacity 0.3s;
-        opacity: 0;
-      }
-      :host([opened]) .controls {
-        opacity: 1;
+    </style>
+    <style is="custom-style">
+      paper-checkbox {
+        display: block
       }
     </style>
-    <div id="background"></div>
-    <ssd-resource
-    id="activeResource"
-    resource-id="[[resourceId]]"
-    name="{{resource.name}}"
-    description="{{resource.description}}"
-    topics="{{resource.topics}}"
-    r-types="{{resource.rTypes}}"
-    tags="{{resource.tags}}"
-    uploaded-files="{{resource.uploadedFiles}}"
-    persisted-topics="[[persistedTopics]]"
-    persisted-r-types="[[persistedRTypes]]"
-    persisted-tags="[[persistedTags]]"
-    persisted-collections="[[persistedCollections]]"
-    editable
-    ></ssd-resource>
-    <div class="controls">
-      <!-- <paper-button on-tap="delete">Delete</paper-button> -->
-      <paper-button on-tap="save">Done</paper-button>
+
+    <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required auto-validate pattern="[a-zA-Z0-9 ']*"
+      error-message="no special characters!"></paper-input>
+    <p>
+      <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required></paper-textarea>
+    </p>
+
+    <paper-tabs selected="{{tabSelected}}">
+      <paper-tab>Topics</paper-tab>
+      <paper-tab>Collections</paper-tab>
+      <paper-tab>Type</paper-tab>
+      <paper-tab>Tags</paper-tab>
+    </paper-tabs>
+    <iron-pages selected="{{tabSelected}}">
+          <paper-listbox multi attr-for-selected="value" selected-values="{{resource.topics}}">
+            <template is="dom-repeat" items="[[persistedTopics]]" as="topic">
+              <paper-item value="{{topic.$val}}">[[topic.$val]]</paper-item>
+            </template>
+          </paper-listbox>
+          <paper-listbox multi attr-for-selected="value" selected-values="{{resource.collections}}">
+            <template is="dom-repeat" items="[[persistedCollections]]" as="collection">
+              <paper-item value="{{collection.$val}}">[[collection.$val]]</paper-item>
+            </template>
+          </paper-listbox>
+          <paper-listbox multi attr-for-selected="value" selected-values="{{resource.rTypes}}">
+            <template is="dom-repeat" items="[[persistedRTypes]]" as="rType">
+              <paper-item value="{{rType.$val}}">[[rType.$val]]</paper-item>
+            </template>
+          </paper-listbox>
+          <paper-listbox multi attr-for-selected="value" selected-values="{{resource.tags}}">
+            <template is="dom-repeat" items="[[persistedTags]]" as="tag">
+              <paper-item value="{{tag.$val}}">[[tag.$val]]</paper-item>
+            </template>
+          </paper-listbox>
+    </iron-pages>
+
+    <div class='card editing'>
+      <h3>Uploaded Files</h3>
+      <ul>
+        <template is="dom-repeat" id="fileView" items="[[_toArray(resource.uploadedFiles)]]" as="file">
+          <a class='fileDownload' href="[[file.value.url]]">
+            <li>
+              <h5 style="margin-bottom:2px">[[file.value.name]]</h5>
+              <ul>
+                <li>Size = [[toMb(file.value.size)]]; </li>
+                <li>Uploaded date = [[toDateString(file.value.lastModified)]]</li>
+              </ul>
+            </li>
+          </a>
+        </template>
+      </ul>
+      <h3>Add new files</h3>
+      <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[vaadinFiles]]"></vaadin-upload>
     </div>
   </template>
+
+  <script>
+    function _getCurrentIndex(file, uploadsMeta) {
+      var index = -1
+      for (var i = 0; i < uploadsMeta.length; i++) {
+        var name = uploadsMeta[i].name
+        if (file.name == name) {
+          index = i
+        }
+      }
+      return index;
+    }
+  </script>
+
   <script>
     Polymer({
       is: 'ssd-resource-editor',
       properties: {
-        resource: {
-          type: Object,
-          notify: true
-        },
-        opened: {
+
+        editing: {
           type: Boolean,
           reflectToAttribute: true,
-          readOnly: true,
           value: false
+        },
+        editMode: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+        tabSelected: {
+          value: 0
+        },
+        uploadedFiles: {
+          type: Array,
+          notify: true
+        },
+        vaadinFiles: {
+          type: Array,
+          observer: 'vaadinChange'
+        },
+        editingFile: {
+          Type: Array,
+          notify: true
+        },
+        fileId: {
+          Type: String,
+          notify: true
+        },
+        singleFile: {
+          type: Object,
+          notify: true
         },
         resourceId: {
           type: String,
           notify: true
-        }
-      },
-      open: function(resourceElement) {
-        console.log('open function called on resource editor')
-        console.log(this.resource)
-        this._setOpened(true);
-        this.__editedresourceElement = resourceElement;
-        if (resourceElement) {
-          //reset file uploader (vaadin uploader is a one-way street)
-          this.resource.uploadingFiles = [];
-          resourceElement.style.opacity = 0;
-          this.transitionInFrom(resourceElement.getBoundingClientRect());
-        } else {
-          this.create();
-        }
-      },
-      create: function() {
-        this._setOpened(true);
-        this.resource = {
-          name: '',
-          description: '',
-          topics: [],
-          rTypes: [],
-          collections: [],
-          tags: [],
-          events: [],
-          uploadedFiles: [],
-          uploadingFiles: []
-        };
-        this.transitionInFrom(this.getBoundingClientRect());
+        },
+        opened: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          reflectToAttribute: true
+        },
       },
 
-      save: function() {
-        this.close('save');
+
+      vaadinChange: function (newData) {
+        console.log('new vaading', newData)
       },
-      delete: function() {
-        this.close('delete');
+
+      edit: function () {
+        this.set('editMode', true)
       },
-      close: function(detail) {
-        //reset file uploader
-        document.querySelector("#ssdResourceUpload").files = [];
-        if (this.__editedresourceElement) {
-          this.__editedresourceElement.style.opacity = 1;
-          this.__editedresourceElement = null;
+      save: function () {
+        this.set('editMode', false)
+      },
+
+      _toArray: function (obj) {
+        if (obj) {
+          var array = Object.keys(obj).map(function (key) {
+            return {
+              name: key,
+              value: obj[key]
+            };
+          });
+          return array;
         }
-        this.fire('close', detail, { bubbles: false });
-        // this.transitionOut().then(function() {
-          Polymer.dom(this).classList.remove('open');
-          this._setOpened(false);
-        // }.bind(this));
+        else {
+          return [];
+        }
+
       },
-      transitionInFrom: function(rect) {
-        var targetRect = this.getBoundingClientRect();
-        var targetLeft = targetRect.width > 500 ?
-            targetRect.width / 2 - 240 : 10;
-        var targetWidth = targetRect.width > 500 ?
-            '480px' : 'calc(100vw - 20px)'
-        var resourceAnimation = this.$.activeResource.animate([{
-          transform: `translate(${rect.left}px,${rect.top - 46}px)`,
-          width: `${rect.width}px`,
-          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-        }, {
-          transform: `translate(${targetLeft}px, 0px)`,
-          width: targetWidth
-        }], 500);
-        var backgroundAnimation = this.$.background.animate([{
-          transform: `translate(${rect.left + rect.width / 2 - 128}px, ${rect.top - 46 + rect.height / 2 - 128}px) scale(0.1)`,
-          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-        }, {
-          transform: `scale(${targetRect.width / 256 * 4})`
-        }], 800);
-        resourceAnimation.addEventListener('finish', function() {
-          Polymer.dom(this).classList.add('open');
+
+      toMb: function (size) {
+        //if less than 1MB, return size in kB
+        var val;
+
+        if (size * 0.000001 < 1) {
+          val = Math.round(size * 0.001)
+          return val + "KB";
+        }
+        else {
+          val = Math.round(size * 0.000001)
+          return val + "MB";
+        }
+      },
+
+      toDateString: function (milliseconds) {
+        var updated = (new Date(milliseconds)).toISOString().slice(0, 10);
+
+        return updated;
+      },
+
+
+      //*******all can be made much nicer!!!*******
+      fileupload: function (event) {
+        event.preventDefault();
+        //check resource name exists, give warning and remove files if not
+
+        //create file upload task
+        var file = event.detail.file;
+        console.log('file', file)
+        var ssdResourcesApp = firebase.app("SSD-Resources")
+        filenumber = this._toArray(this.uploadedFiles).length;
+        console.log(filenumber)
+        var ref = firebase.storage(ssdResourcesApp).ref().child('/resources/' + this.resource.$key + "/" + file.name)
+        console.log('ref', ref)
+        var uploadTask = ref.put(file);
+        uploadTask.on('state_changed', function (snapshot) {
+          console.log('snapshot', snapshot)
+          var progressBars = document.querySelectorAll('paper-progress');
+          console.log(progressBars);
+          var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          var vaadinUploads = document.querySelector('vaadin-upload')
+          console.log(vaadinUploads)
+          var uploadsMeta = vaadinUploads.get('files');
+          var index = _getCurrentIndex(file, uploadsMeta)
+          console.log(index)
+          progressBars[index].set('value', progress)
+        }, function (error) {
+          console.log(error)
+          // Handle unsuccessful uploads
+        }, function () {
+          console.log('uploadTask', uploadTask)
+          var downloadURL = uploadTask.snapshot.downloadURL;
+          // //set progress bar to complete
+          var vaadinUploads = document.querySelector('vaadin-upload')
+          var uploadsMeta = vaadinUploads.get('files');
+          console.log(uploadsMeta);
+          console.log(vaadinUploads);
+          var vaadinFiles = document.querySelectorAll('vaadin-upload-file')
+          var index = _getCurrentIndex(file, uploadsMeta)
+          vaadinFiles[index].set('file.complete', true);
+          vaadinFiles[index].set('file.loaded', 100);
+
+          // just pushing the new file item to the uploadedFiles array loses a bunch of the file metadata (I guess the perils of forcing a file object into a database array?)  So - terrible hack time:
+          var fileItem = [];
+          fileItem.name = vaadinUploads.files[index].name;
+          fileItem.lastModified = Date.now();
+          fileItem.size = vaadinUploads.files[index].size;
+          fileItem.url = downloadURL;
+          console.log(fileItem);
+          this.resource.uploadedFiles.push(fileItem)
+          console.log('current resource', this.resource)
+          document.querySelector("#activeResource").newFile(fileItem);
+        }.bind(this));
+        this.$.fileView.render();
+      },
+
+      statechanged: function (event) {
+        console.log(event.detail.file);
+      },
+
+      newFile: function (fileItem) {
+        //if no uploadedFiles yet, create and set property.
+        console.log(this.name);
+
+        if (!this.uploadedFiles) {
+          this.set("uploadedFiles", [])
+          console.log("no uploaded files, so created empty array");
+          console.log(this.uploadedFiles)
+        }
+        console.log(fileItem);
+        console.log(document.querySelector("#firebaseDocSingleFile"));
+
+        this.fileId = null;
+        var path = this.resourceId + "/uploadedFiles/";
+        console.log(path);
+        this.singleFile = fileItem
+        return document.querySelector("#firebaseDocSingleFile").save(path).then(function () {
+          console.log("singleFile = " + this.singleFile)
+          console.log("singleFileId = " + this.fileId);
+          document.querySelector("#firebaseDocSingleFile").reset();
         }.bind(this));
       },
-      transitionOut: function() {
-        var animation = this.animate([{
-          opacity: 1,
-          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-        }, {
-          opacity: 0
-        }], 300);
-        this.$.resource.animate([{
-          transform: 'translateY(0) scale(1)',
-          opacity: 1,
-          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-        }, {
-          transform: 'translateY(10px) scale(0.9)',
-          opacity: 0
-        }], 500);
-        return new Promise(function(resolve) {
-          animation.addEventListener('finish', resolve);
-        }.bind(this));
-      }
-    });
+
+      // saveFile: function() {
+      //   return this.$.editingResource.save("/resources").then(function() {
+      //     this.$.editingResource.reset();
+      //   }.bind(this));
+      // }
+
+
+
+    })
   </script>
 </dom-module>
