@@ -32,7 +32,7 @@
         flex-wrap: wrap;
       }
     </style>
-    <h1>Search</h1>
+    <h1>Search ([[filteredResources.length]])</h1>
     <paper-button raised on-tap='close'>
       <iron-icon icon="close"></iron-icon>
       close
@@ -65,7 +65,7 @@
       </paper-listbox>
     </paper-dropdown-menu>
     <div class="resources-container">
-      <template id="filteredResources" is="dom-repeat" items="[[filteredResources]]" as="resource" sort="">
+      <template id="filteredResources" is="dom-repeat" items="[[filteredResources]]" as="resource" sort="" filter="_textFilter">
         <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
       </template>
     </div>
@@ -102,13 +102,28 @@
           type: String,
           notify: true,
           value: '',
-          observer: 'searchChanged'
+          observer: 'searchTextChange'
         },
       },
 
-      searchChanged: function (s) {
-        console.log('new search', s)
+      _textFilter: function (resource) {
+        //runs when 3 or more letters typed. checks name, description and tags for search text, return true first time criteria matched
+        let s = this.searchText
+        if (s.length>2) {
+              if (resource.name && resource.name.toLowerCase().indexOf(s) > -1) { return true }
+              if (resource.description &&resource.description.toLowerCase().indexOf(s) > -1) { return true }
+              if (resource.rTypes && resource.rTypes.toString().toLowerCase().indexOf(s) > -1) { return true }
+              if (resource.tags && resource.tags.toString().toLowerCase().indexOf(s) > -1) { return true }
+              if (resource.topics && resource.topics.toString().toLowerCase().indexOf(s) > -1) { return true }
+              else{return false}
+        }
+        return true
       },
+      //manually call dom repeat resources to rerender with _textFilter checking search text
+      searchTextChange:function(newVal,oldVal){
+          this.$.filteredResources.render()
+      },
+
       open: function () {
         console.log('calling open from search component')
         this.set('opened', true)
@@ -120,10 +135,13 @@
         //console.log('no predefined image', resource)
         return '/images/placeholder.png'
       },
+
+      //function to track values across filters, and apply all to resources when changed to create filtered resources subset
+      //this subset is then subject to a seperate text filter
       filterChange: function () {
         var temp = this.allResources
         //if statement in case all resources not yet defined/populated
-        if(temp){
+        if (temp) {
           if (!this.allResources) { this.allResources = this.resources }
           var filtersList = ['topics', 'rTypes', 'tags']
           let activeFilters = {}
@@ -137,10 +155,9 @@
             }
           }
           console.log('temp', temp)
-
           var temp = temp.filter(function (resource) {
             for (let key in activeFilters) {
-              console.log('testing',key,activeFilters[key])
+              console.log('testing', key, activeFilters[key])
               var value = activeFilters[key]
               //return if doesn't have anything saved to filter field
               if (!resource.hasOwnProperty(key)) {
@@ -159,10 +176,7 @@
           this.filteredResources = []
           this.filteredResources = temp
         }
-
-
       },
-
     })
   </script>
 </dom-module>
