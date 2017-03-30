@@ -32,7 +32,9 @@
         flex-wrap: wrap;
       }
     </style>
-    <h1>Search ([[filteredResources.length]])</h1>
+    
+
+    <h1>Search ([[totalResults]])</h1>
     <paper-button raised on-tap='close'>
       <iron-icon icon="close"></iron-icon>
       close
@@ -65,12 +67,12 @@
       </paper-listbox>
     </paper-dropdown-menu>
     <div class="resources-container">
-      <template id="filteredResources" is="dom-repeat" items="[[filteredResources]]" as="resource" sort="" filter="_textFilter">
+      <template id="filteredResources" is="dom-repeat" items="[[filteredResources]]" as="resource" sort="" filter="_textFilter" rendered-item-count="{{totalResults}}">
         <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
       </template>
     </div>
 
-    <!--</template>-->
+    <ssd-resource-full resource='[[selectedResource]]' opened='{{resourceOpened}}' editable='{{editMode}}'></ssd-resource-full>
 
   </template>
   <script>
@@ -104,28 +106,31 @@
           value: '',
           observer: 'searchTextChange'
         },
+        filteredResources:{
+          type:Object,
+          notify:true
+        },
       },
 
       _textFilter: function (resource) {
         //runs when 3 or more letters typed. checks name, description and tags for search text, return true first time criteria matched
         let s = this.searchText
-        if (s.length>2) {
-              if (resource.name && resource.name.toLowerCase().indexOf(s) > -1) { return true }
-              if (resource.description &&resource.description.toLowerCase().indexOf(s) > -1) { return true }
-              if (resource.rTypes && resource.rTypes.toString().toLowerCase().indexOf(s) > -1) { return true }
-              if (resource.tags && resource.tags.toString().toLowerCase().indexOf(s) > -1) { return true }
-              if (resource.topics && resource.topics.toString().toLowerCase().indexOf(s) > -1) { return true }
-              else{return false}
+        if (s.length > 2) {
+          if (resource.name && resource.name.toLowerCase().indexOf(s) > -1) { return true }
+          if (resource.description && resource.description.toLowerCase().indexOf(s) > -1) { return true }
+          if (resource.rTypes && resource.rTypes.toString().toLowerCase().indexOf(s) > -1) { return true }
+          if (resource.tags && resource.tags.toString().toLowerCase().indexOf(s) > -1) { return true }
+          if (resource.topics && resource.topics.toString().toLowerCase().indexOf(s) > -1) { return true }
+          else { return false }
         }
         return true
       },
       //manually call dom repeat resources to rerender with _textFilter checking search text
-      searchTextChange:function(newVal,oldVal){
-          this.$.filteredResources.render()
+      searchTextChange: function (newVal, oldVal) {
+        this.$.filteredResources.render();
       },
 
       open: function () {
-        console.log('calling open from search component')
         this.set('opened', true)
       },
       close: function () {
@@ -134,6 +139,11 @@
       getMainImage: function (resource) {
         //console.log('no predefined image', resource)
         return '/images/placeholder.png'
+      },
+      resourceTap: function (e) {
+        console.log('resource', e.model.resource);
+        this.set('selectedResource', e.model.resource);
+        this.set('resourceOpened', true);
       },
 
       //function to track values across filters, and apply all to resources when changed to create filtered resources subset
@@ -154,25 +164,19 @@
               }
             }
           }
-          console.log('temp', temp)
           var temp = temp.filter(function (resource) {
             for (let key in activeFilters) {
-              console.log('testing', key, activeFilters[key])
               var value = activeFilters[key]
               //return if doesn't have anything saved to filter field
               if (!resource.hasOwnProperty(key)) {
-                console.log('no key, false')
                 return false
               }
               if (resource[key].indexOf(value) == -1) {
-                console.log('has key but not value, false')
                 return false
               }
             }
-            console.log('criteria matched, true')
             return true
           })
-          console.log('filtered', temp)
           this.filteredResources = []
           this.filteredResources = temp
         }
