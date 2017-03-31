@@ -43,7 +43,7 @@
       }
     </style>
     <div class="card">
-      <paper-button raised on-tap='closeResource'>
+      <paper-button raised on-tap='close'>
         <iron-icon icon="arrow-back"></iron-icon>Back
       </paper-button>
       <paper-button raised on-tap='edit' hidden$="[[editMode]]">
@@ -78,15 +78,15 @@
         </ul>
         <h4>Files:</h4>
         <p>Click on any of the file cards to download it</p>
-        <template is='dom-repeat' items="[[_toArray(resource.uploadedFiles)]]" as="file">
-          <a class='fileDownload' href="[[file.value.url]]">
-            <p style="margin-bottom:2px">[[file.value.name]]</p>
+        <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
+          <a class='fileDownload' href="[[file.url]]">
+            <p style="margin-bottom:2px">[[file.name]]</p>
             <ul>
               <li>
-                <h5 style="margin:2px">Size = [[toMb(file.value.size)]]</h5>
+                <h5 style="margin:2px">Size = [[toMb(file.size)]]</h5>
               </li>
               <li>
-                <h5 style="margin:2px">Uploaded date = [[toDateString(file.value.lastModified)]]</h5>
+                <h5 style="margin:2px">Uploaded date = [[toDateString(file.lastModified)]]</h5>
               </li>
             </ul>
           </a>
@@ -101,7 +101,7 @@
       </template>
     </div>
 
-    <firebase-document id="firebaseResourceDoc" app-name="SSD-Resources" data="{{editableResource}}" path="[[firebaseEditPath]]">
+    <firebase-document id="firebaseResourceDoc" app-name="SSD-Resources" data="{{editableResource}}">
     </firebase-document>
   </template>
 
@@ -134,38 +134,61 @@
         firebaseEditPath: {
           type: String,
           notify: true,
+        },
+        key: {
+          type: String,
+          notify: true
         }
       },
 
       edit: function () {
+        //in case re-edit where key has been stripped
+        if(!this.resource.$key){this.resource.$key=this.id}
+        console.log('editing resource id:', this.resource.$key)
+        this.id=this.resource.$key
         this.set('editMode', true)
       },
       save: function () {
+        this.resource.modified=Date.now()
         this.editableResource=this.resource
         delete this.editableResource.$key
-        console.log('saving resource', this.editableResource)
-        var key = this.resource.$key        
-        this.firebaseEditPath = '/resources/' + key
-        this.$.firebaseResourceDoc.save('/resources',key).then(function () {
+        console.log('saving resource with id',this.id)
+        this.$.firebaseResourceDoc.save('/resources', this.id).then(function () {
           this.set('editMode', false)
-          console.log('saved')
+          this.updates=true
+          this.$.firebaseResourceDoc.reset();
+          //document.querySelector('#resourceList').render();
         }.bind(this))
-
-
       },
-      closeResource: function () {
+      close: function () {
         this.set('editMode', false)
         this.set('opened', false)
+        //on update pass up message
+        if(this.updates==true){
+          console.log('firing updates')
+          this.fire('update')
+          this.updates=false
+        }
+        
       },
       open: function (resource) {
         //new resource
         if (!resource) {
-          let id = this.generatePushID();
-          let newResource = this.generateNewResource(id)
+          this.id = this.generatePushID();
+          console.log('creating new resources id:', this.id)
+          let newResource = this.generateNewResource(this.id)
           this.set('resource', newResource)
-          this.set('opened', true)
           this.set('editMode', true)
+          console.log('this.resource',this.resource)
         }
+        //existing resource
+        else {
+          console.log('opening resource',resource,resource.$key)
+          if(!resource.$key){resource.$key=this.id}
+          this.id = resource.$key
+          this.set('resource', resource)
+        }
+        this.set('opened', true)
       },
 
       _toArray: function (obj) {
@@ -202,6 +225,8 @@
         return updated;
       },
       generateNewResource: function (id) {
+        var d=Date.now()
+        console.log('d',d)
         return {
           $key: id,
           description: '',
@@ -210,7 +235,9 @@
           tags: [],
           topics: [],
           uploadedFiles: [],
-          collections: []
+          collections: [],
+          created:d,
+          modified:''
         }
       },
       //firebase function taken from https://gist.github.com/mikelehen/3596a30bd69384624c11

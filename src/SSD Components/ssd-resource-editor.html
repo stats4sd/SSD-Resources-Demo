@@ -54,10 +54,9 @@
       </paper-listbox>
     </iron-pages>
 
-    <div class='card editing'>
-      <h3>Uploaded Files</h3>
-      <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="{{resource.uploadedFiles}}"></vaadin-upload>
-    </div>
+    <h3>Uploaded Files</h3>
+    <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
+
 
   </template>
 
@@ -106,7 +105,7 @@
           notify: true,
           reflectToAttribute: true
         },
-       
+
       },
 
       fileupload: function (event) {
@@ -123,9 +122,8 @@
         uploadTask.on('state_changed', function (snapshot) {
           var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           var vaadinUploads = document.querySelector('vaadin-upload')
-          var index = this.getCurrentIndex(vaadinUploads.files, file.name)
+          var index = this.getCurrentIndex(file.name)
           var temp = this.resource.uploadedFiles[index]
-          temp.loaded = progress
           temp.progress = progress
           this.set('resource.uploadedFiles.' + index, [])
           this.set('resource.uploadedFiles.' + index, temp)
@@ -133,19 +131,26 @@
           console.log('error', error)
           // Handle unsuccessful uploads
         }, function () {
-          var downloadURL = uploadTask.snapshot.downloadURL;
-          var vaadinUploads = document.querySelector('vaadin-upload')
-          var index = this.getCurrentIndex(vaadinUploads.files, file.name)
-          var temp = this.resource.uploadedFiles[index]
-          temp.complete = true
-          temp.url = downloadURL
+          var index = this.getCurrentIndex(file.name)
+          let res= this.resource.uploadedFiles[index]
+          let temp={
+            lastModified:res.lastModified,
+            name:res.name,
+            size:res.size,
+            type:res.type,
+            url:uploadTask.snapshot.downloadURL,
+            complete:true,
+            formDataName:"file",
+            progress:100,
+          }
           this.set('resource.uploadedFiles.' + index, [])
           this.set('resource.uploadedFiles.' + index, temp)
         }.bind(this));
       },
 
       //iterate through each uplaod to find index of current filename
-      getCurrentIndex: function (uploads, fileName) {
+      getCurrentIndex: function (fileName) {
+        var uploads=this.resource.uploadedFiles
         for (let i = 0; i < uploads.length; i++) {
           if (uploads[i].name == fileName) { return i }
         }

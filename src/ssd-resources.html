@@ -45,15 +45,21 @@
     </paper-button>
 
     <h1>Latest Resources</h1>
-    <div class="resources-container">
+    <div class="resources-container" hidden$="[[liveMode]]">
       <template id="resourceList" is="dom-repeat" items="[[persistedNewestResources]]" as="resource" sort="_sortNewest">
+        <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
+      </template>
+    </div>
+    <div class="resources-container" hidden$="[[!liveMode]]">
+      <template id="resourceList2" is="dom-repeat" items="[[resources]]" as="resource" sort="_sortNewest">
         <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
       </template>
     </div>
 
     <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-topics="[[persistedTopics]]" persisted-r-types="[[persistedRTypes]]"
-      persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]">
+      persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]" on-update="updateFired">
     </ssd-resource-full>
+    
 
     <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-topics="[[persistedTopics]]"
       persisted-r-types="[[persistedRTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]">
@@ -91,14 +97,6 @@
       is: 'ssd-resources',
 
       properties: {
-        signedIn: {
-          type: Boolean
-        },
-        resources: {
-          type: Object,
-          observer: 'resourcesChange'
-        },
-
         resourceOpened: {
           type: Boolean,
           value: false,
@@ -140,22 +138,26 @@
           type: Boolean,
           value: false,
           notify: true,
-          observer: 'editingModeChange'
+        },
+        liveMode:{
+          type:Boolean,
+          value:false
         }
+       
       },
-
+      resourcesChanged:function(res){
+        console.log('res changed',res)
+      },
+      updateFired:function(){
+        console.log('res updated')
+        //this.$.resourceList2.render()
+        this.liveMode=true
+      },
       resourceTap: function (e) {
-        console.log('resource', e.model.resource);
-        this.set('selectedResource', e.model.resource);
-        this.set('resourceOpened', true);
-      },
-      resourcesChange: function (resources) {
-      },
-      editingModeChange: function () {
+       this.$.fullResource.open(e.model.resource);
       },
       //responds to calls from add resource button and passes empty request to resource open
       addResource: function () {
-        console.log('add resource called from button')
         this.$.fullResource.open();
       },
       search: function () {
@@ -173,153 +175,17 @@
             if (this[string] != "(all)") {
               this.activeFilters[filter] = this[string]
             }
-
           }
         }
         this.persistedResources = []
         this.persistedResources = temp
       },
 
-      filterResources: function (resource) {
-        //***could run proper query on live, or even indexeddb query on local persistant//
-        // var ssdResourcesApp=firebase.app("SSD-Resources")
-        // var ref = ssdResourcesApp.database().ref('/resources')
-        // ssdResourcesApp.database.Query
-        // console.log('total resources', this.persistedResources.length)
-        // return true
-        //return this._testFilters(resource, this.activeFilters)
-        //remove getting resources message - not perfect as still getting more but don't know when complete
-
-      },
-      //compares key strings (replacing special characters first) returns newest first
-      //**note, inefficient when we have lots of resources
       _sortNewest: function (a, b) {
-        let str1 = a.$key.replace(/\W/g, '')
-        let str2 = b.$key.replace(/\W/g, '')
-        if (str1 > str2) { return -1 }
-        if (str1 < str2) { return 1 }
+        if (a.created > b.created) { return -1 }
+        else  { return 1 }
       },
 
-      _filterNewest: function (res, index) {
-        console.log('index', index)
-      },
-
-      _testFilters: function (resource, activeFilters) {
-        //test each filter. first time any filter fails return false
-        for (let key in activeFilters) {
-          var value = activeFilters[key]
-          //return if doesn't have anything saved to filter field
-          if (!resource.hasOwnProperty(key)) {
-            return false
-          }
-
-          if (resource[key].indexOf(value) == -1) {
-            return false
-          }
-        }
-        return true
-      },
-
-
-      dataChanged: function (newData, oldData) {
-        // this.$.resourceList.render();
-        console.log('data changed', newData, oldData)
-
-      },
-
-
-      //Next bits rely heavily on pasted code from notes-app...
-
-      edit: function (event) {
-        if (this.editMode) {
-          var card = Polymer.dom(event).localTarget;
-          console.log(card);
-          console.log(card.id)
-          console.log("tapped to edit");
-          this.editableResourceID = "/resources/" + card.id;
-          console.log(this.editableResourceID)
-          this.$.editingResource.transactionsComplete.then(function () {
-            console.log(this.editableResource)
-
-            this.$.editor.open(card);
-          }.bind(this));
-        }
-
-      },
-
-      //function to create a new resource (called from new-resource button)
-      create: function () {
-        //if Edit mode is enabled
-        if (this.editMode) {
-          //set editable Note ID to null (so no resource is overwritten)
-          this.editableResourceID = null;
-          this.editableResource.name = "New Resource";
-          console.log(this.editableResource);
-          //open editor with null ID.
-          //
-
-          // if(this.$.query && this.$.query.refresh) {
-          var commitNew;
-          commitNew = this.save();
-
-          //  if(this.$.query && this.$.query.refresh) {
-          commitNew.then(function () {
-            console.log(this.editableResourceID)
-            this.editableResourceID = this.$.editingResource.path
-            console.log(this.editableResourceID)
-
-            this.$.editor.open();
-            this.$.query.refresh();
-
-          }.bind(this));
-          //  }
-          // }
-        }
-      },
-
-      commitChange: function (event) {
-        var changeCommits;
-
-        switch (event.detail) {
-          case 'save':
-            changeCommits = this.save();
-            break;
-          case 'delete':
-            changeCommits = this.delete();
-            break;
-          default:
-            changeComits = Promise.resolve();
-            break;
-        }
-
-        if (this.$.query && this.$.query.refresh) {
-          changeCommits.then(function () {
-            this.$.editingResource.reset();
-            this.$.query.refresh();
-          }.bind(this));
-        }
-      },
-
-      save: function () {
-        if (this.$.editingResource.isNew &&
-          (this.editableResource.name ||
-            this.editableResource.description ||
-            this.editableResource.upload)) {
-
-          console.log("editableResourceID = " + this.editableResourceID);
-          console.log("editableResource = " + this.editableResource);
-
-          return this.$.editingResource.save("/resources").then(function () {
-            console.log(this.$.editingResource.data);
-            console.log(this.$.editingResource.path);
-
-            console.log("editableResourceID = " + this.editableResourceID);
-            console.log("editableResource = " + this.editableResource);
-            //this.$.editingResource.reset();
-          }.bind(this));
-        }
-        return Promise.resolve();
-      },
     });
   </script>
 </dom-module>
