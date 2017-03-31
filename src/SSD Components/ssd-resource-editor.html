@@ -9,7 +9,9 @@
 <dom-module id="ssd-resource-editor">
   <template>
     <style include="shared-styles">
-
+      paper-tabs {
+        --paper-tabs-selection-bar-color: blue
+      }
     </style>
     <style is="custom-style">
       paper-checkbox {
@@ -30,60 +32,35 @@
       <paper-tab>Tags</paper-tab>
     </paper-tabs>
     <iron-pages selected="{{tabSelected}}">
-          <paper-listbox multi attr-for-selected="value" selected-values="{{resource.topics}}">
-            <template is="dom-repeat" items="[[persistedTopics]]" as="topic">
-              <paper-item value="{{topic.$val}}">[[topic.$val]]</paper-item>
-            </template>
-          </paper-listbox>
-          <paper-listbox multi attr-for-selected="value" selected-values="{{resource.collections}}">
-            <template is="dom-repeat" items="[[persistedCollections]]" as="collection">
-              <paper-item value="{{collection.$val}}">[[collection.$val]]</paper-item>
-            </template>
-          </paper-listbox>
-          <paper-listbox multi attr-for-selected="value" selected-values="{{resource.rTypes}}">
-            <template is="dom-repeat" items="[[persistedRTypes]]" as="rType">
-              <paper-item value="{{rType.$val}}">[[rType.$val]]</paper-item>
-            </template>
-          </paper-listbox>
-          <paper-listbox multi attr-for-selected="value" selected-values="{{resource.tags}}">
-            <template is="dom-repeat" items="[[persistedTags]]" as="tag">
-              <paper-item value="{{tag.$val}}">[[tag.$val]]</paper-item>
-            </template>
-          </paper-listbox>
+      <paper-listbox multi attr-for-selected="value" selected-values="{{resource.topics}}">
+        <template is="dom-repeat" items="[[persistedTopics]]" as="topic">
+          <paper-item value="{{topic.$val}}">[[topic.$val]]</paper-item>
+        </template>
+      </paper-listbox>
+      <paper-listbox multi attr-for-selected="value" selected-values="{{resource.collections}}">
+        <template is="dom-repeat" items="[[persistedCollections]]" as="collection">
+          <paper-item value="{{collection.$val}}">[[collection.$val]]</paper-item>
+        </template>
+      </paper-listbox>
+      <paper-listbox multi attr-for-selected="value" selected-values="{{resource.rTypes}}">
+        <template is="dom-repeat" items="[[persistedRTypes]]" as="rType">
+          <paper-item value="{{rType.$val}}">[[rType.$val]]</paper-item>
+        </template>
+      </paper-listbox>
+      <paper-listbox multi attr-for-selected="value" selected-values="{{resource.tags}}">
+        <template is="dom-repeat" items="[[persistedTags]]" as="tag">
+          <paper-item value="{{tag.$val}}">[[tag.$val]]</paper-item>
+        </template>
+      </paper-listbox>
     </iron-pages>
 
     <div class='card editing'>
       <h3>Uploaded Files</h3>
-      <ul>
-        <template is="dom-repeat" id="fileView" items="[[_toArray(resource.uploadedFiles)]]" as="file">
-          <a class='fileDownload' href="[[file.value.url]]">
-            <li>
-              <h5 style="margin-bottom:2px">[[file.value.name]]</h5>
-              <ul>
-                <li>Size = [[toMb(file.value.size)]]; </li>
-                <li>Uploaded date = [[toDateString(file.value.lastModified)]]</li>
-              </ul>
-            </li>
-          </a>
-        </template>
-      </ul>
-      <h3>Add new files</h3>
-      <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[vaadinFiles]]"></vaadin-upload>
+      <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="{{resource.uploadedFiles}}"></vaadin-upload>
     </div>
+
   </template>
 
-  <script>
-    function _getCurrentIndex(file, uploadsMeta) {
-      var index = -1
-      for (var i = 0; i < uploadsMeta.length; i++) {
-        var name = uploadsMeta[i].name
-        if (file.name == name) {
-          index = i
-        }
-      }
-      return index;
-    }
-  </script>
 
   <script>
     Polymer({
@@ -107,10 +84,6 @@
           type: Array,
           notify: true
         },
-        vaadinFiles: {
-          type: Array,
-          observer: 'vaadinChange'
-        },
         editingFile: {
           Type: Array,
           notify: true
@@ -133,147 +106,50 @@
           notify: true,
           reflectToAttribute: true
         },
+       
       },
 
-
-      vaadinChange: function (newData) {
-        console.log('new vaading', newData)
-      },
-
-      edit: function () {
-        this.set('editMode', true)
-      },
-      save: function () {
-        this.set('editMode', false)
-      },
-
-      _toArray: function (obj) {
-        if (obj) {
-          var array = Object.keys(obj).map(function (key) {
-            return {
-              name: key,
-              value: obj[key]
-            };
-          });
-          return array;
-        }
-        else {
-          return [];
-        }
-
-      },
-
-      toMb: function (size) {
-        //if less than 1MB, return size in kB
-        var val;
-
-        if (size * 0.000001 < 1) {
-          val = Math.round(size * 0.001)
-          return val + "KB";
-        }
-        else {
-          val = Math.round(size * 0.000001)
-          return val + "MB";
-        }
-      },
-
-      toDateString: function (milliseconds) {
-        var updated = (new Date(milliseconds)).toISOString().slice(0, 10);
-
-        return updated;
-      },
-
-
-      //*******all can be made much nicer!!!*******
       fileupload: function (event) {
         event.preventDefault();
         //check resource name exists, give warning and remove files if not
+        //*******not implemented yet*****
 
         //create file upload task
         var file = event.detail.file;
-        console.log('file', file)
         var ssdResourcesApp = firebase.app("SSD-Resources")
-        filenumber = this._toArray(this.uploadedFiles).length;
-        console.log(filenumber)
         var ref = firebase.storage(ssdResourcesApp).ref().child('/resources/' + this.resource.$key + "/" + file.name)
-        console.log('ref', ref)
         var uploadTask = ref.put(file);
+        //handle updates from snapshot
         uploadTask.on('state_changed', function (snapshot) {
-          console.log('snapshot', snapshot)
-          var progressBars = document.querySelectorAll('paper-progress');
-          console.log(progressBars);
           var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           var vaadinUploads = document.querySelector('vaadin-upload')
-          console.log(vaadinUploads)
-          var uploadsMeta = vaadinUploads.get('files');
-          var index = _getCurrentIndex(file, uploadsMeta)
-          console.log(index)
-          progressBars[index].set('value', progress)
-        }, function (error) {
-          console.log(error)
+          var index = this.getCurrentIndex(vaadinUploads.files, file.name)
+          var temp = this.resource.uploadedFiles[index]
+          temp.loaded = progress
+          temp.progress = progress
+          this.set('resource.uploadedFiles.' + index, [])
+          this.set('resource.uploadedFiles.' + index, temp)
+        }.bind(this), function (error) {
+          console.log('error', error)
           // Handle unsuccessful uploads
         }, function () {
-          console.log('uploadTask', uploadTask)
           var downloadURL = uploadTask.snapshot.downloadURL;
-          // //set progress bar to complete
           var vaadinUploads = document.querySelector('vaadin-upload')
-          var uploadsMeta = vaadinUploads.get('files');
-          console.log(uploadsMeta);
-          console.log(vaadinUploads);
-          var vaadinFiles = document.querySelectorAll('vaadin-upload-file')
-          var index = _getCurrentIndex(file, uploadsMeta)
-          vaadinFiles[index].set('file.complete', true);
-          vaadinFiles[index].set('file.loaded', 100);
-
-          // just pushing the new file item to the uploadedFiles array loses a bunch of the file metadata (I guess the perils of forcing a file object into a database array?)  So - terrible hack time:
-          var fileItem = [];
-          fileItem.name = vaadinUploads.files[index].name;
-          fileItem.lastModified = Date.now();
-          fileItem.size = vaadinUploads.files[index].size;
-          fileItem.url = downloadURL;
-          console.log(fileItem);
-          this.resource.uploadedFiles.push(fileItem)
-          console.log('current resource', this.resource)
-          document.querySelector("#activeResource").newFile(fileItem);
+          var index = this.getCurrentIndex(vaadinUploads.files, file.name)
+          var temp = this.resource.uploadedFiles[index]
+          temp.complete = true
+          temp.url = downloadURL
+          this.set('resource.uploadedFiles.' + index, [])
+          this.set('resource.uploadedFiles.' + index, temp)
         }.bind(this));
-        this.$.fileView.render();
       },
 
-      statechanged: function (event) {
-        console.log(event.detail.file);
-      },
-
-      newFile: function (fileItem) {
-        //if no uploadedFiles yet, create and set property.
-        console.log(this.name);
-
-        if (!this.uploadedFiles) {
-          this.set("uploadedFiles", [])
-          console.log("no uploaded files, so created empty array");
-          console.log(this.uploadedFiles)
+      //iterate through each uplaod to find index of current filename
+      getCurrentIndex: function (uploads, fileName) {
+        for (let i = 0; i < uploads.length; i++) {
+          if (uploads[i].name == fileName) { return i }
         }
-        console.log(fileItem);
-        console.log(document.querySelector("#firebaseDocSingleFile"));
-
-        this.fileId = null;
-        var path = this.resourceId + "/uploadedFiles/";
-        console.log(path);
-        this.singleFile = fileItem
-        return document.querySelector("#firebaseDocSingleFile").save(path).then(function () {
-          console.log("singleFile = " + this.singleFile)
-          console.log("singleFileId = " + this.fileId);
-          document.querySelector("#firebaseDocSingleFile").reset();
-        }.bind(this));
-      },
-
-      // saveFile: function() {
-      //   return this.$.editingResource.save("/resources").then(function() {
-      //     this.$.editingResource.reset();
-      //   }.bind(this));
-      // }
-
-
-
+      }
     })
   </script>
 </dom-module>

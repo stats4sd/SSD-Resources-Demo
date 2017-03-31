@@ -2,7 +2,7 @@
 <link rel="import" href="../../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../../bower_components/iron-elements/iron-elements.html">
 <link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
-<link rel="import" href="./ssd-resource-meta.html">
+<link rel="import" href="../../bower_components/polymerfire/polymerfire.html">
 
 <link rel="import" href="../shared-styles.html">
 
@@ -40,23 +40,6 @@
       .editing {
         width: 90%;
         margin: 15px auto;
-      }
-      
-      .fileDownload {
-        display: inline-block;
-        min-width: 220px;
-        margin: 5px;
-        padding: 0;
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-        background-color: rgba(0, 0, 0, 0.12);
-        border-radius: 5px;
-        text-decoration: none;
-        color: black;
-      }
-      
-      .fileDownload:hover {
-        background-color: #F8BC02;
-        cursor: pointer;
       }
     </style>
     <div class="card">
@@ -112,14 +95,14 @@
 
       <!--editable version-->
       <template is="dom-if" if='[[editMode]]' restamp='true'>
-        <ssd-resource-editor id="editor"resource='{{resource}}' persisted-topics="[[persistedTopics]]" persisted-r-types="[[persistedRTypes]]"
+        <ssd-resource-editor id="editor" resource='{{resource}}' persisted-topics="[[persistedTopics]]" persisted-r-types="[[persistedRTypes]]"
           persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]">
         </ssd-resource-editor>
       </template>
-
     </div>
 
-
+    <firebase-document id="firebaseResourceDoc" app-name="SSD-Resources" data="{{editableResource}}" path="[[firebaseEditPath]]">
+    </firebase-document>
   </template>
 
   <script>
@@ -147,6 +130,10 @@
           value: false,
           notify: true,
           reflectToAttribute: true
+        },
+        firebaseEditPath: {
+          type: String,
+          notify: true,
         }
       },
 
@@ -154,8 +141,17 @@
         this.set('editMode', true)
       },
       save: function () {
-        this.set('editMode', false)
-        console.log('saving resource', this.resource)
+        this.editableResource=this.resource
+        delete this.editableResource.$key
+        console.log('saving resource', this.editableResource)
+        var key = this.resource.$key        
+        this.firebaseEditPath = '/resources/' + key
+        this.$.firebaseResourceDoc.save('/resources',key).then(function () {
+          this.set('editMode', false)
+          console.log('saved')
+        }.bind(this))
+
+
       },
       closeResource: function () {
         this.set('editMode', false)
