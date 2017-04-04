@@ -23,27 +23,32 @@
 <link rel="import" href="ssd-view404.html">
 <link rel="import" href="ssd-admin-tags.html">
 
+<link rel="stylesheet" href="bower_components/open-sans-fontface/open-sans.css" type="text/css">
 <link rel="import" href="my-icons.html">
 
 <dom-module id="ssd-app">
   <template>
     <style>
-       /*:host {
-        --app-primary-color: var(--paper-red-700);
+       :host {
+        --app-primary-color: #d2232a;
         --app-secondary-color: black;
         display: block;
+        font-family: "Open Sans";
       }
 
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
-        height: 96px;
+        /*padding: 15px 0 0 0;*/
+        /*height: 120px;*/
+        display: flex;
       }
 
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
 
+/*
       .drawer-list {
         margin: 0 20px;
       }
@@ -90,12 +95,32 @@
 
       ;*/
 
+      paper-tabs {
+        font-size: 0.8em;
+      }
+
       div.titleLogo {
         font-size: 18px;
-        font-family: "Open Sans";
         font-weight: bold;
         width: 190px;
-        color: white;      }
+        color: white;
+        padding: 15px;
+        white-space: pre-wrap;
+        float: left;
+      }
+
+      app-toolbar[sticky] {
+        margin-top: 35px;
+        height: auto;
+      }
+
+      paper-tabs[no-bar] paper-tab.iron-selected {
+        font-weight: bold;
+        color: #ffff8d;
+
+      }
+
+
     </style>
 
     <!-- Setup page routing -->
@@ -105,13 +130,13 @@
     <!-- Check screen size -->
     <iron-media-query query="min-width: 500px" query-matches="{{wide}}"></iron-media-query>
 
-    <!-- Define navigation drawer for smaller screens only -->
     <app-drawer-layout force-narrow responsiveWidth>
-      <!-- Drawer content -->
+
+      <!-- Define navigation drawer for smaller screens only -->
       <app-drawer id="drawer">
         <!-- empty app-toolbar to match main-section top bit -->
         <app-toolbar></app-toolbar>
-        <paper-menu selected="{{routeData}}" attr-for-selected="name">
+        <paper-menu selected="{{routeData.page}}" attr-for-selected="name">
           <!-- repeat through and display each (available) nav item -->
           <template is="dom-repeat" items="{{navItems}}">
             <paper-item name="{{item}}">{{item}}</paper-item>
@@ -122,17 +147,28 @@
 
     <!-- header bar content -->
       <app-header-layout has-scrolling-region>
-        <app-header condenses fixed effects="waterfall" style="background-color:#d2232a;" style="height:96px;">
-          <div maintitle class='titleLogo'>Statistics for Sustainable Development</div>
-          <app-toolbar sticky class="tabs-bar" style="height:64px;">
-            <!-- drawer toggle button - only for narrow -->
-            <paper-icon-button icon="my-icons:menu" drawer-toggle hidden$="{{wide}}"></paper-icon-button>
+        <!-- removed condenses for now as it is tricky to impliment well with the given custom css -->
+        <app-header fixed  effects="waterfall">
+            <div main-title class='titleLogo' hidden$="{{!wide}}">Statistics for Sustainable Development</div>
+            <div condensed-title>SSD</div>
+            <!-- WHEN condenses is re-added, setup multiple toolbars and make the tabs one sticky -->
+            <!-- </app-toolbar>
+            <app-toolbar sticky class="tabs-bar"> -->
+
             <!-- Navigation for larger screens -->
-            <paper-tabs selected="{{routeData}}" attr-for-selected="name" hidden$="{{!wide}}" bottom-item>
-              <template is="dom-repeat" items="{{navItems}}">
-                <paper-tab name="{{item}}">{{item}}</paper-tab>
-              </template>
-            </paper-tabs>
+            <!-- </app-toolbar>
+            <app-toolbar> -->
+            <app-toolbar sticky >
+              <paper-icon-button icon="my-icons:menu" drawer-toggle hidden$="{{wide}}"></paper-icon-button>
+
+              <paper-tabs selected="{{routeData.page}}" attr-for-selected="name" hidden$="{{!wide}}">
+                <template is="dom-repeat" items="{{navItems}}">
+                  <paper-tab name="{{item}}" class="top-tab">{{item}}</paper-tab>
+                </template>
+              </paper-tabs>
+              <div spacer></div>
+              <paper-button>
+
           </app-toolbar>
 
 
@@ -149,7 +185,7 @@
 
 
   <!-- Main pages -->
-      <iron-pages selected="{{routeData}}" attr-for-selected="name">
+      <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
         <template is="dom-repeat" items="{{navItems}}">
           <ssd-home name="home"></ssd-home>
           <ssd-resources name="resources"></ssd-resources>
@@ -204,7 +240,7 @@
         navItems: {
           type: Array,
           value: function() {
-            return ['home','resources'];
+            return ['home','resources','filter'];
           }
         }
       },
@@ -212,6 +248,8 @@
 
       _wideChanged: function(wide) {
         console.log("wide",wide);
+        console.log("route",this.route)
+        // console.log("routeData",this.routeData)
         // if it's now wide, confirm the drawer is closed
         if(wide && this.$.drawer.opened) {
           this.$.drawer.opened = false;
