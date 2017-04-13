@@ -47,8 +47,10 @@
       Add resource
     </paper-button> -->
     <div style='display:inline-flex'>
-      <div style='width: 300px; height: 100%; background-color:white;border-right:1px solid grey;flex: 1 1 auto;' hidden$={{!veryWide}}>
-        <h2 style='height:300px;line-height:100%'>Latest Resources</h2>
+      <div style='width: 280px; height: 100%; background-color:white;margin-right:20px;flex: 1 1 auto;box-shadow: 5px 5px 5px #cccccc;position:relative;top:-20px' hidden$={{!veryWide}}>
+        <!-- added position relative and top:-20px to push the sidebar up underneath the header. Then added empty div to push the h2 element back down to the correct position. -->
+        <div style='height:20px;'></div>
+        <h2 style='height:235px;line-height:235px;margin-top:0;'>Latest Resources</h2>
       </div>
     <div style="flex: 1 1 auto;">
       <div style='height: 25px;'></div>
