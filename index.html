@@ -33,11 +33,14 @@
     <meta name="msapplication-tap-highlight" content="no">
 
     <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-    <script src="bower_components/web-animations-js/web-animations-next.min.js"></script>
     <link rel="import" href="bower_components/platinum-sw/platinum-sw-elements.html">
     <link rel="import" href="bower_components/polymerfire/polymerfire.html">
     <link rel="import" href="bower_components/polymerfire/firebase-app.html">
     <link rel="import" href="src/ssd-app.html">
+
+    <!-- import font(s) -->
+    <link rel="stylesheet" href="bower_components/open-sans-fontface/open-sans.css" type="text/css">
+
 
     <!-- Import jQuery -->
     <!--<script src="/bower_components/jquery/dist/jquery.min.js"></script>-->
@@ -46,13 +49,20 @@
     <script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>-->
 
     <style>
+      @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 400;
+
       body {
         margin: 0;
-        font-family: 'Roboto', 'Noto', sans-serif;
+        font-family: 'Open Sans', 'Noto', sans-serif;
         line-height: 1.5;
         min-height: 100vh;
         background-color: #eeeeee;
       }
+
+
     </style>
   </head>
 

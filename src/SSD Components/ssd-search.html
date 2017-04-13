@@ -12,12 +12,12 @@
         opacity: 0;
         display: none;
       }
-      
+
        :host([opened]) {
         display: block;
         opacity: 1;
         position: absolute;
-        top: 64px;
+        top: 0px;
         left: 0;
         right: 0;
         bottom: 0;
@@ -26,13 +26,13 @@
         z-index: 1;
         color: black;
       }
-      
+
       .resources-container {
         display: flex;
         flex-wrap: wrap;
       }
     </style>
-    
+
 
     <h1>Search ([[totalResults]])</h1>
     <paper-button raised on-tap='close'>

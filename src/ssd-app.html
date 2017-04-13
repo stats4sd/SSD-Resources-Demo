@@ -23,65 +23,46 @@
 <link rel="import" href="ssd-view404.html">
 <link rel="import" href="ssd-admin-tags.html">
 
+<link rel="stylesheet" href="bower_components/open-sans-fontface/open-sans.css" type="text/css">
 <link rel="import" href="my-icons.html">
 
 <dom-module id="ssd-app">
   <template>
     <style>
        :host {
-        --app-primary-color: var(--paper-red-700);
+        --app-primary-color: #d2232a;
         --app-secondary-color: black;
         display: block;
+        font-family: "Open Sans";
       }
-      
+
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
+        /*padding: 15px 0 0 0;*/
+        /*height: 120px;*/
+        display: flex;
       }
-      
+
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
-      
+
+/*
       .drawer-list {
         margin: 0 20px;
       }
-      
-      .drawer-list a {
-        display: block;
-        padding: 0 16px;
-        text-decoration: none;
-        color: var(--app-secondary-color);
-        line-height: 40px;
-      }
-      
-      .drawer-list a.iron-selected {
-        color: black;
-        font-weight: bold;
-      }
-      
+
       .user-name {
         text-align: right;
         padding-right: 16px;
         font-size: medium;
       }
-      
-      .admin-pages {
-        color: white!important;
-        background-color: var(--paper-red-700);
-        padding: 4px 0 4px 0;
-        font-weight: 200;
-        padding-left: 16px;
-      }
-      
-      .admin-page {
-        background-color: var(--paper-red-100);
-      }
-      
+
       .login-details {
         color: var(--paper-red-500)
       }
-      
+
       .footer {
         position: absolute;
         right: 0;
@@ -89,88 +70,155 @@
         left: 0;
         padding: 1rem 1rem 8rem 1rem;
         text-align: center;
-        /*color: var(--group-colour-900);*/
+        /*color: var(--group-colour-900);
       }
-      
+
       .enableEditing {
         background-color: var(--paper-red-900);
         color: var(--paper-red-50)
       }
-      
+
       .disableEditing {
         background-color: var(--paper-blue-900);
         color: var(--paper-blue-50)
       }
-      
+
       .addResource {
         background-color: var(--paper-green-900);
         color: var(--paper-green-50)
       }
-      
+
       .adminButton {
         width: 100%;
         margin: 5px;
       }
-      
-      ;
-    </style>
-    <!--<style include="note-app-shared-styles"></style>-->
 
+      ;*/
+
+      paper-tabs {
+        font-size: 0.9em;
+      }
+
+      paper-button {
+        font-size: 0.8em;
+      }
+      div.titleLogo {
+        font-size: 18px;
+        font-weight: bold;
+        width: 130px;
+        color: white;
+        padding: 15px;
+        white-space: pre-wrap;
+        float: left;
+      }
+
+      app-toolbar[sticky] {
+        margin-top: 35px;
+        height: auto;
+        padding-left: 0;
+      }
+
+      paper-tabs[no-bar] paper-tab.iron-selected {
+        font-weight: bold;
+        color: #ffff8d;
+      }
+
+      paper-button {
+        font-family: "Open Sans"
+      }
+
+      :root {
+        --paper-font-common-base: {
+          font-family: "Open Sans", "Noto", sans-serif;
+        }
+      }
+
+      .spacer {
+        width: 10%;
+      }
+    </style>
+
+    <!-- Setup page routing -->
     <app-location route="{{route}}"></app-location>
     <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
+    <!-- Check screen size -->
+    <iron-media-query query="min-width: 650px" query-matches="{{wide}}"></iron-media-query>
+    <iron-media-query query="min-width: 1024px" query-matches="{{veryWide}}"></iron-media-query>
+    <app-drawer-layout force-narrow responsiveWidth>
 
-    <app-drawer-layout fullbleed>
-      <!-- Drawer content -->
+      <!-- Define navigation drawer for smaller screens only -->
       <app-drawer id="drawer">
-        <app-toolbar>Menu</app-toolbar>
-        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="home" href="/home">Home</a>
-          <a name="resources" href="/resources">All Resources</a>
-        </iron-selector>
-        <iron-selector hidden$="{{!signedIn}}" selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <div class="admin-pages">Admin Pages</div>
-          <a class="admin-page" name="admin-tags" href="/admin-tags">Tags</a>
-        </iron-selector>
-        </div>
+        <!-- empty app-toolbar to match main-section top bit -->
+        <app-toolbar>SSD Resources</app-toolbar>
+        <paper-menu selected="{{routeData.page}}" attr-for-selected="name">
+          <!-- repeat through and display each (available) nav item -->
+          <template is="dom-repeat" items="{{navItems}}">
+            <paper-item name="{{item}}">{{item}}</paper-item>
+          </template>
+        </paper-menu>
       </app-drawer>
 
-      <!-- Main content -->
+
+    <!-- header bar content -->
       <app-header-layout has-scrolling-region>
-        <app-header condenses reveals effects="waterfall">
-          <app-toolbar>
-            <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
-            <div main-title>SSD Resources Demo</div>
-            <span class="user-name" hidden$="[[!signedIn]]"> signed in as [[user.displayName]]</span>
-            <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
-            <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
-            <paper-icon-button icon="lock-outline" title="Login" on-tap="_login" hidden$="[[signedIn]]"></paper-icon-button>
-            <paper-icon-button icon="lock-open" title="Logout" on-tap="_logout" hidden$="[[!signedIn]]"></paper-icon-button>
+        <!-- removed condenses for now as it is tricky to impliment well with the given custom css -->
+        <app-header fixed  effects="waterfall">
+            <div main-title class='titleLogo' hidden$="{{!wide}}">Statistics for Sustainable Development</div>
+            <div condensed-title>SSD Resources</div>
+            <!-- WHEN condenses is re-added, setup multiple toolbars and make the tabs one sticky -->
+            <!-- </app-toolbar>
+            <app-toolbar sticky class="tabs-bar"> -->
+
+            <!-- Navigation for larger screens -->
+            <!-- </app-toolbar>
+            <app-toolbar> -->
+            <app-toolbar sticky >
+              <paper-icon-button icon="my-icons:menu" drawer-toggle hidden$="{{wide}}"></paper-icon-button>
+              <paper-tabs selected="{{routeData.page}}" attr-for-selected="name" hidden$="{{!wide}}"  fitcontainer style='width:50%;'>
+                <template is="dom-repeat" items="{{navItems}}">
+                  <paper-tab name="{{item}}">{{item}}</paper-tab>
+                </template>
+              </paper-tabs>
+              <paper-button  on-tap='search' class="right-top-tab">
+                <iron-icon icon="search"></iron-icon>
+                   <p>Search</p>
+              </paper-button>
+              <paper-button  on-tap='addResource' class="right-top-tab">
+                <iron-icon icon="add-circle-outline"></iron-icon>
+                   Add New
+              </paper-button>
+
           </app-toolbar>
-          <template is="dom-if" if="[[signedIn]]">
 
-          </template>
+
         </app-header>
-        <!--after main header pages get loaded-->
-        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-          <ssd-home name="home"></ssd-home>
-          <ssd-resources name="resources" signed-in="[[signedIn]]" edit-mode="[[editingMode]]"></ssd-resources>
-          <ssd-view404 name="view404"></ssd-view404>
-        </iron-pages>
-        <!--pages to only show when signed in-->
-        <iron-pages hidden$="{{!signedIn}}" selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-          <!-- <ssd-add-resource name="add-resource"></ssd-add-resource> -->
-          <ssd-admin-tags name="admin-tags"></ssd-admin-tags>
-        </iron-pages>
-    </app-drawer-layout>
 
-    <paper-dialog id="login" with-backdrop center>
-      <paper-dialog-scrollable>
-        <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
-        <ssd-email-login-fire app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
-        </ssd-email-login-fire>
-      </paper-dialog-scrollable>
-    </paper-dialog>
+        <!-- Login box (starts hidden) -->
+      <paper-dialog id="login" with-backdrop center>
+        <paper-dialog-scrollable>
+          <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
+          <ssd-email-login-fire app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+          </ssd-email-login-fire>
+        </paper-dialog-scrollable>
+      </paper-dialog>
+
+
+  <!-- Main pages -->
+      <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
+        <template is="dom-repeat" items="{{navItems}}">
+          <ssd-home name="home"></ssd-home>
+          <ssd-resources name="resources" id="resourcesPage" very-wide={{veryWide}}></ssd-resources>
+        </template>
+      </iron-pages>
+
+
+      </app-header-layout>
+
+
+
+
+</app-drawer-layout>
 
 
 
@@ -204,8 +252,33 @@
           type: Boolean,
           value: false,
           notify: true,
+        },
+        wide: {
+          type: Boolean,
+          observer: '_wideChanged'
+        },
+        veryWide: {
+          type: Boolean,
+        },
+        navItems: {
+          type: Array,
+          value: function() {
+            return ['home','resources'];
+          }
         }
       },
+
+
+      _wideChanged: function(wide) {
+        console.log("wide",wide);
+        console.log("route",this.route)
+        // console.log("routeData",this.routeData)
+        // if it's now wide, confirm the drawer is closed
+        if(wide && this.$.drawer.opened) {
+          this.$.drawer.opened = false;
+        }
+      },
+
       userChanged: function (user) { console.log('user signed in', user) },
       observers: [
         '_routePageChanged(routeData.page)',
@@ -243,7 +316,15 @@
       },
       _logStatus: function () {
         if (this.signedIn) { this.$$('paper-dialog').close() }
-      }
+      },
+
+      search: function() {
+        this.$$('ssd-resources').search();
+      },
+
+      addResource: function() {
+        this.$$('ssd-resources').addResource();
+      },
     });
   </script>
 </dom-module>
