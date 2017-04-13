@@ -19,7 +19,7 @@
         display: block;
         padding: 10px;
       }
-      
+
       .resources-container {
         display: flex;
         flex-wrap: nowrap;
@@ -27,39 +27,50 @@
         -webkit-overflow-scrolling: touch;
         -ms-overflow-style: -ms-autohiding-scrollbar;
       }
-      
+
       h1 {
         margin: 0
+      }
+
+
       }
     </style>
 
     <!--  SETTING UP RESOURCES -->
 
-    <paper-button raised on-tap='search'>
+    <!-- <paper-button raised on-tap='search'>
       <iron-icon icon="search"></iron-icon>
       Search
-    </paper-button>
-    <paper-button raised on-tap='addResource'>
+    </paper-button> -->
+    <!-- <paper-button raised on-tap='addResource'>
       <iron-icon icon="add"></iron-icon>
       Add resource
-    </paper-button>
-
-    <h1>Latest Resources</h1>
-    <div class="resources-container" hidden$="[[liveMode]]">
-      <template id="resourceList" is="dom-repeat" items="[[persistedNewestResources]]" as="resource" sort="_sortNewest">
-        <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
-      </template>
+    </paper-button> -->
+    <div style='display:inline-flex'>
+      <div style='width: 300px; height: 100%; background-color:white;border-right:1px solid grey;flex: 1 1 auto;' hidden$={{!veryWide}}>
+        <h2 style='height:300px;line-height:100%'>Latest Resources</h2>
+      </div>
+    <div style="flex: 1 1 auto;">
+      <div style='height: 25px;'></div>
+      <div class='thin-title' hidden$={{veryWide}}>
+        <h1>Latest Resources</h1>
+      </div>
+      <div class="resources-container" hidden$="[[liveMode]]">
+        <template id="resourceList" is="dom-repeat" items="[[persistedNewestResources]]" as="resource" sort="_sortNewest">
+          <ssd-resource-small resource='[[resource]]' on-tap='resourceTap'></ssd-resource-small>
+        </template>
+      </div>
+      <div class="resources-container" hidden$="[[!liveMode]]">
+        <template id="resourceList2" is="dom-repeat" items="[[resources]]" as="resource" sort="_sortNewest">
+          <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
+        </template>
+      </div>
     </div>
-    <div class="resources-container" hidden$="[[!liveMode]]">
-      <template id="resourceList2" is="dom-repeat" items="[[resources]]" as="resource" sort="_sortNewest">
-        <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
-      </template>
-    </div>
-
+  </div>
     <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-topics="[[persistedTopics]]" persisted-r-types="[[persistedRTypes]]"
       persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]" on-update="updateFired">
     </ssd-resource-full>
-    
+
 
     <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-topics="[[persistedTopics]]"
       persisted-r-types="[[persistedRTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]">
@@ -143,7 +154,7 @@
           type:Boolean,
           value:false
         }
-       
+
       },
       resourcesChanged:function(res){
         console.log('res changed',res)

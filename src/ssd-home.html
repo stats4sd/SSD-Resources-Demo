@@ -21,94 +21,40 @@
         background-color: var(--paper-indigo-500);
         color: white;
       }
+
+      .resources-container {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        -ms-overflow-style: -ms-autohiding-scrollbar;
+      }
+
+      .card-small {
+        width: 45%;
+        min-width: 250px;
+      }
     </style>
-
-    <div class="card">
-      <h2>RMS Resources</h2>
-      <a href="/resources" tabindex="-1">
-        <paper-button class="indigo" raised>
-          <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-      </a>
-      <h2>RMS Resources</h2>
-      <a href="/resources" tabindex="-1">
-        <paper-button class="indigo" raised>
-          <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-      </a>      <h2>RMS Resources</h2>
-            <a href="/resources" tabindex="-1">
-              <paper-button class="indigo" raised>
-                <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-            </a>      <h2>RMS Resources</h2>
-                  <a href="/resources" tabindex="-1">
-                    <paper-button class="indigo" raised>
-                      <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                  </a>      <h2>RMS Resources</h2>
-                        <a href="/resources" tabindex="-1">
-                          <paper-button class="indigo" raised>
-                            <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                        </a>      <h2>RMS Resources</h2>
-                              <a href="/resources" tabindex="-1">
-                                <paper-button class="indigo" raised>
-                                  <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                              </a>      <h2>RMS Resources</h2>
-                                    <a href="/resources" tabindex="-1">
-                                      <paper-button class="indigo" raised>
-                                        <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                                    </a>      <h2>RMS Resources</h2>
-                                          <a href="/resources" tabindex="-1">
-                                            <paper-button class="indigo" raised>
-                                              <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                                          </a>      <h2>RMS Resources</h2>
-                                                <a href="/resources" tabindex="-1">
-                                                  <paper-button class="indigo" raised>
-                                                    <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                                                </a>      <h2>RMS Resources</h2>
-                                                      <a href="/resources" tabindex="-1">
-                                                        <paper-button class="indigo" raised>
-                                                          <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                                                      </a>      <h2>RMS Resources</h2>
-                                                            <a href="/resources" tabindex="-1">
-                                                              <paper-button class="indigo" raised>
-                                                                <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                                                            </a>      <h2>RMS Resources</h2>
-                                                                  <a href="/resources" tabindex="-1">
-                                                                    <paper-button class="indigo" raised>
-                                                                      <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                                                                  </a>      <h2>RMS Resources</h2>
-                                                                        <a href="/resources" tabindex="-1">
-                                                                          <paper-button class="indigo" raised>
-                                                                            <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                                                                        </a>      <h2>RMS Resources</h2>
-                                                                              <a href="/resources" tabindex="-1">
-                                                                                <paper-button class="indigo" raised>
-                                                                                  <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                                                                              </a>      <h2>RMS Resources</h2>
-                                                                                    <a href="/resources" tabindex="-1">
-                                                                                      <paper-button class="indigo" raised>
-                                                                                        <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                                                                                    </a>      <h2>RMS Resources</h2>
-                                                                                          <a href="/resources" tabindex="-1">
-                                                                                            <paper-button class="indigo" raised>
-                                                                                              <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                                                                                          </a>      <h2>RMS Resources</h2>
-                                                                                                <a href="/resources" tabindex="-1">
-                                                                                                  <paper-button class="indigo" raised>
-                                                                                                    <iron-icon icon="search"></iron-icon>Browse All Resources</paper-button>
-                                                                                                </a>
-      <h2>Event Resources</h2>
-      <a href="/resources/event_maanzoni2017" tabindex="-1">
-        <paper-button class="green" raised>
-          <iron-icon icon="search"></iron-icon>Maanzoni Workshop 2017</paper-button>
-      </a>
-
-      <!--<p>To access the admin pages, please login using the padlock in the top-right of the page.</p>
-      <p class="login-details">username: <strong>admin@test.com</strong><br>password: <strong>test123</strong></p>-->
+    <h2>SSD Resources</h2>
+    <p>View the existing resources on the "resources" page - use the tabs along the top or the sidebar menu to navigate.</p>
+    <p>To edit or add resources, please login using the padlock button in the top-right.</p>
     </div>
+
   </template>
 
   <script>
     //give element selector name here
     Polymer({
       is: 'ssd-home',
+      properties: {
+        demo: {
+          type: Object,
+          value: {
+            "description" : "When we have more resources, we can setup a 'browsing view' and start highlighting different resources",
+            "name" : "Example Resource Card",
+          }
+        }
+      }
     });
   </script>
 </dom-module>

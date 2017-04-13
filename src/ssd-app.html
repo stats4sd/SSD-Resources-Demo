@@ -96,13 +96,16 @@
       ;*/
 
       paper-tabs {
-        font-size: 0.8em;
+        font-size: 0.9em;
       }
 
+      paper-button {
+        font-size: 0.8em;
+      }
       div.titleLogo {
         font-size: 18px;
         font-weight: bold;
-        width: 190px;
+        width: 130px;
         color: white;
         padding: 15px;
         white-space: pre-wrap;
@@ -112,15 +115,27 @@
       app-toolbar[sticky] {
         margin-top: 35px;
         height: auto;
+        padding-left: 0;
       }
 
       paper-tabs[no-bar] paper-tab.iron-selected {
         font-weight: bold;
         color: #ffff8d;
-
       }
 
+      paper-button {
+        font-family: "Open Sans"
+      }
 
+      :root {
+        --paper-font-common-base: {
+          font-family: "Open Sans", "Noto", sans-serif;
+        }
+      }
+
+      .spacer {
+        width: 10%;
+      }
     </style>
 
     <!-- Setup page routing -->
@@ -128,14 +143,14 @@
     <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
     <!-- Check screen size -->
-    <iron-media-query query="min-width: 500px" query-matches="{{wide}}"></iron-media-query>
-
+    <iron-media-query query="min-width: 650px" query-matches="{{wide}}"></iron-media-query>
+    <iron-media-query query="min-width: 1024px" query-matches="{{veryWide}}"></iron-media-query>
     <app-drawer-layout force-narrow responsiveWidth>
 
       <!-- Define navigation drawer for smaller screens only -->
       <app-drawer id="drawer">
         <!-- empty app-toolbar to match main-section top bit -->
-        <app-toolbar></app-toolbar>
+        <app-toolbar>SSD Resources</app-toolbar>
         <paper-menu selected="{{routeData.page}}" attr-for-selected="name">
           <!-- repeat through and display each (available) nav item -->
           <template is="dom-repeat" items="{{navItems}}">
@@ -150,7 +165,7 @@
         <!-- removed condenses for now as it is tricky to impliment well with the given custom css -->
         <app-header fixed  effects="waterfall">
             <div main-title class='titleLogo' hidden$="{{!wide}}">Statistics for Sustainable Development</div>
-            <div condensed-title>SSD</div>
+            <div condensed-title>SSD Resources</div>
             <!-- WHEN condenses is re-added, setup multiple toolbars and make the tabs one sticky -->
             <!-- </app-toolbar>
             <app-toolbar sticky class="tabs-bar"> -->
@@ -160,14 +175,19 @@
             <app-toolbar> -->
             <app-toolbar sticky >
               <paper-icon-button icon="my-icons:menu" drawer-toggle hidden$="{{wide}}"></paper-icon-button>
-
-              <paper-tabs selected="{{routeData.page}}" attr-for-selected="name" hidden$="{{!wide}}">
+              <paper-tabs selected="{{routeData.page}}" attr-for-selected="name" hidden$="{{!wide}}"  fitcontainer style='width:50%;'>
                 <template is="dom-repeat" items="{{navItems}}">
-                  <paper-tab name="{{item}}" class="top-tab">{{item}}</paper-tab>
+                  <paper-tab name="{{item}}">{{item}}</paper-tab>
                 </template>
               </paper-tabs>
-              <div spacer></div>
-              <paper-button>
+              <paper-button  on-tap='search' class="right-top-tab">
+                <iron-icon icon="search"></iron-icon>
+                   <p>Search</p>
+              </paper-button>
+              <paper-button  on-tap='addResource' class="right-top-tab">
+                <iron-icon icon="add-circle-outline"></iron-icon>
+                   Add New
+              </paper-button>
 
           </app-toolbar>
 
@@ -188,7 +208,7 @@
       <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
         <template is="dom-repeat" items="{{navItems}}">
           <ssd-home name="home"></ssd-home>
-          <ssd-resources name="resources"></ssd-resources>
+          <ssd-resources name="resources" id="resourcesPage" very-wide={{veryWide}}></ssd-resources>
         </template>
       </iron-pages>
 
@@ -237,10 +257,13 @@
           type: Boolean,
           observer: '_wideChanged'
         },
+        veryWide: {
+          type: Boolean,
+        },
         navItems: {
           type: Array,
           value: function() {
-            return ['home','resources','filter'];
+            return ['home','resources'];
           }
         }
       },
@@ -293,7 +316,15 @@
       },
       _logStatus: function () {
         if (this.signedIn) { this.$$('paper-dialog').close() }
-      }
+      },
+
+      search: function() {
+        this.$$('ssd-resources').search();
+      },
+
+      addResource: function() {
+        this.$$('ssd-resources').addResource();
+      },
     });
   </script>
 </dom-module>
