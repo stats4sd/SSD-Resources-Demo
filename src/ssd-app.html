@@ -114,13 +114,14 @@
 
       app-toolbar[sticky] {
         margin-top: 35px;
-        height: auto;
+        height: 50px;
         padding-left: 0;
       }
 
       paper-tabs[no-bar] paper-tab.iron-selected {
         font-weight: bold;
         color: #ffff8d;
+        height:50px;
       }
 
       paper-button {
@@ -175,7 +176,7 @@
             <app-toolbar> -->
             <app-toolbar sticky >
               <paper-icon-button icon="my-icons:menu" drawer-toggle hidden$="{{wide}}"></paper-icon-button>
-              <paper-tabs selected="{{routeData.page}}" attr-for-selected="name" hidden$="{{!wide}}"  fitcontainer style='width:50%;'>
+              <paper-tabs selected="{{routeData.page}}" attr-for-selected="name" hidden$="{{!wide}}"  fitcontainer>
                 <template is="dom-repeat" items="{{navItems}}">
                   <paper-tab name="{{item}}">{{item}}</paper-tab>
                 </template>
