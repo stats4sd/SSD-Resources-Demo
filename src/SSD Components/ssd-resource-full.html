@@ -3,7 +3,6 @@
 <link rel="import" href="../../bower_components/iron-elements/iron-elements.html">
 <link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
 <link rel="import" href="../../bower_components/polymerfire/polymerfire.html">
-
 <link rel="import" href="../shared-styles.html">
 
 
@@ -28,7 +27,6 @@
         bottom: 0;
         background-color: var(--paper-red-700);
         transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 1;
       }
 
       .totallyEditable:hover {
@@ -42,7 +40,6 @@
         margin: 15px auto;
       }
     </style>
-    <div class="card">
       <paper-button raised on-tap='close'>
         <iron-icon icon="arrow-back"></iron-icon>Back
       </paper-button>
@@ -52,6 +49,17 @@
       <paper-button raised on-tap='save' hidden$="[[!editMode]]">
         <iron-icon icon="save"></iron-icon>Save
       </paper-button>
+
+      <!-- Notice for incomplete resources -->
+
+      <!-- notice for clicking back without saving - with stuff (do you want to save?) -->
+      <!-- notice for clicking save without name and description (please add); -->
+
+
+      <div style='display:flex;margin:0.5em;-webkit-box-shadow: -1px 0px 25px -1px rgba(97,97,97,1);-moz-box-shadow: -1px 0px 25px -1px rgba(97,97,97,1);box-shadow: -1px 0px 25px -1px rgba(97,97,97,1);padding: 0 1em;justify-content:center;font-weight:bold;' id='emptyResourceNote' hidden$="[[!emptyReourceNoteOpen]]">
+        <p>Please add both a name and a description to the resource before saving.</p>
+        <paper-button on-tap='hideEmptyReourceNoteOpen' style='font-size:0.8em;font-decoration:underline;color:blue;'>( hide this notice )</paper-button>
+      </div>
 
       <div hidden$="[[editMode]]">
         <h3>[[resource.name]]</h3>
@@ -112,6 +120,7 @@
         resource: {
           type: Object,
           value: [],
+          observer: '_pendingEdits'
         },
         editing: {
           type: Boolean,
@@ -138,7 +147,20 @@
         key: {
           type: String,
           notify: true
+        },
+        pendingEdits: {
+          type: Boolean,
+          value: false,
+        },
+        emptyReourceNoteOpen: {
+          type:Boolean,
+          value: false,
         }
+      },
+
+      //when an edit is made, set pendingEdits to true;
+      _pendingEdits: function() {
+        this.pendingEdits = true;
       },
 
       edit: function () {
@@ -157,10 +179,17 @@
           this.set('editMode', false)
           this.updates=true
           this.$.firebaseResourceDoc.reset();
+          //remove check for pending edits on exit.
+          this.pendingEdits = false;
           //document.querySelector('#resourceList').render();
         }.bind(this))
       },
       close: function () {
+        //check to see if resource has a name and description
+        if(this.resource.name=="" || this.resource.description=="") {
+            this.emptyReourceNoteOpen = true;
+            return;
+        }
         this.set('editMode', false)
         this.set('opened', false)
         //on update pass up message
@@ -270,7 +299,11 @@
         }
         if (id.length != 20) throw new Error('Length should be 20.');
         return id;
+      },
+      hideEmptyReourceNoteOpen: function() {
+        this.emptyReourceNoteOpen = false;
       }
+
     })
   </script>
 </dom-module>
