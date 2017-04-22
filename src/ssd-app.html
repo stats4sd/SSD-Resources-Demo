@@ -35,7 +35,7 @@
         display: block;
         font-family: "Open Sans";
       }
-
+      
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
@@ -43,12 +43,11 @@
         /*height: 120px;*/
         display: flex;
       }
-
+      
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
-
-/*
+      /*
       .drawer-list {
         margin: 0 20px;
       }
@@ -94,14 +93,15 @@
       }
 
       ;*/
-
+      
       paper-tabs {
         font-size: 0.9em;
       }
-
+      
       paper-button {
         font-size: 0.8em;
       }
+      
       div.titleLogo {
         font-size: 18px;
         font-weight: bold;
@@ -111,31 +111,45 @@
         white-space: pre-wrap;
         float: left;
       }
-
+      
       app-toolbar[sticky] {
         margin-top: 35px;
         height: 50px;
         padding-left: 0;
       }
-
+      
       paper-tabs[no-bar] paper-tab.iron-selected {
         font-weight: bold;
         color: #ffff8d;
-        height:50px;
+        height: 50px;
       }
-
+      
       paper-button {
         font-family: "Open Sans"
       }
-
-      :root {
+      
+       :root {
         --paper-font-common-base: {
           font-family: "Open Sans", "Noto", sans-serif;
         }
       }
-
+      
       .spacer {
         width: 10%;
+      }
+      
+      .login {
+        position: absolute;
+        right: 10px;
+        font-size: 0.83em;
+        cursor: pointer;
+      }
+      
+      .user-name {
+        position: absolute;
+        top: -30px;
+        right: 10px;
+        font-size: 0.6em;
       }
     </style>
 
@@ -161,57 +175,61 @@
       </app-drawer>
 
 
-    <!-- header bar content -->
+      <!-- header bar content -->
       <app-header-layout has-scrolling-region>
         <!-- removed condenses for now as it is tricky to impliment well with the given custom css -->
-        <app-header fixed  effects="waterfall">
-            <div main-title class='titleLogo' hidden$="{{!wide}}">Statistics for Sustainable Development</div>
-            <div condensed-title>SSD Resources</div>
-            <!-- WHEN condenses is re-added, setup multiple toolbars and make the tabs one sticky -->
-            <!-- </app-toolbar>
+        <app-header fixed effects="waterfall">
+          <div main-title class='titleLogo' hidden$="{{!wide}}">Statistics for Sustainable Development</div>
+          <div condensed-title>SSD Resources</div>
+          <!-- WHEN condenses is re-added, setup multiple toolbars and make the tabs one sticky -->
+          <!-- </app-toolbar>
             <app-toolbar sticky class="tabs-bar"> -->
 
-            <!-- Navigation for larger screens -->
-            <!-- </app-toolbar>
+          <!-- Navigation for larger screens -->
+          <!-- </app-toolbar>
             <app-toolbar> -->
-            <app-toolbar sticky >
-              <paper-icon-button icon="my-icons:menu" drawer-toggle hidden$="{{wide}}"></paper-icon-button>
-              <paper-tabs selected="{{routeData.page}}" attr-for-selected="name" hidden$="{{!wide}}"  fitcontainer>
-                <template is="dom-repeat" items="{{navItems}}">
-                  <paper-tab name="{{item}}">{{item}}</paper-tab>
-                </template>
-              </paper-tabs>
-              <paper-button  on-tap='search' class="right-top-tab">
-                <iron-icon icon="search"></iron-icon>
-                   <p>Search</p>
-              </paper-button>
-              <paper-button  on-tap='addResource' class="right-top-tab">
-                <iron-icon icon="add-circle-outline"></iron-icon>
-                   Add New
-              </paper-button>
+          <app-toolbar sticky>
+            <paper-icon-button icon="my-icons:menu" drawer-toggle hidden$="{{wide}}"></paper-icon-button>
+            <paper-tabs selected="{{routeData.page}}" attr-for-selected="name" hidden$="{{!wide}}" fitcontainer>
+              <template is="dom-repeat" items="{{navItems}}">
+                <paper-tab name="{{item}}">{{item}}</paper-tab>
+              </template>
+            </paper-tabs>
+            <paper-button on-tap='search' class="right-top-tab">
+              <iron-icon icon="search"></iron-icon>
+              <p>Search</p>
+            </paper-button>
+            <paper-button hidden$="{{!signedIn}}" on-tap='addResource' class="right-top-tab">
+              <iron-icon icon="add-circle-outline"></iron-icon>
+              Add New
+            </paper-button>
+            <paper-button hidden$="{{signedIn}}" on-tap='_login' class="right-top-tab login">
+              <iron-icon icon="lock"></iron-icon>
+              Sign In
+            </paper-button>
+            <div class="login" hidden$="{{!signedIn}}" on-tap='_logout'>
+              <paper-icon-button  icon="lock-open"></paper-icon-button>
+              Sign Out
+            </div>
+            <div class="user-name" hidden$="{{!signedIn}}">
+              Signed in as {{user.displayName}}
+            </div>
 
           </app-toolbar>
 
 
         </app-header>
 
-        <!-- Login box (starts hidden) -->
-      <paper-dialog id="login" with-backdrop center>
-        <paper-dialog-scrollable>
-          <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
-          <ssd-email-login-fire app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
-          </ssd-email-login-fire>
-        </paper-dialog-scrollable>
-      </paper-dialog>
 
 
-  <!-- Main pages -->
-      <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
-        <template is="dom-repeat" items="{{navItems}}">
-          <ssd-home name="home"></ssd-home>
-          <ssd-resources name="resources" id="resourcesPage" very-wide={{veryWide}}></ssd-resources>
-        </template>
-      </iron-pages>
+
+        <!-- Main pages -->
+        <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
+          <template is="dom-repeat" items="{{navItems}}">
+            <ssd-home name="home"></ssd-home>
+            <ssd-resources name="resources" id="resourcesPage" very-wide={{veryWide}}></ssd-resources>
+          </template>
+        </iron-pages>
 
 
       </app-header-layout>
@@ -219,7 +237,18 @@
 
 
 
-</app-drawer-layout>
+    </app-drawer-layout>
+
+    <body>
+      <!-- Login box (starts hidden) -->
+      <paper-dialog id="login" modal>
+        <paper-dialog-scrollable>
+          <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
+          <ssd-email-login-fire app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+          </ssd-email-login-fire>
+        </paper-dialog-scrollable>
+      </paper-dialog>
+    </body>
 
 
 
@@ -263,19 +292,19 @@
         },
         navItems: {
           type: Array,
-          value: function() {
-            return ['home','resources'];
+          value: function () {
+            return ['home', 'resources'];
           }
         }
       },
 
 
-      _wideChanged: function(wide) {
-        console.log("wide",wide);
-        console.log("route",this.route)
+      _wideChanged: function (wide) {
+        console.log("wide", wide);
+        console.log("route", this.route)
         // console.log("routeData",this.routeData)
         // if it's now wide, confirm the drawer is closed
-        if(wide && this.$.drawer.opened) {
+        if (wide && this.$.drawer.opened) {
           this.$.drawer.opened = false;
         }
       },
@@ -319,11 +348,11 @@
         if (this.signedIn) { this.$$('paper-dialog').close() }
       },
 
-      search: function() {
+      search: function () {
         this.$$('ssd-resources').search();
       },
 
-      addResource: function() {
+      addResource: function () {
         this.$$('ssd-resources').addResource();
       },
     });
