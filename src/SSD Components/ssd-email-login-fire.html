@@ -76,8 +76,8 @@
     <paper-input id="pwInput" type="password" label="Password" value="{{pw}}" on-keypress="_checkEnter" required></paper-input>
     <p><a href="#" id="reset" on-click="_resetPW">Reset password for entered email</a></p>
     <!--<paper-button id="emailSignUp" type="submit" on-tap="_signUpEmailPW">Sign Up</paper-button>-->
-    <paper-button id="emailSignIn" type="submit" on-tap="_signInEmailPW">Sign In</paper-button>
-    <paper-button id="emailSignIn" type="submit" on-tap="_cancel">Cancel</paper-button>
+    <paper-button id="emailSignIn" type="submit" on-tap="_signInEmailPW" dialog-confirm autofocus>Sign In</paper-button>
+    <paper-button id="emailSignIn" type="submit" dialog-confirm autofocus>Cancel</paper-button>
   </form>
 
 </template>

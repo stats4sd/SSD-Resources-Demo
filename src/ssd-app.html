@@ -321,6 +321,9 @@
       },
 
       _routePageChanged: function (page) {
+        console.log('page changed',page)
+        if(page==""){this.set('route.path','/home')}
+        //404 not working properly? doesn't seem to redirect
         this.page = page || 'home';
 
         if (!this.$.drawer.persistent) {
