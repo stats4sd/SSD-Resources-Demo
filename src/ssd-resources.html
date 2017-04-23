@@ -17,60 +17,141 @@
     <style include="shared-styles">
        :host {
         display: block;
-        padding: 10px;
       }
-
-      .resources-container {
+      
+      /*.resources-container {
+        width: 100%;
         display: flex;
         flex-wrap: nowrap;
-        overflow-x: auto;
+        overflow-x: scroll;
         -webkit-overflow-scrolling: touch;
         -ms-overflow-style: -ms-autohiding-scrollbar;
       }
-
+      */
       h1 {
         margin: 0
       }
-
-
+      
+      /*.side-bar-container {
+        display: inline-flex
+      }*/
+      
+      /*.side-bar {
+        padding: 10px;
+        width: 200px;
+        height: calc(100vh - 140px);
+        background-color: white;
+        margin-right: 20px;
+        flex: 1 1 auto;
+        box-shadow: 5px 5px 5px #cccccc;
+        position: relative;
+        top: -20px;
+      }*/
+      
+      .resource-page-body {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+      }
+      
+      .resource-page-content {
+        display: flex;
+        flex: 1;
+      }
+      
+      .main-content {
+        flex: 1;
+      }
+      
+      .left-sidebar-nav,
+      .right-sidebar-aside {
+        /* 12em is the width of the columns */
+        flex: 0 0 12em;
+      }
+      
+      .left-sidebar-nav {
+        /* put the nav on the left */
+        order: -1;
+        align-self: center;
+      }
+      
+      .slider {
+        position: relative;
+        background-color: #ccc;
+        height: 250px;
+        overflow-x: scroll;
+        overflow-y: hidden;
+      }
+      
+      .track {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        width: 2400px;
+      }
+      .section-heading{
+        font-size: 1.6em;
+        font-weight: 600;
       }
     </style>
 
-    <!--  SETTING UP RESOURCES -->
+    <!--sets up 3 column view (aside not currently used), 
+    sized and ordered through flex css (fixed sidebar, full width main-->
+    <!--uses ideas from http://philipwalton.github.io/solved-by-flexbox/demos/holy-grail/
+    and http://jsfiddle.net/V2x6s/3/-->
+    <body class="resource-page-body">
+      <div class="resource-page-content">
+        <!--main section-->
+        <main class="main-content">
+          <div class="mobile-section-heading section-heading" hidden$={{veryWide}}>
+            Latest Resources
+          </div>
+          <div class="slider">
+            <div class="track" id="track1">
+              <template id="resourceList" is="dom-repeat" items="[[persistedNewestResources]]" as="resource" sort="_sortNewest">
+                <ssd-resource-small resource='[[resource]]' on-tap='resourceTap'></ssd-resource-small>
+              </template>
+            </div>
+          </div>
+        </main>
+        <!--left sidebar-->
+        <nav class="left-sidebar-nav" hidden$={{!veryWide}}>
+          <div class="section-heading">Latest Resources</div>
+          </nav>
+        <!--right sidebar (not used)-->
+        <!--<aside class="right-sidebar-aside">aside</aside>-->
+      </div>
+    </body>
 
-    <!-- <paper-button raised on-tap='search'>
-      <iron-icon icon="search"></iron-icon>
-      Search
-    </paper-button> -->
-    <!-- <paper-button raised on-tap='addResource'>
-      <iron-icon icon="add"></iron-icon>
-      Add resource
-    </paper-button> -->
-    <div style='display:inline-flex'>
-      <div style='width: 280px; height: 100%; background-color:white;margin-right:20px;flex: 1 1 auto;box-shadow: 5px 5px 5px #cccccc;position:relative;top:-20px' hidden$={{!veryWide}}>
-        <!-- added position relative and top:-20px to push the sidebar up underneath the header. Then added empty div to push the h2 element back down to the correct position. -->
-        <div style='height:20px;'></div>
-        <h2 style='height:235px;line-height:235px;margin-top:0;'>Latest Resources</h2>
-      </div>
-    <div style="flex: 1 1 auto;">
-      <div style='height: 25px;'></div>
-      <div class='thin-title' hidden$={{veryWide}}>
-        <h1>Latest Resources</h1>
-      </div>
-      <div class="resources-container" hidden$="[[liveMode]]">
-        <template id="resourceList" is="dom-repeat" items="[[persistedNewestResources]]" as="resource" sort="_sortNewest">
-          <ssd-resource-small resource='[[resource]]' on-tap='resourceTap'></ssd-resource-small>
-        </template>
-      </div>
-      <div class="resources-container" hidden$="[[!liveMode]]">
-        <template id="resourceList2" is="dom-repeat" items="[[resources]]" as="resource" sort="_sortNewest">
-          <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
-        </template>
-      </div>
-    </div>
-  </div>
-    <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-topics="[[persistedTopics]]" persisted-r-types="[[persistedRTypes]]"
-      persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]" on-update="updateFired">
+
+
+
+    <!--  SETTING UP RESOURCES -->
+   
+
+      <!--<div style="flex: 1 1 auto;">
+        <div style='height: 25px;'></div>
+        <div class='thin-title' hidden$={{veryWide}}>
+          <h1>Latest Resources</h1>
+        </div>
+        <div class="resources-container" hidden$="[[liveMode]]">
+          <template id="resourceList" is="dom-repeat" items="[[persistedNewestResources]]" as="resource" sort="_sortNewest">
+            <ssd-resource-small resource='[[resource]]' on-tap='resourceTap'></ssd-resource-small>
+          </template>
+        </div>
+        <div class="resources-container" hidden$="[[!liveMode]]">
+          <template id="resourceList2" is="dom-repeat" items="[[resources]]" as="resource" sort="_sortNewest">
+            <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
+          </template>
+        </div>
+      </div>-->
+
+    <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-topics="[[persistedTopics]]"
+      persisted-r-types="[[persistedRTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]"
+      on-update="updateFired">
     </ssd-resource-full>
 
 
@@ -102,6 +183,7 @@
     <!-- FIREBASE QUERY TO PULL IN newest FROM DB  -->
     <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="10"></firebase-query>
     <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
+
 
   </template>
 
@@ -152,22 +234,22 @@
           value: false,
           notify: true,
         },
-        liveMode:{
-          type:Boolean,
-          value:false
+        liveMode: {
+          type: Boolean,
+          value: false
         }
 
       },
-      resourcesChanged:function(res){
-        console.log('res changed',res)
+      resourcesChanged: function (res) {
+        console.log('res changed', res)
       },
-      updateFired:function(){
+      updateFired: function () {
         console.log('res updated')
         //this.$.resourceList2.render()
-        this.liveMode=true
+        this.liveMode = true
       },
       resourceTap: function (e) {
-       this.$.fullResource.open(e.model.resource);
+        this.$.fullResource.open(e.model.resource);
       },
       //responds to calls from add resource button and passes empty request to resource open
       addResource: function () {
@@ -196,7 +278,7 @@
 
       _sortNewest: function (a, b) {
         if (a.created > b.created) { return -1 }
-        else  { return 1 }
+        else { return 1 }
       },
 
     });
