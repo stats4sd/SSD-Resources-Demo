@@ -12,10 +12,17 @@
       paper-tabs {
         --paper-tabs-selection-bar-color: blue
       }
+      .delete{
+        margin-top: 1em;
+        cursor:pointer;
+      }
     </style>
     <style is="custom-style">
       paper-checkbox {
         display: block
+      }
+      paper-icon-button.delete-button {
+        color: var(--paper-red-500)
       }
     </style>
 
@@ -56,7 +63,11 @@
 
     <h3>Uploaded Files</h3>
     <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
-
+    
+    <div class="delete" on-tap="delete">
+    <paper-icon-button icon="delete" class="delete-button"></paper-icon-button>
+    <span>Delete Resource</span>
+    </div>
 
   </template>
 
@@ -105,6 +116,11 @@
           notify: true,
           reflectToAttribute: true
         },
+        deleted:{
+          type:Boolean,
+          value:false,
+          notify:true
+        }
 
       },
 
@@ -154,6 +170,10 @@
         for (let i = 0; i < uploads.length; i++) {
           if (uploads[i].name == fileName) { return i }
         }
+      },
+
+      delete:function(e,detail){
+        this.set('deleted',true)
       }
     })
   </script>

@@ -238,6 +238,10 @@
         liveMode: {
           type: Boolean,
           value: false
+        },
+        searchOpened:{
+          type:Boolean,
+          value:false
         }
 
       },
@@ -257,7 +261,10 @@
         this.$.fullResource.open();
       },
       search: function () {
-        this.$.search.open();
+        console.log('search opened',this.searchOpened)
+        if(this.searchOpened){this.$.search.close()}
+        else{this.$.search.open()}
+        this.searchOpened=!this.searchOpened
       },
       filterChange: function () {
         console.log('filters updated')
