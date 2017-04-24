@@ -25,11 +25,14 @@
         transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1;
         color: black;
+        overflow: auto;
       }
       
       .resources-container {
         display: flex;
         flex-wrap: wrap;
+        padding-top:1em;
+        background-color: white;
       }
       
       .search-box {
@@ -42,16 +45,19 @@
         align-self: center;
         width: 50vw;
       }
-      .close-search{
+      
+      .close-search {
         align-self: flex-start;
-        margin-left:30px;
+        margin-left: 30px;
         color: white;
       }
-      .search-filters{
-        
+      
+      .search-filters {
+        display: flex;
       }
       
-      paper-input {
+      paper-input,
+      paper-dropdown-menu {
         --paper-input-container-color: white;
         --paper-input-container-underline: white;
         --paper-input-container-underline-focus: yellow;
@@ -63,6 +69,21 @@
         }
         paper-badge {}
       }
+      
+      paper-dropdown-menu {
+        --paper-input-container-label: {
+          color: white;
+          font-style: italic
+        }
+        --paper-input-container-input: {
+          color: yellow;
+        }
+        --paper-input-container-underline: {
+          /*display: none;*/
+          opacity: 0.3
+        }
+        ;
+      }
     </style>
     <style is="custom-style">
       .big {
@@ -70,7 +91,6 @@
         --iron-icon-width: 20vw;
         --iron-icon-fill-color: white
       }
-      
       /*.results-badge {
         --paper-badge-background: white;
         --paper-badge-width: 30px;
@@ -99,38 +119,39 @@
 
     <div class="search-filters">
       <paper-dropdown-menu label="Topics" value="{{filter_topics}}" no-animations placeholder="(all)">
-      <paper-listbox selected="{{search.topics}}" class="dropdown-content">
-        <paper-item>(all)</paper-item>
-        <template is="dom-repeat" items="{{persistedTopics}}">
-          <paper-item>{{item.$val}}</paper-item>
-        </template>
-      </paper-listbox>
-    </paper-dropdown-menu>
-    <paper-dropdown-menu label="Resource Types" value="{{filter_rTypes}}" no-animations placeholder="(all)">
-      <paper-listbox selected="0" class="dropdown-content">
-        <paper-item>(all)</paper-item>
-        <template is="dom-repeat" items="{{persistedRTypes}}">
-          <paper-item>{{item.$val}}</paper-item>
-        </template>
-      </paper-listbox>
-    </paper-dropdown-menu>
-    <paper-dropdown-menu label="Tags" value="{{filter_tags}}" no-animations placeholder="(all)">
-      <paper-listbox selected="0" class="dropdown-content">
-        <paper-item>(all)</paper-item>
-        <template is="dom-repeat" items="{{persistedTags}}">
-          <paper-item>{{item.$val}}</paper-item>
-        </template>
-      </paper-listbox>
-    </paper-dropdown-menu>
+        <paper-listbox selected="0" class="dropdown-content">
+          <paper-item>(all)</paper-item>
+          <template is="dom-repeat" items="{{persistedTopics}}">
+            <paper-item>{{item.$val}}</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <paper-dropdown-menu label="Resource Types" value="{{filter_rTypes}}" no-animations placeholder="(all)">
+        <paper-listbox selected="0" class="dropdown-content">
+          <paper-item>(all)</paper-item>
+          <template is="dom-repeat" items="{{persistedRTypes}}">
+            <paper-item>{{item.$val}}</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <paper-dropdown-menu label="Tags" value="{{filter_tags}}" no-animations placeholder="(all)">
+        <paper-listbox selected="0" class="dropdown-content">
+          <paper-item>(all)</paper-item>
+          <template is="dom-repeat" items="{{persistedTags}}">
+            <paper-item>{{item.$val}}</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+    </div>
+
     <div class="resources-container">
       <template id="filteredResources" is="dom-repeat" items="[[filteredResources]]" as="resource" sort="" filter="_textFilter"
         rendered-item-count="{{totalResults}}">
-        <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
+        <ssd-resource-search-result resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
       </template>
     </div>
-    </div>
 
-    
+
 
     <ssd-resource-full resource='[[selectedResource]]' opened='{{resourceOpened}}' editable='{{editMode}}'></ssd-resource-full>
 

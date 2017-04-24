@@ -1,0 +1,106 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-elements/paper-elements.html">
+<link rel="import" href="../../bower_components/iron-elements/iron-elements.html">
+<link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
+
+<link rel="import" href="../shared-styles.html">
+
+
+<dom-module id="ssd-resource-search-result">
+  <template>
+    <style include="shared-styles">
+      :host {
+        width:100%;
+        max-width:300px;
+        cursor:pointer;
+        padding:2px;
+        margin:4px;
+        border-bottom:2px solid #DBDBDB
+      }    
+      
+      img {
+        /*max-width: 20vw;*/
+        height:5em;
+        margin: auto;
+        object-fit: cover;
+        float: left;
+      }
+      
+      .overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #30A8A7;
+        overflow: hidden;
+        width: 100%;
+        height: 0;
+        transition: .5s ease;
+      }
+      
+      .text {
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        height: 100%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+      }
+      
+      p {
+        padding: 10px;
+        text-overflow: ellipsis;
+        margin: 0;
+        overflow-y: auto;
+      }
+
+      .resource-info{
+        margin-left:5.2em;
+      }
+      .resource-title{
+        color: black;
+        height:1em;
+        font-weight:700;
+        text-overflow: ellipsis;
+      }
+      .resource-description{
+        color:black;
+        opacity:0.8;
+        height:3em;
+        text-overflow: ellipsis;
+      }
+    </style>
+
+    <div>
+      <img src="{{getMainImage(resource)}}">
+    </div>
+    <div class="resource-info">
+      <div class="resource-title">[[resource.name]]</div>
+      <div class="resource-description">[[resource.description]]</div>
+    </div>
+
+
+
+  </template>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'ssd-resource-search-result',
+      properties: {
+        resource: {
+          type: Object,
+          readOnly: false,
+          notify: false
+        },
+      },
+      getMainImage: function (resource) {
+        //console.log('no predefined image', resource)
+        return '/images/placeholder.png'
+      }
+
+    })
+  </script>
+</dom-module>
