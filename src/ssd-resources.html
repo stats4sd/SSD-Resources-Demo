@@ -20,34 +20,9 @@
         display: block;
       }
       
-      /*.resources-container {
-        width: 100%;
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: scroll;
-        -webkit-overflow-scrolling: touch;
-        -ms-overflow-style: -ms-autohiding-scrollbar;
-      }
-      */
       h1 {
         margin: 0
       }
-      
-      /*.side-bar-container {
-        display: inline-flex
-      }*/
-      
-      /*.side-bar {
-        padding: 10px;
-        width: 200px;
-        height: calc(100vh - 140px);
-        background-color: white;
-        margin-right: 20px;
-        flex: 1 1 auto;
-        box-shadow: 5px 5px 5px #cccccc;
-        position: relative;
-        top: -20px;
-      }*/
       
       .resource-page-body {
         display: flex;
@@ -113,7 +88,7 @@
           <div class="slider">
             <div class="track" id="track1">
               <template id="resourceList" is="dom-repeat" items="[[persistedNewestResources]]" as="resource" sort="_sortNewest">
-                <ssd-resource-small resource='[[resource]]' on-tap='resourceTap'></ssd-resource-small>
+                <ssd-resource-small resource='[[resource]]' hidden$="[[resource.deleted]]" on-tap='resourceTap'></ssd-resource-small>
               </template>
             </div>
           </div>
@@ -133,28 +108,10 @@
     <!--  SETTING UP RESOURCES -->
    
 
-      <!--<div style="flex: 1 1 auto;">
-        <div style='height: 25px;'></div>
-        <div class='thin-title' hidden$={{veryWide}}>
-          <h1>Latest Resources</h1>
-        </div>
-        <div class="resources-container" hidden$="[[liveMode]]">
-          <template id="resourceList" is="dom-repeat" items="[[persistedNewestResources]]" as="resource" sort="_sortNewest">
-            <ssd-resource-small resource='[[resource]]' on-tap='resourceTap'></ssd-resource-small>
-          </template>
-        </div>
-        <div class="resources-container" hidden$="[[!liveMode]]">
-          <template id="resourceList2" is="dom-repeat" items="[[resources]]" as="resource" sort="_sortNewest">
-            <ssd-resource-small resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
-          </template>
-        </div>
-      </div>-->
-
     <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-topics="[[persistedTopics]]"
       persisted-r-types="[[persistedRTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]"
       on-update="updateFired">
     </ssd-resource-full>
-
 
     <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-topics="[[persistedTopics]]"
       persisted-r-types="[[persistedRTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]">

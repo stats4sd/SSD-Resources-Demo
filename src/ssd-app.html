@@ -15,6 +15,7 @@
 <link rel="import" href="../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../bower_components/login-fire/login-fire.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="/bower_components/app-storage/app-network-status-behavior.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 
 <link rel="import" href="SSD Components/ssd-email-login-fire.html">
@@ -151,6 +152,13 @@
         right: 10px;
         font-size: 0.6em;
       }
+
+      .top-right{
+        position:absolute;
+        top:-3em;
+        right: 0px;
+        padding: 10px
+      }
     </style>
 
     <!-- Setup page routing -->
@@ -181,6 +189,7 @@
         <app-header fixed effects="waterfall">
           <div main-title class='titleLogo' hidden$="{{!wide}}">Statistics for Sustainable Development</div>
           <div condensed-title>SSD Resources</div>
+
           <!-- WHEN condenses is re-added, setup multiple toolbars and make the tabs one sticky -->
           <!-- </app-toolbar>
             <app-toolbar sticky class="tabs-bar"> -->
@@ -199,6 +208,11 @@
               <iron-icon icon="search"></iron-icon>
               <p>Search</p>
             </paper-button>
+            <div class="top-right">
+              <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
+            <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
+            </div>
+            
             <paper-button hidden$="{{!signedIn}}" on-tap='addResource' class="right-top-tab">
               <iron-icon icon="add-circle-outline"></iron-icon>
               Add New
@@ -208,12 +222,13 @@
               Sign In
             </paper-button>
             <div class="login" hidden$="{{!signedIn}}" on-tap='_logout'>
-              <paper-icon-button  icon="lock-open"></paper-icon-button>
+              <paper-icon-button icon="lock-open"></paper-icon-button>
               Sign Out
             </div>
             <div class="user-name" hidden$="{{!signedIn}}">
               Signed in as {{user.displayName}}
             </div>
+
 
           </app-toolbar>
 
@@ -321,8 +336,8 @@
       },
 
       _routePageChanged: function (page) {
-        console.log('page changed',page)
-        if(page==""){this.set('route.path','/home')}
+        console.log('page changed', page)
+        if (page == "") { this.set('route.path', '/home') }
         //404 not working properly? doesn't seem to redirect
         this.page = page || 'home';
 

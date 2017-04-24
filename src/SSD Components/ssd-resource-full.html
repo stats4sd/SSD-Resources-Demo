@@ -18,6 +18,7 @@
         display: block;
         opacity: 1;
         position: absolute;
+        overflow: auto;
         /*top: 46px;*/
         /*top: calc(100vh - 100px);*/
         /*top:var(--top-padding-height);*/
@@ -217,6 +218,7 @@
       edit: function () {
         //in case re-edit where key has been stripped
         if (!this.resource.$key) { this.resource.$key = this.id }
+        if(!this.resource.uploadedFiles){this.resource.uploadedFiles=[]}
         console.log('editing resource id:', this.resource.$key)
         this.id = this.resource.$key
         this.set('editMode', true)
@@ -244,8 +246,7 @@
 
       },
       delete: function () {
-        console.log('delete called from parent','resource',this.resource,'deleted',this.deleted)        
-        if (this.resource.deleted == false && this.deleted == true) {
+        if (this.resource.deleted != true && this.deleted == true) {
           this.set('resource.deleted', true)
           this.save()
           this.set('deleted',false)
@@ -254,7 +255,6 @@
       restore: function () {
           this.set('resource.deleted', false)
           this.set('deleted',false)
-          console.log('restoring resource', this.resource)
           this.save()
       },
       close: function () {
