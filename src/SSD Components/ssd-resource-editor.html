@@ -2,6 +2,11 @@
 <link rel="import" href="../../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../../bower_components/iron-elements/iron-elements.html">
 <link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags-dropdown.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags-behavior.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags-input.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags-import.html">
 
 <link rel="import" href="../shared-styles.html">
 
@@ -16,6 +21,10 @@
         margin-top: 1em;
         cursor:pointer;
       }
+
+      .keywordSelected {
+
+      }
     </style>
     <style is="custom-style">
       paper-checkbox {
@@ -24,6 +33,12 @@
       paper-icon-button.delete-button {
         color: var(--paper-red-500)
       }
+
+      paper-tags-dropdown {
+      --paper-menu: {
+        width: 200px;
+        }
+      }
     </style>
 
     <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required auto-validate pattern="[a-zA-Z0-9 ']*"
@@ -31,15 +46,22 @@
     <p>
       <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required></paper-textarea>
     </p>
+    <!-- REPLACED PAPER TABS WITH PAPER TAGS -->
 
-    <paper-tabs selected="{{tabSelected}}">
+    <h4>Keywords</h4>
+    <paper-tags-dropdown items="[[persistedTopics]]" label="label dropdown" noink value-object="" on-tap="testing"></paper-tags-dropdown>
+    <paper-tags-dropdown items='[{"id": 1, "label": "first" }, {"id":"5", "label": "last" }]' noink label="label dropdown"  value-object='{"5": "true"}' ></paper-tags-dropdown>
+    <paper-tags-dropdown items="{{items}}" noink label="label dropdown" value-object="{"5":"true"}"></paper-tags-dropdown>
+
+
+    <!-- <paper-tabs selected="{{tabSelected}}">
       <paper-tab>Topics</paper-tab>
       <paper-tab>Collections</paper-tab>
       <paper-tab>Type</paper-tab>
       <paper-tab>Tags</paper-tab>
     </paper-tabs>
     <iron-pages selected="{{tabSelected}}">
-      <paper-listbox multi attr-for-selected="value" selected-values="{{resource.topics}}">
+      <paper-listbox multi attr-for-selected="value" selected-values="{{resource.topics}}" selectedClass="keywordSelected">
         <template is="dom-repeat" items="[[persistedTopics]]" as="topic">
           <paper-item value="{{topic.$val}}">[[topic.$val]]</paper-item>
         </template>
@@ -59,7 +81,7 @@
           <paper-item value="{{tag.$val}}">[[tag.$val]]</paper-item>
         </template>
       </paper-listbox>
-    </iron-pages>
+    </iron-pages> -->
 
     <h3>Uploaded Files</h3>
     <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
@@ -175,6 +197,10 @@
       delete:function(e,detail){
         console.log('delete clicked')
         this.set('deleted',true)
+      },
+
+      testing: function() {
+        console.log(this.persistedTopics);
       }
     })
   </script>

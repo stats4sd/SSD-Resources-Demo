@@ -22,7 +22,7 @@
 <link rel="import" href="ssd-home.html">
 <link rel="import" href="ssd-resources.html">
 <link rel="import" href="ssd-view404.html">
-<link rel="import" href="ssd-admin-tags.html">
+<link rel="import" href="ssd-tags.html">
 
 <link rel="stylesheet" href="bower_components/open-sans-fontface/open-sans.css" type="text/css">
 <link rel="import" href="my-icons.html">
@@ -240,10 +240,9 @@
 
         <!-- Main pages -->
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
-          <template is="dom-repeat" items="{{navItems}}">
             <ssd-home name="home"></ssd-home>
             <ssd-resources name="resources" id="resourcesPage" very-wide={{veryWide}}></ssd-resources>
-          </template>
+            <ssd-tags name="tags" id="tagsPage"></ssd-tags>
         </iron-pages>
 
 
@@ -308,7 +307,7 @@
         navItems: {
           type: Array,
           value: function () {
-            return ['home', 'resources'];
+            return ['home', 'resources','tags'];
           }
 
         }

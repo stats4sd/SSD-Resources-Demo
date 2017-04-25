@@ -115,19 +115,19 @@
         <li>
           <span class='bold'>Topics: </span>
           <template is="dom-repeat" items="[[resource.topics]]" as="topic">
-            <span>[[topic]]; </span>
+            <span>[[topic.label]]; </span>
           </template>
         </li>
         <li>
           <span class='bold'>Resource Type(s): </span>
           <template is="dom-repeat" items="[[resource.rTypes]]" as="rType">
-            <span>[[rType]]; </span>
+            <span>[[rType.label]]; </span>
           </template>
         </li>
         <li>
           <span class='bold'>Tags: </span>
           <template is="dom-repeat" items="[[resource.tags]]" as="tag">
-            <span>[[tag]]; </span>
+            <span>[[tag.label]]; </span>
           </template>
         </li>
       </ul>
