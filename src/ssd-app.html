@@ -36,7 +36,7 @@
         display: block;
         font-family: "Open Sans";
       }
-
+      
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
@@ -44,7 +44,7 @@
         /*height: 120px;*/
         display: flex;
       }
-
+      
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
@@ -94,15 +94,15 @@
       }
 
       ;*/
-
+      
       paper-tabs {
         font-size: 0.9em;
       }
-
+      
       paper-button {
         font-size: 0.8em;
       }
-
+      
       div.titleLogo {
         font-size: 18px;
         font-weight: bold;
@@ -112,58 +112,59 @@
         white-space: pre-wrap;
         float: left;
       }
-
+      
       app-toolbar[sticky] {
         margin-top: 35px;
         height: 50px;
         padding-left: 0;
       }
-
+      
       paper-tabs[no-bar] paper-tab.iron-selected {
         font-weight: bold;
         color: #ffff8d;
         height: 50px;
       }
-
+      
       paper-button {
         font-family: "Open Sans"
       }
-
+      
        :root {
         --paper-font-common-base: {
           font-family: "Open Sans", "Noto", sans-serif;
         }
       }
-
+      
       .spacer {
         width: 10%;
       }
-
+      
       .login {
         position: absolute;
         right: 10px;
         font-size: 0.83em;
         cursor: pointer;
       }
-
+      
       .user-name {
         position: absolute;
         top: -30px;
         right: 10px;
         font-size: 0.6em;
       }
-
-      .top-right{
-        position:absolute;
-        top:-3em;
+      
+      .top-right {
+        position: absolute;
+        top: -3em;
         right: 0px;
         padding: 10px
       }
     </style>
 
     <!-- Setup page routing -->
-    <app-location route="{{route}}" ></app-location>
+    <app-location route="{{route}}"></app-location>
     <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}" query-params="{{queryParams}}"></app-route>
+
 
     <!-- Check screen size -->
     <iron-media-query query="min-width: 650px" query-matches="{{wide}}"></iron-media-query>
@@ -210,7 +211,7 @@
             </paper-button>
             <div class="top-right">
               <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
-            <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
+              <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
             </div>
 
             <paper-button hidden$="{{!signedIn}}" on-tap='addResource' class="right-top-tab">
@@ -242,7 +243,7 @@
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
           <template is="dom-repeat" items="{{navItems}}">
             <ssd-home name="home"></ssd-home>
-            <ssd-resources name="resources" id="resourcesPage" very-wide={{veryWide}}></ssd-resources>
+            <ssd-resources route="{{subroute}}" name="resources" id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}}></ssd-resources>
           </template>
         </iron-pages>
 
@@ -309,6 +310,10 @@
           type: Array,
           value: function () {
             return ['home', 'resources'];
+          },
+          searchTerm: {
+            type: String,
+            value: ""
           }
 
         }
@@ -316,10 +321,6 @@
 
 
       _wideChanged: function (wide) {
-        console.log("wide", wide);
-        console.log("route", this.route)
-        // console.log("routeData",this.routeData)
-        // if it's now wide, confirm the drawer is closed
         if (wide && this.$.drawer.opened) {
           this.$.drawer.opened = false;
         }
@@ -334,21 +335,53 @@
       },
 
       _routePageChanged: function (page) {
-        console.log('page changed', page)
-        if (page == "") { this.set('route.path', '/home') }
-        console.log('route',this.route)
-        //404 not working properly? doesn't seem to redirect
-        this.set('page', page || 'home');
+        // set default route if route path is empty
+        console.log('page', page)
+        if (!page) {
+          this.set('route.path', 'home');
+          return;
+        }
+        if (page == 'r') {
+          this.set('route.path', this.route.path.replace('/r', '/resources'))
+          this.page = 'resources';
+        }
+        if (page == 's') {
+          var split = this.route.path.split('/')
+          this.searchTerm = split[split.length - 1]
+          this.search(this.searchTerm)
+        }
+        else {
+          this.page = page;
+        }
 
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
         }
       },
 
-      _pageChanged: function (page) {
-        // Load page import on demand. Show 404 page if fails
-        var resolvedPageUrl = this.resolveUrl('ssd-' + page + '.html');
-        this.importHref(resolvedPageUrl, null, this._showPage404, true);
+      _pageChanged: function (page, oldPage) {
+        console.log('page changed', page)
+        var href
+        switch (page) {
+          case 'resources':
+            console.log('loading resources page');
+            href = "ssd-resources.html";
+            break
+          case 'home':
+            href = "ssd-home.html";
+            break
+          default:
+            console.log('loading default page');
+            href = "ssd-view404.html";
+            break
+        }
+        console.log('href', href)
+        // importHref(href, onload, onerror, optAsync). Dynamically imports an HTML document.
+        this.importHref(
+          this.resolveUrl(href),
+          null,
+          null,
+          true);
       },
 
       _showPage404: function () {
@@ -365,14 +398,15 @@
         if (this.signedIn) { this.$$('paper-dialog').close() }
       },
 
-      search: function () {
-        this.set("routeData.page","resources");
-
-        this.$$('ssd-resources').search();
+      search: function (e) {        
+        this.set("routeData.page", "resources");
+        if (this.searchTerm) { this.$$('ssd-resources').search(this.searchTerm) }
+        else { this.$$('ssd-resources').search() };
+        delete this.searchTerm
       },
 
       addResource: function () {
-        this.set("routeData.page","resources");
+        this.set("routeData.page", "resources");
         this.$$('ssd-resources').addResource();
       },
     });

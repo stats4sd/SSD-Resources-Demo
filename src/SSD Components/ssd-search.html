@@ -209,7 +209,8 @@
         this.$.filteredResources.render();
       },
 
-      open: function () {
+      open: function (searchTerm) {
+        if(searchTerm){this.set('searchText',searchTerm);}
         this.set('opened', true)
       },
       close: function () {

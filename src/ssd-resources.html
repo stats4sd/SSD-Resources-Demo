@@ -75,7 +75,7 @@
         font-weight: 600;
       }
     </style>
-    <app-route route="[[route]]" pattern="/:category" data="{{_routeData}}"></app-route>
+    <app-route route="{{route}}" pattern="/:resourceID" data="{{_routeData}}"></app-route>
 
     <!--sets up 3 column view (aside not currently used),
     sized and ordered through flex css (fixed sidebar, full width main-->
@@ -203,11 +203,20 @@
         searchOpened: {
           type: Boolean,
           value: false
-        }
+        },
+        resourceID:{
+          type:String,
+          computed:'_return(_routeData.resourceID)',
+          observer:'ResourceIdChange'
+        },
+
 
       },
       resourcesChanged: function (res) {
         console.log('res changed', res)
+      },
+      ResourceIdChange:function(id){
+        console.log('id changed',id)
       },
       updateFired: function () {
         console.log('res updated')
@@ -221,10 +230,14 @@
       addResource: function () {
         this.$.fullResource.open();
       },
-      search: function () {
-        console.log('search opened', this.searchOpened)
+      search: function (searchTerm) {
+        console.log('search term?',searchTerm)
         if (this.searchOpened) { this.$.search.close() }
-        else { this.$.search.open() }
+        else { 
+          if(searchTerm){this.$.search.open(searchTerm) }
+          else{this.$.search.open()}
+          
+          }
         this.searchOpened = !this.searchOpened
       },
       filterChange: function () {
@@ -249,6 +262,9 @@
         if (a.created > b.created) { return -1 }
         else { return 1 }
       },
+      _return: function(value) {
+        return value;
+      }
 
     });
   </script>
