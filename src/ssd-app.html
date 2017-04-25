@@ -204,7 +204,7 @@
                 <paper-tab name="{{item}}">{{item}}</paper-tab>
               </template>
             </paper-tabs>
-            <paper-button on-tap='search' class="right-top-tab">
+            <paper-button on-tap='search' class="right-top-tab" hidden$="{{!isResPage}}">
               <iron-icon icon="search"></iron-icon>
               <p>Search</p>
             </paper-button>
@@ -309,6 +309,9 @@
           type: Array,
           value: function () {
             return ['home', 'resources'];
+          },
+          isResPage: {
+            type: Boolean,
           }
         }
       },
@@ -350,6 +353,14 @@
         // Load page import on demand. Show 404 page if fails
         var resolvedPageUrl = this.resolveUrl('ssd-' + page + '.html');
         this.importHref(resolvedPageUrl, null, this._showPage404, true);
+
+        //add check to see if it's the main resources page. If true, show search.
+        if(page == "resources") {
+          this.isResPage = true;
+        }
+        else {
+          this.isResPage = false;
+        }
       },
 
       _showPage404: function () {
