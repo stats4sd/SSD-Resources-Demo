@@ -162,8 +162,8 @@
     </style>
 
     <!-- Setup page routing -->
-    <app-location route="{{route}}"></app-location>
-    <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <app-location route="{{route}}" ></app-location>
+    <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}" query-params="{{queryParams}}"></app-route>
 
     <!-- Check screen size -->
     <iron-media-query query="min-width: 650px" query-matches="{{wide}}"></iron-media-query>
@@ -338,6 +338,7 @@
       _routePageChanged: function (page) {
         console.log('page changed', page)
         if (page == "") { this.set('route.path', '/home') }
+        console.log('route',this.route)
         //404 not working properly? doesn't seem to redirect
         this.page = page || 'home';
 

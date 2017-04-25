@@ -1,4 +1,5 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../bower_components/iron-elements/iron-elements.html">
@@ -68,16 +69,20 @@
         border: 0;
         width: 2400px;
       }
-      .section-heading{
+      
+      .section-heading {
         font-size: 1.6em;
         font-weight: 600;
       }
     </style>
 
+    <app-route route="[[route]]" pattern="/:category" data="{{_routeData}}"></app-route>
+
     <!--sets up 3 column view (aside not currently used), 
     sized and ordered through flex css (fixed sidebar, full width main-->
     <!--uses ideas from http://philipwalton.github.io/solved-by-flexbox/demos/holy-grail/
     and http://jsfiddle.net/V2x6s/3/-->
+
     <body class="resource-page-body">
       <div class="resource-page-content">
         <!--main section-->
@@ -96,7 +101,7 @@
         <!--left sidebar-->
         <nav class="left-sidebar-nav" hidden$={{!veryWide}}>
           <div class="section-heading">Latest Resources</div>
-          </nav>
+        </nav>
         <!--right sidebar (not used)-->
         <!--<aside class="right-sidebar-aside">aside</aside>-->
       </div>
@@ -106,7 +111,7 @@
 
 
     <!--  SETTING UP RESOURCES -->
-   
+
 
     <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-topics="[[persistedTopics]]"
       persisted-r-types="[[persistedRTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]"
@@ -196,9 +201,9 @@
           type: Boolean,
           value: false
         },
-        searchOpened:{
-          type:Boolean,
-          value:false
+        searchOpened: {
+          type: Boolean,
+          value: false
         }
 
       },
@@ -218,10 +223,10 @@
         this.$.fullResource.open();
       },
       search: function () {
-        console.log('search opened',this.searchOpened)
-        if(this.searchOpened){this.$.search.close()}
-        else{this.$.search.open()}
-        this.searchOpened=!this.searchOpened
+        console.log('search opened', this.searchOpened)
+        if (this.searchOpened) { this.$.search.close() }
+        else { this.$.search.open() }
+        this.searchOpened = !this.searchOpened
       },
       filterChange: function () {
         console.log('filters updated')
