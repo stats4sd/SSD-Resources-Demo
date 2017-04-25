@@ -29,7 +29,7 @@
   
   .metaData {
     display: flex;
-    font-size:small;
+    font-size: small;
   }
 </style>
 
@@ -38,7 +38,7 @@
     <a class='fileDownload' href="[[file.url]]" target="_blank" download>
       <div class="title">[[displayName]]</div>
       <div class="metaData">
-        <img src="/images/file-types/icons/[[extension]].png">
+        <img src="[[extensionImageSrc]]" on-error="fallbackImage">
         <div>
           <div>Size: [[toMb(file.size)]]</div>
           <div>Uploaded: [[toDateString(file.lastModified)]]</div>
@@ -58,12 +58,13 @@
           },
           displayName: {
             type: String,
-            computed: 'computeDisplayName(file.name)'
-          }
+            computed: 'computeDisplayName(file.name)',
+          },
         },
         computeExtension: function (filename) {
           var split = filename.split('.')
           var extension = split[split.length - 1]
+          this.extensionImageSrc='/images/file-types/icons/'+extension+'.png'
           return extension
         },
         computeDisplayName: function (filename) {
@@ -86,13 +87,16 @@
             return val + "MB";
           }
         },
-
         toDateString: function (milliseconds) {
           var updated = (new Date(milliseconds)).toISOString().slice(0, 10);
           return updated;
         },
-      });
+        fallbackImage:function(){
+          console.log('loading fallback image')
+          this.extensionImageSrc= '/images/file-types/icons/file.png'
+        }
 
+      });
     });
   </script>
 </dom-module>
