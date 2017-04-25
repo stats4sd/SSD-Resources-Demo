@@ -22,7 +22,7 @@
 <link rel="import" href="ssd-home.html">
 <link rel="import" href="ssd-resources.html">
 <link rel="import" href="ssd-view404.html">
-<link rel="import" href="ssd-admin-tags.html">
+<link rel="import" href="ssd-tags.html">
 
 <link rel="stylesheet" href="bower_components/open-sans-fontface/open-sans.css" type="text/css">
 <link rel="import" href="my-icons.html">
@@ -36,7 +36,7 @@
         display: block;
         font-family: "Open Sans";
       }
-      
+
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
@@ -44,7 +44,7 @@
         /*height: 120px;*/
         display: flex;
       }
-      
+
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
@@ -94,15 +94,15 @@
       }
 
       ;*/
-      
+
       paper-tabs {
         font-size: 0.9em;
       }
-      
+
       paper-button {
         font-size: 0.8em;
       }
-      
+
       div.titleLogo {
         font-size: 18px;
         font-weight: bold;
@@ -112,47 +112,47 @@
         white-space: pre-wrap;
         float: left;
       }
-      
+
       app-toolbar[sticky] {
         margin-top: 35px;
         height: 50px;
         padding-left: 0;
       }
-      
+
       paper-tabs[no-bar] paper-tab.iron-selected {
         font-weight: bold;
         color: #ffff8d;
         height: 50px;
       }
-      
+
       paper-button {
         font-family: "Open Sans"
       }
-      
+
        :root {
         --paper-font-common-base: {
           font-family: "Open Sans", "Noto", sans-serif;
         }
       }
-      
+
       .spacer {
         width: 10%;
       }
-      
+
       .login {
         position: absolute;
         right: 10px;
         font-size: 0.83em;
         cursor: pointer;
       }
-      
+
       .user-name {
         position: absolute;
         top: -30px;
         right: 10px;
         font-size: 0.6em;
       }
-      
+
       .top-right {
         position: absolute;
         top: -3em;
@@ -241,10 +241,9 @@
 
         <!-- Main pages -->
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
-          <template is="dom-repeat" items="{{navItems}}">
             <ssd-home name="home"></ssd-home>
             <ssd-resources route="{{subroute}}" name="resources" id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}}></ssd-resources>
-          </template>
+            <ssd-tags name="tags" id="tagsPage"></ssd-tags>
         </iron-pages>
 
 
@@ -309,7 +308,7 @@
         navItems: {
           type: Array,
           value: function () {
-            return ['home', 'resources'];
+            return ['home', 'resources','tags'];
           },
           searchTerm: {
             type: String,
@@ -398,7 +397,7 @@
         if (this.signedIn) { this.$$('paper-dialog').close() }
       },
 
-      search: function (e) {        
+      search: function (e) {
         this.set("routeData.page", "resources");
         if (this.searchTerm) { this.$$('ssd-resources').search(this.searchTerm) }
         else { this.$$('ssd-resources').search() };

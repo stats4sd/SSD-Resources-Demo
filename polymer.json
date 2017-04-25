@@ -3,7 +3,7 @@
   "shell": "src/ssd-app.html",
   "fragments": [
     "src/ssd-resources.html",
-    "src/ssd-admin-tags.html",
+    "src/ssd-tags.html",
     "src/ssd-add-resource.html",
     "src/ssd-view404.html"
   ],
