@@ -19,38 +19,38 @@
        :host {
         display: block;
       }
-      
+
       h1 {
         margin: 0
       }
-      
+
       .resource-page-body {
         display: flex;
         min-height: 100vh;
         flex-direction: column;
       }
-      
+
       .resource-page-content {
         display: flex;
         flex: 1;
       }
-      
+
       .main-content {
         flex: 1;
       }
-      
+
       .left-sidebar-nav,
       .right-sidebar-aside {
         /* 12em is the width of the columns */
         flex: 0 0 12em;
       }
-      
+
       .left-sidebar-nav {
         /* put the nav on the left */
         order: -1;
         align-self: center;
       }
-      
+
       .slider {
         position: relative;
         background-color: #ccc;
@@ -58,7 +58,7 @@
         overflow-x: scroll;
         overflow-y: hidden;
       }
-      
+
       .track {
         position: absolute;
         top: 10px;
@@ -74,7 +74,7 @@
       }
     </style>
 
-    <!--sets up 3 column view (aside not currently used), 
+    <!--sets up 3 column view (aside not currently used),
     sized and ordered through flex css (fixed sidebar, full width main-->
     <!--uses ideas from http://philipwalton.github.io/solved-by-flexbox/demos/holy-grail/
     and http://jsfiddle.net/V2x6s/3/-->
@@ -106,7 +106,7 @@
 
 
     <!--  SETTING UP RESOURCES -->
-   
+
 
     <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-topics="[[persistedTopics]]"
       persisted-r-types="[[persistedRTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]"
@@ -229,11 +229,11 @@
         var filtersList = ['topics', 'rTypes', 'tags']
         this.activeFilters = {}
         //populate filter list with currently selected - should be moved out to only calculate on change
-        for (let filter of filtersList) {
-          var string = 'filter_' + filter
+        for (var i=0; i<filtersList.length; i++) {
+          var string = 'filter_' + filtersList[i];
           if (this[string] != undefined && this[string] != '') {
             if (this[string] != "(all)") {
-              this.activeFilters[filter] = this[string]
+              this.activeFilters[filter] = this[string];
             }
           }
         }

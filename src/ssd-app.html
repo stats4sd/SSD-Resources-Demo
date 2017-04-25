@@ -378,10 +378,12 @@
       },
 
       search: function () {
+        this.set("page","resources");
         this.$$('ssd-resources').search();
       },
 
       addResource: function () {
+        this.set("page","resources");
         this.$$('ssd-resources').addResource();
       },
     });
