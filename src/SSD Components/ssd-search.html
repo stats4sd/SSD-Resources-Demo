@@ -12,7 +12,7 @@
         opacity: 0;
         display: none;
       }
-      
+
        :host([opened]) {
         display: block;
         opacity: 1;
@@ -27,35 +27,35 @@
         color: black;
         overflow: auto;
       }
-      
+
       .resources-container {
         display: flex;
         flex-wrap: wrap;
         padding-top: 1em;
         background-color: white;
       }
-      
+
       .search-box {
         display: flex;
         justify-content: center;
         margin-top: 2em;
       }
-      
+
       .search-input {
         align-self: center;
         width: 50vw;
       }
-      
+
       .close-search {
         align-self: flex-start;
         margin-left: 30px;
         color: white;
       }
-      
+
       .search-filters {
         display: flex;
       }
-      
+
       paper-input,
       paper-dropdown-menu {
         --paper-input-container-color: white;
@@ -69,7 +69,7 @@
         }
         paper-badge {}
       }
-      
+
       paper-dropdown-menu {
         --paper-input-container-label: {
           color: white;
@@ -193,7 +193,7 @@
         //don't show deleted resources 
         if (resource.deleted == true) { return false }
         //runs when 3 or more letters typed. checks name, description and tags for search text, return true first time criteria matched
-        let s = this.searchText
+        s = this.searchText
         if (s.length > 2) {
           if (resource.name && resource.name.toLowerCase().indexOf(s) > -1) { return true }
           if (resource.description && resource.description.toLowerCase().indexOf(s) > -1) { return true }
@@ -233,9 +233,10 @@
         if (temp) {
           if (!this.allResources) { this.allResources = this.resources }
           var filtersList = ['topics', 'rTypes', 'tags']
-          let activeFilters = {}
+          var activeFilters = {}
           //populate filter list with currently selected - should be moved out to only calculate on change
-          for (let filter of filtersList) {
+          for (var j=0; j<filtersList.length; j++) {
+            filter = activeFilters[j]
             var string = 'filter_' + filter
             if (this[string] != undefined && this[string] != '') {
               if (this[string] != "(all)") {
@@ -244,7 +245,9 @@
             }
           }
           var temp = temp.filter(function (resource) {
-            for (let key in activeFilters) {
+            keys = Object.keys(activeFilters);
+            for (var i=0; i<activeFilters; i++) {
+              key = keys[i]
               var value = activeFilters[key]
               //return if doesn't have anything saved to filter field
               if (!resource.hasOwnProperty(key)) {

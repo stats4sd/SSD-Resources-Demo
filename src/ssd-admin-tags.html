@@ -41,8 +41,7 @@
               <li>To edit an existing tag, click on it in the list, then make the edit in the text box. Click save to overwrite that tag.</li>
               <li>To remove a tag, click on it in the list, then click the 'remove' button.</li>
             </ul>
-            <paper-input id="topic-input" name="topic-input" label="Add/Edit topic" value="{{topicInput}}" on-keypress="_topicPressed" <!--max="100" char-counter-->
-              >
+            <paper-input id="topic-input" name="topic-input" label="Add/Edit topic" value="{{topicInput}}" on-keypress="_topicPressed"  max="100" char-counter>
             </paper-input>
             <paper-button raised on-tap="addtopic">Save</paper-button>
             <paper-button raised on-tap="removetopic">Remove</paper-button>
@@ -76,8 +75,7 @@
         <div class="card">
           <h2>Resource Types</h2>
           <p>What type of resource is it? This is more than just the file-type - think about how resources will be used (For training, or as a software / setup guide, or a reference manual etc)</p>
-          <paper-input id="rType-input" name="rType-input" label="Add/Edit rType" value="{{rTypeInput}}" on-keypress="_rTypePressed" <!--max="100" char-counter-->
-            >
+          <paper-input id="rType-input" name="rType-input" label="Add/Edit rType" value="{{rTypeInput}}" on-keypress="_rTypePressed" max="100" char-counter>
           </paper-input>
           <paper-button raised on-tap="addrType">Save</paper-button>
           <paper-button raised on-tap="removerType">Remove</paper-button>
@@ -109,8 +107,7 @@
         <div class="card">
           <h2>collections</h2>
           <p>Collections can be materials from a particular course (e.g. eSIAC), a set of resources written for a specific contract, or a compiled set of resources used at a workshop.  For example, all the resources used and referenced at the Kenya workshop (Feb 2017) might be put into a new collection.</p>
-          <paper-input id="collection-input" name="collection-input" label="Add/Edit collection" value="{{collectionInput}}" on-keypress="_collectionPressed" <!--max="100" char-counter-->
-            >
+          <paper-input id="collection-input" name="collection-input" label="Add/Edit collection" value="{{collectionInput}}" on-keypress="_collectionPressed"max="100" char-counter>
           </paper-input>
           <paper-button raised on-tap="addcollection">Save</paper-button>
           <paper-button raised on-tap="removecollection">Remove</paper-button>
@@ -137,8 +134,7 @@
       <div class="card">
         <h2>tags</h2>
         <p>If you want to add tags that don't fit into the groups above, add them here.  This group will be reviewed regularly to see if new tag groups are needed. </p>
-        <paper-input id="tag-input" name="tag-input" label="Add/Edit tag" value="{{tagInput}}" on-keypress="_tagPressed" <!--max="100" char-counter-->
-          >
+        <paper-input id="tag-input" name="tag-input" label="Add/Edit tag" value="{{tagInput}}" on-keypress="_tagPressed"max="100" char-counter>
         </paper-input>
         <paper-button raised on-tap="addtag">Save</paper-button>
         <paper-button raised on-tap="removetag">Remove</paper-button>

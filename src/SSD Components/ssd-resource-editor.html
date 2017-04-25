@@ -63,7 +63,7 @@
 
     <h3>Uploaded Files</h3>
     <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
-    
+
     <div class="delete" on-tap="delete">
     <paper-icon-button icon="delete" class="delete-button"></paper-icon-button>
     <span>Delete Resource</span>
@@ -147,9 +147,9 @@
           console.log('error', error)
           // Handle unsuccessful uploads
         }, function () {
-          var index = this.getCurrentIndex(file.name)
-          let res= this.resource.uploadedFiles[index]
-          let temp={
+          var index = this.getCurrentIndex(file.name);
+          res= this.resource.uploadedFiles[index]
+          temp={
             lastModified:res.lastModified,
             name:res.name,
             size:res.size,
@@ -167,7 +167,7 @@
       //iterate through each uplaod to find index of current filename
       getCurrentIndex: function (fileName) {
         var uploads=this.resource.uploadedFiles
-        for (let i = 0; i < uploads.length; i++) {
+        for (var i = 0; i < uploads.length; i++) {
           if (uploads[i].name == fileName) { return i }
         }
       },
