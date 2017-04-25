@@ -36,7 +36,7 @@
         display: block;
         font-family: "Open Sans";
       }
-      
+
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
@@ -44,7 +44,7 @@
         /*height: 120px;*/
         display: flex;
       }
-      
+
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
@@ -94,15 +94,15 @@
       }
 
       ;*/
-      
+
       paper-tabs {
         font-size: 0.9em;
       }
-      
+
       paper-button {
         font-size: 0.8em;
       }
-      
+
       div.titleLogo {
         font-size: 18px;
         font-weight: bold;
@@ -112,40 +112,40 @@
         white-space: pre-wrap;
         float: left;
       }
-      
+
       app-toolbar[sticky] {
         margin-top: 35px;
         height: 50px;
         padding-left: 0;
       }
-      
+
       paper-tabs[no-bar] paper-tab.iron-selected {
         font-weight: bold;
         color: #ffff8d;
         height: 50px;
       }
-      
+
       paper-button {
         font-family: "Open Sans"
       }
-      
+
        :root {
         --paper-font-common-base: {
           font-family: "Open Sans", "Noto", sans-serif;
         }
       }
-      
+
       .spacer {
         width: 10%;
       }
-      
+
       .login {
         position: absolute;
         right: 10px;
         font-size: 0.83em;
         cursor: pointer;
       }
-      
+
       .user-name {
         position: absolute;
         top: -30px;
@@ -212,7 +212,7 @@
               <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
             <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
             </div>
-            
+
             <paper-button hidden$="{{!signedIn}}" on-tap='addResource' class="right-top-tab">
               <iron-icon icon="add-circle-outline"></iron-icon>
               Add New
@@ -226,7 +226,7 @@
               Sign Out
             </div>
             <div class="user-name" hidden$="{{!signedIn}}">
-              Signed in as {{user.displayName}}
+              Signed in as {{user.email}}
             </div>
 
 
