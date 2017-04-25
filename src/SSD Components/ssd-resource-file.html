@@ -1,0 +1,98 @@
+<style>
+  .fileDownload {
+    display: inline-block;
+    min-width: 220px;
+    padding: 5px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.12);
+    border-radius: 5px;
+    text-decoration: none;
+    color: black;
+  }
+  
+  .fileDownload:hover {
+    background-color: #F8BC02;
+    cursor: pointer;
+  }
+  
+  img {
+    height: 100px;
+    width: 100px;
+    margin: auto;
+    object-fit: cover;
+  }
+  
+  .title {
+    font-weight: 600;
+    padding: 5px
+  }
+  
+  .metaData {
+    display: flex;
+    font-size:small;
+  }
+</style>
+
+<dom-module id="ssd-resource-file">
+  <template>
+    <a class='fileDownload' href="[[file.url]]" target="_blank" download>
+      <div class="title">[[displayName]]</div>
+      <div class="metaData">
+        <img src="/images/file-types/icons/[[extension]].png">
+        <div>
+          <div>Size: [[toMb(file.size)]]</div>
+          <div>Uploaded: [[toDateString(file.lastModified)]]</div>
+        </div>
+
+      </div>
+    </a>
+  </template>
+  <script>
+    HTMLImports.whenReady(function () {
+      Polymer({
+        is: 'ssd-resource-file',
+        properties: {
+          extension: {
+            type: String,
+            computed: 'computeExtension(file.name)'
+          },
+          displayName: {
+            type: String,
+            computed: 'computeDisplayName(file.name)'
+          }
+        },
+        computeExtension: function (filename) {
+          var split = filename.split('.')
+          var extension = split[split.length - 1]
+          return extension
+        },
+        computeDisplayName: function (filename) {
+          var temp = filename.split('.')
+          temp.pop()
+          temp.join('')
+          var displayName = temp[0]
+          console.log('displayName', displayName)
+          return displayName
+        },
+        toMb: function (size) {
+          //if less than 1MB, return size in kB
+          var val;
+          if (size * 0.000001 < 1) {
+            val = Math.round(size * 0.001)
+            return val + "KB";
+          }
+          else {
+            val = Math.round(size * 0.000001)
+            return val + "MB";
+          }
+        },
+
+        toDateString: function (milliseconds) {
+          var updated = (new Date(milliseconds)).toISOString().slice(0, 10);
+          return updated;
+        },
+      });
+
+    });
+  </script>
+</dom-module>

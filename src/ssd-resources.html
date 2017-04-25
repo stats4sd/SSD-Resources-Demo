@@ -8,6 +8,7 @@
 <link rel="import" href="SSD Components/ssd-resource-search-result.html">
 <link rel="import" href="SSD Components/ssd-resource-full.html">
 <link rel="import" href="SSD Components/ssd-resource-editor.html">
+<link rel="import" href="SSD Components/ssd-resource-file.html">
 <link rel="import" href="SSD Components/ssd-search.html">
 <link ref="import" href="../bower_components/paper-fab/index.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
@@ -20,38 +21,38 @@
        :host {
         display: block;
       }
-
+      
       h1 {
         margin: 0
       }
-
+      
       .resource-page-body {
         display: flex;
         min-height: 100vh;
         flex-direction: column;
       }
-
+      
       .resource-page-content {
         display: flex;
         flex: 1;
       }
-
+      
       .main-content {
         flex: 1;
       }
-
+      
       .left-sidebar-nav,
       .right-sidebar-aside {
         /* 12em is the width of the columns */
         flex: 0 0 12em;
       }
-
+      
       .left-sidebar-nav {
         /* put the nav on the left */
         order: -1;
         align-self: center;
       }
-
+      
       .slider {
         position: relative;
         background-color: #ccc;
@@ -59,7 +60,7 @@
         overflow-x: scroll;
         overflow-y: hidden;
       }
-
+      
       .track {
         position: absolute;
         top: 10px;
@@ -204,10 +205,10 @@
           type: Boolean,
           value: false
         },
-        resourceID:{
-          type:String,
-          computed:'_return(_routeData.resourceID)',
-          observer:'ResourceIdChange'
+        resourceID: {
+          type: String,
+          computed: '_return(_routeData.resourceID)',
+          observer: 'ResourceIdChange'
         },
 
 
@@ -215,8 +216,8 @@
       resourcesChanged: function (res) {
         console.log('res changed', res)
       },
-      ResourceIdChange:function(id){
-        console.log('id changed',id)
+      ResourceIdChange: function (id) {
+        console.log('id changed', id)
       },
       updateFired: function () {
         console.log('res updated')
@@ -231,13 +232,13 @@
         this.$.fullResource.open();
       },
       search: function (searchTerm) {
-        console.log('search term?',searchTerm)
+        console.log('search term?', searchTerm)
         if (this.searchOpened) { this.$.search.close() }
-        else { 
-          if(searchTerm){this.$.search.open(searchTerm) }
-          else{this.$.search.open()}
-          
-          }
+        else {
+          if (searchTerm) { this.$.search.open(searchTerm) }
+          else { this.$.search.open() }
+
+        }
         this.searchOpened = !this.searchOpened
       },
       filterChange: function () {
@@ -246,7 +247,7 @@
         var filtersList = ['topics', 'rTypes', 'tags']
         this.activeFilters = {}
         //populate filter list with currently selected - should be moved out to only calculate on change
-        for (var i=0; i<filtersList.length; i++) {
+        for (var i = 0; i < filtersList.length; i++) {
           var string = 'filter_' + filtersList[i];
           if (this[string] != undefined && this[string] != '') {
             if (this[string] != "(all)") {
@@ -262,7 +263,7 @@
         if (a.created > b.created) { return -1 }
         else { return 1 }
       },
-      _return: function(value) {
+      _return: function (value) {
         return value;
       }
 

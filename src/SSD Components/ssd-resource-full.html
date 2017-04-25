@@ -19,9 +19,6 @@
         opacity: 1;
         position: absolute;
         overflow: auto;
-        /*top: 46px;*/
-        /*top: calc(100vh - 100px);*/
-        /*top:var(--top-padding-height);*/
         top: 0px;
         left: 0;
         right: 0;
@@ -134,17 +131,7 @@
       <h4>Files:</h4>
       <p>Click on any of the file cards to download it</p>
       <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
-        <a class='fileDownload' href="[[file.url]]" target="_blank" download>
-          <p style="margin-bottom:2px">[[file.name]]</p>
-          <ul>
-            <li>
-              <h5 style="margin:2px">Size = [[toMb(file.size)]]</h5>
-            </li>
-            <li>
-              <h5 style="margin:2px">Uploaded date = [[toDateString(file.lastModified)]]</h5>
-            </li>
-          </ul>
-        </a>
+        <ssd-resource-file file="[[file]]"></ssd-resource-file>
       </template>
     </div>
 
@@ -307,23 +294,7 @@
 
       },
 
-      toMb: function (size) {
-        //if less than 1MB, return size in kB
-        var val;
-        if (size * 0.000001 < 1) {
-          val = Math.round(size * 0.001)
-          return val + "KB";
-        }
-        else {
-          val = Math.round(size * 0.000001)
-          return val + "MB";
-        }
-      },
-
-      toDateString: function (milliseconds) {
-        var updated = (new Date(milliseconds)).toISOString().slice(0, 10);
-        return updated;
-      },
+     
       generateNewResource: function (id) {
         var d = Date.now()
         console.log('d', d)
