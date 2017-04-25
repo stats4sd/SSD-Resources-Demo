@@ -204,7 +204,7 @@
                 <paper-tab name="{{item}}">{{item}}</paper-tab>
               </template>
             </paper-tabs>
-            <paper-button on-tap='search' class="right-top-tab" hidden$="{{!isResPage}}">
+            <paper-button on-tap='search' class="right-top-tab">
               <iron-icon icon="search"></iron-icon>
               <p>Search</p>
             </paper-button>
@@ -309,10 +309,8 @@
           type: Array,
           value: function () {
             return ['home', 'resources'];
-          },
-          isResPage: {
-            type: Boolean,
           }
+
         }
       },
 
@@ -334,15 +332,12 @@
       toggleEditing: function () {
         this.set('editingMode', !this.editingMode)
       },
-      addResource: function () {
-        document.querySelector('ssd-resources').addResource();
-      },
 
       _routePageChanged: function (page) {
         console.log('page changed', page)
         if (page == "") { this.set('route.path', '/home') }
         //404 not working properly? doesn't seem to redirect
-        this.page = page || 'home';
+        this.set('page', page || 'home');
 
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
@@ -353,14 +348,6 @@
         // Load page import on demand. Show 404 page if fails
         var resolvedPageUrl = this.resolveUrl('ssd-' + page + '.html');
         this.importHref(resolvedPageUrl, null, this._showPage404, true);
-
-        //add check to see if it's the main resources page. If true, show search.
-        if(page == "resources") {
-          this.isResPage = true;
-        }
-        else {
-          this.isResPage = false;
-        }
       },
 
       _showPage404: function () {
@@ -378,12 +365,13 @@
       },
 
       search: function () {
-        this.set("page","resources");
+        this.set("routeData.page","resources");
+
         this.$$('ssd-resources').search();
       },
 
       addResource: function () {
-        this.set("page","resources");
+        this.set("routeData.page","resources");
         this.$$('ssd-resources').addResource();
       },
     });
