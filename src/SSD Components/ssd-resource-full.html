@@ -13,7 +13,7 @@
         opacity: 0;
         display: none;
       }
-
+      
        :host([opened]) {
         display: block;
         opacity: 1;
@@ -27,23 +27,23 @@
         background-color: #DBDBDB;
         transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
-
+      
       .totallyEditable:hover {
         border: #3577f6 1px solid;
         background-color: #d3eaf6;
         cursor: pointer;
       }
-
+      
       .editing {
         width: 90%;
         margin: 15px auto;
       }
-
+      
       .button-group {
         display: flex;
         justify-content: space-between;
       }
-
+      
       .deleted {
         background-color: white;
         font-weight: 700;
@@ -59,15 +59,18 @@
       paper-button.back {
         background-color: white;
       }
-
+      
       paper-button.edit {
         background-color: var(--paper-indigo-500);
         color: white;
       }
-
+      
       paper-button.save {
         background-color: var(--paper-green-500);
         color: white;
+      }
+      a{
+        display: block;
       }
     </style>
 
@@ -128,11 +131,22 @@
           </template>
         </li>
       </ul>
-      <h4>Files:</h4>
-      <p>Click on any of the file cards to download it</p>
-      <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
-        <ssd-resource-file file="[[file]]"></ssd-resource-file>
-      </template>
+      <div hidden$=[[!resource.externalLinks]]>
+        <h4>Links:</h4>
+        <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
+          <a href="[[link.url]]" target="_blank">
+            <iron-icon icon="language" prefix></iron-icon>
+            <span>[[link.url]]</span>
+          </a>
+        </template>
+      </div>
+      <div hidden$="[[!resource.files]]">
+        <h4>Files:</h4>
+        <p>Click on any of the file cards to download it</p>
+        <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
+          <ssd-resource-file file="[[file]]"></ssd-resource-file>
+        </template>
+      </div>
     </div>
 
     <!--editable version-->
@@ -202,10 +216,11 @@
         this.pendingEdits = true;
       },
 
+
       edit: function () {
         //in case re-edit where key has been stripped
         if (!this.resource.$key) { this.resource.$key = this.id }
-        if(!this.resource.uploadedFiles){this.resource.uploadedFiles=[]}
+        if (!this.resource.uploadedFiles) { this.resource.uploadedFiles = [] }
         console.log('editing resource id:', this.resource.$key)
         this.id = this.resource.$key
         this.set('editMode', true)
@@ -236,13 +251,13 @@
         if (this.resource.deleted != true && this.deleted == true) {
           this.set('resource.deleted', true)
           this.save()
-          this.set('deleted',false)
+          this.set('deleted', false)
         }
       },
       restore: function () {
-          this.set('resource.deleted', false)
-          this.set('deleted',false)
-          this.save()
+        this.set('resource.deleted', false)
+        this.set('deleted', false)
+        this.save()
       },
       close: function () {
         //check to see if resource has a name and description, only in editing mode
@@ -294,7 +309,7 @@
 
       },
 
-     
+
       generateNewResource: function (id) {
         var d = Date.now()
         console.log('d', d)
@@ -306,6 +321,7 @@
           tags: [],
           topics: [],
           uploadedFiles: [],
+          externalLinks: [],
           collections: [],
           created: d,
           modified: ''

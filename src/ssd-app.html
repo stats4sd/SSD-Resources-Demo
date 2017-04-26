@@ -335,7 +335,6 @@
 
       _routePageChanged: function (page) {
         // set default route if route path is empty
-        console.log('page', page)
         if (!page) {
           this.set('route.path', 'home');
           return;
@@ -363,14 +362,12 @@
         var href
         switch (page) {
           case 'resources':
-            console.log('loading resources page');
             href = "ssd-resources.html";
             break
           case 'home':
             href = "ssd-home.html";
             break
           default:
-            console.log('loading default page');
             href = "ssd-view404.html";
             break
         }

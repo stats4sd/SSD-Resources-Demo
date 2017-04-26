@@ -17,27 +17,42 @@
       paper-tabs {
         --paper-tabs-selection-bar-color: blue
       }
-      .delete{
+      
+      .delete {
         margin-top: 1em;
-        cursor:pointer;
+        cursor: pointer;
       }
-
-      .keywordSelected {
-
-      }
+      
+      .keywordSelected {}
     </style>
     <style is="custom-style">
       paper-checkbox {
         display: block
       }
+      
       paper-icon-button.delete-button {
         color: var(--paper-red-500)
       }
-
+      
       paper-tags-dropdown {
-      --paper-menu: {
-        width: 200px;
+        --paper-menu: {
+          width: 200px;
         }
+      }
+      
+      .flex-container {
+        display: flex
+      }
+    </style>
+    <style is="custom-style">
+      paper-icon-button.red {
+        color: var(--paper-red-500);
+        --paper-icon-button-ink-color: var(--paper-red-500);
+      }
+      
+      paper-icon-button.green {
+        color: var(--paper-green-700);
+        --paper-icon-button-ink-color: var(--paper-green-700);
       }
     </style>
 
@@ -50,45 +65,33 @@
 
     <h4>Keywords</h4>
     <paper-tags-dropdown items="[[persistedTopics]]" label="label dropdown" noink value-object="" on-tap="testing"></paper-tags-dropdown>
-    <paper-tags-dropdown items='[{"id": 1, "label": "first" }, {"id":"5", "label": "last" }]' noink label="label dropdown"  value-object='{"5": "true"}' ></paper-tags-dropdown>
-    <paper-tags-dropdown items="{{items}}" noink label="label dropdown" value-object="{"5":"true"}"></paper-tags-dropdown>
+    <paper-tags-dropdown items='[{"id": 1, "label": "first" }, {"id":"5", "label": "last" }]' noink label="label dropdown" value-object='{"5": "true"}'></paper-tags-dropdown>
+    <paper-tags-dropdown items="{{items}}" noink label="label dropdown" value-object="{" 5 ":"true "}"></paper-tags-dropdown>
 
 
-    <!-- <paper-tabs selected="{{tabSelected}}">
-      <paper-tab>Topics</paper-tab>
-      <paper-tab>Collections</paper-tab>
-      <paper-tab>Type</paper-tab>
-      <paper-tab>Tags</paper-tab>
-    </paper-tabs>
-    <iron-pages selected="{{tabSelected}}">
-      <paper-listbox multi attr-for-selected="value" selected-values="{{resource.topics}}" selectedClass="keywordSelected">
-        <template is="dom-repeat" items="[[persistedTopics]]" as="topic">
-          <paper-item value="{{topic.$val}}">[[topic.$val]]</paper-item>
-        </template>
-      </paper-listbox>
-      <paper-listbox multi attr-for-selected="value" selected-values="{{resource.collections}}">
-        <template is="dom-repeat" items="[[persistedCollections]]" as="collection">
-          <paper-item value="{{collection.$val}}">[[collection.$val]]</paper-item>
-        </template>
-      </paper-listbox>
-      <paper-listbox multi attr-for-selected="value" selected-values="{{resource.rTypes}}">
-        <template is="dom-repeat" items="[[persistedRTypes]]" as="rType">
-          <paper-item value="{{rType.$val}}">[[rType.$val]]</paper-item>
-        </template>
-      </paper-listbox>
-      <paper-listbox multi attr-for-selected="value" selected-values="{{resource.tags}}">
-        <template is="dom-repeat" items="[[persistedTags]]" as="tag">
-          <paper-item value="{{tag.$val}}">[[tag.$val]]</paper-item>
-        </template>
-      </paper-listbox>
-    </iron-pages> -->
+    <h4>External Links</h4>
+    <template id="externalLinks" is="dom-repeat" items="[[resource.externalLinks]]" as="link">
+      <!--{{link.number}} test-->
+      <div class='flex-container'>
+        <a href="{{link.url}}" target="_blank"><span>[[link.url]]</span></a>
+        <paper-icon-button suffix on-tap="editLink" class="green" icon="editor:mode-edit" alt="edit" title="edit">
+        </paper-icon-button>
+        <paper-icon-button on-tap="removeLink" class="red" icon="clear" alt="clear" title="clear">
+        </paper-icon-button>
+      </div>
+    </template>
 
-    <h3>Uploaded Files</h3>
+    <paper-input label="add any external links here" no-label-float value="{{newLink.url}}">
+      <iron-icon icon="language" prefix></iron-icon>
+      <paper-icon-button suffix on-tap="addLink" class="green" icon="add" alt="add" title="add" hidden$="{{link.saved}}">
+      </paper-icon-button>
+    </paper-input>
+
+    <h4>Uploaded Files</h4>
     <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
-
     <div class="delete" on-tap="delete">
-    <paper-icon-button icon="delete" class="delete-button"></paper-icon-button>
-    <span>Delete Resource</span>
+      <paper-icon-button icon="delete" class="delete-button"></paper-icon-button>
+      <span>Delete Resource</span>
     </div>
 
   </template>
@@ -138,12 +141,46 @@
           notify: true,
           reflectToAttribute: true
         },
-        deleted:{
-          type:Boolean,
-          value:false,
-          notify:true
+        deleted: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        newLink: {
+          type: Object,
+          value: {
+            url: '',
+            displayName:''
+          }
         }
 
+
+      },
+      addLink: function (e) {
+        if (this.newLink.url != '') {
+          this.push('resource.externalLinks', {
+            displayName: this.newLink.displayName,
+            url: this.newLink.url
+          })
+        }
+        this.set('newLink.url',"")
+        this.set('newLink.displayName',"")
+        console.log('resource', this.resource)
+      },
+      editLink: function (e) {
+        this.newLink=e.model.link
+        this.removeLink(e)
+      },
+      removeLink: function (e) {
+        var index = e.model.index;
+        this.splice('resource.externalLinks', index, 1)
+
+      },
+      isHidden: function (link) {
+        console.log('hidden?', link)
+        if (link.saved == true) { return true }
+        if (link.url == "") { return true }
+        return false
       },
 
       fileupload: function (event) {
@@ -170,16 +207,16 @@
           // Handle unsuccessful uploads
         }, function () {
           var index = this.getCurrentIndex(file.name);
-          res= this.resource.uploadedFiles[index]
-          temp={
-            lastModified:res.lastModified,
-            name:res.name,
-            size:res.size,
-            type:res.type,
-            url:uploadTask.snapshot.downloadURL,
-            complete:true,
-            formDataName:"file",
-            progress:100,
+          res = this.resource.uploadedFiles[index]
+          temp = {
+            lastModified: res.lastModified,
+            name: res.name,
+            size: res.size,
+            type: res.type,
+            url: uploadTask.snapshot.downloadURL,
+            complete: true,
+            formDataName: "file",
+            progress: 100,
           }
           this.set('resource.uploadedFiles.' + index, [])
           this.set('resource.uploadedFiles.' + index, temp)
@@ -188,19 +225,25 @@
 
       //iterate through each uplaod to find index of current filename
       getCurrentIndex: function (fileName) {
-        var uploads=this.resource.uploadedFiles
+        var uploads = this.resource.uploadedFiles
         for (var i = 0; i < uploads.length; i++) {
           if (uploads[i].name == fileName) { return i }
         }
       },
 
-      delete:function(e,detail){
+      delete: function (e, detail) {
         console.log('delete clicked')
-        this.set('deleted',true)
+        this.set('deleted', true)
       },
 
-      testing: function() {
+      testing: function () {
         console.log(this.persistedTopics);
+      },
+
+      _getLinks: function () {
+        return [
+          { name: 'test 1' }
+        ]
       }
     })
   </script>

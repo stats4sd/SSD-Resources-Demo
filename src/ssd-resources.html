@@ -232,7 +232,6 @@
         this.$.fullResource.open();
       },
       search: function (searchTerm) {
-        console.log('search term?', searchTerm)
         if (this.searchOpened) { this.$.search.close() }
         else {
           if (searchTerm) { this.$.search.open(searchTerm) }
