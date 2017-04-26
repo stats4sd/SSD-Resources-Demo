@@ -11,6 +11,7 @@
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="SSD Components/admin-tag.html">
 
 
 <!--give id reference of page name-->
@@ -26,60 +27,39 @@
 
       paper-card {
         padding: 0 15px;
-        max-width: 400px;
+        /*max-width: 400px;*/
+        min-width: 500px;
         display: inline-block;
         margin-bottom: 25px;
       }
-      .alert {
-        background-color: #eee;
-        display:flex;
-        margin:0.5em;
-        -webkit-box-shadow: -1px 0px 25px -1px rgba(97,97,97,1);
-        -moz-box-shadow: -1px 0px 25px -1px rgba(97,97,97,1);
-        box-shadow: -1px 0px 25px -1px rgba(97,97,97,1);
-        padding: 0 1em;
-        justify-content:center;
-        max-width: 90%;
+
+      admin-tags {
+        min-width: 450px;
       }
-      .alert paper-button {
-        font-size: 0.8em;
-        color: blue;
+
+      #currentTagMaker {
+        background-color: green;
+        margin-left: 10px;
+        margin-bottom: 20px;
       }
     </style>
 
-    <paper-card heading="Tag Editor" class='horizontal'>
-      <div id='emptyTagNote' hidden$="[[!emptyTagNoteOpen]]" class='alert'>
-        <p>Please add a label and a type.</p>
-        <paper-button on-tap='closeNote'>Ok!</paper-button>
-      </div>
-      <paper-input id="tagLabel" value="{{currentTag.label}}" name="label" label="Label"></paper-input>
-      <paper-dropdown-menu label="tag type">
-        <paper-listbox class='dropdown-content' selected="{{currentTag.type}}" attr-for-selected="name" >
-          <paper-item name="Collection">Collection</paper-item>
-          <paper-item name="Keyword">Keyword</paper-item>
-          <paper-item name="Resource Type">Resource Type</paper-item>
-          <paper-item name="Topic">Topic</paper-item>
-        </paper-listbox>
-      </paper-dropdown-menu>
-      <div class='card-actions'>
-        <paper-button name='submitTag' on-tap='submitTag'>Submit Tag</paper-button>
-        <paper-button name='discardTag' on-tap='discardTag'>Discard Tag</paper-button>
-      </div>
-    </paper-card>
-
-      <paper-card heading="List of Existing Tags">
+    <paper-card heading="List of Existing Tags">
+      <!-- Selection determines which tag is loaded in from the firebase-document (only for deletions. All other edits are made via the 2-way link to the firebase-query.)  -->
       <paper-menu selected="{{currentTagId}}" attr-for-selected="name">
         <template id="resourceList" is="dom-repeat" items="{{allTags}}" as="tag">
-          <paper-item name='{{tag.$key}}'>{{tag.label}}  ({{tag.type}})</paper-item>
+          <admin-tag name="{{tag.$key}}" tag='{{tag}}' on-delete="deleteTag"></admin-tag>
         </template>
       </paper-menu>
+      <paper-button raised id='currentTagMaker' on-tap='openNewTag'>Add new tag</paper-button>
+      <admin-tag id="newTagElement" tag='{{currentTag}}' on-delete="deleteTag" on-save="saveNew" hidden$="{{!editingNew}}"></admin-tag>
     </paper-card>
 
 
     <!-- Firebase query to list all tags in the database -->
     <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{allTags}}"></firebase-query>
 
-    <!-- Firebase document to get / add / edit individual tags  -->
+
     <firebase-document id="currentTag" app-name="SSD-Resources" data="{{currentTag}}" path="/tags/{{currentTagId}}">
     </firebase-document>
 
@@ -101,20 +81,24 @@
         },
         currentTag:{
           type:Object,
+        },
+        editingNew:{
+          type:Boolean,
+          value:false,
         }
       },
 
       observers: [
-        '_currentTagChanged(currentTag.*)',
+        '_currentTagTagChanged(currentTag.*)',
         '_allTagsChanged(allTags.*)'
       ],
 
-      _currentTagChanged: function() {
-        console.log("Current Tag Changed Observe:", this.currentTag)
+      _currentTagTagChanged: function() {
+        // console.log("Current Tag Changed Observe:", this.currentTag)
       },
 
       _allTagsChanged: function() {
-        console.log("All Tags Changed",this.allTags);
+        // console.log("All Tags Changed",this.allTags);
       },
 
 
@@ -122,65 +106,53 @@
         this.set("emptyTagNoteOpen",false);
         console.log(this.emptyTagNoteOpen)
       },
-      //submitTag function to send whatever's in the currentTag object off to the database.  This either overwrites a tag at id = currentTag.id, or (if id is not specified) creates a new entry in the database.
-      submitTag: function() {
-          console.log("currentTag",this.currentTag);
-          //prompt validation
-          if (!this.currentTag.label ||  !this.currentTag.type ) {
-            this.emptyTagNoteOpen = true;
-            return;
-          }
-          else {
 
-            this.currentTag.modified = Date.now()
-
-            //check if id already exists, if yes use it to "update" the tag, otherwise save it as a "new" tag.
-            if(this.currentTag.id){
-              console.log("currentTag.$key",this.currentTag.$key)
-
-              //find the path to update currentTag
-              path = "/tags/"
-
-              //error caused by $key being set (weird - don't properly get this, probably because we're trying to actively avoid doing what firebase-doument is supposed to do (i.e. real-time updates)...)
-
-              this.$.currentTag.save(path,this.currentTag.$key).then(function () {
-
-                //once it's all saved, just discard it from memory.
-                this.discardTag();
-
-                //also poke the resource list dom-repeat to prompt a redraw (feels janky; would prefer to find a better way to do this).
-                this.set("allTags",this.get("allTags"));
-                console.log("All Tags = ", this.allTags)
-
-               }.bind(this));
-            }
-            else {
-              this.$.currentTag.save('/tags').then(function () {
-                console.log("firebase-doc",this.$.currentTag.path)
-                console.log("currentTag",this.currentTag)
-
-
-                //set ID of currentTag based on newly generated Path:
-                //this.set("currentTag.id",id);
-
-                //finally, discardTag:
-                this.discardTag();
-
-              }.bind(this));
-            }
-        }
+      openNewTag: function() {
+        //first, set current TagID to null so we're not overwriting anything through the firebase-document
+        this.currentTagId = "";
+        //then make the currentTag empty, so it's ready for new stuff
+        this.currentTag = {};
+        // then make the newTagElement visible AND set it to editing mode.
+        this.editingNew = true;
+        this.$.newTagElement.editing = true;
       },
 
-      //new tag function to clear whatever's in the currentTag object and set focus to edit tag card.
-      discardTag: function() {
-        console.log("discarding currentTag from memory and resetting firebase-document");
-        //given we aren't doing real-time database edits, we're not setting the "location" for the firebase document. Therefore, to discard the link once the tag is uploaded we must reset the firebase document element.
-        this.$.currentTag.reset().then(function() {
-          //then we can safely discard the currentTag in memory.
-          this.set("currentTag",{})
+      //submitTag function to send whatever's in the currentTag object off to the database.  This either overwrites a tag at id = currentTag.id, or (if id is not specified) creates a new entry in the database.
+      saveNew: function() {
+        console.log("currentTag",this.currentTag);
+
+
+        //set modified date
+        this.currentTag.modified = Date.now()
+
+        // save new tag
+        this.$.currentTag.save('/tags').then(function () {
+          console.log("firebase-doc",this.$.currentTag.path)
+          console.log("currentTag",this.currentTag)
+
+          //set ID of currentTag based on newly generated Path:
+          //this.set("currentTag.id",id);
+
+          //finally, discardTag:
+          this.currentTagId = "";
+          //and hide the newTag editor:
+          this.editingNew = false;
+          
         }.bind(this));
 
+      },
+
+      deleteTag: function() {
+
+        //the currentTag is set to whichever tag is currently selected from the list. So making it null removes it from the db.
+        this.currentTag = null;
+        console.log("Event worked, deleting...");
+        // call a reset on the firebase-document.
+        this.$.currentTag.reset()
+
       }
+
+
     });
   </script>
 </dom-module>
