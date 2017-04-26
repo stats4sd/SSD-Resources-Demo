@@ -17,29 +17,29 @@
       paper-tabs {
         --paper-tabs-selection-bar-color: blue
       }
-      
+
       .delete {
         margin-top: 1em;
         cursor: pointer;
       }
-      
+
       .keywordSelected {}
     </style>
     <style is="custom-style">
       paper-checkbox {
         display: block
       }
-      
+
       paper-icon-button.delete-button {
         color: var(--paper-red-500)
       }
-      
+
       paper-tags-dropdown {
         --paper-menu: {
           width: 200px;
         }
       }
-      
+
       .flex-container {
         display: flex
       }
@@ -49,7 +49,7 @@
         color: var(--paper-red-500);
         --paper-icon-button-ink-color: var(--paper-red-500);
       }
-      
+
       paper-icon-button.green {
         color: var(--paper-green-700);
         --paper-icon-button-ink-color: var(--paper-green-700);
@@ -64,7 +64,7 @@
     <!-- REPLACED PAPER TABS WITH PAPER TAGS -->
 
     <h4>Keywords</h4>
-    <paper-tags-dropdown items="[[persistedTopics]]" label="label dropdown" noink value-object="" on-tap="testing"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[persistedTags]]" label="label dropdown" noink value-object="" on-tap="testing"></paper-tags-dropdown>
     <paper-tags-dropdown items='[{"id": 1, "label": "first" }, {"id":"5", "label": "last" }]' noink label="label dropdown" value-object='{"5": "true"}'></paper-tags-dropdown>
     <paper-tags-dropdown items="{{items}}" noink label="label dropdown" value-object="{" 5 ":"true "}"></paper-tags-dropdown>
 
@@ -237,7 +237,7 @@
       },
 
       testing: function () {
-        console.log(this.persistedTopics);
+        console.log(this.persistedTags);
       },
 
       _getLinks: function () {

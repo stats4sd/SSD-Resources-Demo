@@ -21,38 +21,38 @@
        :host {
         display: block;
       }
-      
+
       h1 {
         margin: 0
       }
-      
+
       .resource-page-body {
         display: flex;
         min-height: 100vh;
         flex-direction: column;
       }
-      
+
       .resource-page-content {
         display: flex;
         flex: 1;
       }
-      
+
       .main-content {
         flex: 1;
       }
-      
+
       .left-sidebar-nav,
       .right-sidebar-aside {
         /* 12em is the width of the columns */
         flex: 0 0 12em;
       }
-      
+
       .left-sidebar-nav {
         /* put the nav on the left */
         order: -1;
         align-self: center;
       }
-      
+
       .slider {
         position: relative;
         background-color: #ccc;
@@ -60,7 +60,7 @@
         overflow-x: scroll;
         overflow-y: hidden;
       }
-      
+
       .track {
         position: absolute;
         top: 10px;
@@ -70,7 +70,7 @@
         border: 0;
         width: 2400px;
       }
-      
+
       .section-heading {
         font-size: 1.6em;
         font-weight: 600;
@@ -113,27 +113,12 @@
     <!--  SETTING UP RESOURCES -->
 
 
-    <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-topics="[[persistedTopics]]"
-      persisted-r-types="[[persistedRTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]"
-      on-update="updateFired">
+    <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-tags="[[persistedTags]]" on-update="updateFired">
     </ssd-resource-full>
 
     <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-topics="[[persistedTopics]]"
       persisted-r-types="[[persistedRTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]">
     </ssd-search>
-
-
-    <firebase-query id="query" app-name="SSD-Resources" path="/collections" data="{{allCollections}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedCollections" data="{{allCollections}}" persisted-data="{{persistedCollections}}" session="keepAlways"></app-indexeddb-mirror>
-
-    <firebase-query id="query" app-name="SSD-Resources" path="/rTypes" data="{{allrTypes}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedRTypes" data="{{allrTypes}}" persisted-data="{{persistedRTypes}}" session="keepAlways"></app-indexeddb-mirror>
-
-    <firebase-query id="query" app-name="SSD-Resources" path="/topics" data="{{allTopics}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedTopics" data="{{allTopics}}" persisted-data="{{persistedTopics}}" session="keepAlways"></app-indexeddb-mirror>
-
-    <firebase-query id="query" app-name="SSD-Resources" path="/events" data="{{allEvents}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedEvents" data="{{allEvents}}" persisted-data="{{persistedEvents}}" session="keepAlways"></app-indexeddb-mirror>
 
     <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>
     <app-indexeddb-mirror key="persistedTags" data="{{alltags}}" persisted-data="{{persistedTags}}" session="keepAlways"></app-indexeddb-mirror>
@@ -144,7 +129,7 @@
     <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
 
     <!-- FIREBASE QUERY TO PULL IN newest FROM DB  -->
-    <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="10"></firebase-query>
+    <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="20"></firebase-query>
     <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
 
 
@@ -160,27 +145,9 @@
           value: false,
           notify: true
         },
-        topicActive: {
-          type: Boolean,
-          value: false
-        },
-        rTypeActive: {
-          type: Boolean,
-          value: false
-        },
         tagActive: {
           type: Boolean,
           value: false
-        },
-        filter_topics: {
-          type: Object,
-          observer: 'filterChange',
-          value: []
-        },
-        filter_rTypes: {
-          type: Object,
-          observer: 'filterChange',
-          value: []
         },
         filter_tags: {
           type: Object,

@@ -136,8 +136,9 @@
           //finally, discardTag:
           this.currentTagId = "";
           //and hide the newTag editor:
+          this.$.currentTag.reset()
           this.editingNew = false;
-          
+
         }.bind(this));
 
       },
@@ -148,7 +149,9 @@
         this.currentTag = null;
         console.log("Event worked, deleting...");
         // call a reset on the firebase-document.
-        this.$.currentTag.reset()
+        this.currentTagId = "";
+
+        this.editingNew = false;
 
       }
 
