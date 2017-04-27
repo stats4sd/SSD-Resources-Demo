@@ -64,9 +64,10 @@
     <!-- REPLACED PAPER TABS WITH PAPER TAGS -->
 
     <h4>Keywords</h4>
-    <paper-tags-dropdown items="[[persistedTags]]" label="label dropdown" noink value-object="" on-tap="testing"></paper-tags-dropdown>
-    <paper-tags-dropdown items='[{"id": 1, "label": "first" }, {"id":"5", "label": "last" }]' noink label="label dropdown" value-object='{"5": "true"}'></paper-tags-dropdown>
-    <paper-tags-dropdown items="{{items}}" noink label="label dropdown" value-object="{" 5 ":"true "}"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{resource.topics}}"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{resource.rTypes}}"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{resource.collections}}"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key"  value-object="{{resource.keywords}}"></paper-tags-dropdown>
 
 
     <h4>External Links</h4>
@@ -156,6 +157,16 @@
 
 
       },
+
+      _filterTags: function(tags,filter) {
+        console.log("filter",filter)
+        filteredTags = tags.filter(function(e) {
+          return e.type == filter;
+        })
+        console.log("filteredTags",filteredTags)
+        return filteredTags;
+      },
+
       addLink: function (e) {
         if (this.newLink.url != '') {
           this.push('resource.externalLinks', {
@@ -236,15 +247,31 @@
         this.set('deleted', true)
       },
 
-      testing: function () {
-        console.log(this.persistedTags);
-      },
+      // testing: function () {
+      //   console.log(this.persistedTags);
+      // },
 
       _getLinks: function () {
         return [
           { name: 'test 1' }
         ]
-      }
+      },
+      _toArray: function (obj) {
+        if (obj) {
+          var array = Object.keys(obj).map(function (key) {
+            return {
+              name: key,
+              value: obj[key]
+            };
+          });
+          console.log(array);
+          return array;
+        }
+        else {
+          return [];
+        }
+
+      },
     })
   </script>
 </dom-module>

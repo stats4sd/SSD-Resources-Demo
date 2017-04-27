@@ -55,6 +55,9 @@
       },
 
       _filterTest(tagType,filter) {
+        if(filter=="" || !filter) {
+          return true;
+        }
         if(tagType==filter){
           return true;
         }

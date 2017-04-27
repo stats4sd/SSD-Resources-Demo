@@ -114,26 +114,26 @@
       <p><span class='bold'>Description: </span>[[resource.description]]</p>
       <p>
         <span class='bold'>Topics: </span>
-        <template is="dom-repeat" items="[[_toArray(resource.tags)]]" as="tag">
-          <ssd-tag tag="[[tag]]" filter="Topic"></ssd-tag>
+        <template is="dom-repeat" items="[[_toArray(resource.topics)]]" as="tag">
+          <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
         </template>
       </p>
       <p>
         <span class='bold'>Resource Types: </span>
-        <template is="dom-repeat" items="[[_toArray(resource.tags)]]" as="tag">
-          <ssd-tag tag="[[tag]]" filter="Resource Type"></ssd-tag>
+        <template is="dom-repeat" items="[[_toArray(resource.rTypes)]]" as="tag">
+          <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
         </template>
       </p>
       <p>
         <span class='bold'>Collections: </span>
-        <template is="dom-repeat" items="[[_toArray(resource.tags)]]" as="tag">
-          <ssd-tag tag="[[tag]]" filter="Collection"></ssd-tag>
+        <template is="dom-repeat" items="[[_toArray(resource.collections)]]" as="tag">
+          <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
         </template>
       </p>
       <p>
         <span class='bold'>Keywords: </span>
-        <template is="dom-repeat" items="[[_toArray(resource.tags)]]" as="tag">
-          <ssd-tag tag="[[tag]]" filter="Keyword"></ssd-tag>
+        <template is="dom-repeat" items="[[_toArray(resource.keywords)]]" as="tag">
+          <ssd-tag tag="[[tag]]"filter="" ></ssd-tag>
         </template>
       </p>
       <div hidden$=[[!resource.externalLinks]]>
