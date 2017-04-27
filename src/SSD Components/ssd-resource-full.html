@@ -115,6 +115,7 @@
       <p>
         <span class='bold'>Topics: </span>
         <template is="dom-repeat" items="[[_toArray(resource.topics)]]" as="tag">
+          <!-- Sticking with the 4 lists in resources (resources.topics etc) instead of 1 list means we don't need the filter attribute for the ssd-tag. Could remove.  -->
           <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
         </template>
       </p>

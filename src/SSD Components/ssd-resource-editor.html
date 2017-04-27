@@ -65,7 +65,7 @@
 
     <h4>Keywords</h4>
     <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{resource.topics}}"></paper-tags-dropdown>
-    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{resource.rTypes}}"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{resource.rTypes}}" max-tags="1"></paper-tags-dropdown>
     <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{resource.collections}}"></paper-tags-dropdown>
     <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key"  value-object="{{resource.keywords}}"></paper-tags-dropdown>
 

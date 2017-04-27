@@ -17,25 +17,25 @@
         margin:6px;
         float: left;
       }
-      
+
       .resource-info {
         height: 120px;
         width: 100%;
         position: relative;
       }
-      
+
       h3 {
         margin: 10px;
         font-size: 1rem;
       }
-      
+
       img {
         height: 120px;
         width: 100%;
         margin: auto;
         object-fit: cover;
       }
-      
+
       .overlay {
         position: absolute;
         bottom: 0;
@@ -47,7 +47,7 @@
         height: 0;
         transition: .5s ease;
       }
-      
+
       .text {
         color: white;
         position: absolute;
@@ -58,21 +58,21 @@
         transform: translate(-50%, -50%);
         -ms-transform: translate(-50%, -50%);
       }
-      
+
       p {
         padding: 10px;
         text-overflow: ellipsis;
         margin: 0;
         overflow-y: auto;
       }
-      
+
       .resource-card-small:hover .overlay {
         height: 100%
       }
     </style>
     <div class="card resource-card-small">
       <div class=resource-info>
-        <img src="{{getMainImage(resource)}}">
+        <img src="{{_getImage(resource)}}">
         <h3>[[resource.name]]</h3>
         <div class="overlay">
           <div class="text">
@@ -82,6 +82,7 @@
       </div>
     </div>
 
+<!-- <firebase-document id="imageGetter" app-name="SSD-Resoures" path="/tags/[[rTypeId]]/image" data="{{image}}"></firebase-document> -->
   </template>
 
   </template>
@@ -92,13 +93,60 @@
         resource: {
           type: Object,
           readOnly: false,
-          notify: false
+          notify: false,
+          // observer: "_resourceUpdate"
         },
       },
-      getMainImage: function (resource) {
-        //console.log('no predefined image', resource)
-        return '/images/placeholder.png'
-      }
+
+      // _resourceUpdate: function() {
+      //   if(this.resource.rTypes){
+      //     this.rTypeId = Object.keys(this.resource.rTypes);
+      //   }
+      // },
+
+      _getImage: function (resource) {
+        if(resource.rTypes) {
+          console.log(resource.rTypes);
+
+          //VERY janky way to go through and check if any of the resource types = true within the resource. This probably needs a refactor...
+
+          if(resource.rTypes["-KijSiLb_oGKl4dOKkUH"]) {
+            return "images/resourceTypes/academic_paper.jpg";
+          }
+          if(resource.rTypes["-KijSkrdzRFfid9Z-UEU"]) {
+            return "images/resourceTypes/audio.jpg";
+          }
+          if(resource.rTypes["-KijSmFY6UQgHvoWBTSP"]) {
+            return "images/resourceTypes/book.jpg";
+          }
+          if(resource.rTypes["-KijSqPXSYxFOraiV9k3"]) {
+            return "images/resourceTypes/code.jpg";
+          }
+          if(resource.rTypes["-KijSsSpmLDdSrpuHT1L"]) {
+            return "images/resourceTypes/desktop_software.jpg";
+          }
+          if(resource.rTypes["-KijSvHsIPBrtyQxI2GI"]) {
+            return "images/resourceTypes/interactive_presentation.jpg";
+          }
+          if(resource.rTypes["-KijSwlTh3vBWJKyu8ur"]) {
+            return "images/resourceTypes/mobile_app.jpg";
+          }
+          if(resource.rTypes["-KijSyXK54z5mZB3dhlS"]) {
+            return "images/resourceTypes/short_text.jpg";
+          }
+          if(resource.rTypes["-KijT-2h3LK5p1z85D1x"]) {
+            return "images/resourceTypes/video.jpg";
+          }
+          if(resource.rTypes["-KijT0fOYm_dw83rNHV1"]) {
+            return "images/resourceTypes/website.jpg";
+          }
+          if(resource.rTypes["-KijedgWoC8WkOxqnwRx"]) {
+            return "images/resourceTypes/presentation.jpg";
+          }
+            }
+          return "images/placeholder.png";
+        }
+
 
     })
   </script>

@@ -21,6 +21,7 @@
     }
 
   </style>
+  <!-- Sticking with the 4 lists in resources (resources.topics etc) instead of 1 list means we don't need the filter attribute for the ssd-tag. Could remove.  -->
 
   <template is="dom-if" if="[[_filterTest(tagDetails.type,filter)]]">
     <paper-tags items="[[_toArray(tagDetails)]]" label-accessor="label" prevent-remove-tag="true" on-tap="console"></paper-tags>
