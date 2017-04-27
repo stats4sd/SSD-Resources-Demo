@@ -116,8 +116,7 @@
     <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-tags="[[persistedTags]]" on-update="updateFired">
     </ssd-resource-full>
 
-    <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-topics="[[persistedTopics]]"
-      persisted-r-types="[[persistedRTypes]]" persisted-tags="[[persistedTags]]" persisted-collections="[[persistedCollections]]">
+    <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-tags="[[persistedTags]]">
     </ssd-search>
 
     <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>

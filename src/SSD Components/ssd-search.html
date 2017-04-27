@@ -1,6 +1,11 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-elements/paper-elements.html">
 <link rel="import" href="../../bower_components/iron-elements/iron-elements.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags-dropdown.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags-behavior.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags-input.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags-import.html">
 
 <link rel="import" href="../shared-styles.html">
 
@@ -37,8 +42,9 @@
 
       .search-box {
         display: flex;
-        justify-content: center;
-        margin-top: 2em;
+        /*justify-content: center;*/
+        margin-top: 3em;
+
       }
 
       .search-input {
@@ -70,7 +76,7 @@
         paper-badge {}
       }
 
-      paper-dropdown-menu {
+      paper-dropdown-menu, paper-tags-dropdown {
         --paper-input-container-label: {
           color: white;
           font-style: italic
@@ -84,12 +90,15 @@
         }
         ;
       }
+
+
     </style>
     <style is="custom-style">
       .big {
-        --iron-icon-height: 20vw;
-        --iron-icon-width: 20vw;
-        --iron-icon-fill-color: white
+        --iron-icon-height:  10em;
+        --iron-icon-width: 10em;
+        --iron-icon-fill-color: white;
+
       }
       /*.results-badge {
         --paper-badge-background: white;
@@ -118,10 +127,10 @@
     </div>
 
     <div class="search-filters">
-      <paper-dropdown-menu label="Topics" value="{{filter_topics}}" no-animations placeholder="(all)">
+      <!-- <paper-dropdown-menu label="Topics" value="{{filter_topics}}" no-animations placeholder="(all)">
         <paper-listbox selected="0" class="dropdown-content">
           <paper-item>(all)</paper-item>
-          <template is="dom-repeat" items="{{persistedTopics}}">
+          <template is="dom-repeat" items="{{persistedTags}}">
             <paper-item>{{item.$val}}</paper-item>
           </template>
         </paper-listbox>
@@ -129,7 +138,7 @@
       <paper-dropdown-menu label="Resource Types" value="{{filter_rTypes}}" no-animations placeholder="(all)">
         <paper-listbox selected="0" class="dropdown-content">
           <paper-item>(all)</paper-item>
-          <template is="dom-repeat" items="{{persistedRTypes}}">
+          <template is="dom-repeat" items="{{persistedTags}}">
             <paper-item>{{item.$val}}</paper-item>
           </template>
         </paper-listbox>
@@ -141,7 +150,13 @@
             <paper-item>{{item.$val}}</paper-item>
           </template>
         </paper-listbox>
-      </paper-dropdown-menu>
+      </paper-dropdown-menu> -->
+
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key"></paper-tags-dropdown>
+
     </div>
 
     <div class="resources-container">
@@ -189,8 +204,18 @@
         },
       },
 
+      _filterTags: function(tags,filter) {
+        console.log("allTags",this.persistedTags)
+        console.log("filter",filter)
+        filteredTags = tags.filter(function(e) {
+          return e.type == filter;
+        })
+        console.log("filteredTags",filteredTags)
+        return filteredTags;
+      },
+
       _textFilter: function (resource) {
-        //don't show deleted resources 
+        //don't show deleted resources
         if (resource.deleted == true) { return false }
         //runs when 3 or more letters typed. checks name, description and tags for search text, return true first time criteria matched
         s = this.searchText.toLowerCase();
