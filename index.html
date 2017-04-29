@@ -1,92 +1,82 @@
 <html lang="en">
-  <head>
-    <base href="/">
-    <meta charset="utf-8">
-    <meta name="generator" content="SSD Resources Demo">
-    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>SSD Resources Demo</title>
-    <meta name="description" content="SSD Resources Demo - ">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="SSD Resources Demo">
-    <link rel="icon" href="/images/favicon-32x32.ico">
-    <!-- See https://goo.gl/OOhYW5 -->
-    <link rel="manifest" href="/manifest.json">
-    <!-- See https://goo.gl/qRE0vM -->
-    <meta name="theme-color" content="#3f51b5">
+<head>
+  <base href="/">
+  <meta charset="utf-8">
+  <meta name="generator" content="SSD Resources Demo">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="SSD Resources">
-    <!-- Add to homescreen for Safari on iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SSD Resources">
-    <!-- Homescreen icons -->
-    <link rel="apple-touch-icon" href="/images/manifest/icon-48x48.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/images/manifest/icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="96x96" href="/images/manifest/icon-96x96.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/images/manifest/icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="/images/manifest/icon-192x192.png">
-    <!-- Tile icon for Windows 8 (144x144 + tile color) -->
-    <meta name="msapplication-TileImage" content="/images/manifest/icon-144x144.png">
-    <meta name="msapplication-TileColor" content="#3f51b5">
-    <meta name="msapplication-tap-highlight" content="no">
+  <title>SSD Resources Demo</title>
+  <meta name="description" content="SSD Resources Demo - ">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="SSD Resources Demo">
+  <link rel="icon" href="/images/favicon-32x32.ico">
+  <!-- See https://goo.gl/OOhYW5 -->
+  <link rel="manifest" href="/manifest.json">
+  <!-- See https://goo.gl/qRE0vM -->
+  <meta name="theme-color" content="#3f51b5">
 
-    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-    <link rel="import" href="bower_components/platinum-sw/platinum-sw-elements.html">
-    <link rel="import" href="bower_components/polymerfire/polymerfire.html">
-    <link rel="import" href="bower_components/polymerfire/firebase-app.html">
-    <link rel="import" href="src/ssd-app.html">
+  <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="SSD Resources">
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SSD Resources">
+  <!-- Homescreen icons -->
+  <link rel="apple-touch-icon" href="/images/manifest/icon-48x48.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/images/manifest/icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="96x96" href="/images/manifest/icon-96x96.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/images/manifest/icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/images/manifest/icon-192x192.png">
+  <!-- Tile icon for Windows 8 (144x144 + tile color) -->
+  <meta name="msapplication-TileImage" content="/images/manifest/icon-144x144.png">
+  <meta name="msapplication-TileColor" content="#3f51b5">
+  <meta name="msapplication-tap-highlight" content="no">
 
-    <!-- import font(s) -->
-    <link rel="stylesheet" href="bower_components\open-sans-fontface\open-sans.css" type="text/css">
+  <script src="/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <!--<link rel="import" href="/bower_components/platinum-sw/platinum-sw-elements.html">-->
+  <link rel="import" href="/src/ssd-app.html">
 
 
-    <!-- Import jQuery -->
-    <!--<script src="/bower_components/jquery/dist/jquery.min.js"></script>-->
-    <!-- Import Boostrap css and js -->
-    <!--<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css" type="text/css"/>
-    <script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>-->
-
-    <style>
-
-      body {
-        margin: 0;
-        font-family: 'Open Sans', 'Noto', sans-serif;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 1.5;
-        min-height: 100vh;
-        background-color: #eeeeee;
-      }
+  <!-- import font(s) -->
+  <link rel="stylesheet" href="/src/open-sans.css" type="text/css">
 
 
-    </style>
-  </head>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Open Sans', 'Noto', sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 1.5;
+      min-height: 100vh;
+      background-color: #eeeeee;
+    }
+  </style>
+</head>
 
-  <body>
-    <!--register service worker-->
-    <platinum-sw-register
-      auto-register
-      skip-waiting
-      clients-claim
-      reload-on-install
-      href="sw-import.js">
-    <platinum-sw-cache
-        default-cache-strategy="fastest">
-    </platinum-sw-cache>
-  </platinum-sw-register>
+<body>
+  <!--register service worker - platinum sw method
+  also need to include sw-import and platinum-service-worker in polymer.json extraDependencies
+  and uncomment element import above-->
+  
+  <!--<platinum-sw-register skip-waiting clients-claim auto-register reload-on-install>
+    <platinum-sw-cache default-cache-strategy="fastest"></platinum-sw-cache>
+  </platinum-sw-register>-->
+
   <!--firebase app register-->
-  <firebase-app
-      name="SSD-Resources"
-      api-key="AIzaSyCfl_Pe6Fb8KzIQRV1P2RIwwhN8Jl6BACo"
-      storage-bucket="ssd-resources-demo.appspot.com"
-      auth-domain="ssd-resources-demo.firebaseapp.com"
-      database-url="https://ssd-resources-demo.firebaseio.com"
-      >
-   </firebase-app>
-    <ssd-app></ssd-app>
-    <!-- Built with love using Polymer Starter Kit -->
-  </body>
+  <firebase-app name="SSD-Resources" api-key="AIzaSyCfl_Pe6Fb8KzIQRV1P2RIwwhN8Jl6BACo" storage-bucket="ssd-resources-demo.appspot.com"
+    auth-domain="ssd-resources-demo.firebaseapp.com" database-url="https://ssd-resources-demo.firebaseio.com">
+  </firebase-app>
+  <ssd-app></ssd-app>
+  
+  <script>
+    // Register service worker if supported.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js');
+    }
+  </script>
+</body>
+
 </html>

@@ -7,14 +7,14 @@
     "src/ssd-home.html",
     "src/ssd-view404.html"
   ],
-  "sourceGlobs": [
+  "sources": [
     "src/**/*",
     "images/**/*",
-    "bower.json"
+    "bower.json",
+    "index.html"
   ],
-  "includeDependencies": [
+  "extraDependencies": [
     "manifest.json",
-    "bower_components/webcomponentsjs/webcomponents-lite.min.js",
-    "sw-import.js"
+    "bower_components/webcomponentsjs/webcomponents-lite.min.js"
   ]
 }

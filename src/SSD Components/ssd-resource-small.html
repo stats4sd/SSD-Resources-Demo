@@ -14,28 +14,28 @@
         height: 200px;
         padding: 0;
         cursor: pointer;
-        margin:6px;
+        margin: 6px;
         float: left;
       }
-
+      
       .resource-info {
         height: 120px;
         width: 100%;
         position: relative;
       }
-
+      
       h3 {
         margin: 10px;
         font-size: 1rem;
       }
-
+      
       img {
         height: 120px;
         width: 100%;
         margin: auto;
         object-fit: cover;
       }
-
+      
       .overlay {
         position: absolute;
         bottom: 0;
@@ -47,7 +47,7 @@
         height: 0;
         transition: .5s ease;
       }
-
+      
       .text {
         color: white;
         position: absolute;
@@ -58,14 +58,14 @@
         transform: translate(-50%, -50%);
         -ms-transform: translate(-50%, -50%);
       }
-
+      
       p {
         padding: 10px;
         text-overflow: ellipsis;
         margin: 0;
         overflow-y: auto;
       }
-
+      
       .resource-card-small:hover .overlay {
         height: 100%
       }
@@ -82,7 +82,7 @@
       </div>
     </div>
 
-<!-- <firebase-document id="imageGetter" app-name="SSD-Resoures" path="/tags/[[rTypeId]]/image" data="{{image}}"></firebase-document> -->
+    <!-- <firebase-document id="imageGetter" app-name="SSD-Resoures" path="/tags/[[rTypeId]]/image" data="{{image}}"></firebase-document> -->
   </template>
 
   </template>
@@ -105,49 +105,28 @@
       // },
 
       _getImage: function (resource) {
-        if(resource.rTypes) {
-          console.log(resource.rTypes);
-
+        if (resource.rTypes) {
+          //get name of first key (assuming either only 1, or just use first for image)
+          var key = Object.keys(resource.rTypes)[0]
+          console.log('key', key)
           //VERY janky way to go through and check if any of the resource types = true within the resource. This probably needs a refactor...
-
-          if(resource.rTypes["-KijSiLb_oGKl4dOKkUH"]) {
-            return "images/resourceTypes/academic_paper.jpg";
+          var images = {
+            "-KijSiLb_oGKl4dOKkUH": "images/resourceTypes/academic_paper.jpg",
+            "-KijSkrdzRFfid9Z-UEU": "images/resourceTypes/audio.jpg",
+            "-KijSmFY6UQgHvoWBTSP": "images/resourceTypes/book.jpg",
+            "-KijSqPXSYxFOraiV9k3": "images/resourceTypes/code.jpg",
+            "-KijSsSpmLDdSrpuHT1L": "images/resourceTypes/desktop_software.jpg",
+            "-KijSvHsIPBrtyQxI2GI": "images/resourceTypes/interactive_presentation.jpg",
+            "-KijSwlTh3vBWJKyu8ur": "images/resourceTypes/mobile_app.jpg",
+            "-KijSyXK54z5mZB3dhlS": "images/resourceTypes/short_text.jpg",
+            "-KijT-2h3LK5p1z85D1x": "images/resourceTypes/video.jpg",
+            "-KijT0fOYm_dw83rNHV1": "images/resourceTypes/website.jpg",
+            "-KijedgWoC8WkOxqnwRx": "images/resourceTypes/presentation.jpg"
           }
-          if(resource.rTypes["-KijSkrdzRFfid9Z-UEU"]) {
-            return "images/resourceTypes/audio.jpg";
-          }
-          if(resource.rTypes["-KijSmFY6UQgHvoWBTSP"]) {
-            return "images/resourceTypes/book.jpg";
-          }
-          if(resource.rTypes["-KijSqPXSYxFOraiV9k3"]) {
-            return "images/resourceTypes/code.jpg";
-          }
-          if(resource.rTypes["-KijSsSpmLDdSrpuHT1L"]) {
-            return "images/resourceTypes/desktop_software.jpg";
-          }
-          if(resource.rTypes["-KijSvHsIPBrtyQxI2GI"]) {
-            return "images/resourceTypes/interactive_presentation.jpg";
-          }
-          if(resource.rTypes["-KijSwlTh3vBWJKyu8ur"]) {
-            return "images/resourceTypes/mobile_app.jpg";
-          }
-          if(resource.rTypes["-KijSyXK54z5mZB3dhlS"]) {
-            return "images/resourceTypes/short_text.jpg";
-          }
-          if(resource.rTypes["-KijT-2h3LK5p1z85D1x"]) {
-            return "images/resourceTypes/video.jpg";
-          }
-          if(resource.rTypes["-KijT0fOYm_dw83rNHV1"]) {
-            return "images/resourceTypes/website.jpg";
-          }
-          if(resource.rTypes["-KijedgWoC8WkOxqnwRx"]) {
-            return "images/resourceTypes/presentation.jpg";
-          }
-            }
-          return "images/placeholder.png";
+          if (images[key]) { return images[key] }
         }
-
-
+        return "images/placeholder.png"
+      }
     })
   </script>
 </dom-module>
