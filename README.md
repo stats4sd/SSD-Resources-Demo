@@ -9,8 +9,8 @@ $ bower install
 start the server. you can see the output at the localhost address given
 $ polymer serve --open
 
-build the project for deployment
-$ polymer build
+build the project for deployment (including service worker)
+$ polymer build --add-service-worker
 
 deploy to firebase
 $firebase deploy

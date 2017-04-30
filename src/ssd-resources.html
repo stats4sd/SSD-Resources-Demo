@@ -119,17 +119,17 @@
     <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-tags="[[persistedTags]]">
     </ssd-search>
 
+
     <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>
     <app-indexeddb-mirror key="persistedTags" data="{{alltags}}" persisted-data="{{persistedTags}}" session="keepAlways"></app-indexeddb-mirror>
 
-
     <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB  -->
     <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
+    <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}" session="keepAlways"></app-indexeddb-mirror>
 
     <!-- FIREBASE QUERY TO PULL IN newest FROM DB  -->
     <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="20"></firebase-query>
-    <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
+    <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" session="keepAlways" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
 
 
   </template>
