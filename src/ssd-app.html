@@ -31,7 +31,7 @@
         display: block;
         font-family: "Open Sans";
       }
-
+      
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
@@ -39,7 +39,7 @@
         /*height: 120px;*/
         display: flex;
       }
-
+      
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
@@ -89,15 +89,15 @@
       }
 
       ;*/
-
+      
       paper-tabs {
         font-size: 0.9em;
       }
-
+      
       paper-button {
         font-size: 0.8em;
       }
-
+      
       div.titleLogo {
         font-size: 18px;
         font-weight: bold;
@@ -107,47 +107,47 @@
         white-space: pre-wrap;
         float: left;
       }
-
+      
       app-toolbar[sticky] {
         margin-top: 35px;
         height: 50px;
         padding-left: 0;
       }
-
+      
       paper-tabs[no-bar] paper-tab.iron-selected {
         font-weight: bold;
         color: #ffff8d;
         height: 50px;
       }
-
+      
       paper-button {
         font-family: "Open Sans"
       }
-
+      
        :root {
         --paper-font-common-base: {
           font-family: "Open Sans", "Noto", sans-serif;
         }
       }
-
+      
       .spacer {
         width: 10%;
       }
-
+      
       .login {
         position: absolute;
         right: 10px;
         font-size: 0.83em;
         cursor: pointer;
       }
-
+      
       .user-name {
         position: absolute;
         top: -30px;
         right: 10px;
         font-size: 0.6em;
       }
-
+      
       .top-right {
         position: absolute;
         top: -3em;
@@ -175,6 +175,7 @@
           <template is="dom-repeat" items="{{navItems}}">
             <paper-item name="{{item}}">{{item}}</paper-item>
           </template>
+
         </paper-menu>
       </app-drawer>
 
@@ -199,6 +200,7 @@
               <template is="dom-repeat" items="{{navItems}}">
                 <paper-tab name="{{item}}">{{item}}</paper-tab>
               </template>
+
             </paper-tabs>
             <paper-button on-tap='search' class="right-top-tab">
               <iron-icon icon="search"></iron-icon>
@@ -236,9 +238,9 @@
 
         <!-- Main pages -->
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
-            <ssd-home name="home"></ssd-home>
-            <ssd-resources route="{{subroute}}" name="resources" id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}}></ssd-resources>
-            <ssd-tags name="tags" id="tagsPage"></ssd-tags>
+          <ssd-home name="home"></ssd-home>
+          <ssd-resources route="{{subroute}}" name="resources" signed-in={{signedIn}} id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}}></ssd-resources>
+          <ssd-tags name="tags" id="tagsPage"></ssd-tags>
         </iron-pages>
 
 
@@ -303,13 +305,13 @@
         navItems: {
           type: Array,
           value: function () {
-            return ['home', 'resources','tags'];
+            return ['home', 'resources'];
           },
-          searchTerm: {
-            type: String,
-            value: ""
-          }
 
+        },
+        searchTerm: {
+          type: String,
+          value: ""
         }
       },
 
@@ -384,9 +386,21 @@
       _logout: function () {
         this.$$('ssd-email-login-fire').signOut();
         console.log('logged out');
+        //remove admin pages on sign out
+        console.log('tag nav index',this.navItems.indexOf('tags'))
+        if(this.navItems.indexOf('tags')!=-1){
+          this.pop('navItems','tags')
+        }
       },
       _logStatus: function () {
+        console.log('user status changed')
         if (this.signedIn) { this.$$('paper-dialog').close() }
+        //show admin pages on sign in
+        console.log('nav items',this.navItems)
+        console.log('tag nav index', this.navItems.indexOf('tags'))
+        if(this.navItems.indexOf('tags')==-1 && this.signedIn==true){
+          this.push('navItems','tags')
+        }
       },
 
       search: function (e) {

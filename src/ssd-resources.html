@@ -113,7 +113,7 @@
     <!--  SETTING UP RESOURCES -->
 
 
-    <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' persisted-tags="[[persistedTags]]" on-update="updateFired">
+    <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' signed-in='{{signedIn}}' persisted-tags="[[persistedTags]]" on-update="updateFired">
     </ssd-resource-full>
 
     <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-tags="[[persistedTags]]">
@@ -176,6 +176,10 @@
           computed: '_return(_routeData.resourceID)',
           observer: 'ResourceIdChange'
         },
+        signedIn:{
+          type:Boolean,
+          notify:true
+        }
 
 
       },

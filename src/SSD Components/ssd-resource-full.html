@@ -81,7 +81,7 @@
           <iron-icon icon="arrow-back"></iron-icon>Back
         </paper-button>
       </div>
-      <div>
+      <div hidden$="[[!signedIn]]">
         <paper-button class="edit" raised on-tap='edit' hidden$="[[editMode]]">
           <iron-icon icon="editor:mode-edit"></iron-icon>Edit
         </paper-button>
@@ -224,7 +224,7 @@
         tags: {
           type: Array,
           notify: true,
-        }
+        },
       },
 
       //Filtering tags by type
