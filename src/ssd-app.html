@@ -1,25 +1,25 @@
-<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-layout/app-layout.html">
-<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
-<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
-<link rel="import" href="../bower_components/iron-icons/editor-icons.html">
-<link rel="import" href="../bower_components/paper-elements/paper-elements.html">
-<link rel="import" href="../bower_components/login-fire/login-fire.html">
-<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
-<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
-
 <link rel="import" href="SSD Components/ssd-email-login-fire.html">
-<link rel="import" href="ssd-home.html">
-<link rel="import" href="ssd-resources.html">
-<link rel="import" href="ssd-view404.html">
-<link rel="import" href="ssd-tags.html">
-
+<!--Unnecessary imports-->
+<!--<link rel="import" href="../bower_components/paper-elements/paper-elements.html">-->
+<!--<link rel="import" href="../bower_components/login-fire/login-fire.html">-->
+<!--<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">-->
+<!--<link rel="import" href="../bower_components/iron-icons/editor-icons.html">-->
+<!--<link rel="import" href="../bower_components/iron-selector/iron-selector.html">-->
+<!--<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">-->
 <link rel="import" href="my-icons.html">
 
 <dom-module id="ssd-app">
@@ -43,52 +43,6 @@
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
-      /*
-      .drawer-list {
-        margin: 0 20px;
-      }
-
-      .user-name {
-        text-align: right;
-        padding-right: 16px;
-        font-size: medium;
-      }
-
-      .login-details {
-        color: var(--paper-red-500)
-      }
-
-      .footer {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        padding: 1rem 1rem 8rem 1rem;
-        text-align: center;
-        /*color: var(--group-colour-900);
-      }
-
-      .enableEditing {
-        background-color: var(--paper-red-900);
-        color: var(--paper-red-50)
-      }
-
-      .disableEditing {
-        background-color: var(--paper-blue-900);
-        color: var(--paper-blue-50)
-      }
-
-      .addResource {
-        background-color: var(--paper-green-900);
-        color: var(--paper-green-50)
-      }
-
-      .adminButton {
-        width: 100%;
-        margin: 5px;
-      }
-
-      ;*/
       
       paper-tabs {
         font-size: 0.9em;
@@ -160,12 +114,10 @@
     <app-location route="{{route}}"></app-location>
     <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}" query-params="{{queryParams}}"></app-route>
 
-
     <!-- Check screen size -->
     <iron-media-query query="min-width: 650px" query-matches="{{wide}}"></iron-media-query>
     <iron-media-query query="min-width: 1024px" query-matches="{{veryWide}}"></iron-media-query>
     <app-drawer-layout force-narrow responsiveWidth>
-
       <!-- Define navigation drawer for smaller screens only -->
       <app-drawer id="drawer">
         <!-- empty app-toolbar to match main-section top bit -->
@@ -175,10 +127,8 @@
           <template is="dom-repeat" items="{{navItems}}">
             <paper-item name="{{item}}">{{item}}</paper-item>
           </template>
-
         </paper-menu>
       </app-drawer>
-
 
       <!-- header bar content -->
       <app-header-layout has-scrolling-region>
@@ -186,7 +136,6 @@
         <app-header fixed effects="waterfall">
           <div main-title class='titleLogo' hidden$="{{!wide}}">Stats4SD Resources Bank</div>
           <div condensed-title>SSD Resources</div>
-
           <!-- WHEN condenses is re-added, setup multiple toolbars and make the tabs one sticky -->
           <!-- </app-toolbar>
             <app-toolbar sticky class="tabs-bar"> -->
@@ -226,29 +175,17 @@
             <div class="user-name" hidden$="{{!signedIn}}">
               Signed in as {{user.displayName}}
             </div>
-
-
           </app-toolbar>
-
-
         </app-header>
-
-
-
 
         <!-- Main pages -->
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
           <ssd-home name="home"></ssd-home>
-          <ssd-resources route="{{subroute}}" name="resources" signed-in={{signedIn}} id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}}></ssd-resources>
+          <ssd-resources page-loaded="{{resourcesPageLoaded}}" route="{{subroute}}" name="resources" signed-in={{signedIn}} id="resourcesPage"
+            very-wide={{veryWide}} short-code={{shortCode}}></ssd-resources>
           <ssd-tags name="tags" id="tagsPage"></ssd-tags>
         </iron-pages>
-
-
       </app-header-layout>
-
-
-
-
     </app-drawer-layout>
 
     <body>
@@ -261,9 +198,6 @@
         </paper-dialog-scrollable>
       </paper-dialog>
     </body>
-
-
-
   </template>
 
   <script>
@@ -307,11 +241,13 @@
           value: function () {
             return ['home', 'resources'];
           },
-
         },
         searchTerm: {
           type: String,
           value: ""
+        },
+        resourcesPageLoaded: {
+          type: Boolean
         }
       },
 
@@ -354,6 +290,7 @@
         }
       },
 
+      //lazy load page contents on change (useful for admin pages)
       _pageChanged: function (page, oldPage) {
         console.log('page changed', page)
         var href
@@ -364,6 +301,9 @@
           case 'home':
             href = "ssd-home.html";
             break
+          case 'tags':
+            href = "ssd-tags.html";
+            break
           default:
             href = "ssd-view404.html";
             break
@@ -372,9 +312,27 @@
         // importHref(href, onload, onerror, optAsync). Dynamically imports an HTML document.
         this.importHref(
           this.resolveUrl(href),
-          null,
+          this._pageLoaded(page),
           null,
           true);
+      },
+
+      _pageLoaded(page) {
+        console.log('page loaded:', page)
+        //lazy load resources page if not already
+        if (page != 'resources' && !this.resourcesPageLoaded) {
+          console.log('start of resource page lazy load')
+          Polymer.RenderStatus.afterNextRender(this, function () {
+            this.importHref(
+              this.resolveUrl('ssd-resources.html'),
+              function () {
+                console.log('resources loaded laziliy'),
+                  this.resourcesPageLoaded = true
+                null,
+                  null
+              })
+          })
+        }
       },
 
       _showPage404: function () {
@@ -387,19 +345,19 @@
         this.$$('ssd-email-login-fire').signOut();
         console.log('logged out');
         //remove admin pages on sign out
-        console.log('tag nav index',this.navItems.indexOf('tags'))
-        if(this.navItems.indexOf('tags')!=-1){
-          this.pop('navItems','tags')
+        console.log('tag nav index', this.navItems.indexOf('tags'))
+        if (this.navItems.indexOf('tags') != -1) {
+          this.pop('navItems', 'tags')
         }
       },
+      //used to load and hide/show components based on signedIn status changing
       _logStatus: function () {
-        console.log('user status changed')
-        if (this.signedIn) { this.$$('paper-dialog').close() }
-        //show admin pages on sign in
-        console.log('nav items',this.navItems)
-        console.log('tag nav index', this.navItems.indexOf('tags'))
-        if(this.navItems.indexOf('tags')==-1 && this.signedIn==true){
-          this.push('navItems','tags')
+        console.log('signed in?', this.signedIn)
+        if (this.signedIn) {
+          this.$$('paper-dialog').close()
+        }
+        if (this.navItems.indexOf('tags') == -1 && this.signedIn == true) {
+          this.push('navItems', 'tags')
         }
       },
 

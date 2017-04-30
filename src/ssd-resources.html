@@ -1,17 +1,19 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/app-route/app-route.html">
-<link rel="import" href="shared-styles.html">
-<link rel="import" href="../bower_components/paper-elements/paper-elements.html">
-<link rel="import" href="../bower_components/iron-elements/iron-elements.html">
+<!--unnecessary imports-->
+<!--<link rel="import" href="../bower_components/polymer/polymer.html">-->
+<!--<link rel="import" href="../bower_components/app-route/app-route.html">-->
+<!--<link rel="import" href="../bower_components/paper-elements/paper-elements.html">-->
+<!--<link rel="import" href="../bower_components/iron-elements/iron-elements.html">-->
 
+
+<link rel="import" href="shared-styles.html">
 <link rel="import" href="SSD Components/ssd-resource-small.html">
 <link rel="import" href="SSD Components/ssd-resource-search-result.html">
-<link rel="import" href="SSD Components/ssd-resource-full.html">
+
 <link rel="import" href="SSD Components/ssd-resource-editor.html">
-<link rel="import" href="SSD Components/ssd-resource-file.html">
+
 <link rel="import" href="SSD Components/ssd-search.html">
 <link ref="import" href="../bower_components/paper-fab/index.html">
-<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<!--<link rel="import" href="../bower_components/polymerfire/polymerfire.html">-->
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 
 
@@ -21,38 +23,38 @@
        :host {
         display: block;
       }
-
+      
       h1 {
         margin: 0
       }
-
+      
       .resource-page-body {
         display: flex;
         min-height: 100vh;
         flex-direction: column;
       }
-
+      
       .resource-page-content {
         display: flex;
         flex: 1;
       }
-
+      
       .main-content {
         flex: 1;
       }
-
+      
       .left-sidebar-nav,
       .right-sidebar-aside {
         /* 12em is the width of the columns */
         flex: 0 0 12em;
       }
-
+      
       .left-sidebar-nav {
         /* put the nav on the left */
         order: -1;
         align-self: center;
       }
-
+      
       .slider {
         position: relative;
         background-color: #ccc;
@@ -60,7 +62,7 @@
         overflow-x: scroll;
         overflow-y: hidden;
       }
-
+      
       .track {
         position: absolute;
         top: 10px;
@@ -70,7 +72,7 @@
         border: 0;
         width: 2400px;
       }
-
+      
       .section-heading {
         font-size: 1.6em;
         font-weight: 600;
@@ -107,27 +109,21 @@
       </div>
     </body>
 
-
-
-
     <!--  SETTING UP RESOURCES -->
-
-
-    <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' signed-in='{{signedIn}}' persisted-tags="[[persistedTags]]" on-update="updateFired">
+    <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' signed-in='{{signedIn}}'
+      persisted-tags="[[persistedTags]]" on-update="updateFired">
     </ssd-resource-full>
-
     <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-tags="[[persistedTags]]">
     </ssd-search>
 
-
+    <!--Firebase queries-->
+    <!--query to pull in tags as doesn't update well in live mode on tags page (want import before load)-->
     <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{alltags}}"></firebase-query>
     <app-indexeddb-mirror key="persistedTags" data="{{alltags}}" persisted-data="{{persistedTags}}" session="keepAlways"></app-indexeddb-mirror>
-
-    <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB  -->
-    <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}"></firebase-query>
+    <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB, starts after load  -->
+    <firebase-query id="query" app-name="SSD-Resources" path="[[allResourcesPath]]" data="{{resources}}"></firebase-query>
     <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}" session="keepAlways"></app-indexeddb-mirror>
-
-    <!-- FIREBASE QUERY TO PULL IN newest FROM DB  -->
+    <!-- FIREBASE QUERY TO PULL IN newest FROM DB, starts before load  -->
     <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="20"></firebase-query>
     <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" session="keepAlways" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
 
@@ -137,6 +133,16 @@
   <script>
     Polymer({
       is: 'ssd-resources',
+      //when core loaded, load click-through elements and setup firebase queries
+      ready: function () {
+        console.log('resource element ready')
+        this.importHref(
+          this.resolveUrl('SSD Components/import-lazy-resources.html'),
+          function () { console.log('successful import') },
+          function (err) { console.log('error importing lazy resources', err) },
+          true);
+        this.allResourcesPath = "/resources"
+      },
 
       properties: {
         resourceOpened: {
@@ -176,9 +182,9 @@
           computed: '_return(_routeData.resourceID)',
           observer: 'ResourceIdChange'
         },
-        signedIn:{
-          type:Boolean,
-          notify:true
+        signedIn: {
+          type: Boolean,
+          notify: true
         }
 
 
