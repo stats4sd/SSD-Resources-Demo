@@ -1,18 +1,7 @@
-<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/app-layout/app-layout.html">
-<link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
-<link rel="import" href="../bower_components/app-route/app-location.html">
-<link rel="import" href="../bower_components/app-route/app-route.html">
-<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
-<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
-<link rel="import" href="SSD Components/ssd-email-login-fire.html">
+
+<link rel="import" href="ssd-app-imports.vulcanized.html">
+
 <!--Unnecessary imports-->
 <!--<link rel="import" href="../bower_components/paper-elements/paper-elements.html">-->
 <!--<link rel="import" href="../bower_components/login-fire/login-fire.html">-->
@@ -20,7 +9,7 @@
 <!--<link rel="import" href="../bower_components/iron-icons/editor-icons.html">-->
 <!--<link rel="import" href="../bower_components/iron-selector/iron-selector.html">-->
 <!--<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">-->
-<link rel="import" href="my-icons.html">
+
 
 <dom-module id="ssd-app">
   <template>
@@ -193,7 +182,7 @@
       <paper-dialog id="login" modal>
         <paper-dialog-scrollable>
           <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
-          <ssd-email-login-fire app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+          <ssd-email-login-fire app-name="[[emailLoginFireAppName]]" user="{{user}}" signed-in="{{signedIn}}">
           </ssd-email-login-fire>
         </paper-dialog-scrollable>
       </paper-dialog>
@@ -326,11 +315,13 @@
             this.importHref(
               this.resolveUrl('ssd-resources.html'),
               function () {
-                console.log('resources loaded laziliy'),
-                  this.resourcesPageLoaded = true
-                null,
-                  null
-              })
+                console.log('resources loaded laziliy')
+                  this.resourcesPageLoaded = true;
+                  //setup email login fire
+                  this.emailLoginFireAppName="SSD-Resources"
+              },                
+                  null,null
+              )
           })
         }
       },

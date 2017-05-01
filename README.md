@@ -23,6 +23,12 @@ Links to $firebase serve command, ideally should have precompile before from hig
 2. copy ssd-viewTemplate contents to new page and update necessary code
 3. provide a reference for the menu in ssd-app.html <iron-pages> and <iron-selector> sections
 
+#Prepare fore deployment
+Vulcanizing:
+App elements (if changes have been made):
+$ vulcanize src/ssd-app-imports.html --strip-comments --out-html src/ssd-app-imports.vulcanized.html --inlin
+e-scripts --inline-css --strip-exclude bower_components/polymer/polymer.html
+
 
 #Learn more about the code used
 
