@@ -182,7 +182,7 @@
       <paper-dialog id="login" modal>
         <paper-dialog-scrollable>
           <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
-          <ssd-email-login-fire app-name="[[emailLoginFireAppName]]" user="{{user}}" signed-in="{{signedIn}}">
+          <ssd-email-login-fire app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
           </ssd-email-login-fire>
         </paper-dialog-scrollable>
       </paper-dialog>
@@ -320,8 +320,8 @@
               function () {
                 console.log('resources page core loaded')
                   this.resourcesPageLoaded = true;
-                  //setup email login fire
-                  this.emailLoginFireAppName="SSD-Resources"
+                  // //setup email login fire
+                  // this.emailLoginFireAppName="SSD-Resources"
               },                
                   null,null
               )
