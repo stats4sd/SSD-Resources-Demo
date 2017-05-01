@@ -1,6 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<link rel="import" href="ssd-app-imports.vulcanized.html">
+<link rel="import" href="ssd-app-imports.html">
 
 <!--Unnecessary imports-->
 <!--<link rel="import" href="../bower_components/paper-elements/paper-elements.html">-->
@@ -170,7 +170,7 @@
         <!-- Main pages -->
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
           <ssd-home name="home"></ssd-home>
-          <ssd-resources page-loaded="{{resourcesPageLoaded}}" route="{{subroute}}" name="resources" signed-in={{signedIn}} id="resourcesPage"
+          <ssd-resources page-loaded="{{resourcesPageLoaded}}" page="{{routeData.page}}" route="{{subroute}}" name="resources" signed-in={{signedIn}} id="resourcesPage"
             very-wide={{veryWide}} short-code={{shortCode}}></ssd-resources>
           <ssd-tags name="tags" id="tagsPage"></ssd-tags>
         </iron-pages>
@@ -236,6 +236,9 @@
           value: ""
         },
         resourcesPageLoaded: {
+          type: Boolean
+        },
+        resourcesPageLazyLoaded: {
           type: Boolean
         }
       },
@@ -315,10 +318,24 @@
             this.importHref(
               this.resolveUrl('ssd-resources.html'),
               function () {
-                console.log('resources loaded laziliy')
+                console.log('resources page core loaded')
                   this.resourcesPageLoaded = true;
                   //setup email login fire
                   this.emailLoginFireAppName="SSD-Resources"
+              },                
+                  null,null
+              )
+          })
+        }
+        if (page == 'resources' && !this.resourcesPageLazyLoaded) {
+          console.log('start of resource page lazy load')
+          Polymer.RenderStatus.afterNextRender(this, function () {
+            this.importHref(
+              this.resolveUrl('SSD Components/import-lazy-resources.html'),
+              function () {
+                console.log('resource page lazy resources loaded')
+                  this.resourcesPageLazyLoaded = true;
+                  //setup email login fire
               },                
                   null,null
               )

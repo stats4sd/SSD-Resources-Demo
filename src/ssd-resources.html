@@ -3,18 +3,13 @@
 <!--<link rel="import" href="../bower_components/app-route/app-route.html">-->
 <!--<link rel="import" href="../bower_components/paper-elements/paper-elements.html">-->
 <!--<link rel="import" href="../bower_components/iron-elements/iron-elements.html">-->
-
-
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="SSD Components/ssd-resource-small.html">
-<link rel="import" href="SSD Components/ssd-resource-search-result.html">
-
-<link rel="import" href="SSD Components/ssd-resource-editor.html">
-
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="SSD Components/ssd-search.html">
 <link ref="import" href="../bower_components/paper-fab/index.html">
 <!--<link rel="import" href="../bower_components/polymerfire/polymerfire.html">-->
-<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+
 
 
 <dom-module id="ssd-resources">
@@ -135,13 +130,7 @@
       is: 'ssd-resources',
       //when core loaded, load click-through elements and setup firebase queries
       ready: function () {
-        console.log('resource element ready')
-        this.importHref(
-          this.resolveUrl('SSD Components/import-lazy-resources.html'),
-          function () { console.log('successful import') },
-          function (err) { console.log('error importing lazy resources', err) },
-          true);
-        this.allResourcesPath = "/resources"
+        
       },
 
       properties: {
@@ -185,9 +174,15 @@
         signedIn: {
           type: Boolean,
           notify: true
+        },
+        page:{
+          type:String,
+          observer:'_pageChanged',
+          notify:true
+        },
+        lazyLoadComplete:{
+          type:Boolean
         }
-
-
       },
       resourcesChanged: function (res) {
         console.log('res changed', res)
@@ -202,6 +197,20 @@
       },
       resourceTap: function (e) {
         this.$.fullResource.open(e.model.resource);
+      },
+      _pageChanged:function(page){
+        if(this.page=="resources" && this.lazyLoadComplete==false){
+          console.log('starting lazy load')
+          this.importHref(
+          this.resolveUrl('SSD Components/import-lazy-resources.html'),
+          function (success) { 
+            this.lazyLoadComplete =true;
+            console.log('lazy resources successful import') },
+          function (err) { console.log('error importing lazy resources', err) },
+          true);
+        this.allResourcesPath = "/resources"
+        
+        }
       },
       //responds to calls from add resource button and passes empty request to resource open
       addResource: function () {
