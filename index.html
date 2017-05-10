@@ -34,8 +34,9 @@
   <meta name="msapplication-TileColor" content="#3f51b5">
   <meta name="msapplication-tap-highlight" content="no">
 
-  <script src="/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <!--<script src="/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>-->
   <!--<link rel="import" href="/bower_components/platinum-sw/platinum-sw-elements.html">-->
+
   <link rel="import" href="/src/ssd-app.html">
 
 
@@ -65,18 +66,36 @@
     <platinum-sw-cache default-cache-strategy="fastest"></platinum-sw-cache>
   </platinum-sw-register>-->
 
-  <!--firebase app register-->
-  <firebase-app name="SSD-Resources" api-key="AIzaSyBD5pjMlrhbmtkBU32-zvoJImF010wgFxY" storage-bucket="stats4sd-resources.appspot.com"
-    auth-domain="stats4sd-resources.firebaseapp.com" database-url="https://stats4sd-resources.firebaseio.com">
-  </firebase-app>
-  <ssd-app></ssd-app>
+  
 
   <script>
-    // Register service worker if supported.
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js');
-    }
+    (function () {
+      console.log('registering')
+        if ('registerElement' in document
+          && 'import' in document.createElement('link')
+          && 'content' in document.createElement('template')) {
+            console.log('platform good')
+          // platform is good!
+        } else {
+          console.log('polyfilling platform')
+          // polyfill the platform!
+          var e = document.createElement('script');
+          e.src = '/bower_components/webcomponentsjs/webcomponents-lite.min.js';
+          document.body.appendChild(e);
+        }
+
+        // Register service worker if supported.
+          if ('serviceWorker' in navigator) {
+            console.log('registering service worker')
+            navigator.serviceWorker.register('/service-worker.js');
+          }
+
+      })();
+
+    
   </script>
+
+  <ssd-app></ssd-app>
 
   <!--warning if no javascript available-->
   <noscript>
