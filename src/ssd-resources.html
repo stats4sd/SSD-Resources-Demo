@@ -201,15 +201,17 @@
       _pageChanged:function(page){
         if(this.page=="resources" && this.lazyLoadComplete==false){
           console.log('starting lazy load')
-          this.importHref(
-          this.resolveUrl('SSD Components/import-lazy-resources.html'),
-          function (success) { 
-            this.lazyLoadComplete =true;
-            console.log('lazy resources successful import') },
-          function (err) { console.log('error importing lazy resources', err) },
-          true);
-        this.allResourcesPath = "/resources"
-        
+          Polymer.RenderStatus.afterNextRender(this, () => {
+              this.importHref(
+              this.resolveUrl('SSD Components/import-lazy-resources.html'),
+              function (success) {
+                this.lazyLoadComplete = true;
+                console.log('lazy resources successful import')
+              },
+              function (err) { console.log('error importing lazy resources', err) },
+              true);
+            this.allResourcesPath = "/resources"
+            });
         }
       },
       //responds to calls from add resource button and passes empty request to resource open

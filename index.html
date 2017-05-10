@@ -39,10 +39,7 @@
   <link rel="import" href="/src/ssd-app.html">
 
 
-  <!-- import font(s) -->
-  <link rel="stylesheet" href="/src/open-sans.css" type="text/css">
-
-
+ 
   <style>
     body {
       margin: 0;
@@ -55,6 +52,21 @@
     }
   </style>
 </head>
+
+<script>
+  (function () {
+    if ('registerElement' in document
+      && 'import' in document.createElement('link')
+      && 'content' in document.createElement('template')) {
+      // platform is good!
+    } else {
+      // polyfill the platform!
+      var e = document.createElement('script');
+      e.src = '/bower_components/webcomponentsjs/webcomponents-lite.min.js';
+      document.body.appendChild(e);
+    }
+  })();
+</script>
 
 <body>
   <!--register service worker - platinum sw method
