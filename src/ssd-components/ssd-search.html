@@ -6,7 +6,8 @@
 <link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../bower_components/paper-badge/paper-badge.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-tags/paper-tags.html">-->
+<link rel="import" href="../../bower_components/paper-tags/paper-tags.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags-dropdown.html">-->
 
 <link rel="import" href="../shared-styles.html">
 
@@ -128,10 +129,10 @@
     </div>
 
     <div class="search-filters">
-      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" ></paper-tags-dropdown>
-      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" ></paper-tags-dropdown>
-      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" ></paper-tags-dropdown>
-      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key"></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{search.topics}}" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{search.rTypes}}" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{search.collections}}" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{search.keywords}}"></paper-tags-dropdown>
     </div>
 
     <div class="resources-container">
@@ -175,12 +176,20 @@
           value: '',
           observer: 'searchTextChange'
         },
+        persistedTags: {
+          type: Object,
+          notify: true,
+        }
       },
 
       _filterTags: function(tags,filter) {
+        console.log("filter",filter)
+        console.log("tags",tags)
+        console.log("persistedTags",this.persistedTags)
         filteredTags = tags.filter(function(e) {
           return e.type == filter;
         })
+        console.log("filteredTags",filteredTags)
         return filteredTags;
       },
 
@@ -206,6 +215,10 @@
 
       open: function (searchTerm) {
         if(searchTerm){this.set('searchText',searchTerm);}
+        var temp = this.persistedTags;
+        this.persistedTags = [];
+        this.persistedTags = temp;
+        
         this.set('opened', true)
       },
       close: function () {
