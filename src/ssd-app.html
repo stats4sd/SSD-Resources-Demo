@@ -1,15 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<link rel="import" href="ssd-app-imports.html">
-
-<!--Unnecessary imports-->
-<!--<link rel="import" href="../bower_components/paper-elements/paper-elements.html">-->
-<!--<link rel="import" href="../bower_components/login-fire/login-fire.html">-->
-<!--<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">-->
-<!--<link rel="import" href="../bower_components/iron-icons/editor-icons.html">-->
-<!--<link rel="import" href="../bower_components/iron-selector/iron-selector.html">-->
-<!--<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">-->
-
+<!--All other imports pulled in from imports-core, which is vulcanized to build directory-->
+<link rel="import" href="imports-core.html">
 
 <dom-module id="ssd-app">
   <template>
@@ -240,6 +232,12 @@
         },
         resourcesPageLazyLoaded: {
           type: Boolean
+        },
+        queryParams:{
+
+        },
+        shortCode:{
+
         }
       },
 
@@ -331,7 +329,7 @@
           console.log('start of resource page lazy load')
           Polymer.RenderStatus.afterNextRender(this, function () {
             this.importHref(
-              this.resolveUrl('SSD Components/import-lazy-resources.html'),
+              this.resolveUrl('imports-lazy-resources.html'),
               function () {
                 console.log('resource page lazy resources loaded')
                   this.resourcesPageLazyLoaded = true;
@@ -370,10 +368,10 @@
       },
 
       search: function (e) {
-        this.set("routeData.page", "resources");
         if (this.searchTerm) { this.$$('ssd-resources').search(this.searchTerm) }
         else { this.$$('ssd-resources').search() };
         delete this.searchTerm
+        this.set("routeData.page", "resources");
       },
 
       addResource: function () {

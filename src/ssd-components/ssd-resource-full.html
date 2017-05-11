@@ -1,0 +1,395 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--imported via imports-lazy-resources.html or imports-core-html-->
+<!--<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../shared-styles.html">
+<link rel="import" href="ssd-tag.html">-->
+
+
+
+<dom-module id="ssd-resource-full">
+  <template>
+    <style include="shared-styles">
+       :host {
+        opacity: 0;
+        display: none;
+      }
+
+       :host([opened]) {
+        display: block;
+        opacity: 1;
+        position: absolute;
+        overflow: auto;
+        top: 0px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 10px;
+        background-color: #DBDBDB;
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .totallyEditable:hover {
+        border: #3577f6 1px solid;
+        background-color: #d3eaf6;
+        cursor: pointer;
+      }
+
+      .editing {
+        width: 90%;
+        margin: 15px auto;
+      }
+
+      .button-group {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .deleted {
+        background-color: white;
+        font-weight: 700;
+        margin-top: 10px;
+        height: 3em;
+        color: white;
+        background-color: var(--paper-red-500);
+        align-items: center;
+        padding: 5px;
+      }
+    </style>
+    <style is="custom-style">
+      paper-button.back {
+        background-color: white;
+      }
+
+      paper-button.edit {
+        background-color: var(--paper-indigo-500);
+        color: white;
+      }
+
+      paper-button.save {
+        background-color: var(--paper-green-500);
+        color: white;
+      }
+      a{
+        display: block;
+      }
+    </style>
+
+    <div class="button-group">
+      <div>
+        <paper-button class="back" raised on-tap='close'>
+          <iron-icon icon="arrow-back"></iron-icon>Back
+        </paper-button>
+      </div>
+      <div hidden$="[[!signedIn]]">
+        <paper-button class="edit" raised on-tap='edit' hidden$="[[editMode]]">
+          <iron-icon icon="editor:mode-edit"></iron-icon>Edit
+        </paper-button>
+        <paper-button raised class="save" on-tap='save' hidden$="[[!editMode]]">
+          <iron-icon icon="save"></iron-icon>Save
+        </paper-button>
+      </div>
+    </div>
+
+    <!-- Notice for incomplete resources -->
+    <!-- notice for clicking back without saving - with stuff (do you want to save?) -->
+    <!-- notice for clicking save without name and description (please add); -->
+
+    <div style='display:flex;margin:0.5em;-webkit-box-shadow: -1px 0px 25px -1px rgba(97,97,97,1);-moz-box-shadow: -1px 0px 25px -1px rgba(97,97,97,1);box-shadow: -1px 0px 25px -1px rgba(97,97,97,1);padding: 0 1em;justify-content:center;font-weight:bold;'
+      id='emptyResourceNote' hidden$="[[!emptyReourceNoteOpen]]">
+      <p>Please add both a name and a description to the resource before saving.</p>
+      <paper-button on-tap='hideEmptyReourceNoteOpen' style='font-size:0.8em;font-decoration:underline;color:blue;'>( hide this notice )</paper-button>
+    </div>
+
+    <div class="button-group deleted" hidden$="[[!resource.deleted]]">
+      <div>This resource has been deleted</div>
+      <div>
+        <paper-button class="restore" on-tap='restore'>
+          <iron-icon icon="restore"></iron-icon>Restore
+        </paper-button>
+      </div>
+    </div>
+    <div hidden$="[[editMode]]">
+      <h3>[[resource.name]]</h3>
+      <p><span class='bold'>Description: </span>[[resource.description]]</p>
+      <p>
+        <span class='bold'>Topics: </span>
+        <template is="dom-repeat" items="[[_toArray(resource.topics)]]" as="tag">
+          <!-- Sticking with the 4 lists in resources (resources.topics etc) instead of 1 list means we don't need the filter attribute for the ssd-tag. Could remove.  -->
+          <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
+        </template>
+      </p>
+      <p>
+        <span class='bold'>Resource Types: </span>
+        <template is="dom-repeat" items="[[_toArray(resource.rTypes)]]" as="tag">
+          <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
+        </template>
+      </p>
+      <p>
+        <span class='bold'>Collections: </span>
+        <template is="dom-repeat" items="[[_toArray(resource.collections)]]" as="tag">
+          <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
+        </template>
+      </p>
+      <p>
+        <span class='bold'>Keywords: </span>
+        <template is="dom-repeat" items="[[_toArray(resource.keywords)]]" as="tag">
+          <ssd-tag tag="[[tag]]"filter="" ></ssd-tag>
+        </template>
+      </p>
+      <div hidden$=[[!resource.externalLinks]]>
+        <h4>Links:</h4>
+        <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
+          <a href="[[link.url]]" target="_blank">
+            <iron-icon icon="language" prefix></iron-icon>
+            <span>[[link.url]]</span>
+          </a>
+        </template>
+      </div>
+      <div hidden$="[[!resource.uploadedFiles]]">
+        <h4>Files:</h4>
+        <p>Click on any of the file cards to download it</p>
+        <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
+          <ssd-resource-file file="[[file]]"></ssd-resource-file>
+        </template>
+      </div>
+    </div>
+
+    <!-- <paper-button id='console' raised on-tap='console'>CONSOLE</paper-button> -->
+
+    <!--editable version-->
+    <template is="dom-if" if='[[editMode]]' restamp='true'>
+      <ssd-resource-editor id="editor" resource='{{resource}}' deleted='{{deleted}}' persisted-tags="[[persistedTags]]">
+      </ssd-resource-editor>
+    </template>
+    </div>
+
+    <firebase-document id="firebaseResourceDoc" app-name="SSD-Resources" data="{{editableResource}}">
+    </firebase-document>
+
+    <!-- <firebase-query id="tagsQuery" app-name="SSD-Resources" path="/resources/[[resource.$key]]/tags" data="{{tags}}"></firebase-query> -->
+
+
+
+  </template>
+
+
+  <script>
+    Polymer({
+      is: 'ssd-resource-full',
+      properties: {
+        resource: {
+          type: Object,
+          value: [],
+          observer: '_pendingEdits'
+        },
+        editing: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
+        },
+        editMode: {
+          type: Boolean,
+          value: false
+        },
+        tabSelected: {
+          value: 0
+        },
+        opened: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          reflectToAttribute: true
+        },
+        firebaseEditPath: {
+          type: String,
+          notify: true,
+        },
+        key: {
+          type: String,
+          notify: true
+        },
+        pendingEdits: {
+          type: Boolean,
+          value: false,
+        },
+        emptyReourceNoteOpen: {
+          type: Boolean,
+          value: false,
+        },
+        deleted: {
+          type: Boolean,
+          observer: 'delete'
+        },
+        tags: {
+          type: Array,
+          notify: true,
+        },
+      },
+
+      //Filtering tags by type
+
+
+      //when an edit is made, set pendingEdits to true;
+      _pendingEdits: function () {
+        this.pendingEdits = true;
+      },
+
+
+      edit: function () {
+        //in case re-edit where key has been stripped
+        if (!this.resource.$key) { this.resource.$key = this.id }
+        if (!this.resource.uploadedFiles) { this.resource.uploadedFiles = [] }
+        console.log('editing resource id:', this.resource.$key)
+        this.id = this.resource.$key
+        this.set('editMode', true)
+      },
+      save: function () {
+        //prompt validation
+        if (this.resource.name == "" || this.resource.description == "") {
+          this.emptyReourceNoteOpen = true;
+          return;
+        }
+        else {
+          this.resource.modified = Date.now()
+          this.editableResource = this.resource
+          delete this.editableResource.$key
+          console.log('saving resource with id', this.id)
+          this.$.firebaseResourceDoc.save('/resources', this.id).then(function () {
+            this.set('editMode', false)
+            this.updates = true
+            this.$.firebaseResourceDoc.reset();
+            //remove check for pending edits on exit.
+            this.pendingEdits = false;
+            //document.querySelector('#resourceList').render();
+          }.bind(this))
+        }
+
+      },
+      delete: function () {
+        if (this.resource.deleted != true && this.deleted == true) {
+          this.set('resource.deleted', true)
+          this.save()
+          this.set('deleted', false)
+        }
+      },
+      restore: function () {
+        this.set('resource.deleted', false)
+        this.set('deleted', false)
+        this.save()
+      },
+      close: function () {
+        //check to see if resource has a name and description, only in editing mode
+        if (this.editMode) {
+        }
+        this.set('editMode', false)
+        this.set('opened', false)
+        //on update pass up message
+        if (this.updates == true) {
+          console.log('firing updates')
+          this.fire('update')
+          this.updates = false
+        }
+
+      },
+      open: function (resource) {
+        //new resource
+        if (!resource) {
+          this.id = this.generatePushID();
+          console.log('creating new resources id:', this.id)
+          var newResource = this.generateNewResource(this.id)
+          this.set('resource', newResource)
+          this.set('editMode', true)
+          console.log('this.resource', this.resource)
+        }
+        //existing resource
+        else {
+          console.log('opening resource', resource, resource.$key)
+          if (!resource.$key) { resource.$key = this.id }
+          this.id = resource.$key
+          this.set('resource', resource)
+        }
+        this.set('opened', true)
+      },
+
+      _toArray: function (obj) {
+        if (obj) {
+          var array = Object.keys(obj).map(function (key) {
+            return {
+              name: key,
+              value: obj[key]
+            };
+          });
+          console.log(array);
+          return array;
+        }
+        else {
+          return [];
+        }
+
+      },
+
+
+      generateNewResource: function (id) {
+        var d = Date.now()
+        console.log('d', d)
+        return {
+          $key: id,
+          description: '',
+          name: '',
+          tags: [],
+          uploadedFiles: [],
+          externalLinks: [],
+          created: d,
+          modified: ''
+        }
+      },
+      //firebase function taken from https://gist.github.com/mikelehen/3596a30bd69384624c11
+      generatePushID: function () {
+        var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+        var lastPushTime = 0;
+        var lastRandChars = [];
+        var now = new Date().getTime();
+        var duplicateTime = (now === lastPushTime);
+        lastPushTime = now;
+        var timeStampChars = new Array(8);
+        for (var i = 7; i >= 0; i--) {
+          timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+          now = Math.floor(now / 64);
+        }
+        if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+        var id = timeStampChars.join('');
+        if (!duplicateTime) {
+          for (i = 0; i < 12; i++) {
+            lastRandChars[i] = Math.floor(Math.random() * 64);
+          }
+        } else {
+          for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
+            lastRandChars[i] = 0;
+          }
+          lastRandChars[i]++;
+        }
+        for (i = 0; i < 12; i++) {
+          id += PUSH_CHARS.charAt(lastRandChars[i]);
+        }
+        if (id.length != 20) throw new Error('Length should be 20.');
+        return id;
+      },
+      hideEmptyReourceNoteOpen: function () {
+        this.emptyReourceNoteOpen = false;
+      },
+
+      console: function() {
+        something = this.$.tagsQuery.getStoredValue(this.$.tagsQuery.path);
+        console.log(something)
+        console.log("resource",this.resource);
+        console.log("resource_id",this.resource.$key);
+        console.log("tags",this.tags);
+        console.log("resource-tags",this.resource.tags);
+        console.log("firebase-query-path",this.$.tagsQuery.path)
+      }
+
+    })
+  </script>
+</dom-module>

@@ -1,0 +1,105 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../shared-styles.html">
+
+
+<dom-module id="ssd-resource-search-result">
+  <template>
+    <style include="shared-styles">
+       :host {
+        width: 100%;
+        max-width: 400px;
+        cursor: pointer;
+        padding: 2px;
+        margin: 4px;
+        border-bottom: 2px solid #DBDBDB
+      }
+      
+      img {
+        /*max-width: 20vw;*/
+        height: 5em;
+        margin: auto;
+        object-fit: cover;
+        float: left;
+        padding-right:5px;
+      }
+      
+      .resource-info {
+        margin-left: 5.2em;
+      }
+
+      
+      .resource-title {
+        color: black;
+        line-height: 1em;
+        overflow: hidden;
+        font-weight: 700;
+        text-overflow: ellipsis;
+      }
+      
+      .resource-description {
+        display: block;
+        /* Fallback for non-webkit */
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        margin: 0 auto;
+        color: black;
+        opacity: 0.8;
+        height: 4em;
+        line-height: 1em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        ;
+      }
+    </style>
+
+    <div>
+      <img src="{{getMainImage(resource)}}">
+    </div>
+    <div class="resource-info">
+      <div class="resource-title">[[resource.name]]</div>
+      <div class="resource-description">[[resource.description]]</div>
+    </div>
+
+
+
+  </template>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'ssd-resource-search-result',
+      properties: {
+        resource: {
+          type: Object,
+          readOnly: false,
+          notify: false
+        },
+      },
+      getMainImage: function (resource) {
+        if (resource.rTypes) {
+          //get name of first key (assuming either only 1, or just use first for image)
+          var key = Object.keys(resource.rTypes)[0]
+          //VERY janky way to go through and check if any of the resource types = true within the resource. This probably needs a refactor...
+          var images = {
+            "-KijSiLb_oGKl4dOKkUH": "images/resourceTypes/academic_paper.jpg",
+            "-KijSkrdzRFfid9Z-UEU": "images/resourceTypes/audio.jpg",
+            "-KijSmFY6UQgHvoWBTSP": "images/resourceTypes/book.jpg",
+            "-KijSqPXSYxFOraiV9k3": "images/resourceTypes/code.jpg",
+            "-KijSsSpmLDdSrpuHT1L": "images/resourceTypes/desktop_software.jpg",
+            "-KijSvHsIPBrtyQxI2GI": "images/resourceTypes/interactive_presentation.jpg",
+            "-KijSwlTh3vBWJKyu8ur": "images/resourceTypes/mobile_app.jpg",
+            "-KijSyXK54z5mZB3dhlS": "images/resourceTypes/short_text.jpg",
+            "-KijT-2h3LK5p1z85D1x": "images/resourceTypes/video.jpg",
+            "-KijT0fOYm_dw83rNHV1": "images/resourceTypes/website.jpg",
+            "-KijedgWoC8WkOxqnwRx": "images/resourceTypes/presentation.jpg"
+          }
+          if (images[key]) { return images[key] }
+        }
+        return "images/placeholder.png"
+      }
+      
+
+    })
+  </script>
+</dom-module>

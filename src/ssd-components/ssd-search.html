@@ -1,0 +1,264 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--imported via imports-lazy-resources.html or imports-core-html-->
+<!--<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower_components/paper-badge/paper-badge.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags.html">-->
+
+<link rel="import" href="../shared-styles.html">
+
+
+<dom-module id="ssd-search">
+  <template>
+    <style include="shared-styles">
+       :host {
+        opacity: 0;
+        display: none;
+      }
+
+       :host([opened]) {
+        display: block;
+        opacity: 1;
+        position: absolute;
+        top: 0px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #d2232a;
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1;
+        color: black;
+        overflow: auto;
+      }
+
+      .resources-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 1em;
+        background-color: white;
+      }
+
+      .search-box {
+        display: flex;
+        /*justify-content: center;*/
+        margin-top: 3em;
+
+      }
+
+      .search-input {
+        align-self: center;
+        width: 50vw;
+      }
+
+      .close-search {
+        align-self: flex-start;
+        margin-left: 30px;
+        color: white;
+      }
+
+      .search-filters {
+        display: flex;
+      }
+
+      paper-input,
+      paper-dropdown-menu {
+        --paper-input-container-color: white;
+        --paper-input-container-underline: white;
+        --paper-input-container-underline-focus: yellow;
+        --paper-input-container-invalid-color: yellow;
+        --paper-input-container-focus-color: white;
+        --paper-input-container-input: {
+          color: white;
+          font-size: 3em;
+        }
+        paper-badge {}
+      }
+
+      paper-dropdown-menu, paper-tags-dropdown {
+        --paper-input-container-label: {
+          color: white;
+          font-style: italic
+        }
+        --paper-input-container-input: {
+          color: yellow;
+        }
+        --paper-input-container-underline: {
+          /*display: none;*/
+          opacity: 0.3
+        }
+        ;
+      }
+
+
+    </style>
+    <style is="custom-style">
+      .big {
+        --iron-icon-height:  10em;
+        --iron-icon-width: 10em;
+        --iron-icon-fill-color: white;
+
+      }
+      /*.results-badge {
+        --paper-badge-background: white;
+        --paper-badge-width: 30px;
+        --paper-badge-height: 30px;
+        --paper-badge: {
+          font-size: 18px;
+          color:var(--paper-red-900);
+        }
+      }*/
+    </style>
+    <div class="search-box">
+      <iron-icon class="big" icon="search"></iron-icon>
+      <div class=search-input>
+        <paper-input id="searchBox" value="{{searchText}}" name="search" label="search" required auto-validate pattern="[a-zA-Z0-9 ']*"
+          error-message="no special characters!"></paper-input>
+      </div>
+      <div>
+        <!--don't like badge look, but worth remembering code-->
+        <!--<span></span>
+        <paper-badge class="results-badge" label="[[totalResults]]"></paper-badge>-->
+      </div>
+      <div class="close-search">
+        <paper-icon-button on-tap="close" icon="close"></paper-icon-button>
+      </div>
+    </div>
+
+    <div class="search-filters">
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key"></paper-tags-dropdown>
+    </div>
+
+    <div class="resources-container">
+      <template id="filteredResources" is="dom-repeat" items="[[filteredResources]]" as="resource" sort="" filter="_textFilter"
+        rendered-item-count="{{totalResults}}">
+        <ssd-resource-search-result resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
+      </template>
+    </div>
+
+    <ssd-resource-full resource='[[selectedResource]]' opened='{{resourceOpened}}' editable='{{editMode}}'></ssd-resource-full>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'ssd-search',
+      properties: {
+        opened: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          reflectToAttribute: true
+        },
+        filter_topics: {
+          type: Object,
+          observer: 'filterChange',
+          value: '(all)'
+        },
+        filter_rTypes: {
+          type: Object,
+          observer: 'filterChange',
+          value: '(all)'
+        },
+        filter_tags: {
+          type: Object,
+          observer: 'filterChange',
+          value: '(all)'
+        },
+        searchText: {
+          type: String,
+          notify: true,
+          value: '',
+          observer: 'searchTextChange'
+        },
+      },
+
+      _filterTags: function(tags,filter) {
+        filteredTags = tags.filter(function(e) {
+          return e.type == filter;
+        })
+        return filteredTags;
+      },
+
+      _textFilter: function (resource) {
+        //don't show deleted resources
+        if (resource.deleted == true) { return false }
+        //runs when 3 or more letters typed. checks name, description and tags for search text, return true first time criteria matched
+        s = this.searchText.toLowerCase();
+        if (s.length > 2) {
+          if (resource.name && resource.name.toLowerCase().indexOf(s) > -1) { return true }
+          if (resource.description && resource.description.toLowerCase().indexOf(s) > -1) { return true }
+          if (resource.rTypes && resource.rTypes.toString().toLowerCase().indexOf(s) > -1) { return true }
+          if (resource.tags && resource.tags.toString().toLowerCase().indexOf(s) > -1) { return true }
+          if (resource.topics && resource.topics.toString().toLowerCase().indexOf(s) > -1) { return true }
+          else { return false }
+        }
+        else{return false}
+      },
+      //manually call dom repeat resources to rerender with _textFilter checking search text
+      searchTextChange: function (newVal, oldVal) {
+        this.$.filteredResources.render();
+      },
+
+      open: function (searchTerm) {
+        if(searchTerm){this.set('searchText',searchTerm);}
+        this.set('opened', true)
+      },
+      close: function () {
+        this.set('opened', false)
+      },
+      getMainImage: function (resource) {
+        //console.log('no predefined image', resource)
+        return '/images/placeholder.png'
+      },
+      resourceTap: function (e) {
+        console.log('resource', e.model.resource);
+        this.set('selectedResource', e.model.resource);
+        this.set('resourceOpened', true);
+      },
+
+      //function to track values across filters, and apply all to resources when changed to create filtered resources subset
+      //this subset is then subject to a seperate text filter
+      filterChange: function () {
+        var temp = this.allResources
+        //if statement in case all resources not yet defined/populated
+        if (temp) {
+          if (!this.allResources) { this.allResources = this.resources }
+          var filtersList = ['topics', 'rTypes', 'tags']
+          var activeFilters = {}
+          //populate filter list with currently selected - should be moved out to only calculate on change
+          for (var j=0; j<filtersList.length; j++) {
+            filter = activeFilters[j]
+            var string = 'filter_' + filter
+            if (this[string] != undefined && this[string] != '') {
+              if (this[string] != "(all)") {
+                activeFilters[filter] = this[string]
+              }
+            }
+          }
+          var temp = temp.filter(function (resource) {
+            keys = Object.keys(activeFilters);
+            for (var i=0; i<activeFilters; i++) {
+              key = keys[i]
+              var value = activeFilters[key]
+              //return if doesn't have anything saved to filter field
+              if (!resource.hasOwnProperty(key)) {
+                return false
+              }
+              if (resource[key].indexOf(value) == -1) {
+                return false
+              }
+            }
+            return true
+          })
+          this.filteredResources = []
+          this.filteredResources = temp
+        }
+      },
+    })
+  </script>
+</dom-module>

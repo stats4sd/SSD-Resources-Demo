@@ -1,0 +1,282 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+
+<!--imported via imports-lazy-resources.html or imports-core-html-->
+<!--
+<link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags-dropdown.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+-->
+
+<link rel="import" href="../shared-styles.html">
+
+
+<dom-module id="ssd-resource-editor">
+  <template>
+    <style include="shared-styles">
+      paper-tabs {
+        --paper-tabs-selection-bar-color: blue
+      }
+
+      .delete {
+        margin-top: 1em;
+        cursor: pointer;
+      }
+
+      .keywordSelected {}
+    </style>
+    <style is="custom-style">
+      paper-checkbox {
+        display: block
+      }
+
+      paper-icon-button.delete-button {
+        color: var(--paper-red-500)
+      }
+
+      paper-tags-dropdown {
+        --paper-menu: {
+          width: 200px;
+        }
+      }
+
+      .flex-container {
+        display: flex
+      }
+    </style>
+    <style is="custom-style">
+      paper-icon-button.red {
+        color: var(--paper-red-500);
+        --paper-icon-button-ink-color: var(--paper-red-500);
+      }
+
+      paper-icon-button.green {
+        color: var(--paper-green-700);
+        --paper-icon-button-ink-color: var(--paper-green-700);
+      }
+    </style>
+
+    <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required auto-validate pattern="[a-zA-Z0-9 ']*"
+      error-message="no special characters!"></paper-input>
+    <p>
+      <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required></paper-textarea>
+    </p>
+    <!-- REPLACED PAPER TABS WITH PAPER TAGS -->
+
+    <h4>Keywords</h4>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{resource.topics}}"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{resource.rTypes}}" max-tags="1"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{resource.collections}}"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key"  value-object="{{resource.keywords}}"></paper-tags-dropdown>
+
+
+    <h4>External Links</h4>
+    <template id="externalLinks" is="dom-repeat" items="[[resource.externalLinks]]" as="link">
+      <!--{{link.number}} test-->
+      <div class='flex-container'>
+        <a href="{{link.url}}" target="_blank"><span>[[link.url]]</span></a>
+        <paper-icon-button suffix on-tap="editLink" class="green" icon="editor:mode-edit" alt="edit" title="edit">
+        </paper-icon-button>
+        <paper-icon-button on-tap="removeLink" class="red" icon="clear" alt="clear" title="clear">
+        </paper-icon-button>
+      </div>
+    </template>
+
+    <paper-input label="add any external links here" no-label-float value="{{newLink.url}}">
+      <iron-icon icon="language" prefix></iron-icon>
+      <paper-icon-button suffix on-tap="addLink" class="green" icon="add" alt="add" title="add" hidden$="{{link.saved}}">
+      </paper-icon-button>
+    </paper-input>
+
+    <h4>Uploaded Files</h4>
+    <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
+    <div class="delete" on-tap="delete">
+      <paper-icon-button icon="delete" class="delete-button"></paper-icon-button>
+      <span>Delete Resource</span>
+    </div>
+
+  </template>
+
+
+  <script>
+    Polymer({
+      is: 'ssd-resource-editor',
+      properties: {
+
+        editing: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
+        },
+        editMode: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+        tabSelected: {
+          value: 0
+        },
+        uploadedFiles: {
+          type: Array,
+          notify: true
+        },
+        editingFile: {
+          Type: Array,
+          notify: true
+        },
+        fileId: {
+          Type: String,
+          notify: true
+        },
+        singleFile: {
+          type: Object,
+          notify: true
+        },
+        resourceId: {
+          type: String,
+          notify: true
+        },
+        opened: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          reflectToAttribute: true
+        },
+        deleted: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        newLink: {
+          type: Object,
+          value: {
+            url: '',
+            displayName:''
+          }
+        }
+
+
+      },
+
+      _filterTags: function(tags,filter) {
+        console.log("filter",filter)
+        filteredTags = tags.filter(function(e) {
+          return e.type == filter;
+        })
+        console.log("filteredTags",filteredTags)
+        return filteredTags;
+      },
+
+      addLink: function (e) {
+        if (this.newLink.url != '') {
+          this.push('resource.externalLinks', {
+            displayName: this.newLink.displayName,
+            url: this.newLink.url
+          })
+        }
+        this.set('newLink.url',"")
+        this.set('newLink.displayName',"")
+        console.log('resource', this.resource)
+      },
+      editLink: function (e) {
+        this.newLink=e.model.link
+        this.removeLink(e)
+      },
+      removeLink: function (e) {
+        var index = e.model.index;
+        this.splice('resource.externalLinks', index, 1)
+
+      },
+      isHidden: function (link) {
+        console.log('hidden?', link)
+        if (link.saved == true) { return true }
+        if (link.url == "") { return true }
+        return false
+      },
+
+      fileupload: function (event) {
+        event.preventDefault();
+        //check resource name exists, give warning and remove files if not
+        //*******not implemented yet*****
+
+        //create file upload task
+        var file = event.detail.file;
+        var ssdResourcesApp = firebase.app("SSD-Resources")
+        var ref = firebase.storage(ssdResourcesApp).ref().child('/resources/' + this.resource.$key + "/" + file.name)
+        var uploadTask = ref.put(file);
+        //handle updates from snapshot
+        uploadTask.on('state_changed', function (snapshot) {
+          var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          var vaadinUploads = document.querySelector('vaadin-upload')
+          var index = this.getCurrentIndex(file.name)
+          var temp = this.resource.uploadedFiles[index]
+          temp.progress = progress
+          this.set('resource.uploadedFiles.' + index, [])
+          this.set('resource.uploadedFiles.' + index, temp)
+        }.bind(this), function (error) {
+          console.log('error', error)
+          // Handle unsuccessful uploads
+        }, function () {
+          var index = this.getCurrentIndex(file.name);
+          res = this.resource.uploadedFiles[index]
+          temp = {
+            lastModified: res.lastModified,
+            name: res.name,
+            size: res.size,
+            type: res.type,
+            url: uploadTask.snapshot.downloadURL,
+            complete: true,
+            formDataName: "file",
+            progress: 100,
+          }
+          this.set('resource.uploadedFiles.' + index, [])
+          this.set('resource.uploadedFiles.' + index, temp)
+        }.bind(this));
+      },
+
+      //iterate through each uplaod to find index of current filename
+      getCurrentIndex: function (fileName) {
+        var uploads = this.resource.uploadedFiles
+        for (var i = 0; i < uploads.length; i++) {
+          if (uploads[i].name == fileName) { return i }
+        }
+      },
+
+      delete: function (e, detail) {
+        console.log('delete clicked')
+        this.set('deleted', true)
+      },
+
+      // testing: function () {
+      //   console.log(this.persistedTags);
+      // },
+
+      _getLinks: function () {
+        return [
+          { name: 'test 1' }
+        ]
+      },
+      _toArray: function (obj) {
+        if (obj) {
+          var array = Object.keys(obj).map(function (key) {
+            return {
+              name: key,
+              value: obj[key]
+            };
+          });
+          console.log(array);
+          return array;
+        }
+        else {
+          return [];
+        }
+
+      },
+    })
+  </script>
+</dom-module>
