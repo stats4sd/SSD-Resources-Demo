@@ -25,8 +25,8 @@ Links to $firebase serve command, ideally should have precompile before from hig
 
 #Prepare fore deployment
 Vulcanizing:
-App elements (if changes have been made):
-$ vulcanize src/ssd-app-imports.html --strip-comments --out-html src/ssd-app-imports.vulcanized.html --inline-scripts --inline-css --strip-exclude bower_components/polymer/polymer.html
+core elements (if changes have been made):
+$ vulcanize src/imports-core.html --strip-comments --out-html src/imports-core.vulcanized.html --inline-scripts --inline-css --strip-exclude bower_components/polymer/polymer.html
 
 #testing
 install polylint

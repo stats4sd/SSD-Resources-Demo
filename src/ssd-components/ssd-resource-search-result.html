@@ -20,20 +20,20 @@
         margin: auto;
         object-fit: cover;
         float: left;
+        padding-right:5px;
       }
       
       .resource-info {
         margin-left: 5.2em;
       }
+
       
       .resource-title {
         color: black;
-        height: 1em;
         line-height: 1em;
         overflow: hidden;
         font-weight: 700;
         text-overflow: ellipsis;
-        white-space: nowrap
       }
       
       .resource-description {
@@ -77,9 +77,28 @@
         },
       },
       getMainImage: function (resource) {
-        //console.log('no predefined image', resource)
-        return '/images/placeholder.png'
+        if (resource.rTypes) {
+          //get name of first key (assuming either only 1, or just use first for image)
+          var key = Object.keys(resource.rTypes)[0]
+          //VERY janky way to go through and check if any of the resource types = true within the resource. This probably needs a refactor...
+          var images = {
+            "-KijSiLb_oGKl4dOKkUH": "images/resourceTypes/academic_paper.jpg",
+            "-KijSkrdzRFfid9Z-UEU": "images/resourceTypes/audio.jpg",
+            "-KijSmFY6UQgHvoWBTSP": "images/resourceTypes/book.jpg",
+            "-KijSqPXSYxFOraiV9k3": "images/resourceTypes/code.jpg",
+            "-KijSsSpmLDdSrpuHT1L": "images/resourceTypes/desktop_software.jpg",
+            "-KijSvHsIPBrtyQxI2GI": "images/resourceTypes/interactive_presentation.jpg",
+            "-KijSwlTh3vBWJKyu8ur": "images/resourceTypes/mobile_app.jpg",
+            "-KijSyXK54z5mZB3dhlS": "images/resourceTypes/short_text.jpg",
+            "-KijT-2h3LK5p1z85D1x": "images/resourceTypes/video.jpg",
+            "-KijT0fOYm_dw83rNHV1": "images/resourceTypes/website.jpg",
+            "-KijedgWoC8WkOxqnwRx": "images/resourceTypes/presentation.jpg"
+          }
+          if (images[key]) { return images[key] }
+        }
+        return "images/placeholder.png"
       }
+      
 
     })
   </script>

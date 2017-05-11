@@ -1,16 +1,6 @@
-<!--unnecessary imports-->
+<!--additional required imports vulcanized in import-core.html-->
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<!--<link rel="import" href="../bower_components/app-route/app-route.html">-->
-<!--<link rel="import" href="../bower_components/paper-elements/paper-elements.html">-->
-<!--<link rel="import" href="../bower_components/iron-elements/iron-elements.html">-->
 <link rel="import" href="shared-styles.html">
-<link rel="import" href="SSD Components/ssd-resource-small.html">
-<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
-<link rel="import" href="SSD Components/ssd-search.html">
-<link ref="import" href="../bower_components/paper-fab/index.html">
-<!--<link rel="import" href="../bower_components/polymerfire/polymerfire.html">-->
-
-
 
 <dom-module id="ssd-resources">
   <template>
@@ -108,7 +98,7 @@
     <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' signed-in='{{signedIn}}'
       persisted-tags="[[persistedTags]]" on-update="updateFired">
     </ssd-resource-full>
-    <ssd-search id="search" filtered-resources="[[resources]]" all-resources="[[resources]]" persisted-tags="[[persistedTags]]">
+    <ssd-search id="search" filtered-resources="[[persistedResources]]" all-resources="[[persistedResources]]" persisted-tags="[[persistedTags]]">
     </ssd-search>
 
     <!--Firebase queries-->
@@ -138,6 +128,10 @@
           type: Boolean,
           value: false,
           notify: true
+        },
+        resources:{
+          type:Object,
+          notify:true,
         },
         tagActive: {
           type: Boolean,
@@ -184,6 +178,10 @@
           type:Boolean
         }
       },
+      ready:function(){
+        this.allResourcesPath = "/resources"
+        console.log('downloading all resources')
+      },
       resourcesChanged: function (res) {
         console.log('res changed', res)
       },
@@ -203,14 +201,13 @@
           console.log('starting lazy load')
           Polymer.RenderStatus.afterNextRender(this, () => {
               this.importHref(
-              this.resolveUrl('SSD Components/import-lazy-resources.html'),
+              this.resolveUrl('imports-lazy-resources.html'),
               function (success) {
                 this.lazyLoadComplete = true;
                 console.log('lazy resources successful import')
               },
               function (err) { console.log('error importing lazy resources', err) },
               true);
-            this.allResourcesPath = "/resources"
             });
         }
       },
