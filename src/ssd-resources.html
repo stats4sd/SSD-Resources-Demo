@@ -8,46 +8,46 @@
        :host {
         display: block;
       }
-      
+
       h1 {
         margin: 0
       }
-      
+
       .resource-page-body {
         display: flex;
         min-height: 100vh;
         flex-direction: column;
       }
-      
+
       .resource-page-content {
         display: flex;
         flex: 1;
       }
-      
+
       .main-content {
         flex: 1;
       }
-      
+
       .left-sidebar-nav,
       .right-sidebar-aside {
         /* 12em is the width of the columns */
         flex: 0 0 12em;
       }
-      
+
       .left-sidebar-nav {
         /* put the nav on the left */
         order: -1;
         align-self: center;
       }
-      
+
       .slider {
         position: relative;
         background-color: #ccc;
-        height: 250px;
+        height: 300px;
         overflow-x: scroll;
         overflow-y: hidden;
       }
-      
+
       .track {
         position: absolute;
         top: 10px;
@@ -57,7 +57,7 @@
         border: 0;
         width: 2400px;
       }
-      
+
       .section-heading {
         font-size: 1.6em;
         font-weight: 600;
@@ -120,7 +120,7 @@
       is: 'ssd-resources',
       //when core loaded, load click-through elements and setup firebase queries
       ready: function () {
-        
+
       },
 
       properties: {
@@ -216,8 +216,8 @@
         this.$.fullResource.open();
       },
       search: function (searchTerm) {
-        if (this.searchOpened && this.page=="resources") { 
-          this.$.search.close() 
+        if (this.searchOpened && this.page=="resources") {
+          this.$.search.close()
           this.searchOpened=false;
         }
         else {
