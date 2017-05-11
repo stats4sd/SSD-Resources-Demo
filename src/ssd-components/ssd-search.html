@@ -6,7 +6,8 @@
 <link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../bower_components/paper-badge/paper-badge.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-tags/paper-tags.html">-->
+<link rel="import" href="../../bower_components/paper-tags/paper-tags.html">
+<link rel="import" href="../../bower_components/paper-tags/paper-tags-dropdown.html">-->
 
 <link rel="import" href="../shared-styles.html">
 
@@ -126,16 +127,17 @@
         <paper-icon-button on-tap="close" icon="close"></paper-icon-button>
       </div>
     </div>
-
+    <p>Search by entering text into the box above. The search will automatically update after you have entered 3 or more characters.</p>
+    <p>The filters below can be used to refine your search. Returned resources will match at least 1 tag from every list. Empty lists are ignored.</p>
     <div class="search-filters">
-      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" ></paper-tags-dropdown>
-      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" ></paper-tags-dropdown>
-      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" ></paper-tags-dropdown>
-      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key"></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{filters.topics}}" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{filters.rTypes}}" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{filters.collections}}" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{filters.keywords}}"></paper-tags-dropdown>
     </div>
 
     <div class="resources-container">
-      <template id="filteredResources" is="dom-repeat" items="[[filteredResources]]" as="resource" sort="" filter="_textFilter"
+      <template id="filteredResources" is="dom-repeat" items="[[filteredResources]]" as="resource" sort="" filter="_searchFilter"
         rendered-item-count="{{totalResults}}">
         <ssd-resource-search-result resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
       </template>
@@ -154,20 +156,14 @@
           notify: true,
           reflectToAttribute: true
         },
-        filter_topics: {
-          type: Object,
-          observer: 'filterChange',
-          value: '(all)'
-        },
-        filter_rTypes: {
-          type: Object,
-          observer: 'filterChange',
-          value: '(all)'
-        },
-        filter_tags: {
-          type: Object,
-          observer: 'filterChange',
-          value: '(all)'
+        filters:{
+          type:Object,
+          value:{
+            "topics":{},
+            "rTypes":{},
+            "collections":{},
+            "keywords":{}
+          }
         },
         searchText: {
           type: String,
@@ -175,18 +171,75 @@
           value: '',
           observer: 'searchTextChange'
         },
+        persistedTags: {
+          type: Object,
+          notify: true,
+        }
+      },
+
+      observers: [
+        '_filterChange(filters.*)',
+      ],
+
+      _filterChange: function() {
+        this.$.filteredResources.render();
       },
 
       _filterTags: function(tags,filter) {
+        console.log("filter",filter)
+        console.log("tags",tags)
+        console.log("persistedTags",this.persistedTags)
         filteredTags = tags.filter(function(e) {
           return e.type == filter;
         })
+        console.log("filteredTags",filteredTags)
         return filteredTags;
       },
 
-      _textFilter: function (resource) {
+      _searchFilter: function (resource) {
         //don't show deleted resources
         if (resource.deleted == true) { return false }
+
+
+        //list filter types to check
+        var filtertypes = [
+          "topics",
+          "rTypes",
+          "collections",
+          "keywords"
+        ];
+
+        //run through each filter.
+        for(var j=0; j<filtertypes.length; j++) {
+          filterName = filtertypes[j];
+
+          //if there is a ##filterName## filter, check it.
+          if(this.filters[filterName] && this.filters[filterName]!={}) {
+            //start by assuming the filter will not match.
+            var filterTopic = false;
+
+            console.log("this.filters[filterName]",this.filters[filterName]);
+
+            //for each tag selected in the chosen filter...
+            for(item in this.filters[filterName]) {
+              console.log("item",item)
+              //... check to see if that 'item' exists in the resource object.
+              if(resource[filterName][item]) {
+                //declare item found
+                filterTopic = true;
+                console.log("found filter match")
+                //breaking here makes the individual filter lists "or" -> i.e. if you select "presentation" and "audio file" for Resource Type, it'll return anything that matches presentation OR audio file.
+                break;
+              }
+            }
+            //after checking against each filter, if it's not matched, return false.
+            if(filterTopic == false) { return false }
+          }
+        }
+
+
+
+
         //runs when 3 or more letters typed. checks name, description and tags for search text, return true first time criteria matched
         s = this.searchText.toLowerCase();
         if (s.length > 2) {
@@ -206,6 +259,10 @@
 
       open: function (searchTerm) {
         if(searchTerm){this.set('searchText',searchTerm);}
+        var temp = this.persistedTags;
+        this.persistedTags = [];
+        this.persistedTags = temp;
+
         this.set('opened', true)
       },
       close: function () {

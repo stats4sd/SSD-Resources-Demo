@@ -7,31 +7,36 @@
     <style include="shared-styles">
       .resource-card-small {
         width: 250px;
-        height: 200px;
+        height: 250px;
         padding: 0;
         cursor: pointer;
         margin: 6px;
         float: left;
       }
-      
+
       .resource-info {
-        height: 120px;
+        height: 200px;
         width: 100%;
         position: relative;
+
       }
-      
+
       h3 {
-        margin: 10px;
+        margin: 0;
         font-size: 1rem;
+        top: -1rem;
+        position: relative;
+        background-color: white;
+        padding: 10px;
       }
-      
+
       img {
-        height: 120px;
+        /*height: 120px;*/
         width: 100%;
         margin: auto;
         object-fit: cover;
       }
-      
+
       .overlay {
         position: absolute;
         bottom: 0;
@@ -43,7 +48,7 @@
         height: 0;
         transition: .5s ease;
       }
-      
+
       .text {
         color: white;
         position: absolute;
@@ -54,28 +59,28 @@
         transform: translate(-50%, -50%);
         -ms-transform: translate(-50%, -50%);
       }
-      
+
       p {
         padding: 10px;
         text-overflow: ellipsis;
         margin: 0;
         overflow-y: auto;
       }
-      
+
       .resource-card-small:hover .overlay {
         height: 100%
       }
     </style>
     <div class="card resource-card-small">
-      <div class=resource-info>
-        <img src="{{_getImage(resource)}}">
-        <h3>[[resource.name]]</h3>
+      <div class="resource-info">
+        <img src="{{_getImage(resource)}}"/>
         <div class="overlay">
           <div class="text">
             <p>[[resource.description]]</p>
           </div>
         </div>
       </div>
+      <h3>[[resource.name]]</h3>
     </div>
 
     <!-- <firebase-document id="imageGetter" app-name="SSD-Resoures" path="/tags/[[rTypeId]]/image" data="{{image}}"></firebase-document> -->
