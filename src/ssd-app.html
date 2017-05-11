@@ -1,7 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<!--All other imports pulled in from imports-core-vulcanized-->
-<link rel="import" href="imports-core.vulcanized.html">
+<!--All other imports pulled in from imports-core, which is vulcanized to build directory-->
+<link rel="import" href="imports-core.html">
 
 <dom-module id="ssd-app">
   <template>
@@ -368,10 +368,10 @@
       },
 
       search: function (e) {
-        this.set("routeData.page", "resources");
         if (this.searchTerm) { this.$$('ssd-resources').search(this.searchTerm) }
         else { this.$$('ssd-resources').search() };
         delete this.searchTerm
+        this.set("routeData.page", "resources");
       },
 
       addResource: function () {

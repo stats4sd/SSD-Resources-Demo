@@ -23,10 +23,12 @@ Links to $firebase serve command, ideally should have precompile before from hig
 2. copy ssd-viewTemplate contents to new page and update necessary code
 3. provide a reference for the menu in ssd-app.html <iron-pages> and <iron-selector> sections
 
-#Prepare fore deployment
-Vulcanizing:
-core elements (if changes have been made):
-$ vulcanize src/imports-core.html --strip-comments --out-html src/imports-core.vulcanized.html --inline-scripts --inline-css --strip-exclude bower_components/polymer/polymer.html
+#Prepare for deployment
+After polymer build, run:
+$ vulcanize src/imports-core.html --strip-comments --out-html build/default/src/imports-core.html --inline-scripts --inline-css --strip-exclude bower_components/polymer/polymer.html
+
+(test with $firebase serve)
+$firebase deploy
 
 #testing
 install polylint

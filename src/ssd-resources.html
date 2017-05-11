@@ -216,13 +216,15 @@
         this.$.fullResource.open();
       },
       search: function (searchTerm) {
-        if (this.searchOpened) { this.$.search.close() }
+        if (this.searchOpened && this.page=="resources") { 
+          this.$.search.close() 
+          this.searchOpened=false;
+        }
         else {
           if (searchTerm) { this.$.search.open(searchTerm) }
           else { this.$.search.open() }
-
+          this.searchOpened =true
         }
-        this.searchOpened = !this.searchOpened
       },
       filterChange: function () {
         console.log('filters updated')
