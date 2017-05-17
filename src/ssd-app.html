@@ -12,7 +12,7 @@
         display: block;
         font-family: "Open Sans";
       }
-      
+
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
@@ -20,19 +20,19 @@
         /*height: 120px;*/
         display: flex;
       }
-      
+
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
-      
+
       paper-tabs {
         font-size: 0.9em;
       }
-      
+
       paper-button {
         font-size: 0.8em;
       }
-      
+
       div.titleLogo {
         font-size: 18px;
         font-weight: bold;
@@ -42,47 +42,47 @@
         white-space: pre-wrap;
         float: left;
       }
-      
+
       app-toolbar[sticky] {
         margin-top: 35px;
         height: 50px;
         padding-left: 0;
       }
-      
+
       paper-tabs[no-bar] paper-tab.iron-selected {
         font-weight: bold;
         color: #ffff8d;
         height: 50px;
       }
-      
+
       paper-button {
         font-family: "Open Sans"
       }
-      
+
        :root {
         --paper-font-common-base: {
           font-family: "Open Sans", "Noto", sans-serif;
         }
       }
-      
+
       .spacer {
         width: 10%;
       }
-      
+
       .login {
         position: absolute;
         right: 10px;
         font-size: 0.83em;
         cursor: pointer;
       }
-      
+
       .user-name {
         position: absolute;
         top: -30px;
         right: 10px;
         font-size: 0.6em;
       }
-      
+
       .top-right {
         position: absolute;
         top: -3em;
@@ -132,7 +132,7 @@
               </template>
 
             </paper-tabs>
-            <paper-button on-tap='search' class="right-top-tab">
+            <paper-button on-tap='toggleSearch' class="right-top-tab">
               <iron-icon icon="search"></iron-icon>
               <p>Search</p>
             </paper-button>
@@ -162,8 +162,8 @@
         <!-- Main pages -->
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
           <ssd-home name="home"></ssd-home>
-          <ssd-resources page-loaded="{{resourcesPageLoaded}}" page="{{routeData.page}}" route="{{subroute}}" name="resources" signed-in={{signedIn}} id="resourcesPage"
-            very-wide={{veryWide}} short-code={{shortCode}}></ssd-resources>
+          <ssd-resources page-loaded="{{resourcesPageLoaded}}" page="{{routeData.page}}" route="{{subroute}}" name="resources" signed-in={{signedIn}}
+            id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}}></ssd-resources>
           <ssd-tags name="tags" id="tagsPage"></ssd-tags>
         </iron-pages>
       </app-header-layout>
@@ -233,10 +233,10 @@
         resourcesPageLazyLoaded: {
           type: Boolean
         },
-        queryParams:{
+        queryParams: {
 
         },
-        shortCode:{
+        shortCode: {
 
         }
       },
@@ -269,7 +269,9 @@
         if (page == 's') {
           var split = this.route.path.split('/')
           this.searchTerm = split[split.length - 1]
-          this.search(this.searchTerm)
+          this.set('route.path', '/resources')
+          this.page = 'resources';
+          this.openSearch(this.searchTerm)
         }
         else {
           this.page = page;
@@ -317,12 +319,12 @@
               this.resolveUrl('ssd-resources.html'),
               function () {
                 console.log('resources page core loaded')
-                  this.resourcesPageLoaded = true;
-                  // //setup email login fire
-                  // this.emailLoginFireAppName="SSD-Resources"
-              },                
-                  null,null
-              )
+                this.resourcesPageLoaded = true;
+                // //setup email login fire
+                // this.emailLoginFireAppName="SSD-Resources"
+              },
+              null, null
+            )
           })
         }
         if (page == 'resources' && !this.resourcesPageLazyLoaded) {
@@ -332,11 +334,11 @@
               this.resolveUrl('imports-lazy-resources.html'),
               function () {
                 console.log('resource page lazy resources loaded')
-                  this.resourcesPageLazyLoaded = true;
-                  //setup email login fire
-              },                
-                  null,null
-              )
+                this.resourcesPageLazyLoaded = true;
+                //setup email login fire
+              },
+              null, null
+            )
           })
         }
       },
@@ -366,12 +368,25 @@
           this.push('navItems', 'tags')
         }
       },
+      toggleSearch: function () {
+        if (!this.searchOpened) {
+          this.openSearch()
+        }
+        else {
+          this.closeSearch()
+        }
+      },
 
-      search: function (e) {
-        if (this.searchTerm) { this.$$('ssd-resources').search(this.searchTerm) }
-        else { this.$$('ssd-resources').search() };
+      openSearch: function (e) {
+        if (this.searchTerm) { this.$$('ssd-resources').openSearch(this.searchTerm) }
+        else { this.$$('ssd-resources').openSearch() };
         delete this.searchTerm
         this.set("routeData.page", "resources");
+        this.searchOpened = true;
+      },
+      closeSearch:function(){
+         this.$$('ssd-resources').closeSearch()
+         this.searchOpened = false;
       },
 
       addResource: function () {

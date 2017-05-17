@@ -46,7 +46,6 @@
         display: flex;
         /*justify-content: center;*/
         margin-top: 3em;
-
       }
 
       .search-input {
@@ -64,6 +63,13 @@
         display: flex;
       }
 
+      .share,
+      .share-link {
+        color: white;
+        opacity: 0.95;
+        font-size: x-small
+      }
+
       paper-input,
       paper-dropdown-menu {
         --paper-input-container-color: white;
@@ -78,7 +84,8 @@
         paper-badge {}
       }
 
-      paper-dropdown-menu, paper-tags-dropdown {
+      paper-dropdown-menu,
+      paper-tags-dropdown {
         --paper-input-container-label: {
           color: white;
           font-style: italic
@@ -92,15 +99,12 @@
         }
         ;
       }
-
-
     </style>
     <style is="custom-style">
       .big {
-        --iron-icon-height:  10em;
+        --iron-icon-height: 10em;
         --iron-icon-width: 10em;
         --iron-icon-fill-color: white;
-
       }
       /*.results-badge {
         --paper-badge-background: white;
@@ -128,11 +132,12 @@
       </div>
     </div>
     <p>Search by entering text into the box above. The search will automatically update after you have entered 3 or more characters.</p>
-    <p>The filters below can be used to refine your search. Returned resources will match at least 1 tag from every list. Empty lists are ignored.</p>
+    <p>The filters below can be used to refine your search. Returned resources will match at least 1 tag from every list. Empty
+      lists are ignored.</p>
     <div class="search-filters">
-      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{filters.topics}}" ></paper-tags-dropdown>
-      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{filters.rTypes}}" ></paper-tags-dropdown>
-      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{filters.collections}}" ></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{filters.topics}}"></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{filters.rTypes}}"></paper-tags-dropdown>
+      <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{filters.collections}}"></paper-tags-dropdown>
       <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{filters.keywords}}"></paper-tags-dropdown>
     </div>
 
@@ -145,6 +150,10 @@
 
     <ssd-resource-full resource='[[selectedResource]]' opened='{{resourceOpened}}' editable='{{editMode}}'></ssd-resource-full>
 
+    <p class="share" hidden$="[[!showLink]]">
+      <span>search link: </span>
+      <a class="share-link" href="/s/[[searchText]]">[[origin]]/s/[[searchText]]</a>
+    </p>
   </template>
   <script>
     Polymer({
@@ -156,14 +165,17 @@
           notify: true,
           reflectToAttribute: true
         },
-        filters:{
-          type:Object,
-          value:{
-            "topics":{},
-            "rTypes":{},
-            "collections":{},
-            "keywords":{}
+        filters: {
+          type: Object,
+          value: {
+            "topics": {},
+            "rTypes": {},
+            "collections": {},
+            "keywords": {}
           }
+        },
+        route: {
+
         },
         searchText: {
           type: String,
@@ -181,25 +193,24 @@
         '_filterChange(filters.*)',
       ],
 
-      _filterChange: function() {
+      _filterChange: function () {
         this.$.filteredResources.render();
       },
 
-      _filterTags: function(tags,filter) {
-        console.log("filter",filter)
-        console.log("tags",tags)
-        console.log("persistedTags",this.persistedTags)
-        filteredTags = tags.filter(function(e) {
+      _filterTags: function (tags, filter) {
+        // console.log("filter",filter)
+        // console.log("tags",tags)
+        // console.log("persistedTags",this.persistedTags)
+        filteredTags = tags.filter(function (e) {
           return e.type == filter;
         })
-        console.log("filteredTags",filteredTags)
+        // console.log("filteredTags",filteredTags)
         return filteredTags;
       },
 
       _searchFilter: function (resource) {
         //don't show deleted resources
         if (resource.deleted == true) { return false }
-
 
         //list filter types to check
         var filtertypes = [
@@ -210,21 +221,18 @@
         ];
 
         //run through each filter.
-        for(var j=0; j<filtertypes.length; j++) {
+        for (var j = 0; j < filtertypes.length; j++) {
           filterName = filtertypes[j];
-
           //if there is a ##filterName## filter, check it.
-          if(this.filters[filterName] && this.filters[filterName]!={}) {
+          if (this.filters[filterName] && this.filters[filterName] != {}) {
             //start by assuming the filter will not match.
             var filterTopic = false;
-
-            console.log("this.filters[filterName]",this.filters[filterName]);
-
+            console.log("this.filters[filterName]", this.filters[filterName]);
             //for each tag selected in the chosen filter...
-            for(item in this.filters[filterName]) {
-              console.log("item",item)
+            for (item in this.filters[filterName]) {
+              console.log("item", item)
               //... check to see if that 'item' exists in the resource object.
-              if(resource[filterName][item]) {
+              if (resource[filterName][item]) {
                 //declare item found
                 filterTopic = true;
                 console.log("found filter match")
@@ -233,24 +241,27 @@
               }
             }
             //after checking against each filter, if it's not matched, return false.
-            if(filterTopic == false) { return false }
+            if (filterTopic == false) { return false }
           }
         }
-
-
-
-
         //runs when 3 or more letters typed. checks name, description and tags for search text, return true first time criteria matched
         s = this.searchText.toLowerCase();
         if (s.length > 2) {
+          this.showLink = true
           if (resource.name && resource.name.toLowerCase().indexOf(s) > -1) { return true }
           if (resource.description && resource.description.toLowerCase().indexOf(s) > -1) { return true }
           if (resource.rTypes && resource.rTypes.toString().toLowerCase().indexOf(s) > -1) { return true }
           if (resource.tags && resource.tags.toString().toLowerCase().indexOf(s) > -1) { return true }
           if (resource.topics && resource.topics.toString().toLowerCase().indexOf(s) > -1) { return true }
-          else { return false }
+          else {
+            this.showLink = false;
+            return false
+          }
         }
-        else{return false}
+        else {
+          this.showLink = false;
+          return false
+        }
       },
       //manually call dom repeat resources to rerender with _textFilter checking search text
       searchTextChange: function (newVal, oldVal) {
@@ -258,11 +269,11 @@
       },
 
       open: function (searchTerm) {
-        if(searchTerm){this.set('searchText',searchTerm);}
+        this.origin = window.location.origin;
+        if (searchTerm) { this.set('searchText', searchTerm); }
         var temp = this.persistedTags;
         this.persistedTags = [];
         this.persistedTags = temp;
-
         this.set('opened', true)
       },
       close: function () {
@@ -288,7 +299,7 @@
           var filtersList = ['topics', 'rTypes', 'tags']
           var activeFilters = {}
           //populate filter list with currently selected - should be moved out to only calculate on change
-          for (var j=0; j<filtersList.length; j++) {
+          for (var j = 0; j < filtersList.length; j++) {
             filter = activeFilters[j]
             var string = 'filter_' + filter
             if (this[string] != undefined && this[string] != '') {
@@ -299,7 +310,7 @@
           }
           var temp = temp.filter(function (resource) {
             keys = Object.keys(activeFilters);
-            for (var i=0; i<activeFilters; i++) {
+            for (var i = 0; i < activeFilters; i++) {
               key = keys[i]
               var value = activeFilters[key]
               //return if doesn't have anything saved to filter field

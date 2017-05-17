@@ -98,7 +98,8 @@
     <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' signed-in='{{signedIn}}'
       persisted-tags="[[persistedTags]]" on-update="updateFired">
     </ssd-resource-full>
-    <ssd-search id="search" filtered-resources="[[persistedResources]]" all-resources="[[persistedResources]]" persisted-tags="[[persistedTags]]">
+    <ssd-search id="search" route="{{route}}" filtered-resources="[[persistedResources]]" all-resources="[[persistedResources]]"
+      persisted-tags="[[persistedTags]]">
     </ssd-search>
 
     <!--Firebase queries-->
@@ -129,9 +130,9 @@
           value: false,
           notify: true
         },
-        resources:{
-          type:Object,
-          notify:true,
+        resources: {
+          type: Object,
+          notify: true,
         },
         tagActive: {
           type: Boolean,
@@ -169,20 +170,20 @@
           type: Boolean,
           notify: true
         },
-        page:{
-          type:String,
-          observer:'_pageChanged',
-          notify:true
+        page: {
+          type: String,
+          observer: '_pageChanged',
+          notify: true
         },
-        lazyLoadComplete:{
-          type:Boolean
+        lazyLoadComplete: {
+          type: Boolean
         },
-        persistedTags:{
-          type:Object,
-          notify:true,
+        persistedTags: {
+          type: Object,
+          notify: true,
         }
       },
-      ready:function(){
+      ready: function () {
         this.allResourcesPath = "/resources"
         console.log('downloading all resources')
       },
@@ -200,11 +201,11 @@
       resourceTap: function (e) {
         this.$.fullResource.open(e.model.resource);
       },
-      _pageChanged:function(page){
-        if(this.page=="resources" && this.lazyLoadComplete==false){
+      _pageChanged: function (page) {
+        if (this.page == "resources" && this.lazyLoadComplete == false) {
           console.log('starting lazy load')
           Polymer.RenderStatus.afterNextRender(this, () => {
-              this.importHref(
+            this.importHref(
               this.resolveUrl('imports-lazy-resources.html'),
               function (success) {
                 this.lazyLoadComplete = true;
@@ -212,23 +213,19 @@
               },
               function (err) { console.log('error importing lazy resources', err) },
               true);
-            });
+          });
         }
       },
       //responds to calls from add resource button and passes empty request to resource open
       addResource: function () {
         this.$.fullResource.open();
       },
-      search: function (searchTerm) {
-        if (this.searchOpened && this.page=="resources") {
-          this.$.search.close()
-          this.searchOpened=false;
-        }
-        else {
-          if (searchTerm) { this.$.search.open(searchTerm) }
-          else { this.$.search.open() }
-          this.searchOpened =true
-        }
+      openSearch: function (searchTerm) {
+        if (searchTerm) { this.$.search.open(searchTerm) }
+        else { this.$.search.open() }
+      },
+      closeSearch: function () {
+        this.$.search.close()
       },
       filterChange: function () {
         console.log('filters updated')
