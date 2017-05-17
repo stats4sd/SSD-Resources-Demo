@@ -186,7 +186,18 @@
         persistedTags: {
           type: Object,
           notify: true,
-        }
+        },
+        searchOpened:{
+          type:Boolean,
+          notify:true,
+          reflectToAttribute:true,
+          observer:'searchOpenChange'
+        },
+        searchTerm:{
+          type:Boolean,
+          notify:true,
+          reflectToAttribute:true
+        },
       },
 
       observers: [
@@ -267,17 +278,15 @@
       searchTextChange: function (newVal, oldVal) {
         this.$.filteredResources.render();
       },
-
-      open: function (searchTerm) {
-        this.origin = window.location.origin;
-        if (searchTerm) { this.set('searchText', searchTerm); }
+      searchOpenChange:function(open){
+        if(!this.origin){this.origin= window.location.origin};
+        this.opened=open;
         var temp = this.persistedTags;
         this.persistedTags = [];
         this.persistedTags = temp;
-        this.set('opened', true)
       },
       close: function () {
-        this.set('opened', false)
+        this.searchOpened=false;
       },
       getMainImage: function (resource) {
         //console.log('no predefined image', resource)

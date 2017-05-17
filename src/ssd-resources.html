@@ -99,7 +99,7 @@
       persisted-tags="[[persistedTags]]" on-update="updateFired">
     </ssd-resource-full>
     <ssd-search id="search" route="{{route}}" filtered-resources="[[persistedResources]]" all-resources="[[persistedResources]]"
-      persisted-tags="[[persistedTags]]">
+      persisted-tags="[[persistedTags]]" search-opened="{{searchOpened}}" search-text="{{searchText}}">
     </ssd-search>
 
     <!--Firebase queries-->
@@ -181,7 +181,17 @@
         persistedTags: {
           type: Object,
           notify: true,
-        }
+        },
+        searchOpened:{
+          type:Boolean,
+          notify:true,
+          reflectToAttribute:true
+        },
+        searchText:{
+          type:String,
+          notify:true,
+          reflectToAttribute:true
+        },
       },
       ready: function () {
         this.allResourcesPath = "/resources"
@@ -219,13 +229,6 @@
       //responds to calls from add resource button and passes empty request to resource open
       addResource: function () {
         this.$.fullResource.open();
-      },
-      openSearch: function (searchTerm) {
-        if (searchTerm) { this.$.search.open(searchTerm) }
-        else { this.$.search.open() }
-      },
-      closeSearch: function () {
-        this.$.search.close()
       },
       filterChange: function () {
         console.log('filters updated')

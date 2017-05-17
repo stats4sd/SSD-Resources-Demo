@@ -163,7 +163,7 @@
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
           <ssd-home name="home"></ssd-home>
           <ssd-resources page-loaded="{{resourcesPageLoaded}}" page="{{routeData.page}}" route="{{subroute}}" name="resources" signed-in={{signedIn}}
-            id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}}></ssd-resources>
+            id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}} search-opened="{{searchOpened}}" search-text="{{searchText}}"></ssd-resources>
           <ssd-tags name="tags" id="tagsPage"></ssd-tags>
         </iron-pages>
       </app-header-layout>
@@ -188,6 +188,17 @@
       properties: {
         routeData: {
           type: String
+        },
+        searchOpened:{
+          type:Boolean,
+          notify:true,
+          reflectToAttribute:true
+        },
+        searchText:{
+          type:String,
+          value:"",
+          notify:true,
+          reflectToAttribute:true
         },
         subroute: {
           type: String
@@ -222,10 +233,6 @@
           value: function () {
             return ['home', 'resources'];
           },
-        },
-        searchTerm: {
-          type: String,
-          value: ""
         },
         resourcesPageLoaded: {
           type: Boolean
@@ -268,10 +275,11 @@
         }
         if (page == 's') {
           var split = this.route.path.split('/')
-          this.searchTerm = split[split.length - 1]
+          this.searchText = split[split.length - 1]
           this.set('route.path', '/resources')
           this.page = 'resources';
-          this.openSearch(this.searchTerm)
+          this.searchOpened=true
+          // this.openSearch(this.searchText)
         }
         else {
           this.page = page;
@@ -369,23 +377,17 @@
         }
       },
       toggleSearch: function () {
-        if (!this.searchOpened) {
-          this.openSearch()
-        }
-        else {
-          this.closeSearch()
-        }
+        this.searchOpened=!this.searchOpened;
       },
 
       openSearch: function (e) {
-        if (this.searchTerm) { this.$$('ssd-resources').openSearch(this.searchTerm) }
+        if (this.searchText) { this.$$('ssd-resources').openSearch(this.searchText) }
         else { this.$$('ssd-resources').openSearch() };
-        delete this.searchTerm
+        delete this.searchText
         this.set("routeData.page", "resources");
         this.searchOpened = true;
       },
       closeSearch:function(){
-         this.$$('ssd-resources').closeSearch()
          this.searchOpened = false;
       },
 
