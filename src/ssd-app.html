@@ -9,6 +9,7 @@
        :host {
         --app-primary-color: #d2232a;
         --app-secondary-color: black;
+        background-color: var(--background-color, '#eeeeee');
         display: block;
         font-family: "Open Sans";
       }
@@ -132,10 +133,6 @@
               </template>
 
             </paper-tabs>
-            <paper-button on-tap='toggleSearch' class="right-top-tab">
-              <iron-icon icon="search"></iron-icon>
-              <p>Search</p>
-            </paper-button>
             <div class="top-right">
               <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
               <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
@@ -163,8 +160,10 @@
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
           <ssd-home name="home"></ssd-home>
           <ssd-resources page-loaded="{{resourcesPageLoaded}}" page="{{routeData.page}}" route="{{subroute}}" name="resources" signed-in={{signedIn}}
-            id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}} search-opened="{{searchOpened}}" search-text="{{searchText}}"></ssd-resources>
+            id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}} persisted-resources="{{persistedResources}}" persisted-tags="{{persistedTags}}"></ssd-resources>
+          <ssd-search name="search" id="searchPage" persisted-resources="{{persistedResources}}" persisted-tags="{{persistedTags}}" search-opened="{{searchOpened}}"></ssd-search>
           <ssd-tags name="tags" id="tagsPage"></ssd-tags>
+          
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
@@ -173,7 +172,7 @@
       <!-- Login box (starts hidden) -->
       <paper-dialog id="login" modal>
         <paper-dialog-scrollable>
-          <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
+          <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources "></login-fire>-->
           <ssd-email-login-fire app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
           </ssd-email-login-fire>
         </paper-dialog-scrollable>
@@ -189,16 +188,16 @@
         routeData: {
           type: String
         },
-        searchOpened:{
-          type:Boolean,
-          notify:true,
-          reflectToAttribute:true
+        searchOpened: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
         },
-        searchText:{
-          type:String,
-          value:"",
-          notify:true,
-          reflectToAttribute:true
+        searchText: {
+          type: String,
+          value: " ",
+          notify: true,
+          reflectToAttribute: true
         },
         subroute: {
           type: String
@@ -214,7 +213,8 @@
         },
         signedIn: {
           type: Boolean,
-          observer: '_logStatus'
+          observer: '_logStatus',
+          value:false
         },
         editingMode: {
           type: Boolean,
@@ -231,7 +231,7 @@
         navItems: {
           type: Array,
           value: function () {
-            return ['home', 'resources'];
+            return ['home', 'resources', 'search'];
           },
         },
         resourcesPageLoaded: {
@@ -253,6 +253,9 @@
         if (wide && this.$.drawer.opened) {
           this.$.drawer.opened = false;
         }
+      },
+      _login:function(){
+        this.$$('#login').open();
       },
 
       userChanged: function (user) { console.log('user signed in', user) },
@@ -278,7 +281,7 @@
           this.searchText = split[split.length - 1]
           this.set('route.path', '/resources')
           this.page = 'resources';
-          this.searchOpened=true
+          this.searchOpened = true
           // this.openSearch(this.searchText)
         }
         else {
@@ -294,21 +297,26 @@
       _pageChanged: function (page, oldPage) {
         console.log('page changed', page)
         var href
+        this.customStyle['--background-color'] = '#eeeeee'
         switch (page) {
           case 'resources':
-            href = "ssd-resources.html";
+            href = "ssd-resources.html ";
             break
           case 'home':
-            href = "ssd-home.html";
+            href = "ssd-home.html ";
+            break
+          case 'search':
+            href = "ssd-search.html ";
+            this.customStyle['--background-color'] = '#d2232a'
             break
           case 'tags':
-            href = "ssd-tags.html";
+            href = "ssd-tags.html ";
             break
           default:
-            href = "ssd-view404.html";
+            href = "ssd-view404.html ";
             break
         }
-        console.log('href', href)
+        this.updateStyles();
         // importHref(href, onload, onerror, optAsync). Dynamically imports an HTML document.
         this.importHref(
           this.resolveUrl(href),
@@ -318,7 +326,6 @@
       },
 
       _pageLoaded(page) {
-        console.log('page loaded:', page)
         //lazy load resources page if not already
         if (page != 'resources' && !this.resourcesPageLoaded) {
           console.log('start of resource page lazy load')
@@ -329,7 +336,7 @@
                 console.log('resources page core loaded')
                 this.resourcesPageLoaded = true;
                 // //setup email login fire
-                // this.emailLoginFireAppName="SSD-Resources"
+                // this.emailLoginFireAppName="SSD-Resources "
               },
               null, null
             )
@@ -354,11 +361,9 @@
       _showPage404: function () {
         this.page = 'view404';
       },
-      _login: function () {
-        login.open();
-      },
       _logout: function () {
         this.$$('ssd-email-login-fire').signOut();
+        this.signedIn=false;
         console.log('logged out');
         //remove admin pages on sign out
         console.log('tag nav index', this.navItems.indexOf('tags'))
@@ -372,16 +377,16 @@
         if (this.signedIn) {
           this.$$('paper-dialog').close()
         }
-        if (this.navItems.indexOf('tags') == -1 && this.signedIn == true) {
+        if (this.navItems && this.navItems.indexOf('tags') == -1 && this.signedIn == true) {
           this.push('navItems', 'tags')
         }
       },
       toggleSearch: function () {
-        this.searchOpened=!this.searchOpened;
+        this.searchOpened = !this.searchOpened;
       },
-      
+
       addResource: function () {
-        this.set("routeData.page", "resources");
+        this.set("routeData.page ", "resources ");
         this.$$('ssd-resources').addResource();
       },
     });

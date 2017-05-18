@@ -5,6 +5,7 @@
     "src/ssd-resources.html",
     "src/ssd-tags.html",
     "src/ssd-home.html",
+    "src/ssd-search.html",
     "src/ssd-view404.html"
   ],
   "sources": [

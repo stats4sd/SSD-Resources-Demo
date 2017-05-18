@@ -7,6 +7,7 @@
     <style include="shared-styles">
        :host {
         display: block;
+        padding: 10px;
       }
 
       h1 {
@@ -84,10 +85,6 @@
               </template>
             </div>
           </div>
-          <!--temp section-->
-          <div>
-            [[serverSearch]]
-          </div>
         </main>
         <!--left sidebar-->
         <nav class="left-sidebar-nav" hidden$={{!veryWide}}>
@@ -106,9 +103,9 @@
       signed-in='{{signedIn}}' persisted-tags="[[persistedTags]]" on-update="updateFired">
     </ssd-resource-full>
 
-    <ssd-search id="search" route="{{route}}" filtered-resources="[[persistedResources]]" all-resources="[[persistedResources]]"
+    <!--<ssd-search id="search" route="{{route}}" filtered-resources="[[persistedResources]]" all-resources="[[persistedResources]]"
       persisted-tags="[[persistedTags]]" search-opened="{{searchOpened}}" search-text="{{searchText}}">
-    </ssd-search>
+    </ssd-search>-->
 
     <!--Firebase queries-->
     <!--query to pull in tags as doesn't update well in live mode on tags page (want import before load)-->
@@ -145,6 +142,14 @@
           type: Object,
           notify: true,
         },
+        persistedResources:{
+          type:Object,
+          notify:true,
+        },
+        persistedTags: {
+            type: Object,
+            notify: true,
+          },
         tagActive: {
           type: Boolean,
           value: false
@@ -208,12 +213,11 @@
         searchText: {
           type: String,
           notify: true,
-          reflectToAttribute: true
+          reflectToAttribute: true,
+          value:""
         },
       },
-      // observers:[
-      //   'serverSearch2(serverSearch.*)'
-      //   ],
+      // observers:[],
       ready: function () {
         this.allResourcesPath = "/resources"
         console.log('downloading all resources')

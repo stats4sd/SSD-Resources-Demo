@@ -1,0 +1,343 @@
+<!--check in case other imports done in imports-core.html-->
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="ssd-search">
+    <template>
+        <style include="shared-styles">
+             :host {
+                color: black;
+                padding: 10px;
+            }
+            .resources-container {
+                display: flex;
+                flex-wrap: wrap;
+                margin-top: 1em;
+                background-color: white;
+            }
+
+            .search-box {
+                display: flex;
+                /*justify-content: center;*/
+                margin-top: 1em;
+            }
+
+            .search-input {
+                align-self: center;
+                width: 50vw;
+            }
+
+            .close-search {
+                align-self: flex-start;
+                margin-left: 30px;
+                color: white;
+            }
+
+            .search-filters {
+                display: flex;
+            }
+
+            .share,
+            .share-link {
+                color: white;
+                opacity: 0.95;
+                font-size: x-small
+            }
+
+            paper-input,
+            paper-dropdown-menu {
+                --paper-input-container-color: white;
+                --paper-input-container-underline: white;
+                --paper-input-container-underline-focus: yellow;
+                --paper-input-container-invalid-color: yellow;
+                --paper-input-container-focus-color: white;
+                --paper-input-container-input: {
+                    color: white;
+                    font-size: 3em;
+                }
+                paper-badge {}
+            }
+
+            paper-dropdown-menu,
+            paper-tags-dropdown {
+                --paper-input-container-label: {
+                    color: white;
+                    font-style: italic
+                }
+                --paper-input-container-input: {
+                    color: yellow;
+                }
+                --paper-input-container-underline: {
+                    /*display: none;*/
+                    opacity: 0.3
+                }
+                ;
+            }
+            .search-page{
+                background-color: red;
+            }
+        </style>
+        <style is="custom-style">
+            .big {
+                --iron-icon-height: 10em;
+                --iron-icon-width: 10em;
+                --iron-icon-fill-color: white;
+            }
+            /*.results-badge {
+        --paper-badge-background: white;
+        --paper-badge-width: 30px;
+        --paper-badge-height: 30px;
+        --paper-badge: {
+          font-size: 18px;
+          color:var(--paper-red-900);
+        }
+      }*/
+        </style>
+            <div class="search-box">
+                <iron-icon class="big" icon="search"></iron-icon>
+                <div class=search-input>
+                    <paper-input id="searchBox" value="{{searchText}}" name="search" label="search" required auto-validate pattern="[a-zA-Z0-9 ']*"
+                        error-message="no special characters!"></paper-input>
+                </div>
+                <div>
+                    <!--don't like badge look, but worth remembering code-->
+                    <!--<span></span>
+                    <paper-badge class="results-badge" label="[[totalResults]]"></paper-badge>-->
+                </div>
+                <!--<div class="close-search">
+                    <paper-icon-button on-tap="close" icon="close"></paper-icon-button>
+                </div>-->
+            </div>
+            <p>Search by entering text into the box above. The search will automatically update after you have entered 3 or
+                more characters.</p>
+            <p>The filters below can be used to refine your search. Returned resources will match at least 1 tag from every
+                list. Empty lists are ignored.</p>
+            <div class="search-filters">
+                <paper-tags-dropdown items="[[_filterTags(allTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{filters.topics}}"></paper-tags-dropdown>
+                <paper-tags-dropdown items="[[_filterTags(allTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{filters.rTypes}}"></paper-tags-dropdown>
+                <paper-tags-dropdown items="[[_filterTags(allTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{filters.collections}}"></paper-tags-dropdown>
+                <paper-tags-dropdown items="[[_filterTags(allTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{filters.keywords}}"></paper-tags-dropdown>
+            </div>
+            <div class="resources-container">
+                <template id="persistedResources" is="dom-repeat" items="[[persistedResources]]" as="resource" sort="" filter="_searchFilter"
+                    rendered-item-count="{{totalResults}}">
+                    <ssd-resource-search-result resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
+                </template>
+            </div>
+            <p class="share" hidden$="[[!showLink]]">
+                <span>search link: </span>
+                <a class="share-link" href="/s/[[searchText]]">[[origin]]/s/[[searchText]]</a>
+            </p>
+        <ssd-resource-full resource='[[selectedResource]]' opened='{{resourceOpened}}' editable='{{editMode}}'></ssd-resource-full>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'ssd-search',
+            ready: function () {
+
+            },
+
+            properties: {
+                    opened: {
+                        type: Boolean,
+                        value: false,
+                        notify: true,
+                        reflectToAttribute: true
+                    },
+                    persistedResources:{
+                        type:Object,
+                        notify:true
+                    },
+                    filters: {
+                        type: Object,
+                        value: {
+                            "topics": {},
+                            "rTypes": {},
+                            "collections": {},
+                            "keywords": {}
+                        }
+                    },
+                    route: {
+
+                    },
+                    searchText: {
+                        type: String,
+                        notify: true,
+                        value: "",
+                        observer: 'searchTextChange'
+                    },
+                    persistedTags: {
+                        type: Object,
+                        notify: true,
+                    },
+                    searchOpened: {
+                        type: Boolean,
+                        notify: true,
+                        reflectToAttribute: true,
+                        observer: 'searchOpenChange'
+                    },
+                    searchTerm: {
+                        type: Boolean,
+                        notify: true,
+                        reflectToAttribute: true
+                    },
+                },
+                attached:function(){
+                    //populate tags on page entry, note still not loaded automatically if navigate direct to search page but assumed not vital
+                    //and will try to populate after anything is typed
+                    if (!this.allTags || this.allTags.length > 0) {
+                        this.set('allTags', this.persistedTags)
+                        console.log('all tags',this.allTags)
+                    } 
+                },
+                observers: [
+                    '_filterChange(filters.*)',
+                ],
+
+                _filterChange: function () {
+                     if (this.persistedResources && this.persistedResources.length > 0 && this.searchText.length>2) {
+                        this.$.persistedResources.render();
+                    } 
+                },
+
+                _filterTags: function (tags, filter) {
+                    // console.log("filter",filter)
+                    // console.log("tags",tags)
+                    // console.log("persistedTags",this.persistedTags)
+                    filteredTags = tags.filter(function (e) {
+                        return e.type == filter;
+                    })
+                    // console.log("filteredTags",filteredTags)
+                    return filteredTags;
+                },
+
+                _searchFilter: function (resource) {
+                    //don't show deleted resources
+                    if (resource.deleted == true) { return false }
+                    //list filter types to check
+                    var filtertypes = [
+                        "topics",
+                        "rTypes",
+                        "collections",
+                        "keywords"
+                    ];
+                    //run through each filter via key.
+                    for (var property in this.filterTypes) {
+                            if (this.filterTypes.hasOwnProperty(property)) {
+                                console.log('testing property',property)
+                                // do stuff
+                            }
+                        }
+                    // for (var j = 0; j < filtertypes.length; j++) {
+                    //     filterName = filtertypes[j];
+                    //     //if there is a ##filterName## filter, check it.
+                    //     if (this.filters[filterName] && this.filters[filterName] != {}) {
+                    //         //start by assuming the filter will not match.
+                    //         var filterTopic = false;
+                    //         //for each tag selected in the chosen filter...
+                    //         for (item in this.filters[filterName]) {
+                    //             console.log("item", item)
+                    //             //... check to see if that 'item' exists in the resource object.
+                    //             if (resource[filterName][item]) {
+                    //                 //declare item found
+                    //                 filterTopic = true;
+                    //                 console.log("found filter match")
+                    //                 //breaking here makes the individual filter lists "or" -> i.e. if you select "presentation" and "audio file" for Resource Type, it'll return anything that matches presentation OR audio file.
+                    //                 break;
+                    //             }
+                    //         }
+                    //         //after checking against each filter, if it's not matched, return false.
+                    //         if (filterTopic == false) { return false }
+                    //     }
+                    // }
+                    //runs when 3 or more letters typed. checks name, description and tags for search text, return true first time criteria matched
+                    s = this.searchText.toLowerCase();
+                    if (s.length > 2) {
+                        this.showLink = true
+                        if (resource.name && resource.name.toLowerCase().indexOf(s) > -1) { return true }
+                        if (resource.description && resource.description.toLowerCase().indexOf(s) > -1) { return true }
+                        if (resource.rTypes && resource.rTypes.toString().toLowerCase().indexOf(s) > -1) { return true }
+                        if (resource.tags && resource.tags.toString().toLowerCase().indexOf(s) > -1) { return true }
+                        if (resource.topics && resource.topics.toString().toLowerCase().indexOf(s) > -1) { return true }
+                        else {
+                            this.showLink = false;
+                            return false
+                        }
+                    }
+                    else {
+                        this.showLink = false;
+                        return false
+                    }
+                },
+                //manually call dom repeat resources to rerender with _textFilter checking search text
+                searchTextChange: function (newVal, oldVal) {
+                    if(this.persistedResources && this.persistedResources.length>0){
+                        this.$.persistedResources.render(); 
+                    } 
+                    if (!this.allTags || this.allTags.length > 0) {
+                            this.set('allTags',this.persistedTags)
+                        } 
+                },
+                searchOpenChange: function (open) {
+                    if (!this.origin) { this.origin = window.location.origin };
+                    this.opened = open;
+                    var temp = this.persistedTags;
+                    this.persistedTags = [];
+                    this.persistedTags = temp;
+                },
+                close: function () {
+                    this.searchOpened = false;
+                },
+                getMainImage: function (resource) {
+                    //console.log('no predefined image', resource)
+                    return '/images/placeholder.png'
+                },
+                resourceTap: function (e) {
+                    console.log('resource', e.model.resource);
+                    this.set('selectedResource', e.model.resource);
+                    this.set('resourceOpened', true);
+                },
+
+                //function to track values across filters, and apply all to resources when changed to create filtered resources subset
+                //this subset is then subject to a seperate text filter
+                filterChange: function () {
+                    var temp = this.allResources
+                    //if statement in case all resources not yet defined/populated
+                    if (temp) {
+                        if (!this.allResources) { this.allResources = this.resources }
+                        var filtersList = ['topics', 'rTypes', 'tags']
+                        var activeFilters = {}
+                        //populate filter list with currently selected - should be moved out to only calculate on change
+                        for (var j = 0; j < filtersList.length; j++) {
+                            filter = activeFilters[j]
+                            var string = 'filter_' + filter
+                            if (this[string] != undefined && this[string] != '') {
+                                if (this[string] != "(all)") {
+                                    activeFilters[filter] = this[string]
+                                }
+                            }
+                        }
+                        var temp = temp.filter(function (resource) {
+                            keys = Object.keys(activeFilters);
+                            for (var i = 0; i < activeFilters; i++) {
+                                key = keys[i]
+                                var value = activeFilters[key]
+                                //return if doesn't have anything saved to filter field
+                                if (!resource.hasOwnProperty(key)) {
+                                    return false
+                                }
+                                if (resource[key].indexOf(value) == -1) {
+                                    return false
+                                }
+                            }
+                            return true
+                        })
+                        this.filteredResources = []
+                        this.filteredResources = temp
+                    }
+                },
+                })
+          </script>
+</dom-module>
