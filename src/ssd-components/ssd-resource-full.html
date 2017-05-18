@@ -169,6 +169,9 @@
     <firebase-document id="firebaseResourceDoc" app-name="SSD-Resources" data="{{editableResource}}">
     </firebase-document>
 
+    <firebase-document id="firebaseSlugDoc" app-name="SSD-Resources" data="{{editableSlug}}">
+    </firebase-document>
+
     <!-- <firebase-query id="tagsQuery" app-name="SSD-Resources" path="/resources/[[resource.$key]]/tags" data="{{tags}}"></firebase-query> -->
 
 
@@ -211,7 +214,7 @@
           type: String,
           notify: true
         },
-        
+
         pendingEdits: {
           type: Boolean,
           value: false,
@@ -237,11 +240,11 @@
       _pendingEdits: function () {
         this.pendingEdits = true;
       },
-      
+
 
 
       edit: function () {
-        console.log('editing resource',this.resource)
+        console.log('editing resource', this.resource)
         //in case re-edit where key has been stripped
         if (!this.resource.$key) { this.resource.$key = this.id }
         if (!this.resource.uploadedFiles) { this.resource.uploadedFiles = [] }
@@ -258,6 +261,8 @@
         else {
           this.resource.modified = Date.now()
           this.editableResource = this.resource
+          this.editableSlug = this.id
+          delete this.editableSlug.$key
           delete this.editableResource.$key
           console.log('saving resource with id', this.id)
           this.$.firebaseResourceDoc.save('/resources', this.id).then(function () {
@@ -268,9 +273,12 @@
             this.pendingEdits = false;
             //document.querySelector('#resourceList').render();
           }.bind(this))
+          this.$.firebaseSlugDoc.save('/slugs', this.resource.slug).then(function () {
+            this.$.firebaseSlugDoc.reset();
+          }.bind(this))
         }
 
-      },
+        },
       delete: function () {
         if (this.resource.deleted != true && this.deleted == true) {
           this.set('resource.deleted', true)
@@ -303,12 +311,12 @@
         // if(window.history.length>2){
         //   window.history.back();
         // }
-        
+
       },
       open: function (resource) {
-        console.log('resource',resource)
+        console.log('resource', resource)
         //new resource
-        if (resource=='new') {
+        if (resource == 'new') {
           this.id = this.generatePushID();
           console.log('creating new resources id:', this.id)
           var newResource = this.generateNewResource(this.id)
@@ -339,11 +347,11 @@
 
       generateNewResource: function (id) {
         var d = Date.now()
-        var shortcode=this.generateShortCode()
+        var shortcode = this.generateShortCode()
         console.log('d', d)
         return {
           $key: id,
-          shortcode:shortcode,
+          shortcode: shortcode,
           description: '',
           name: '',
           tags: [],
