@@ -271,7 +271,8 @@
         if (Object.keys(doc).length > 0) {
           console.log('slugDocRetrieved', doc)
           this.liveResourceID = doc
-          this.$.liveResource.open('live');
+          console.log('opening live resource')
+          this.$.liveResource.open();
         }
       },
 
@@ -303,7 +304,9 @@
       },
       //responds to calls from add resource button and passes empty request to resource open
       addResource: function () {
-        this.$.fullResource.open();
+        //hide live editor if present
+        this.liveResourceMode = false
+        this.$.fullResource.open('new');
       },
       getResource: function (id) {
         console.log('getting resource', id)

@@ -241,6 +241,7 @@
 
 
       edit: function () {
+        console.log('editing resource',this.resource)
         //in case re-edit where key has been stripped
         if (!this.resource.$key) { this.resource.$key = this.id }
         if (!this.resource.uploadedFiles) { this.resource.uploadedFiles = [] }
@@ -305,25 +306,15 @@
         
       },
       open: function (resource) {
+        console.log('resource',resource)
         //new resource
-        if (!resource) {
+        if (resource=='new') {
           this.id = this.generatePushID();
           console.log('creating new resources id:', this.id)
           var newResource = this.generateNewResource(this.id)
           this.set('resource', newResource)
-          this.set('editMode', true)
           console.log('this.resource', this.resource)
-        }
-        //live resource loaded
-        if(resource=='live'){
-          console.log('live resource loaded')
-        }
-        //existing resource
-        else {
-          console.log('opening resource', resource, resource.$key)
-          if (!resource.$key) { resource.$key = this.id }
-          this.id = resource.$key
-          this.set('resource', resource)
+          this.edit();
         }
         this.set('opened', true)
       },

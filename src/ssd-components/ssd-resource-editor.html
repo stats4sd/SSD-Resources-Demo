@@ -48,6 +48,9 @@
       .flex-container {
         display: flex
       }
+      .url{
+        font-size: x-small
+      }
     </style>
     <style is="custom-style">
       paper-icon-button.red {
@@ -63,7 +66,7 @@
 
     <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required auto-validate pattern="[a-zA-Z0-9 ']*"
       error-message="no special characters!"></paper-input>
-    <p>slug:[[slug]]</p>
+    <span class="url">[[origin]]/[[slug]]</span>
     <p>
       <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required></paper-textarea>
     </p>
@@ -168,6 +171,9 @@
 
 
       },
+      ready:function(){
+        this.origin = window.location.origin
+      },
 
       _filterTags: function (tags, filter) {
         console.log("filter", filter)
@@ -178,11 +184,19 @@
         return filteredTags;
       },
       _toSlug: function (name) {
-        //could definitely be combined into one expression but I suck at regex :( 
-        //make lower case, replace all spaces with '-' and remove special
-        var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
-        this.resource.slug=slug
-        return slug
+        if(!name){
+          //new resource
+          this.resource.slug = ""
+          return ""  
+        }
+        else{
+          //could definitely be combined into one expression but I suck at regex :( 
+          //make lower case, replace all spaces with '-' and remove special
+          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
+          this.resource.slug = slug
+          return slug
+        }
+        
       },
 
       addLink: function (e) {
