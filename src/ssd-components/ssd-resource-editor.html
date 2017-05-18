@@ -63,6 +63,7 @@
 
     <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required auto-validate pattern="[a-zA-Z0-9 ']*"
       error-message="no special characters!"></paper-input>
+    <p>slug:[[slug]]</p>
     <p>
       <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required></paper-textarea>
     </p>
@@ -70,9 +71,10 @@
 
     <h4>Keywords</h4>
     <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{resource.topics}}"></paper-tags-dropdown>
-    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{resource.rTypes}}" max-tags="1"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{resource.rTypes}}"
+      max-tags="1"></paper-tags-dropdown>
     <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{resource.collections}}"></paper-tags-dropdown>
-    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key"  value-object="{{resource.keywords}}"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{resource.keywords}}"></paper-tags-dropdown>
 
 
     <h4>External Links</h4>
@@ -141,6 +143,10 @@
           type: String,
           notify: true
         },
+        slug: {
+          type: String,
+          computed: '_toSlug(resource.name)'
+        },
         opened: {
           type: Boolean,
           value: false,
@@ -156,20 +162,27 @@
           type: Object,
           value: {
             url: '',
-            displayName:''
+            displayName: ''
           }
         }
 
 
       },
 
-      _filterTags: function(tags,filter) {
-        console.log("filter",filter)
-        filteredTags = tags.filter(function(e) {
+      _filterTags: function (tags, filter) {
+        console.log("filter", filter)
+        filteredTags = tags.filter(function (e) {
           return e.type == filter;
         })
-        console.log("filteredTags",filteredTags)
+        console.log("filteredTags", filteredTags)
         return filteredTags;
+      },
+      _toSlug: function (name) {
+        //could definitely be combined into one expression but I suck at regex :( 
+        //make lower case, replace all spaces with '-' and remove special
+        var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
+        this.resource.slug=slug
+        return slug
       },
 
       addLink: function (e) {
@@ -179,12 +192,12 @@
             url: this.newLink.url
           })
         }
-        this.set('newLink.url',"")
-        this.set('newLink.displayName',"")
+        this.set('newLink.url', "")
+        this.set('newLink.displayName', "")
         console.log('resource', this.resource)
       },
       editLink: function (e) {
-        this.newLink=e.model.link
+        this.newLink = e.model.link
         this.removeLink(e)
       },
       removeLink: function (e) {

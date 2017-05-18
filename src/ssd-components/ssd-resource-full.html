@@ -71,7 +71,8 @@
         background-color: var(--paper-green-500);
         color: white;
       }
-      a{
+
+      a {
         display: block;
       }
     </style>
@@ -135,7 +136,7 @@
       <p>
         <span class='bold'>Keywords: </span>
         <template is="dom-repeat" items="[[_toArray(resource.keywords)]]" as="tag">
-          <ssd-tag tag="[[tag]]"filter="" ></ssd-tag>
+          <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
         </template>
       </p>
       <div hidden$=[[!resource.externalLinks]]>
@@ -210,6 +211,7 @@
           type: String,
           notify: true
         },
+        
         pendingEdits: {
           type: Boolean,
           value: false,
@@ -235,6 +237,7 @@
       _pendingEdits: function () {
         this.pendingEdits = true;
       },
+      
 
 
       edit: function () {
@@ -333,9 +336,11 @@
 
       generateNewResource: function (id) {
         var d = Date.now()
+        var shortcode=this.generateShortCode()
         console.log('d', d)
         return {
           $key: id,
+          shortcode:shortcode,
           description: '',
           name: '',
           tags: [],
@@ -379,15 +384,24 @@
       hideEmptyReourceNoteOpen: function () {
         this.emptyReourceNoteOpen = false;
       },
+      //simple random alpha-numeric generator
+      //doesn't check for duplicates
+      generateShortCode: function () {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwyz123456789";
+        for (var i = 0; i < 4; i++)
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+        return text;
+      },
 
-      console: function() {
+      console: function () {
         something = this.$.tagsQuery.getStoredValue(this.$.tagsQuery.path);
         console.log(something)
-        console.log("resource",this.resource);
-        console.log("resource_id",this.resource.$key);
-        console.log("tags",this.tags);
-        console.log("resource-tags",this.resource.tags);
-        console.log("firebase-query-path",this.$.tagsQuery.path)
+        console.log("resource", this.resource);
+        console.log("resource_id", this.resource.$key);
+        console.log("tags", this.tags);
+        console.log("resource-tags", this.resource.tags);
+        console.log("firebase-query-path", this.$.tagsQuery.path)
       }
 
     })

@@ -63,7 +63,7 @@
         font-weight: 600;
       }
     </style>
-    <app-route route="{{route}}" pattern="/:resourceID" data="{{_routeData}}"></app-route>
+    <app-route route="{{route}}" pattern="/:resourceSlug" data="{{_routeData}}"></app-route>
 
     <!--sets up 3 column view (aside not currently used),
     sized and ordered through flex css (fixed sidebar, full width main-->
@@ -83,6 +83,10 @@
                 <ssd-resource-small resource='[[resource]]' hidden$="[[resource.deleted]]" on-tap='resourceTap'></ssd-resource-small>
               </template>
             </div>
+          </div>
+          <!--temp section-->
+          <div>
+            [[serverSearch]]
           </div>
         </main>
         <!--left sidebar-->
@@ -108,12 +112,13 @@
     <app-indexeddb-mirror key="persistedTags" data="{{alltags}}" persisted-data="{{persistedTags}}" session="keepAlways"></app-indexeddb-mirror>
     <!-- FIREBASE QUERY TO PULL IN RESOURCES FROM DB, starts after load  -->
     <firebase-query id="query" app-name="SSD-Resources" path="[[allResourcesPath]]" data="{{resources}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}" session="keepAlways"></app-indexeddb-mirror>
+    <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}" session="keepAlways"
+      transactions-complete="persistedComplete" log="true"></app-indexeddb-mirror>
     <!-- FIREBASE QUERY TO PULL IN newest FROM DB, starts before load  -->
     <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="20"></firebase-query>
     <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" session="keepAlways" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
-
-
+    <!--Firebase document for specific resource id from slug. Not needed as won't be making live query to firebase document afterwards (want function from persisted if possible)-->
+    <!--<firebase-document id="query" app-name="SSD-Resources" path="/slugs/[[resourceSlug]]" data="{{resourcesDoc}}"></firebase-document>-->
   </template>
 
   <script>
@@ -161,10 +166,26 @@
           type: Boolean,
           value: false
         },
-        resourceID: {
+        resourcesSlug: {
           type: String,
-          computed: '_return(_routeData.resourceID)',
-          observer: 'ResourceIdChange'
+          value: '_no-resource-here'
+        },
+        resourceSlug: {
+          type: String,
+          computed: '_return(_routeData.resourceSlug)',
+          observer: 'ResourceSlugChange'
+        },
+        resourceFromUrl: {
+          type: Object,
+          computed: '_getResourceFromURL(resourcesDoc)'
+        },
+        computedResource: {
+          type: Object,
+          computed: '_getResourceBySlug(persistedResources)'
+        },
+        resourcesDoc: {
+          type: Object,
+          notify: true,
         },
         signedIn: {
           type: Boolean,
@@ -182,26 +203,62 @@
           type: Object,
           notify: true,
         },
-        searchOpened:{
-          type:Boolean,
-          notify:true,
-          reflectToAttribute:true
+        searchOpened: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
         },
-        searchText:{
-          type:String,
-          notify:true,
-          reflectToAttribute:true
+        searchText: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true
         },
       },
+      // observers:[
+      //   'serverSearch2(serverSearch.*)'
+      //   ],
       ready: function () {
         this.allResourcesPath = "/resources"
         console.log('downloading all resources')
       },
-      resourcesChanged: function (res) {
-        console.log('res changed', res)
+      created: function () {
+        this.persistedComplete = new Promise(
+          // The resolver function is called with the ability to resolve or
+          // reject the promise
+          (resolve, reject) => {
+            log.insertAdjacentHTML('beforeend', thisPromiseCount +
+              ') Promise started (<small>Async code started</small>)<br/>');
+            // This is only an example to create asynchronism
+            window.setTimeout(
+              function () {
+                // We fulfill the promise !
+                resolve(thisPromiseCount);
+              }, Math.random() * 2000 + 1000);
+          }
+        );
       },
-      ResourceIdChange: function (id) {
-        console.log('id changed', id)
+
+      ResourceSlugChange: function (slug) {
+        console.log('slug changed', slug)
+        this.resourceSlug = slug;
+        this.selectedResource = this._getResourceBySlug(this.persistedResources)
+        console.log('selected resource', this.selectedResource)
+      },
+
+      _getResourceBySlug: function (persistedResources) {
+        console.log('getting resource by slug', this.resourceSlug)
+        console.log('persisted resources', persistedResources)
+        if (persistedResources) {
+          console.log('length', persistedResources.length)
+        }
+        if (persistedResources && persistedResources.length > 0) {
+          console.log('persistedResources', persistedResources)
+          for (var i = 0; i < persistedResources.length; i++) {
+            if (persistedResources[i].slug == this.resourceSlug)
+              console.log('match found', persistedResources[i])
+            return persistedResource[i]
+          }
+        }
       },
       updateFired: function () {
         console.log('res updated')
@@ -229,6 +286,10 @@
       //responds to calls from add resource button and passes empty request to resource open
       addResource: function () {
         this.$.fullResource.open();
+      },
+      getResource: function (id) {
+        console.log('getting resource', id)
+        console.log('resources', this.allR)
       },
       filterChange: function () {
         console.log('filters updated')

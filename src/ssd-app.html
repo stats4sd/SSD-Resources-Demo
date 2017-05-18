@@ -379,18 +379,7 @@
       toggleSearch: function () {
         this.searchOpened=!this.searchOpened;
       },
-
-      openSearch: function (e) {
-        if (this.searchText) { this.$$('ssd-resources').openSearch(this.searchText) }
-        else { this.$$('ssd-resources').openSearch() };
-        delete this.searchText
-        this.set("routeData.page", "resources");
-        this.searchOpened = true;
-      },
-      closeSearch:function(){
-         this.searchOpened = false;
-      },
-
+      
       addResource: function () {
         this.set("routeData.page", "resources");
         this.$$('ssd-resources').addResource();
