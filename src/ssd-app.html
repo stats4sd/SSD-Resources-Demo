@@ -161,7 +161,7 @@
           <ssd-home name="home"></ssd-home>
           <ssd-resources page-loaded="{{resourcesPageLoaded}}" page="{{routeData.page}}" route="{{subroute}}" name="resources" signed-in={{signedIn}}
             id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}} persisted-resources="{{persistedResources}}" persisted-tags="{{persistedTags}}"></ssd-resources>
-          <ssd-search name="search" id="searchPage" persisted-resources="{{persistedResources}}" persisted-tags="{{persistedTags}}" search-opened="{{searchOpened}}"></ssd-search>
+          <ssd-search name="search" id="searchPage" persisted-resources="{{persistedResources}}" signed-in={{signedIn}} persisted-tags="{{persistedTags}}"></ssd-search>
           <ssd-tags name="tags" id="tagsPage"></ssd-tags>
           
         </iron-pages>
@@ -295,7 +295,6 @@
 
       //lazy load page contents on change (useful for admin pages)
       _pageChanged: function (page, oldPage) {
-        console.log('page changed', page)
         var href
         this.customStyle['--background-color'] = '#eeeeee'
         switch (page) {
@@ -328,7 +327,7 @@
       _pageLoaded(page) {
         //lazy load resources page if not already
         if (page != 'resources' && !this.resourcesPageLoaded) {
-          console.log('start of resource page lazy load')
+          console.log('start of resource page core load')
           Polymer.RenderStatus.afterNextRender(this, function () {
             this.importHref(
               this.resolveUrl('ssd-resources.html'),
@@ -342,7 +341,7 @@
             )
           })
         }
-        if (page == 'resources' && !this.resourcesPageLazyLoaded) {
+        if (page == 'resources' || page=='search' && !this.resourcesPageLazyLoaded) {
           console.log('start of resource page lazy load')
           Polymer.RenderStatus.afterNextRender(this, function () {
             this.importHref(

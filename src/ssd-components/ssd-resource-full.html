@@ -56,6 +56,9 @@
         align-items: center;
         padding: 5px;
       }
+      .url{
+        font-size: x-small
+      }
     </style>
     <style is="custom-style">
       paper-button.back {
@@ -74,6 +77,9 @@
 
       a {
         display: block;
+      }
+      h3{
+        margin-bottom: 0
       }
     </style>
 
@@ -113,6 +119,7 @@
     </div>
     <div hidden$="[[editMode]]">
       <h3>[[resource.name]]</h3>
+      <div class="url">[[origin]]/[[resource.slug]]</div>
       <p><span class='bold'>Description: </span>[[resource.description]]</p>
       <p>
         <span class='bold'>Topics: </span>
@@ -232,6 +239,9 @@
           notify: true,
         },
       },
+      ready:function(){
+        this.origin = window.location.origin
+      },
 
       //Filtering tags by type
 
@@ -335,7 +345,6 @@
               value: obj[key]
             };
           });
-          console.log(array);
           return array;
         }
         else {

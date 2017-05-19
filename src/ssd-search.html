@@ -148,7 +148,9 @@
             <span>search link: </span>
             <a class="share-link" href="/s/[[searchText]]">[[origin]]/s/[[searchText]]</a>
         </p>
-        <ssd-resource-full resource='[[selectedResource]]' opened='{{resourceOpened}}' editable='{{editMode}}'></ssd-resource-full>
+        <ssd-resource-full id="searchFulResource" resource='[[selectedResource]]' opened='{{resourceOpened}}'
+            signed-in='{{signedIn}}' persisted-tags="[[persistedTags]]" on-update="updateFired">
+        </ssd-resource-full>
 
     </template>
 
@@ -195,9 +197,9 @@
                     notify: true,
                     reflectToAttribute: true
                 },
-                showLink:{
-                    type:Boolean,
-                    value:false
+                showLink: {
+                    type: Boolean,
+                    value: false
                 }
             },
             attached: function () {
@@ -228,9 +230,7 @@
                 //don't show deleted resources
                 if (resource.deleted == true) { return false }
                 //run through each filter via key, if not matched return false.
-                console.log('filters',this.filters)
-                console.log('filters length',this.filters.length)
-                var totalFilters=0
+                var totalFilters = 0
                 for (var key in this.filters) {
                     //safeguard in case only proto info exists or null
                     if (this.filters.hasOwnProperty(key) && this.filters[key]) {
@@ -241,17 +241,13 @@
                         }
                     }
                 }
-                console.log('passed filters test')
                 //return entire category if no search text (2 char or less) but at least one filter selected,
-                if(!this.searchText || this.searchText.length<=2){
+                if (!this.searchText || this.searchText.length <= 2) {
                     //if no filters either then just return empty (neater)
-                    if(totalFilters==0){return false}
+                    if (totalFilters == 0) { return false }
                     return true
                 }
-                
-                
-                console.log('applying text filter')
-                if (!this.searchText) {this.searchText = ""}
+                if (!this.searchText) { this.searchText = "" }
                 s = this.searchText.toLowerCase();
                 if (s.length > 2) {
                     // this.showLink = true
