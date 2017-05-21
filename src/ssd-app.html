@@ -216,11 +216,6 @@
           observer: '_logStatus',
           value:false
         },
-        editingMode: {
-          type: Boolean,
-          value: false,
-          notify: true,
-        },
         wide: {
           type: Boolean,
           observer: '_wideChanged'
@@ -262,10 +257,6 @@
       observers: [
         '_routePageChanged(routeData.page)',
       ],
-      toggleEditing: function () {
-        this.set('editingMode', !this.editingMode)
-      },
-
       _routePageChanged: function (page) {
         // set default route if route path is empty
         if (!page) {

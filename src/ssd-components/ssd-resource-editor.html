@@ -48,7 +48,8 @@
       .flex-container {
         display: flex
       }
-      .url{
+
+      .url {
         font-size: x-small
       }
     </style>
@@ -64,7 +65,7 @@
       }
     </style>
 
-    <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required ></paper-input>
+    <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
     <span class="url">[[origin]]/[[slug]]</span>
     <p>
       <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required></paper-textarea>
@@ -77,6 +78,13 @@
       max-tags="1"></paper-tags-dropdown>
     <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{resource.collections}}"></paper-tags-dropdown>
     <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{resource.keywords}}"></paper-tags-dropdown>
+
+    <vaadin-combo-box label="Resource Types" id="Resource-TypeCombo" items="[[_filterTags(persistedTags,'Resource-Type')]]" selected-item="{{tags.Resource-Type}}"
+      filtered-items="{{filteredRTypes}}" on-filter-changed="_filterChanged" focused="{{focused.Resource-Type}}">
+    </vaadin-combo-box>
+    <paper-button raised hidden$="[[!newTag]]" on-tap="addTag">New tag: [[newTag.value]]</paper-button>
+    <!--live tag editor-->
+    <firebase-document id="currentTag" app-name="SSD-Resources" data="{{currentTag}}" path="/tags/"></firebase-document>
 
 
     <h4>External Links</h4>
@@ -122,6 +130,14 @@
           value: false,
           reflectToAttribute: true
         },
+        filtered: {
+          type: Object,
+          value: {}
+        },
+        focused: {
+          type: Object,
+          value: {},
+        },
         tabSelected: {
           value: 0
         },
@@ -155,6 +171,11 @@
           notify: true,
           reflectToAttribute: true
         },
+        liveTagsPath: {
+          type: String,
+          value: "",
+          notify: true
+        },
         deleted: {
           type: Boolean,
           value: false,
@@ -165,37 +186,96 @@
           value: {
             url: '',
             displayName: ''
+          },
+          currentTagId: {
+            type: String,
+            value: ''
+          },
+          currentTag: {
+            type: Object
           }
         }
 
 
+
       },
-      ready:function(){
+      ready: function () {
         this.origin = window.location.origin
       },
 
       _filterTags: function (tags, filter) {
-        console.log("filter", filter)
         filteredTags = tags.filter(function (e) {
           return e.type == filter;
         })
-        console.log("filteredTags", filteredTags)
         return filteredTags;
       },
+      //runs usual filter function (not updating filtered items),
+      //but tracks whether none exist to populate add tag button
+      //messy workarounds as unfocus sets text to "" and want to not hide tag
+      _filterChanged: function (e) {
+        //work out which filter
+        this.currentFilter = this._getFocusedFilter();
+        console.log('currentFilter',this.currentFilter)
+        if(this.currentFilter==undefined){
+          this.newTag = false
+          return}
+        var filterText = e.detail.value.toLowerCase()
+        var items = this.$$('#'+this.currentFilter+'Combo').items
+        var focused = this.$$('#'+this.currentFilter+'Combo').focused
+
+        if (!items) { items = [] }
+        var filtered = items.filter(function (el) {
+          var label = el.label.toLowerCase()
+          return label.indexOf(filterText) !== -1;
+        })
+        if (filtered.length == 0 && focused) {
+          this.newTag = {
+            value: filterText
+          }
+        }
+        if (filterText == "" && focused) { this.newTag = false }
+        if (filtered.length > 0 && focused) { this.newTag = false }
+        // console.log('filtered', filtered)
+        // console.log('filterText', filterText)
+        // console.log('focused', focused)
+        // console.log('this.focused', this.focused)
+      },
+      addTag: function () {
+        console.log('adding tag', this.newTag)
+        this.currentTag = {};
+        this.currentTag.modified = Date.now()
+        // save new tag
+        console.log('saving tag', this.currentTag)
+        this.$.currentTag.save('/tags').then(function () {
+          //finally, discardTag:
+          console.log('tag saved', this.newTag)
+          this.$.currentTag.reset()
+
+        }.bind(this));
+      },
       _toSlug: function (name) {
-        if(!name){
+        if (!name) {
           //new resource
           this.resource.slug = ""
-          return ""  
+          return ""
         }
-        else{
+        else {
           //could definitely be combined into one expression but I suck at regex :( 
           //make lower case, replace all spaces with '-' and remove special
           var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
           this.resource.slug = slug
           return slug
         }
-        
+      },
+      _getFocusedFilter:function() {
+        console.log('this.focused',this.focused)
+        for (var key in this.focused) {
+          if (this.focused.hasOwnProperty(key)) {
+            if(this.focused[key]==true){return key}
+          }
+        }
+        //if none focused return last known
+        return this.currentFilter
       },
 
       addLink: function (e) {
