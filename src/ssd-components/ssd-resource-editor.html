@@ -63,6 +63,13 @@
         color: var(--paper-green-700);
         --paper-icon-button-ink-color: var(--paper-green-700);
       }
+
+      paper-button.tag-button {
+        border: 2px solid black;
+        padding: 0;
+        margin: 0;
+        text-transform: none;
+      }
     </style>
 
     <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
@@ -73,18 +80,23 @@
     <!-- REPLACED PAPER TABS WITH PAPER TAGS -->
 
     <h4>Keywords</h4>
-    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{resource.topics}}"></paper-tags-dropdown>
-    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Resource Type')]]" label="Resource Types" id-accessor="$key" value-object="{{resource.rTypes}}"
-      max-tags="1"></paper-tags-dropdown>
+    <!--<paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{resource.topics}}"></paper-tags-dropdown>
     <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{resource.collections}}"></paper-tags-dropdown>
-    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{resource.keywords}}"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{resource.keywords}}"></paper-tags-dropdown>-->
 
     <vaadin-combo-box label="Resource Types" id="Resource-TypeCombo" items="[[_filterTags(persistedTags,'Resource-Type')]]" selected-item="{{tags.Resource-Type}}"
-      filtered-items="{{filteredRTypes}}" on-filter-changed="_filterChanged" focused="{{focused.Resource-Type}}">
+      filtered-items="{{filteredResource-Type}}" on-change="_comboChange" on-filter-changed="_filterChanged" focused="{{focused.Resource-Type}}" item-value-path="$key" item-value-path="label" allow-custom-value>
     </vaadin-combo-box>
-    <paper-button raised hidden$="[[!newTag]]" on-tap="addTag">New tag: [[newTag.value]]</paper-button>
+    <paper-button raised hidden$="[[!newTag]]" on-tap="addTag">New tag: [[newTag.label]]</paper-button>
+    <template is="dom-repeat" as="tag" items="[[_tagsToArray(resource.tags,'Resource-Type')]]" observe="tags resource.tags">
+      <paper-button class="tag-button">{{tag.label}}
+        <iron-icon icon="close" on-tap="removeTag"></iron-icon>
+      </paper-button>
+    </template>
+    <!--<paper-tags id="Resource-TypeTags" items="[[_tagsToArray(resource.tags,'Resource-Type')]]"></paper-tags>-->
     <!--live tag editor-->
     <firebase-document id="currentTag" app-name="SSD-Resources" data="{{currentTag}}" path="/tags/"></firebase-document>
+    <firebase-document id="allTags" app-name="SSD-Resources" data="{{allTags}}" path="/tags"></firebase-document>
 
 
     <h4>External Links</h4>
@@ -113,7 +125,6 @@
     </div>
 
   </template>
-
 
   <script>
     Polymer({
@@ -207,21 +218,47 @@
         filteredTags = tags.filter(function (e) {
           return e.type == filter;
         })
+        console.log('filtered tags', filter, tags)
         return filteredTags;
       },
+      //function to lookup tag metadata and filter for resource tag type
+      //replaces paper-tags value-object lookup functionality as moving away from component
+      _tagsToArray: function (tags, filter) {
+        //lookup full tag
+        var tagsArray = []
+        for (var key in tags) {
+          if (tags.hasOwnProperty(key)) {
+            tagsArray.push(this._lookupTag(key))
+          }
+        }
+        return tagsArray
+      },
+      _lookupTag: function (key) {
+        //iterate over persisted tags, return matching key
+        for (var i = 0; i < this.persistedTags.length; i++) {
+          if (this.persistedTags[i].$key == key) {
+            return this.persistedTags[i]
+          }
+        }
+      },
+      _comboChange:function(e){
+        this.updateResourceTags(e.target.value)
+        e.target.value=""
+      },
+
       //runs usual filter function (not updating filtered items),
       //but tracks whether none exist to populate add tag button
       //messy workarounds as unfocus sets text to "" and want to not hide tag
       _filterChanged: function (e) {
         //work out which filter
         this.currentFilter = this._getFocusedFilter();
-        console.log('currentFilter',this.currentFilter)
-        if(this.currentFilter==undefined){
+        if (this.currentFilter == undefined) {
           this.newTag = false
-          return}
+          return
+        }
         var filterText = e.detail.value.toLowerCase()
-        var items = this.$$('#'+this.currentFilter+'Combo').items
-        var focused = this.$$('#'+this.currentFilter+'Combo').focused
+        var items = this.$$('#' + this.currentFilter + 'Combo').items
+        var focused = this.$$('#' + this.currentFilter + 'Combo').focused
 
         if (!items) { items = [] }
         var filtered = items.filter(function (el) {
@@ -230,7 +267,8 @@
         })
         if (filtered.length == 0 && focused) {
           this.newTag = {
-            value: filterText
+            label: filterText,
+            type: this.currentFilter
           }
         }
         if (filterText == "" && focused) { this.newTag = false }
@@ -241,17 +279,38 @@
         // console.log('this.focused', this.focused)
       },
       addTag: function () {
-        console.log('adding tag', this.newTag)
-        this.currentTag = {};
+        this.currentTag = this.newTag
         this.currentTag.modified = Date.now()
         // save new tag
-        console.log('saving tag', this.currentTag)
-        this.$.currentTag.save('/tags').then(function () {
+        var key = this.generatePushID()
+        this.currentTag.key = key;
+        this.$.currentTag.save('/tags', key).then(function () {
           //finally, discardTag:
           console.log('tag saved', this.newTag)
+          //populate element
+          this.updateResourceTags(key)
+          this.newTag = false
           this.$.currentTag.reset()
 
         }.bind(this));
+      },
+      removeTag: function (e) {
+        var key = e.model.tag.key
+        delete this.resource.tags[key]
+        // this.notifyPath('resource.tags')
+        //dirty override as doesn't detect when all tags removed
+        var temp = this.resource
+        this.resource = {}
+        this.resource = temp
+      },
+      updateResourceTags: function (key) {
+        if (!this.resource.tags) { this.resource.tags = {} }
+        this.resource.tags[key] = true
+        //dirty override as doesn't update after more than one tag
+        //this.notifyPath('resource.tags')
+        var temp = this.resource
+        this.resource = {}
+        this.resource = temp
       },
       _toSlug: function (name) {
         if (!name) {
@@ -267,11 +326,10 @@
           return slug
         }
       },
-      _getFocusedFilter:function() {
-        console.log('this.focused',this.focused)
+      _getFocusedFilter: function () {
         for (var key in this.focused) {
           if (this.focused.hasOwnProperty(key)) {
-            if(this.focused[key]==true){return key}
+            if (this.focused[key] == true) { return key }
           }
         }
         //if none focused return last known
@@ -352,20 +410,9 @@
           if (uploads[i].name == fileName) { return i }
         }
       },
-
       delete: function (e, detail) {
         console.log('delete clicked')
         this.set('deleted', true)
-      },
-
-      // testing: function () {
-      //   console.log(this.persistedTags);
-      // },
-
-      _getLinks: function () {
-        return [
-          { name: 'test 1' }
-        ]
       },
       _toArray: function (obj) {
         if (obj) {
@@ -382,6 +429,49 @@
           return [];
         }
 
+      },
+      //firebase function taken from https://gist.github.com/mikelehen/3596a30bd69384624c11
+      generatePushID: function () {
+        var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+        var lastPushTime = 0;
+        var lastRandChars = [];
+        var now = new Date().getTime();
+        var duplicateTime = (now === lastPushTime);
+        lastPushTime = now;
+        var timeStampChars = new Array(8);
+        for (var i = 7; i >= 0; i--) {
+          timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+          now = Math.floor(now / 64);
+        }
+        if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+        var id = timeStampChars.join('');
+        if (!duplicateTime) {
+          for (i = 0; i < 12; i++) {
+            lastRandChars[i] = Math.floor(Math.random() * 64);
+          }
+        } else {
+          for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
+            lastRandChars[i] = 0;
+          }
+          lastRandChars[i]++;
+        }
+        for (i = 0; i < 12; i++) {
+          id += PUSH_CHARS.charAt(lastRandChars[i]);
+        }
+        if (id.length != 20) throw new Error('Length should be 20.');
+        return id;
+      },
+      hideEmptyReourceNoteOpen: function () {
+        this.emptyReourceNoteOpen = false;
+      },
+      //simple random alpha-numeric generator
+      //doesn't check for duplicates
+      generateShortCode: function () {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwyz123456789";
+        for (var i = 0; i < 4; i++)
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+        return text;
       },
     })
   </script>

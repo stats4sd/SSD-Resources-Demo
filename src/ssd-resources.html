@@ -314,7 +314,7 @@
       filterChange: function () {
         console.log('filters updated')
         var temp = this.persistedResources
-        var filtersList = ['topics', 'rTypes', 'tags']
+        var filtersList = ['topics', 'Resource-Type', 'tags']
         this.activeFilters = {}
         //populate filter list with currently selected - should be moved out to only calculate on change
         for (var i = 0; i < filtersList.length; i++) {
