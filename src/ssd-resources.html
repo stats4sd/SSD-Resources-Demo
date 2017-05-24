@@ -267,11 +267,12 @@
 
       slugDocRetrieved: function (doc) {
         //should pull id as string or object length 20
+        console.log('slug doc',doc)
         if (Object.keys(doc).length > 0) {
           console.log('slugDocRetrieved', doc)
           this.liveResourceID = doc
-          console.log('opening live resource')
-          this.$.liveResource.open();
+          console.log('opening live resource id',doc)
+          this.$.liveResource.open({liveID:this.liveResourceID});
         }
       },
 

@@ -79,20 +79,37 @@
     </p>
     <!-- REPLACED PAPER TABS WITH PAPER TAGS -->
 
-    <h4>Keywords</h4>
+    <h4>Tags</h4>
     <!--<paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{resource.topics}}"></paper-tags-dropdown>
     <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{resource.collections}}"></paper-tags-dropdown>
     <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{resource.keywords}}"></paper-tags-dropdown>-->
 
     <vaadin-combo-box label="Resource Types" id="Resource-TypeCombo" items="[[_filterTags(persistedTags,'Resource-Type')]]" selected-item="{{tags.Resource-Type}}"
-      filtered-items="{{filteredResource-Type}}" on-change="_comboChange" on-filter-changed="_filterChanged" focused="{{focused.Resource-Type}}" item-value-path="$key" item-value-path="label" allow-custom-value>
+      filtered-items="{{filteredResource-Type}}" on-change="_comboChange" on-filter-changed="_filterChanged" focused="{{focused.Resource-Type}}"
+      item-value-path="$key" item-value-path="label" allow-custom-value>
     </vaadin-combo-box>
-    <paper-button raised hidden$="[[!newTag]]" on-tap="addTag">New tag: [[newTag.label]]</paper-button>
+    <div hidden$="[[!newTag]]" on-tap="addTag">
+      <div hidden$="[[!focused.Resource-Type]]">Press enter to add tag: [[newTag.label]]</div>
+    </div>
     <template is="dom-repeat" as="tag" items="[[_tagsToArray(resource.tags,'Resource-Type')]]" observe="tags resource.tags">
       <paper-button class="tag-button">{{tag.label}}
         <iron-icon icon="close" on-tap="removeTag"></iron-icon>
       </paper-button>
     </template>
+
+    <vaadin-combo-box label="Collections" id="CollectionCombo" items="[[_filterTags(persistedTags,'Collection')]]" selected-item="{{tags.Collection}}"
+      filtered-items="{{filteredCollections}}" on-change="_comboChange" on-filter-changed="_filterChanged" focused="{{focused.Collection}}"
+      item-value-path="$key" item-value-path="label" allow-custom-value>
+    </vaadin-combo-box>
+    <div hidden$="[[!newTag]]" on-tap="addTag">
+      <div hidden$="[[!focused.Collection]]">Press enter to add tag: [[newTag.label]]</div>
+    </div>
+    <template is="dom-repeat" as="tag" items="[[_tagsToArray(resource.tags,'Collection')]]" observe="tags resource.tags">
+      <paper-button class="tag-button">{{tag.label}}
+        <iron-icon icon="close" on-tap="removeTag"></iron-icon>
+      </paper-button>
+    </template>
+
     <!--<paper-tags id="Resource-TypeTags" items="[[_tagsToArray(resource.tags,'Resource-Type')]]"></paper-tags>-->
     <!--live tag editor-->
     <firebase-document id="currentTag" app-name="SSD-Resources" data="{{currentTag}}" path="/tags/"></firebase-document>
@@ -204,21 +221,27 @@
           },
           currentTag: {
             type: Object
-          }
+          },
         }
 
 
 
       },
       ready: function () {
-        this.origin = window.location.origin
+        this.origin = window.location.origin;
+        //needs to match vaadin elements for proper lookup
+        this.tagTypes = [
+          { type: 'Resource-Type', label: 'Resource Types' },
+          { type: 'Collection', label: 'Collections' },
+          { type: 'Keyword', label: 'Keywords' }
+        ]
+        console.log('tag types', this.tagTypes)
       },
 
       _filterTags: function (tags, filter) {
         filteredTags = tags.filter(function (e) {
           return e.type == filter;
         })
-        console.log('filtered tags', filter, tags)
         return filteredTags;
       },
       //function to lookup tag metadata and filter for resource tag type
@@ -228,7 +251,9 @@
         var tagsArray = []
         for (var key in tags) {
           if (tags.hasOwnProperty(key)) {
-            tagsArray.push(this._lookupTag(key))
+            if (tags[key] == filter) {
+              tagsArray.push(this._lookupTag(key))
+            }
           }
         }
         return tagsArray
@@ -241,9 +266,21 @@
           }
         }
       },
-      _comboChange:function(e){
-        this.updateResourceTags(e.target.value)
-        e.target.value=""
+      _comboChange: function (e) {
+        console.log('combo change', e.target.value, e.target.label)
+        var type = this._getTagType(e.target.label)
+        console.log('type looked up:', type)
+        this.updateResourceTags(e.target.value, type)
+        e.target.value = ""
+      },
+      //lookup tag label and return tag type
+      _getTagType: function (val) {
+        console.log('getting type for', val)
+        for (var key in this.tagTypes) {
+          if (this.tagTypes.hasOwnProperty(key)) {
+            if (this.tagTypes[key].label == val) { return this.tagTypes[key].type }
+          }
+        }
       },
 
       //runs usual filter function (not updating filtered items),
@@ -279,6 +316,7 @@
         // console.log('this.focused', this.focused)
       },
       addTag: function () {
+        console.log('adding tag')
         this.currentTag = this.newTag
         this.currentTag.modified = Date.now()
         // save new tag
@@ -288,14 +326,15 @@
           //finally, discardTag:
           console.log('tag saved', this.newTag)
           //populate element
-          this.updateResourceTags(key)
+          this.updateResourceTags(key, this.currentTag.type)
           this.newTag = false
           this.$.currentTag.reset()
 
         }.bind(this));
       },
       removeTag: function (e) {
-        var key = e.model.tag.key
+        console.log('removing tag', e.model.tag)
+        var key = e.model.tag.$key
         delete this.resource.tags[key]
         // this.notifyPath('resource.tags')
         //dirty override as doesn't detect when all tags removed
@@ -303,9 +342,17 @@
         this.resource = {}
         this.resource = temp
       },
-      updateResourceTags: function (key) {
+      updateResourceTags: function (key, value) {
+        console.log('updating resource tag', key)
+        console.log('new tag?', this.newTag)
+        if (this.newTag != false) {
+          console.log('need to add tag')
+          this.addTag()
+          return
+        }
+        console.log('no need to add tag')
         if (!this.resource.tags) { this.resource.tags = {} }
-        this.resource.tags[key] = true
+        this.resource.tags[key] = value
         //dirty override as doesn't update after more than one tag
         //this.notifyPath('resource.tags')
         var temp = this.resource

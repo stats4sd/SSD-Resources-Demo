@@ -56,7 +56,8 @@
         align-items: center;
         padding: 5px;
       }
-      .url{
+
+      .url {
         font-size: x-small
       }
     </style>
@@ -78,8 +79,18 @@
       a {
         display: block;
       }
-      h3{
+
+      h3 {
         margin-bottom: 0
+      }
+      .bold{font-weight: 800}
+    </style>
+    <style is="custom-style">
+      paper-button.tag-button {
+        border: 2px solid black;
+        padding: 0;
+        margin: 0;
+        text-transform: none;
       }
     </style>
 
@@ -121,31 +132,6 @@
       <h3>[[resource.name]]</h3>
       <div class="url">[[origin]]/[[resource.slug]]</div>
       <p><span class='bold'>Description: </span>[[resource.description]]</p>
-      <p>
-        <span class='bold'>Topics: </span>
-        <template is="dom-repeat" items="[[_toArray(resource.topics)]]" as="tag">
-          <!-- Sticking with the 4 lists in resources (resources.topics etc) instead of 1 list means we don't need the filter attribute for the ssd-tag. Could remove.  -->
-          <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
-        </template>
-      </p>
-      <p>
-        <span class='bold'>Resource Types: </span>
-        <template is="dom-repeat" items="[[_toArray(resource.Resource-Type)]]" as="tag">
-          <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
-        </template>
-      </p>
-      <p>
-        <span class='bold'>Collections: </span>
-        <template is="dom-repeat" items="[[_toArray(resource.collections)]]" as="tag">
-          <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
-        </template>
-      </p>
-      <p>
-        <span class='bold'>Keywords: </span>
-        <template is="dom-repeat" items="[[_toArray(resource.keywords)]]" as="tag">
-          <ssd-tag tag="[[tag]]" filter=""></ssd-tag>
-        </template>
-      </p>
       <div hidden$=[[!resource.externalLinks]]>
         <h4>Links:</h4>
         <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
@@ -157,11 +143,20 @@
       </div>
       <div hidden$="[[!resource.uploadedFiles]]">
         <h4>Files:</h4>
-        <p>Click on any of the file cards to download it</p>
+        <div>Click on any of the file cards to download it</div>
         <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
           <ssd-resource-file file="[[file]]"></ssd-resource-file>
         </template>
       </div>
+      <p>
+        <span class='bold'>Tags: </span>
+        <template is="dom-repeat" items="[[tags]]" as="tag">
+          <!-- Sticking with the 4 lists in resources (resources.topics etc) instead of 1 list means we don't need the filter attribute for the ssd-tag. Could remove.  -->
+          <!--<ssd-tag tag="[[tag]]" filter=""></ssd-tag>-->
+          <paper-button class="tag-button">[[tag.label]]</paper-button>
+        </template>
+      </p>
+      
     </div>
 
     <!-- <paper-button id='console' raised on-tap='console'>CONSOLE</paper-button> -->
@@ -237,10 +232,38 @@
         tags: {
           type: Array,
           notify: true,
+          value: []
         },
       },
-      ready:function(){
+      observers: ['tagsChange(resource.tags)'],
+      ready: function () {
         this.origin = window.location.origin
+      },
+      tagsChange: function (tags) {
+        if (tags) {
+          var tagsArray = this._tagsToArray(tags)
+        }
+       this.set('tags',tagsArray)
+       console.log('this.tags',this.tags)
+
+      },
+      _tagsToArray: function (tags, filter) {
+        //lookup full tag
+        var tagsArray = []
+        for (var key in tags) {
+          if (tags.hasOwnProperty(key)) {
+            tagsArray.push(this._lookupTag(key))
+          }
+        }
+        return tagsArray
+      },
+      _lookupTag: function (key) {
+        //iterate over persisted tags, return matching key
+        for (var i = 0; i < this.persistedTags.length; i++) {
+          if (this.persistedTags[i].$key == key) {
+            return this.persistedTags[i]
+          }
+        }
       },
 
       //Filtering tags by type
@@ -289,7 +312,7 @@
           }.bind(this))
         }
 
-        },
+      },
       delete: function () {
         if (this.resource.deleted != true && this.deleted == true) {
           this.set('resource.deleted', true)
@@ -325,7 +348,7 @@
 
       },
       open: function (resource) {
-        console.log('resource', resource)
+        console.log('opening resource', resource)
         //new resource
         if (resource == 'new') {
           this.id = this.generatePushID();
@@ -335,10 +358,14 @@
           console.log('this.resource', this.resource)
           this.edit();
         }
+        if (resource.liveID) {
+          this.resource.$key = resource.liveID
+        }
         this.set('opened', true)
       },
 
-      _toArray: function (obj) {
+      _toArray: function (obj, val) {
+        console.log('to array', obj)
         if (obj) {
           var array = Object.keys(obj).map(function (key) {
             return {
@@ -414,16 +441,6 @@
           text += possible.charAt(Math.floor(Math.random() * possible.length));
         return text;
       },
-
-      console: function () {
-        something = this.$.tagsQuery.getStoredValue(this.$.tagsQuery.path);
-        console.log(something)
-        console.log("resource", this.resource);
-        console.log("resource_id", this.resource.$key);
-        console.log("tags", this.tags);
-        console.log("resource-tags", this.resource.tags);
-        console.log("firebase-query-path", this.$.tagsQuery.path)
-      }
 
     })
   </script>
