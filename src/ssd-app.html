@@ -95,6 +95,9 @@
     <!-- Setup page routing -->
     <app-location route="{{route}}"></app-location>
     <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}" query-params="{{queryParams}}"></app-route>
+    
+    <!--analytics tracking-->
+    <iron-ga code="UA-84922436-3"></iron-ga>
 
     <!-- Check screen size -->
     <iron-media-query query="min-width: 650px" query-matches="{{wide}}"></iron-media-query>
@@ -307,6 +310,7 @@
             break
         }
         this.updateStyles();
+        this.fire('iron-signal', { name: 'track-page', data: { path: "/"+href } });
         // importHref(href, onload, onerror, optAsync). Dynamically imports an HTML document.
         this.importHref(
           this.resolveUrl(href),
