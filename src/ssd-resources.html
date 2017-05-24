@@ -97,10 +97,10 @@
 
     <!--  SETTING UP RESOURCES 2 versions, one if running live and one if loading from cache -->
     <ssd-resource-full hidden$="[[liveResourceMode]]" id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}'
-      signed-in='{{signedIn}}' persisted-tags="[[persistedTags]]" on-update="updateFired">
+      signed-in='{{signedIn}}' persisted-tags="[[persistedTags]]" on-update="updateFired" user="{{user}}">
     </ssd-resource-full>
     <ssd-resource-full hidden$="[[!liveResourceMode]]" id="liveResource" resource='[[liveResourceDoc]]' opened='{{resourceOpened}}'
-      signed-in='{{signedIn}}' persisted-tags="[[persistedTags]]" on-update="updateFired">
+      signed-in='{{signedIn}}' persisted-tags="[[persistedTags]]" on-update="updateFired" user="{{user}}">
     </ssd-resource-full>
 
     <!--<ssd-search id="search" route="{{route}}" filtered-resources="[[persistedResources]]" all-resources="[[persistedResources]]"

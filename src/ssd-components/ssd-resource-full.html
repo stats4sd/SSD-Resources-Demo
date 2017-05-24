@@ -287,6 +287,7 @@
         console.log('loading tags')
       },
       save: function () {
+        console.log('this.user',this.user)
         //prompt validation
         if (this.resource.name == "" || this.resource.description == "") {
           this.emptyReourceNoteOpen = true;
@@ -296,12 +297,16 @@
           this.resource.modified = Date.now()
           this.editableResource = this.resource
           this.editableSlug = this.id
+          if(!this.resource.editedBy){this.resource.editedBy={}}
+          this.resource.editedBy[Date.now()] = this.user.email
           delete this.editableSlug.$key
           delete this.editableResource.$key
           console.log('saving resource with id', this.id)
           this.$.firebaseResourceDoc.save('/resources', this.id).then(function () {
             this.set('editMode', false)
             this.updates = true
+            //save revision 
+            this.$.firebaseResourceDoc.save('/revisions/'+this.id, Date.now())
             this.$.firebaseResourceDoc.reset();
             //remove check for pending edits on exit.
             this.pendingEdits = false;
@@ -395,7 +400,8 @@
           uploadedFiles: [],
           externalLinks: [],
           created: d,
-          modified: ''
+          modified: '',
+          editedBy:{}
         }
       },
       //firebase function taken from https://gist.github.com/mikelehen/3596a30bd69384624c11
