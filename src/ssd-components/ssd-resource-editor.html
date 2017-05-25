@@ -56,9 +56,10 @@
       .url {
         font-size: x-small
       }
-      .selected{
-        border:2px solid black;
+      .feature-image{
+        display: inline-block
       }
+
     </style>
     <style is="custom-style">
       paper-icon-button.red {
@@ -77,6 +78,9 @@
         margin: 0;
         text-transform: none;
       }
+      .iron-selected {
+          border: 2px solid black;
+        }
     </style>
 
     <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
@@ -150,13 +154,16 @@
 
     <h4>Feature Image</h4>
     <div class='flex-container'>
+      
+    </div>
+    <iron-selector selected="0">
       <template is="dom-repeat" as="tag" items="[[_tagsToArray(resource.tags,'Resource-Type')]]" observe="tags resource.tags">
-        <div on-tap="setFeatureImage" class$="feature-image [[selectedClass]]">
+        <div on-tap="setFeatureImage" class="feature-image">
           <img src="/images/resourceTypes/{{tag.slug}}.jpg">
           <div class="image-label">{{tag.label}}</div>
         </div>
       </template>
-    </div>
+    </iron-selector>
 
 
   </template>
@@ -274,7 +281,6 @@
             }
           }
         }
-        console.log('tagsArray', tagsArray)
         return tagsArray
       },
       _lookupTag: function (key) {
@@ -407,14 +413,10 @@
         return this.currentFilter
       },
 
-      setFeatureImage:function(e){
-        var tag =e.model.tag
-        this.resource.featureImage="/images/resourceTypes/"+tag.slug+".jpg"
-        console.log('this.resource',this.resource)
-        var index = e.model.index
-        console.log('index',index)
-        this.selectedClass[1]="selected"
-
+      setFeatureImage: function (e) {
+        var tag = e.model.tag
+        this.resource.featureImage = "/images/resourceTypes/" + tag.slug + ".jpg"
+        console.log('this.resource', this.resource)
       },
 
       addLink: function (e) {
