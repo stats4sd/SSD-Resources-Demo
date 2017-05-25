@@ -153,7 +153,7 @@
         <template is="dom-repeat" items="[[tags]]" as="tag">
           <!-- Sticking with the 4 lists in resources (resources.topics etc) instead of 1 list means we don't need the filter attribute for the ssd-tag. Could remove.  -->
           <!--<ssd-tag tag="[[tag]]" filter=""></ssd-tag>-->
-          <paper-button class="tag-button">[[tag.label]]</paper-button>
+          <paper-button class="tag-button" hidden$="[[!tag.modified]]">[[tag.label]]</paper-button>
         </template>
       </p>
       
@@ -257,13 +257,18 @@
         }
         return tagsArray
       },
-      _lookupTag: function (key) {
+       _lookupTag: function (key) {
         //iterate over persisted tags, return matching key
         for (var i = 0; i < this.persistedTags.length; i++) {
           if (this.persistedTags[i].$key == key) {
             return this.persistedTags[i]
           }
         }
+        //no tag found, probably deleted
+        return {
+          label:'TAG NOT FOUND',
+          $key:key
+          }
       },
 
       //Filtering tags by type
@@ -401,7 +406,8 @@
           externalLinks: [],
           created: d,
           modified: '',
-          editedBy:{}
+          editedBy:{},
+          featureImage:''
         }
       },
       //firebase function taken from https://gist.github.com/mikelehen/3596a30bd69384624c11
