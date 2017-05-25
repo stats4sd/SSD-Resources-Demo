@@ -154,9 +154,7 @@
 
     <h4>Feature Image</h4>
     <div class='flex-container'>
-      
-    </div>
-    <iron-selector selected="0">
+    <iron-selector>
       <template is="dom-repeat" as="tag" items="[[_tagsToArray(resource.tags,'Resource-Type')]]" observe="tags resource.tags">
         <div on-tap="setFeatureImage" class="feature-image">
           <img src="/images/resourceTypes/{{tag.slug}}.jpg">
@@ -164,6 +162,7 @@
         </div>
       </template>
     </iron-selector>
+    </div>
 
 
   </template>
