@@ -1,29 +1,38 @@
-<!--import polymer html and shared styles-->
+<!--check in case other imports done in imports-core.html-->
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="shared-styles.html">
 
-<!--give id reference of page name-->
-<dom-module id="ssd-[page-name]">
+<dom-module id="ssd-templatename">
   <template>
     <style include="shared-styles">
-      :host {
-        display: block;
-        padding: 10px;
-      }
+      /*:host { }*/
     </style>
-<!--Add template content here-->
-    <div class="card">
-      <div class="circle">3</div>
-      <h1>View Three</h1>
-      <p>Modus commodo minimum eum te, vero utinam assueverit per eu.</p>
-      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.Has at minim mucius aliquam, est id tempor laoreet.Pro saepe pertinax ei, ad pri animal labores suscipiantur.</p>
-    </div>
+
+    <body>
+      <!--viewable things here-->
+
+    </body>
+    <!--additional logic and elements here-->
+
   </template>
 
   <script>
-//give element selector name here
     Polymer({
-      is: 'ssd-[page-name]',
+      is: 'ssd-templatename',
+      ready: function () {
+
+      },
+
+      properties: {
+
+      },
+      // observers:[],
+      // ready: function () { },
+
+      // functions here
+      // myfunction:function(){
+      //     console.log('demo function')
+      // }
     });
   </script>
 </dom-module>

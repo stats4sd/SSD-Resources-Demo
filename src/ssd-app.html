@@ -9,10 +9,11 @@
        :host {
         --app-primary-color: #d2232a;
         --app-secondary-color: black;
+        background-color: var(--background-color, '#eeeeee');
         display: block;
         font-family: "Open Sans";
       }
-      
+
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
@@ -20,19 +21,19 @@
         /*height: 120px;*/
         display: flex;
       }
-      
+
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
-      
+
       paper-tabs {
         font-size: 0.9em;
       }
-      
+
       paper-button {
         font-size: 0.8em;
       }
-      
+
       div.titleLogo {
         font-size: 18px;
         font-weight: bold;
@@ -42,47 +43,47 @@
         white-space: pre-wrap;
         float: left;
       }
-      
+
       app-toolbar[sticky] {
         margin-top: 35px;
         height: 50px;
         padding-left: 0;
       }
-      
+
       paper-tabs[no-bar] paper-tab.iron-selected {
         font-weight: bold;
         color: #ffff8d;
         height: 50px;
       }
-      
+
       paper-button {
         font-family: "Open Sans"
       }
-      
+
        :root {
         --paper-font-common-base: {
           font-family: "Open Sans", "Noto", sans-serif;
         }
       }
-      
+
       .spacer {
         width: 10%;
       }
-      
+
       .login {
         position: absolute;
         right: 10px;
         font-size: 0.83em;
         cursor: pointer;
       }
-      
+
       .user-name {
         position: absolute;
         top: -30px;
         right: 10px;
         font-size: 0.6em;
       }
-      
+
       .top-right {
         position: absolute;
         top: -3em;
@@ -94,6 +95,9 @@
     <!-- Setup page routing -->
     <app-location route="{{route}}"></app-location>
     <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}" query-params="{{queryParams}}"></app-route>
+    
+    <!--analytics tracking-->
+    <iron-ga code="UA-84922436-3"></iron-ga>
 
     <!-- Check screen size -->
     <iron-media-query query="min-width: 650px" query-matches="{{wide}}"></iron-media-query>
@@ -132,10 +136,6 @@
               </template>
 
             </paper-tabs>
-            <paper-button on-tap='search' class="right-top-tab">
-              <iron-icon icon="search"></iron-icon>
-              <p>Search</p>
-            </paper-button>
             <div class="top-right">
               <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
               <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
@@ -162,9 +162,11 @@
         <!-- Main pages -->
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
           <ssd-home name="home"></ssd-home>
-          <ssd-resources page-loaded="{{resourcesPageLoaded}}" page="{{routeData.page}}" route="{{subroute}}" name="resources" signed-in={{signedIn}} id="resourcesPage"
-            very-wide={{veryWide}} short-code={{shortCode}}></ssd-resources>
+          <ssd-resources page-loaded="{{resourcesPageLoaded}}" page="{{routeData.page}}" route="{{subroute}}" name="resources" signed-in={{signedIn}}
+            id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}} persisted-resources="{{persistedResources}}" persisted-tags="{{persistedTags}}" user="{{user}}"></ssd-resources>
+          <ssd-search name="search" id="searchPage" persisted-resources="{{persistedResources}}" signed-in={{signedIn}} persisted-tags="{{persistedTags}}"></ssd-search>
           <ssd-tags name="tags" id="tagsPage"></ssd-tags>
+          
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
@@ -173,7 +175,7 @@
       <!-- Login box (starts hidden) -->
       <paper-dialog id="login" modal>
         <paper-dialog-scrollable>
-          <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources"></login-fire>-->
+          <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources "></login-fire>-->
           <ssd-email-login-fire app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
           </ssd-email-login-fire>
         </paper-dialog-scrollable>
@@ -189,6 +191,17 @@
         routeData: {
           type: String
         },
+        searchOpened: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
+        },
+        searchText: {
+          type: String,
+          value: " ",
+          notify: true,
+          reflectToAttribute: true
+        },
         subroute: {
           type: String
         },
@@ -203,12 +216,8 @@
         },
         signedIn: {
           type: Boolean,
-          observer: '_logStatus'
-        },
-        editingMode: {
-          type: Boolean,
-          value: false,
-          notify: true,
+          observer: '_logStatus',
+          value:false
         },
         wide: {
           type: Boolean,
@@ -220,12 +229,8 @@
         navItems: {
           type: Array,
           value: function () {
-            return ['home', 'resources'];
+            return ['home', 'resources', 'search'];
           },
-        },
-        searchTerm: {
-          type: String,
-          value: ""
         },
         resourcesPageLoaded: {
           type: Boolean
@@ -233,10 +238,10 @@
         resourcesPageLazyLoaded: {
           type: Boolean
         },
-        queryParams:{
+        queryParams: {
 
         },
-        shortCode:{
+        shortCode: {
 
         }
       },
@@ -247,15 +252,14 @@
           this.$.drawer.opened = false;
         }
       },
+      _login:function(){
+        this.$$('#login').open();
+      },
 
       userChanged: function (user) { console.log('user signed in', user) },
       observers: [
         '_routePageChanged(routeData.page)',
       ],
-      toggleEditing: function () {
-        this.set('editingMode', !this.editingMode)
-      },
-
       _routePageChanged: function (page) {
         // set default route if route path is empty
         if (!page) {
@@ -268,8 +272,11 @@
         }
         if (page == 's') {
           var split = this.route.path.split('/')
-          this.searchTerm = split[split.length - 1]
-          this.search(this.searchTerm)
+          this.searchText = split[split.length - 1]
+          this.set('route.path', '/resources')
+          this.page = 'resources';
+          this.searchOpened = true
+          // this.openSearch(this.searchText)
         }
         else {
           this.page = page;
@@ -282,23 +289,28 @@
 
       //lazy load page contents on change (useful for admin pages)
       _pageChanged: function (page, oldPage) {
-        console.log('page changed', page)
         var href
+        this.customStyle['--background-color'] = '#eeeeee'
         switch (page) {
           case 'resources':
-            href = "ssd-resources.html";
+            href = "ssd-resources.html ";
             break
           case 'home':
-            href = "ssd-home.html";
+            href = "ssd-home.html ";
+            break
+          case 'search':
+            href = "ssd-search.html ";
+            this.customStyle['--background-color'] = '#d2232a'
             break
           case 'tags':
-            href = "ssd-tags.html";
+            href = "ssd-tags.html ";
             break
           default:
-            href = "ssd-view404.html";
+            href = "ssd-view404.html ";
             break
         }
-        console.log('href', href)
+        this.updateStyles();
+        this.fire('iron-signal', { name: 'track-page', data: { path: "/"+href } });
         // importHref(href, onload, onerror, optAsync). Dynamically imports an HTML document.
         this.importHref(
           this.resolveUrl(href),
@@ -308,35 +320,34 @@
       },
 
       _pageLoaded(page) {
-        console.log('page loaded:', page)
         //lazy load resources page if not already
         if (page != 'resources' && !this.resourcesPageLoaded) {
-          console.log('start of resource page lazy load')
+          console.log('start of resource page core load')
           Polymer.RenderStatus.afterNextRender(this, function () {
             this.importHref(
               this.resolveUrl('ssd-resources.html'),
               function () {
                 console.log('resources page core loaded')
-                  this.resourcesPageLoaded = true;
-                  // //setup email login fire
-                  // this.emailLoginFireAppName="SSD-Resources"
-              },                
-                  null,null
-              )
+                this.resourcesPageLoaded = true;
+                // //setup email login fire
+                // this.emailLoginFireAppName="SSD-Resources "
+              },
+              null, null
+            )
           })
         }
-        if (page == 'resources' && !this.resourcesPageLazyLoaded) {
+        if (page == 'resources' || page=='search' && !this.resourcesPageLazyLoaded) {
           console.log('start of resource page lazy load')
           Polymer.RenderStatus.afterNextRender(this, function () {
             this.importHref(
               this.resolveUrl('imports-lazy-resources.html'),
               function () {
                 console.log('resource page lazy resources loaded')
-                  this.resourcesPageLazyLoaded = true;
-                  //setup email login fire
-              },                
-                  null,null
-              )
+                this.resourcesPageLazyLoaded = true;
+                //setup email login fire
+              },
+              null, null
+            )
           })
         }
       },
@@ -344,11 +355,9 @@
       _showPage404: function () {
         this.page = 'view404';
       },
-      _login: function () {
-        login.open();
-      },
       _logout: function () {
         this.$$('ssd-email-login-fire').signOut();
+        this.signedIn=false;
         console.log('logged out');
         //remove admin pages on sign out
         console.log('tag nav index', this.navItems.indexOf('tags'))
@@ -362,20 +371,16 @@
         if (this.signedIn) {
           this.$$('paper-dialog').close()
         }
-        if (this.navItems.indexOf('tags') == -1 && this.signedIn == true) {
+        if (this.navItems && this.navItems.indexOf('tags') == -1 && this.signedIn == true) {
           this.push('navItems', 'tags')
         }
       },
-
-      search: function (e) {
-        if (this.searchTerm) { this.$$('ssd-resources').search(this.searchTerm) }
-        else { this.$$('ssd-resources').search() };
-        delete this.searchTerm
-        this.set("routeData.page", "resources");
+      toggleSearch: function () {
+        this.searchOpened = !this.searchOpened;
       },
 
       addResource: function () {
-        this.set("routeData.page", "resources");
+        this.set("routeData.page ", "resources ");
         this.$$('ssd-resources').addResource();
       },
     });

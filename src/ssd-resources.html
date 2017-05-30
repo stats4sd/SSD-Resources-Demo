@@ -7,6 +7,7 @@
     <style include="shared-styles">
        :host {
         display: block;
+        padding: 10px;
       }
 
       h1 {
@@ -63,7 +64,7 @@
         font-weight: 600;
       }
     </style>
-    <app-route route="{{route}}" pattern="/:resourceID" data="{{_routeData}}"></app-route>
+    <app-route route="{{route}}" pattern="/:resourceSlug" data="{{_routeData}}"></app-route>
 
     <!--sets up 3 column view (aside not currently used),
     sized and ordered through flex css (fixed sidebar, full width main-->
@@ -94,12 +95,17 @@
       </div>
     </body>
 
-    <!--  SETTING UP RESOURCES -->
-    <ssd-resource-full id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' signed-in='{{signedIn}}'
-      persisted-tags="[[persistedTags]]" on-update="updateFired">
+    <!--  SETTING UP RESOURCES 2 versions, one if running live and one if loading from cache -->
+    <ssd-resource-full hidden$="[[liveResourceMode]]" id="fullResource" resource='[[selectedResource]]' opened='{{resourceOpened}}'
+      signed-in='{{signedIn}}' persisted-tags="[[persistedTags]]" on-update="updateFired" user="{{user}}">
     </ssd-resource-full>
-    <ssd-search id="search" filtered-resources="[[persistedResources]]" all-resources="[[persistedResources]]" persisted-tags="[[persistedTags]]">
-    </ssd-search>
+    <ssd-resource-full hidden$="[[!liveResourceMode]]" id="liveResource" resource='[[liveResourceDoc]]' opened='{{resourceOpened}}'
+      signed-in='{{signedIn}}' persisted-tags="[[persistedTags]]" on-update="updateFired" user="{{user}}">
+    </ssd-resource-full>
+
+    <!--<ssd-search id="search" route="{{route}}" filtered-resources="[[persistedResources]]" all-resources="[[persistedResources]]"
+      persisted-tags="[[persistedTags]]" search-opened="{{searchOpened}}" search-text="{{searchText}}">
+    </ssd-search>-->
 
     <!--Firebase queries-->
     <!--query to pull in tags as doesn't update well in live mode on tags page (want import before load)-->
@@ -111,8 +117,10 @@
     <!-- FIREBASE QUERY TO PULL IN newest FROM DB, starts before load  -->
     <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="20"></firebase-query>
     <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" session="keepAlways" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
-
-
+    <!--Firebase documents to load specific resource from slug. One doc to pull correct full id and other to load. 
+    only used if no persisted resource (e.g. initial resource load direct from link)-->
+    <firebase-document id="query" app-name="SSD-Resources" path="/slugs/[[resourceSlug]]" data="{{slugDoc}}"></firebase-document>
+    <firebase-document id="query" app-name="SSD-Resources" path="/resources/[[liveResourceID]]" data="{{liveResourceDoc}}"></firebase-document>
   </template>
 
   <script>
@@ -127,12 +135,21 @@
         resourceOpened: {
           type: Boolean,
           value: false,
-          notify: true
+          notify: true,
+          observer: 'resourceOpenChange'
         },
-        resources:{
+        resources: {
+          type: Object,
+          notify: true,
+        },
+        persistedResources:{
           type:Object,
           notify:true,
         },
+        persistedTags: {
+            type: Object,
+            notify: true,
+          },
         tagActive: {
           type: Boolean,
           value: false
@@ -147,11 +164,6 @@
           value: [],
           notify: true
         },
-        editMode: {
-          type: Boolean,
-          value: false,
-          notify: true,
-        },
         liveMode: {
           type: Boolean,
           value: false
@@ -160,51 +172,126 @@
           type: Boolean,
           value: false
         },
-        resourceID: {
+        _routeData: {
+          type: Object,
+          observer: 'routeChange'
+        },
+        slugDoc: {
+          type: Object,
+          observer: 'slugDocRetrieved'
+        },
+        liveResourceID: {
           type: String,
-          computed: '_return(_routeData.resourceID)',
-          observer: 'ResourceIdChange'
+          value: '_empty'
         },
         signedIn: {
           type: Boolean,
           notify: true
         },
-        page:{
-          type:String,
-          observer:'_pageChanged',
-          notify:true
+        page: {
+          type: String,
+          observer: '_pageChanged',
+          notify: true
         },
-        lazyLoadComplete:{
-          type:Boolean
+        lazyLoadComplete: {
+          type: Boolean
         },
-        persistedTags:{
-          type:Object,
-          notify:true,
-        }
+        persistedTags: {
+          type: Object,
+          notify: true,
+        },
+        searchOpened: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
+        },
+        searchText: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+          value:""
+        },
       },
-      ready:function(){
+      // observers:[],
+      ready: function () {
         this.allResourcesPath = "/resources"
         console.log('downloading all resources')
+        // ***
+        // would be good to somehow use transactions-complete or similar promise to know when query finished
       },
-      resourcesChanged: function (res) {
-        console.log('res changed', res)
+
+      routeChange: function (newRoute, oldRoute) {
+        if (newRoute.resourceSlug == "") {
+          //close resource on back navigation
+          this.set('resourceOpened', false)
+        }
+        if (newRoute.resourceSlug && newRoute.resourceSlug.length > 0) {
+          //if already loaded via click don't bother
+          if (this.selectedResource.slug && this.selectedResource.slug == newRoute.resourceSlug) {}
+          else {
+            this.loadResource(newRoute.resourceSlug)
+          }
+        }
       },
-      ResourceIdChange: function (id) {
-        console.log('id changed', id)
+      resourceOpenChange: function (newState, oldState) {
+        if (newState == false) {
+          //resource has been closed
+          this.set('route.path', '/')
+        }
       },
-      updateFired: function () {
+
+      loadResource: function (slug) {
+        if (this.persistedResources && this.persistedResources.length > 0) {
+          console.log('persistedResources', this.persistedResources)
+          console.log('attempting to load from cache')
+          // load it
+          var found = false
+          for (var i = 0; i < this.persistedResources.length; i++) {
+            console.log('testing', this.persistedResources[i].slug, 'for', slug)
+            if (this.persistedResources[i].slug == slug) {
+              //match found in persited resources
+              console.log('match found', this.persistedResources[i])
+              this.liveResourceMode = false;
+              this.$.fullResource.open(this.persistedResources[i]);
+              found = true
+              return
+            }
+          }
+        }
+        else {
+          console.log('attempting to load live version')
+          this.resourceSlug = slug
+          this.liveResourceMode = true
+        }
+      },
+
+      slugDocRetrieved: function (doc) {
+        //should pull id as string or object length 20
+        console.log('slug doc',doc)
+        if (Object.keys(doc).length > 0) {
+          console.log('slugDocRetrieved', doc)
+          this.liveResourceID = doc
+          console.log('opening live resource id',doc)
+          this.$.liveResource.open({liveID:this.liveResourceID});
+        }
+      },
+
+      updateFired: function (message) {
         console.log('res updated')
         //this.$.resourceList2.render()
         this.liveMode = true
       },
       resourceTap: function (e) {
-        this.$.fullResource.open(e.model.resource);
+        this.set('selectedResource', e.model.resource)
+        this.$.fullResource.open(this.selectedResource);
+        this.liveResourceMode = false;
+        this.set('route.path', e.model.resource.slug)
       },
-      _pageChanged:function(page){
-        if(this.page=="resources" && this.lazyLoadComplete==false){
+      _pageChanged: function (page) {
+        if (this.page == "resources" && this.lazyLoadComplete == false) {
           console.log('starting lazy load')
           Polymer.RenderStatus.afterNextRender(this, () => {
-              this.importHref(
+            this.importHref(
               this.resolveUrl('imports-lazy-resources.html'),
               function (success) {
                 this.lazyLoadComplete = true;
@@ -212,28 +299,23 @@
               },
               function (err) { console.log('error importing lazy resources', err) },
               true);
-            });
+          });
         }
       },
       //responds to calls from add resource button and passes empty request to resource open
       addResource: function () {
-        this.$.fullResource.open();
+        //hide live editor if present
+        this.liveResourceMode = false
+        this.$.fullResource.open('new');
       },
-      search: function (searchTerm) {
-        if (this.searchOpened && this.page=="resources") {
-          this.$.search.close()
-          this.searchOpened=false;
-        }
-        else {
-          if (searchTerm) { this.$.search.open(searchTerm) }
-          else { this.$.search.open() }
-          this.searchOpened =true
-        }
+      getResource: function (id) {
+        console.log('getting resource', id)
+        console.log('resources', this.allR)
       },
       filterChange: function () {
         console.log('filters updated')
         var temp = this.persistedResources
-        var filtersList = ['topics', 'rTypes', 'tags']
+        var filtersList = ['topics', 'Resource-Type', 'tags']
         this.activeFilters = {}
         //populate filter list with currently selected - should be moved out to only calculate on change
         for (var i = 0; i < filtersList.length; i++) {
