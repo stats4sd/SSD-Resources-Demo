@@ -3,7 +3,8 @@ module.exports = {
     '/index.html',
     '/manifest.json',
     '/bower_components/webcomponentsjs/webcomponents-lite.min.js',
-    '/images/*'
+    '/images/*',
+    '/src/**/*.{js,html,css,png,jpg,gif}'
   ],
   navigateFallback: '/index.html',
   navigateFallbackWhitelist: [/^(?!.*\.html$|\/data\/).*/],
@@ -28,5 +29,15 @@ module.exports = {
         }
       }
     },
+    {
+      urlPattern: /\/home\/.*/,
+      handler: 'networkFirst',
+      options: {
+        cache: {
+          maxEntries: 100,
+          name: 'data-resources-cache'
+        }
+      }
+    }
   ]
 };

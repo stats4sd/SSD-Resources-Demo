@@ -27,6 +27,9 @@ Links to $firebase serve command, ideally should have precompile before from hig
 After polymer build, run:
 $ vulcanize src/imports-core.html --strip-comments --out-html build/default/src/imports-core.html --inline-scripts --inline-css --strip-exclude bower_components/polymer/polymer.html
 
+Set necessary firebase deployment (if different test from live)
+$firebase use [deployment-name]
+
 (test with $firebase serve)
 $firebase deploy
 
