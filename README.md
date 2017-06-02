@@ -9,14 +9,6 @@ $ bower install
 start the server. you can see the output at the localhost address given
 $ polymer serve --open
 
-build the project for deployment (including service worker)
-$ polymer build --add-service-worker
-
-deploy to firebase
-$firebase deploy
-
-Note - project structure not ideal (currently way too much sitting in public folder as testing ground).
-Links to $firebase serve command, ideally should have precompile before from higher level
 
 #Add a page
 1. create a new html doc in the src folder. naming convention is ssd-[name].html
@@ -24,10 +16,15 @@ Links to $firebase serve command, ideally should have precompile before from hig
 3. provide a reference for the menu in ssd-app.html <iron-pages> and <iron-selector> sections
 
 #Prepare for deployment
+$ polymer build --add-service-worker
+
 After polymer build, run:
 $ vulcanize src/imports-core.html --strip-comments --out-html build/default/src/imports-core.html --inline-scripts --inline-css --strip-exclude bower_components/polymer/polymer.html
 
-(test with $firebase serve)
+(optional. test with $firebase serve)
+$firebase serve
+
+Deploy to server
 $firebase deploy
 
 #testing
