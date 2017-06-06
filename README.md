@@ -16,6 +16,9 @@ $ polymer serve --open
 3. provide a reference for the menu in ssd-app.html <iron-pages> and <iron-selector> sections
 
 #Prepare for deployment
+NOTE- CURRENT SYSTEM FLAWED (6/6/17)
+for unknown reasons polymer build is not correctly copying over all bower components. As such after polymer build all components should be copied over again before deploying. 
+
 $ polymer build --add-service-worker
 
 After polymer build, run:
