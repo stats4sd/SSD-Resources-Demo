@@ -34,59 +34,9 @@
   <meta name="msapplication-TileColor" content="#3f51b5">
   <meta name="msapplication-tap-highlight" content="no">
 
-  <!--<script src="/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>-->
-  <!--<link rel="import" href="/bower_components/platinum-sw/platinum-sw-elements.html">-->
-
-  <script>
-    window.Polymer = {
-        dom: 'shadow',
-        lazyRegister: true,
-      };
-
-      // Load webcomponentsjs polyfill if browser does not support native
-        // Web Components
-        (function () {
-          'use strict';
-          var onload = function () {
-            // For native Imports, manually fire WebComponentsReady so user code
-            // can use the same code path for native and polyfill'd imports.
-            console.log('test 1')
-            if (!window.HTMLImports) {
-              console.log('answer 1a')
-              document.dispatchEvent(
-                new CustomEvent('WebComponentsReady', { bubbles: true })
-              );
-            }
-          };
-          var webComponentsSupported = (
-            'registerElement' in document
-            && 'import' in document.createElement('link')
-            && 'content' in document.createElement('template')
-          );
-          console.log('test 2')
-          if (!webComponentsSupported) {
-            console.log('answer 2a')
-            var script = document.createElement('script');
-            script.async = true;
-            script.src = '/bower_components/webcomponentsjs/webcomponents-lite.min.js';
-            script.onload = onload;
-            document.head.appendChild(script);
-          } else {
-            console.log('answer 2b')
-            onload();
-          }
-        })();
-        // Load pre-caching Service Worker
-        console.log('test 3')
-        if ('serviceWorker' in navigator) {
-          console.log('answer 3a')
-          window.addEventListener('load', function () {
-            navigator.serviceWorker.register('/service-worker.js');
-          });
-        }
-  </script>
-
-  <link rel="import" href="/src/ssd-app.html">
+  <script src="/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="bower_components/polymerfire/firebase-app.html">
+  <link rel="import" href="src/ssd-app.html">
 
   <style>
     body {
@@ -101,44 +51,17 @@
   </style>
 </head>
 
-<!--<script>
-  (function () {
-    if ('registerElement' in document
-      && 'import' in document.createElement('link')
-      && 'content' in document.createElement('template')) {
-      // platform is good!
-    } else {
-      // polyfill the platform!
-      var e = document.createElement('script');
-      e.src = '/bower_components/webcomponentsjs/webcomponents-lite.min.js';
-      document.body.appendChild(e);
-    }
-  })();
-</script>-->
+<body unresolved>
+  <!-- Configure Service Worker caching: -->
 
-<body>
-  <!--register service worker - platinum sw method
-  also need to include sw-import and platinum-service-worker in polymer.json extraDependencies
-  and uncomment element import above-->
-
-  <!--<platinum-sw-register skip-waiting clients-claim auto-register reload-on-install>
-    <platinum-sw-cache default-cache-strategy="fastest"></platinum-sw-cache>
-  </platinum-sw-register>-->
-  <ssd-app></ssd-app>
 
   <!--firebase app register-->
   <firebase-app name="SSD-Resources" api-key="AIzaSyCfl_Pe6Fb8KzIQRV1P2RIwwhN8Jl6BACo" storage-bucket="ssd-resources-demo.appspot.com"
     auth-domain="ssd-resources-demo.firebaseapp.com" database-url="https://ssd-resources-demo.firebaseio.com">
   </firebase-app>
 
-
-  <!--<script>
-    // Register service worker if supported.
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js');
-    }
-  </script>-->
-
+  <ssd-app ></ssd-app>
+ 
   <!--warning if no javascript available-->
   <noscript>
     <p>Javascript is required to view this page</p>
