@@ -16,9 +16,15 @@ $ polymer serve --open
 3. provide a reference for the menu in ssd-app.html <iron-pages> and <iron-selector> sections
 
 #Prepare for deployment
-$ polymer build --add-service-worker
+NOTE- CURRENT SYSTEM FLAWED (6/6/17)
+for unknown reasons polymer build is not correctly copying over all bower components. As such after polymer build all components should be copied over again before deploying. 
 
-After polymer build, run:
+$ polymer build
+(service worker automatically generated)
+
+Copy bower components from main to build
+
+Vulcanise:
 $ vulcanize src/imports-core.html --strip-comments --out-html build/default/src/imports-core.html --inline-scripts --inline-css --strip-exclude bower_components/polymer/polymer.html
 
 (optional. test with $firebase serve)
