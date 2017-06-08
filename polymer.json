@@ -16,7 +16,15 @@
   ],
   "extraDependencies": [
     "manifest.json",
-    "bower_components/webcomponentsjs/webcomponents-lite.min.js",
     "bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror-worker.js"
-  ]
+  ],
+  "builds": [{
+      "addServiceWorker": true
+  }],
+  "lint": {
+    "rules": [
+      "polymer-hybrid"
+    ],
+    "ignoreWarnings": []
+  }
 }
