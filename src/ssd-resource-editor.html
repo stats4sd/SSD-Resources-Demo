@@ -125,7 +125,7 @@
       </div>
     </template>
 
-    <paper-input label="add any external links here" no-label-float value="{{newLink.url}}">
+    <paper-input label="add any external links here" no-label-float value="{{resource.tempLinkUrl}}">
       <iron-icon icon="language" prefix></iron-icon>
       <paper-icon-button suffix on-tap="addLink" class="green" icon="add" alt="add" title="add" hidden$="{{link.saved}}">
       </paper-icon-button>
@@ -405,14 +405,14 @@
       },
 
       addLink: function (e) {
-        if (this.newLink.url != '') {
+        console.log('old resource',this.resource)
+        if (this.resource.tempLinkUrl != '') {
           this.push('resource.externalLinks', {
-            displayName: this.newLink.displayName,
-            url: this.newLink.url
+            displayName: "",
+            url: this.resource.tempLinkUrl
           })
         }
-        this.set('newLink.url', "")
-        this.set('newLink.displayName', "")
+        this.set('resource.tempLinkUrl', "")        
         console.log('resource', this.resource)
       },
       editLink: function (e) {

@@ -304,6 +304,7 @@
           this.resource.editedBy[Date.now()] = this.user.email
           delete this.editableSlug.$key
           delete this.editableResource.$key
+          delete this.resource.tempLinkUrl
           console.log('saving resource with id', this.id)
           this.$.firebaseResourceDoc.save('/resources', this.id).then(function () {
             this.set('editMode', false)
