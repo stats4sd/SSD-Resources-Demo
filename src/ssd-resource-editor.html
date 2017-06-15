@@ -405,7 +405,9 @@
       },
 
       addLink: function (e) {
-        console.log('old resource',this.resource)
+        if(!this.resource.externalLinks){
+          this.set('resource.externalLinks',[])
+          }
         if (this.resource.tempLinkUrl != '') {
           this.push('resource.externalLinks', {
             displayName: "",
