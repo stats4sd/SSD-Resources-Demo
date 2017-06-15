@@ -370,9 +370,10 @@
         this.resource.tags[key] = value
         //dirty override as doesn't update after more than one tag
         //this.notifyPath('resource.tags')
-        var temp = this.resource
-        this.resource = {}
-        this.resource = temp
+        var temp = this.resource.tags
+        this.set('resource.tags',[])
+        this.set('resource.tags',temp)
+        console.log('resource',this.resource)
       },
       _toSlug: function (name) {
         if (!name) {
@@ -470,6 +471,7 @@
           }
           this.set('resource.uploadedFiles.' + index, [])
           this.set('resource.uploadedFiles.' + index, temp)
+          console.log('resource',this.resource)
         }.bind(this));
       },
 
