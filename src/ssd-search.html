@@ -141,7 +141,7 @@
         <div class="resources-container">
             <template id="persistedResources" is="dom-repeat" items="[[persistedResources]]" as="resource" sort="" filter="_searchFilter"
                 rendered-item-count="{{totalResults}}">
-                <ssd-resource-search-result resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
+                <ssd-resource-search-result resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-search-result>
             </template>
         </div>
         <p class="share" hidden$="[[!showLink]]">

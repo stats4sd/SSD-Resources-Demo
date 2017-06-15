@@ -84,6 +84,14 @@
               </template>
             </div>
           </div>
+          <div class="mobile-section-heading section-heading" hidden$={{veryWide}}>
+            All Resources
+          </div>
+          <div class="resources-container">
+            <template id="persistedResources" is="dom-repeat" items="[[persistedResources]]" as="resource" sort="" filter="" rendered-item-count="{{totalResults}}">
+              <ssd-resource-search-result resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-small>
+            </template>
+          </div>
         </main>
         <!--left sidebar-->
         <nav class="left-sidebar-nav" hidden$={{!veryWide}}>
@@ -114,7 +122,7 @@
     <firebase-query id="query" app-name="SSD-Resources" path="[[allResourcesPath]]" data="{{resources}}"></firebase-query>
     <app-indexeddb-mirror key="persistedResources" data="{{resources}}" persisted-data="{{persistedResources}}" session="keepAlways"></app-indexeddb-mirror>
     <!-- FIREBASE QUERY TO PULL IN newest FROM DB, starts before load  -->
-    <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="20"></firebase-query>
+    <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{newestResources}}" limit-to-last="9"></firebase-query>
     <app-indexeddb-mirror key="persistedNewestResources" data="{{newestResources}}" session="keepAlways" persisted-data="{{persistedNewestResources}}"></app-indexeddb-mirror>
     <!--Firebase documents to load specific resource from slug. One doc to pull correct full id and other to load. 
     only used if no persisted resource (e.g. initial resource load direct from link)-->
