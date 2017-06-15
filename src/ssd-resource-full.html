@@ -78,6 +78,7 @@
       .bold {
         font-weight: 800
       }
+      .description{white-space: pre-line}
     </style>
     <style is="custom-style">
       paper-button.tag-button {
@@ -125,7 +126,7 @@
     <div hidden$="[[editMode]]">
       <h3>[[resource.name]]</h3>
       <div class="url">[[origin]]/[[resource.slug]]</div>
-      <p><span class='bold'>Description: </span>[[resource.description]]</p>
+      <p class="description"><span class='bold'>Description: </span>[[resource.description]]</p>
       <div hidden$=[[!resource.externalLinks]]>
         <h4>Links:</h4>
         <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
