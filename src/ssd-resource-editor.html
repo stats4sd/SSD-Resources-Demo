@@ -125,7 +125,7 @@
       </div>
     </template>
 
-    <paper-input label="add any external links here" no-label-float value="{{newLink.url}}">
+    <paper-input label="add any external links here" no-label-float value="{{resource.tempLinkUrl}}">
       <iron-icon icon="language" prefix></iron-icon>
       <paper-icon-button suffix on-tap="addLink" class="green" icon="add" alt="add" title="add" hidden$="{{link.saved}}">
       </paper-icon-button>
@@ -370,9 +370,10 @@
         this.resource.tags[key] = value
         //dirty override as doesn't update after more than one tag
         //this.notifyPath('resource.tags')
-        var temp = this.resource
-        this.resource = {}
-        this.resource = temp
+        var temp = this.resource.tags
+        this.set('resource.tags',[])
+        this.set('resource.tags',temp)
+        console.log('resource',this.resource)
       },
       _toSlug: function (name) {
         if (!name) {
@@ -405,14 +406,16 @@
       },
 
       addLink: function (e) {
-        if (this.newLink.url != '') {
+        if(!this.resource.externalLinks){
+          this.set('resource.externalLinks',[])
+          }
+        if (this.resource.tempLinkUrl != '') {
           this.push('resource.externalLinks', {
-            displayName: this.newLink.displayName,
-            url: this.newLink.url
+            displayName: "",
+            url: this.resource.tempLinkUrl
           })
         }
-        this.set('newLink.url', "")
-        this.set('newLink.displayName', "")
+        this.set('resource.tempLinkUrl', "")        
         console.log('resource', this.resource)
       },
       editLink: function (e) {
@@ -468,6 +471,7 @@
           }
           this.set('resource.uploadedFiles.' + index, [])
           this.set('resource.uploadedFiles.' + index, temp)
+          console.log('resource',this.resource)
         }.bind(this));
       },
 

@@ -30,6 +30,9 @@ $ vulcanize src/imports-core.html --strip-comments --out-html build/default/src/
 (optional. test with $firebase serve)
 $firebase serve
 
+(optional. select firebase app to deploy to)
+$firebase use
+
 Deploy to server
 $firebase deploy
 
