@@ -1,7 +1,10 @@
 <!--All other imports pulled in from imports-core, which is vulcanized to build directory-->
 <link rel="import" href="imports-core.html">
-<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
-<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+
+<!--<link rel="import" href="firebase-auth.html">
+<link rel="import" href="firebase-app.html">
+<link rel="import" href=>
+<link rel="import" href="firebase-query.html">-->
 
 
 <dom-module id="ssd-app">
@@ -322,7 +325,6 @@
       },
 
       _pageLoaded(page) {
-        console.log('page loaded')
         if(!this.lazyLoadComplete){
           console.log('start of lazy load')
           Polymer.RenderStatus.afterNextRender(this, function () {
