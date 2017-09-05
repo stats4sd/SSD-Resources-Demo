@@ -78,7 +78,18 @@
       .bold {
         font-weight: 800
       }
-      .description{white-space: pre-line}
+
+      .description {
+        white-space: pre-line
+      }
+      #metaData{
+        padding:10px;
+        width: 400px
+      }
+      #resourceMain{
+        margin-right:auto;
+        padding-right: 50px;
+      }
     </style>
     <style is="custom-style">
       paper-button.tag-button {
@@ -123,39 +134,42 @@
         </paper-button>
       </div>
     </div>
-    <div hidden$="[[editMode]]">
-      <h3>[[resource.name]]</h3>
-      <div class="url">[[origin]]/[[resource.slug]]</div>
-      <p class="description"><span class='bold'>Description: </span>[[resource.description]]</p>
-      <div hidden$=[[!resource.externalLinks]]>
-        <h4>Links:</h4>
-        <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
-          <a href="[[link.url]]" target="_blank">
-            <iron-icon icon="language" prefix></iron-icon>
-            <span>[[link.url]]</span>
-          </a>
-          <template is="dom-if" if="{{_isYoutube(link)}}">
-            <google-youtube video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0" autoplay="0">
-            </google-youtube>
+    <div hidden$="[[editMode]]" class="flex wrap">
+      <div id="resourceMain">
+        <h3>[[resource.name]]</h3>
+        <div class="url">[[origin]]/[[resource.slug]]</div>
+        <p class="description"><span class='bold'>Description: </span>[[resource.description]]</p>
+      </div>
+      <div id="metaData">
+        <div hidden$=[[!resource.externalLinks]]>
+          <h4>Links:</h4>
+          <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
+            <a href="[[link.url]]" target="_blank">
+              <iron-icon icon="language" prefix></iron-icon>
+              <span>[[link.url]]</span>
+            </a>
+            <template is="dom-if" if="{{_isYoutube(link)}}">
+              <google-youtube video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0" autoplay="0">
+              </google-youtube>
+            </template>
           </template>
-        </template>
-
+        </div>
+        <div hidden$="[[!resource.uploadedFiles]]">
+          <h4>Files:</h4>
+          <div>Click on any of the file cards to download it</div>
+          <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
+            <ssd-resource-file file="[[file]]"></ssd-resource-file>
+          </template>
+        </div>
+        <p>
+          <span class='bold'>Tags: </span>
+          <template is="dom-repeat" items="[[tags]]" as="tag">
+            <!-- Sticking with the 4 lists in resources (resources.topics etc) instead of 1 list means we don't need the filter attribute for the ssd-tag. Could remove.  -->
+            <!--<ssd-tag tag="[[tag]]" filter=""></ssd-tag>-->
+            <paper-button class="tag-button" hidden$="[[!tag.modified]]">[[tag.label]]</paper-button>
+          </template>
+        </p>
       </div>
-      <div hidden$="[[!resource.uploadedFiles]]">
-        <h4>Files:</h4>
-        <div>Click on any of the file cards to download it</div>
-        <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
-          <ssd-resource-file file="[[file]]"></ssd-resource-file>
-        </template>
-      </div>
-      <p>
-        <span class='bold'>Tags: </span>
-        <template is="dom-repeat" items="[[tags]]" as="tag">
-          <!-- Sticking with the 4 lists in resources (resources.topics etc) instead of 1 list means we don't need the filter attribute for the ssd-tag. Could remove.  -->
-          <!--<ssd-tag tag="[[tag]]" filter=""></ssd-tag>-->
-          <paper-button class="tag-button" hidden$="[[!tag.modified]]">[[tag.label]]</paper-button>
-        </template>
-      </p>
 
     </div>
 
@@ -396,8 +410,8 @@
       },
       _getYoutubeID: function (link) {
         var temp = link.url.split('/')
-        return temp[temp.length-1]
-        
+        return temp[temp.length - 1]
+
       },
       generateNewResource: function (id) {
         var d = Date.now()
