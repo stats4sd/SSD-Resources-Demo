@@ -139,8 +139,7 @@
             </vaadin-combo-box>
         </div>
         <div class="resources-container">
-            <template id="persistedResources" is="dom-repeat" items="[[persistedResources]]" as="resource" sort="" filter="_searchFilter"
-                rendered-item-count="{{totalResults}}">
+            <template id="persistedResources" is="dom-repeat" items="[[persistedResources]]" as="resource" sort="" filter="_searchFilter"rendered-item-count="{{totalResults}}">
                 <ssd-resource-search-result resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-search-result>
             </template>
         </div>
@@ -251,11 +250,11 @@
                 s = this.searchText.toLowerCase();
                 if (s.length > 2) {
                     // this.showLink = true
-                    if (resource.name && resource.name.toLowerCase().indexOf(s) > -1) { return true }
-                    if (resource.description && resource.description.toLowerCase().indexOf(s) > -1) { return true }
-                    if (resource.rTypes && resource.rTypes.toString().toLowerCase().indexOf(s) > -1) { return true }
-                    if (resource.tags && resource.tags.toString().toLowerCase().indexOf(s) > -1) { return true }
-                    if (resource.topics && resource.topics.toString().toLowerCase().indexOf(s) > -1) { return true }
+                    if (resource.name && resource.name.toLowerCase().indexOf(s) > -1) {return true }
+                    if (resource.description && resource.description.toLowerCase().indexOf(s) > -1) {return true }
+                    if (resource.rTypes && resource.rTypes.toString().toLowerCase().indexOf(s) > -1) {return true }
+                    if (resource.tags && resource.tags.toString().toLowerCase().indexOf(s) > -1) {return true }
+                    if (resource.topics && resource.topics.toString().toLowerCase().indexOf(s) > -1) {return true }
                     else {
                         // this.showLink = false;
                         return false
@@ -268,6 +267,7 @@
             },
             //manually call dom repeat resources to rerender with _textFilter checking search text
             searchTextChange: function (newVal, oldVal) {
+                console.log('persisted',this.persistedResources)
                 if (this.persistedResources && this.persistedResources.length > 0) {
                     this.$.persistedResources.render();
                 }

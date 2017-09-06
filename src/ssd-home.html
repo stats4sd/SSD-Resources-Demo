@@ -5,18 +5,21 @@
 <dom-module id="ssd-home">
   <template>
     <style include="shared-styles">
-      :host {
+       :host {
         display: block;
         padding: 10px;
       }
-      a{
-        text-decoration:none;
+
+      a {
+        text-decoration: none;
       }
-      .green{
+
+      .green {
         background-color: var(--paper-green-500);
         color: white;
       }
-      .indigo{
+
+      .indigo {
         background-color: var(--paper-indigo-500);
         color: white;
       }
@@ -33,17 +36,69 @@
         width: 45%;
         min-width: 250px;
       }
+
+      .resource-type {
+        width: 10em;
+        border: 3px solid white;
+        margin-left: -3px;
+        margin-bottom: -3px;
+      }
+
+      .resource-type>img {
+        width: 10em;
+      }
+
+      .resource-label-container {
+        top: -2em;
+        position: relative;
+        line-height: 1em;
+        background-color: white;
+        width: 100%;
+        height: 2em;
+        opacity: 0.8;
+        margin-bottom: -2em;
+        display: table;
+      }
+
+      .resource-label {
+        text-align: center;
+        vertical-align: middle;
+        display: table-cell;
+        font-size: 0.9em;
+      }
     </style>
-    <h2>SSD Resources</h2>
-    <p>View the existing resources on the "resources" page - use the tabs along the top or the sidebar menu to navigate.</p>
-    <p>To edit or add resources, please login using the padlock button in the top-right.</p>
-    <hr/>
+    <!--load feature resource lists and resource types  -->
+    <!-- <firebase-query id="query" app-name="SSD-Resources" path="/featured" data="{{featuredResources}}"></firebase-query>
+    <app-indexeddb-mirror key="featuredResourcesPersisted" data="{{featuredResources}}" persisted-data="{{featuredResourcesPersisted}}"
+      session="keepAlways"></app-indexeddb-mirror> -->
+    <!--load feature resource lists  -->
+    <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{resourceTags}}"></firebase-query>
+    <app-indexeddb-mirror key="resourceTagsPersisted" data="{{resourceTags}}" persisted-data="{{resourceTagsPersisted}}" session="keepAlways"></app-indexeddb-mirror>
+    <p>Welcome to the Stats4SD resource bank. You can browse all resources using the top or sidebar menus, or explore some the
+      links below</p>
+    <div class="sub-section-heading">View Resources by Type</div>
+    <div class="flex wrap">
+      <template id="tagList" is="dom-repeat" items="[[resourceTagsPersisted]]" as="tag" filter="{{_tagFilter('Resource-Type')}}">
+        <div class="resource-type" on-tap="ResourceTypeSelected">
+          <img src="{{_getImageSrc(tag)}}">
+          <div class="resource-label-container">
+            <div class="resource-label">[[tag.label]]</div>
+          </div>
+        </div>
+      </template>
+    </div>
+    <div class="sub-section-heading" style="margin-top:2em">Browse Collections</div>
+    <p style="margin:1em 0 0 0;font-size:small">There are currently no collections</p>
+    <!-- <template id="resourceList" is="dom-repeat" items="[[featuredResourcesPersisted]]" as="resource">
+      <ssd-resource-small resource='[[resource]]' hidden$="[[resource.deleted]]" on-tap='resourceTap'></ssd-resource-small>
+    </template>     -->
 
-    <p><span style='color:red;font-weight:bold;'>NOTE:</span>This platform is currently in development (v0.9.3)</p>
+    <!-- <p>To edit or add resources, please login using the padlock button in the top-right.</p> -->
 
-    <p>To feedback on specific issues or requests please contact c.clarke@stats4sd.org</p>
-    
-    
+    <div class="footer-padding"></div>
+    <div class="footer flex wrap">
+      <div style='display:inline; color:yellow;font-weight:bold;'>Note</div>
+      <div style='padding-left:10px'>This platform is currently in development (v0.9.4).<br>To feedback on specific issues or requests please contact <a style="color:wheat" href="mailto:c.clarke@stats4sd.org?Subject=Resources%20Site%20Feedback" target="_top">c.clarke@stats4sd.org</a></div>
     </div>
 
   </template>
@@ -56,10 +111,27 @@
         demo: {
           type: Object,
           value: {
-            "description" : "When we have more resources, we can setup a 'browsing view' and start highlighting different resources",
-            "name" : "Example Resource Card",
+            "description": "When we have more resources, we can setup a 'browsing view' and start highlighting different resources",
+            "name": "Example Resource Card",
           }
         }
+      },
+      observers: [
+        // '_featuredResourcesPersistedChanged(featuredResourcesPersisted.*)'
+      ],
+      ResourceTypeSelected:function(e){
+        console.log('resource type selected',e.model.tag)
+      },
+      _tagFilter: function (type) {
+        return function (tag) {
+          if (!type) return true;
+          if (!tag) return false;
+          return (tag.type == type);
+        }
+      },
+      _getImageSrc: function (tag) {
+        let src = "/images/resourceTypes/" + tag.slug + ".jpg"
+        return src
       }
     });
   </script>

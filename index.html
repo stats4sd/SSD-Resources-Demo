@@ -3,13 +3,13 @@
 <head>
   <base href="/">
   <meta charset="utf-8">
-  <meta name="generator" content="SSD Resources Demo">
+  <meta name="generator" content="Stats4SD Resources Demo">
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
   <title>SSD Resources Demo</title>
-  <meta name="description" content="SSD Resources Demo - ">
+  <meta name="description" content="Stats4SD Resources Demo - ">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="SSD Resources Demo">
+  <meta name="application-name" content="Stats4SD Resources Demo">
   <link rel="icon" href="/images/favicon-32x32.ico">
   <!-- See https://goo.gl/OOhYW5 -->
   <link rel="manifest" href="/manifest.json">
@@ -18,11 +18,11 @@
 
   <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="SSD Resources">
+  <meta name="application-name" content="Stats4SD Resources">
   <!-- Add to homescreen for Safari on iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="SSD Resources">
+  <meta name="apple-mobile-web-app-title" content="Stats4SD Resources">
   <!-- Homescreen icons -->
   <link rel="apple-touch-icon" href="/images/manifest/icon-48x48.png">
   <link rel="apple-touch-icon" sizes="72x72" href="/images/manifest/icon-72x72.png">
@@ -34,9 +34,10 @@
   <meta name="msapplication-TileColor" content="#3f51b5">
   <meta name="msapplication-tap-highlight" content="no">
 
-  <script src="/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-  <link rel="import" href="bower_components/polymerfire/firebase-app.html">
-  <link rel="import" href="src/ssd-app.html">
+  <!-- <script src="/bower_components/webcomponentsjs/webcomponents-lite.js"></script> -->
+
+  
+  <!-- <link rel="import" href="bower_components/polymerfire/firebase-app.html"> -->
 
   <style>
     body {
@@ -52,18 +53,23 @@
 </head>
 
 
-<body unresolved>
+<body>
   <!-- Configure Service Worker caching: -->
 
 
   <!--firebase app register-->
-  <firebase-app name="SSD-Resources" api-key="AIzaSyBD5pjMlrhbmtkBU32-zvoJImF010wgFxY" storage-bucket="stats4sd-resources.appspot.com" 
+  <!-- <firebase-app name="SSD-Resources" api-key="AIzaSyBD5pjMlrhbmtkBU32-zvoJImF010wgFxY" storage-bucket="stats4sd-resources.appspot.com" 
       auth-domain="stats4sd-resources.firebaseapp.com" database-url="https://stats4sd-resources.firebaseio.com">
-    </firebase-app>
+    </firebase-app> -->
 
-  </firebase-app>
+  <ssd-app unresolved></ssd-app>
 
-  <ssd-app ></ssd-app>
+    <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+    <link rel="import" href="src/ssd-app.html">
+
+    <script>
+      window.performance && performance.mark && performance.mark('index.html');
+    </script>
 
   <!--warning if no javascript available-->
   <noscript>
