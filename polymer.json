@@ -1,11 +1,11 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/shop-app.html",
+  "shell": "src/stats4sd-app.html",
   "fragments": [
-    "src/shop-list.html",
-    "src/shop-detail.html",
-    "src/shop-cart.html",
-    "src/shop-checkout.html",
+    "src/stats4sd-list.html",
+    "src/stats4sd-detail.html",
+    "src/stats4sd-cart.html",
+    "src/stats4sd-checkout.html",
     "src/lazy-resources.html"
   ],
   "sources": [

@@ -10,11 +10,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
-<dom-module id="shop-checkbox">
+<dom-module id="stats4sd-checkbox">
   <template>
     <style>
 
-      shop-checkbox {
+      stats4sd-checkbox {
         display: inline-block;
         width: 14px;
         height: 14px;
@@ -23,7 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         border-radius: 2px;
       }
 
-      shop-checkbox > input[type=checkbox] {
+      stats4sd-checkbox > input[type=checkbox] {
         position: absolute;
         top: 0;
         left: 0;
@@ -33,12 +33,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         opacity: 0;
       }
 
-      shop-checkbox > shop-md-decorator {
+      stats4sd-checkbox > stats4sd-md-decorator {
         pointer-events: none;
       }
 
       /* Checked state overlay */
-      shop-checkbox > shop-md-decorator::after {
+      stats4sd-checkbox > stats4sd-md-decorator::after {
         content: '';
         position: absolute;
         top: -5px;
@@ -51,12 +51,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         will-change: opacity;
       }
 
-      shop-checkbox > input[type=checkbox]:checked + shop-md-decorator::after {
+      stats4sd-checkbox > input[type=checkbox]:checked + stats4sd-md-decorator::after {
         opacity: 1;
       }
 
       /* Focused state */
-      shop-checkbox > shop-md-decorator::before {
+      stats4sd-checkbox > stats4sd-md-decorator::before {
         content: '';
         pointer-events: none;
         position: absolute;
@@ -74,7 +74,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         will-change: transform;
       }
 
-      shop-checkbox > input[type=checkbox]:focus + shop-md-decorator::before {
+      stats4sd-checkbox > input[type=checkbox]:focus + stats4sd-md-decorator::before {
         -webkit-transform: scale3d(1, 1, 1);
         transform: scale3d(1, 1, 1);
       }

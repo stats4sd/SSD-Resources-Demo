@@ -11,9 +11,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selectable.html">
-<link rel="import" href="shop-tabs-overlay.html">
+<link rel="import" href="stats4sd-tabs-overlay.html">
 
-<dom-module id="shop-tabs">
+<dom-module id="stats4sd-tabs">
   <template strip-whitespace>
     <style>
       :host {
@@ -25,21 +25,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         position: relative;
       }
 
-      shop-tabs-overlay {
-        @apply --shop-tab-overlay;
+      stats4sd-tabs-overlay {
+        @apply --stats4sd-tab-overlay;
       }
     </style>
     <div id="container">
-      <shop-tabs-overlay id="overlay"></shop-tabs-overlay>
+      <stats4sd-tabs-overlay id="overlay"></stats4sd-tabs-overlay>
       <slot></slot>
     </div>
   </template>
   <script>
 
-    class ShopTabs extends Polymer.mixinBehaviors(
+    class stats4sdTabs extends Polymer.mixinBehaviors(
       [Polymer.IronSelectableBehavior], Polymer.Element) {
 
-      static get is() { return 'shop-tabs'; }
+      static get is() { return 'stats4sd-tabs'; }
 
       static get observers() { return [
         '_onSelectedItemChanged(selectedItem)'
@@ -52,7 +52,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     }
 
-    customElements.define(ShopTabs.is, ShopTabs);
+    customElements.define(stats4sdTabs.is, stats4sdTabs);
 
   </script>
 </dom-module>

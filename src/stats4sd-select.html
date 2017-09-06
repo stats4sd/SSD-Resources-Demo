@@ -10,11 +10,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
-<dom-module id="shop-select">
+<dom-module id="stats4sd-select">
   <template>
     <style>
 
-      shop-select {
+      stats4sd-select {
         display: inline-block;
         position: relative;
         /* create a layer to avoid invalidation from other controls*/
@@ -22,14 +22,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         transform: translateZ(0);
       }
 
-      shop-select > shop-md-decorator {
+      stats4sd-select > stats4sd-md-decorator {
         display: block;
         border-top: 1px solid #ccc;
         height: 1px;
         speak: none;
       }
 
-      shop-select > shop-md-decorator::after {
+      stats4sd-select > stats4sd-md-decorator::after {
         content: '\25BC';
         display: block;
         position: absolute;
@@ -42,7 +42,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         pointer-events: none;
       }
 
-      shop-select > select {
+      stats4sd-select > select {
         width: 100%;
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -59,11 +59,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         outline: none;
       }
 
-      shop-select > select::-ms-expand {
+      stats4sd-select > select::-ms-expand {
         display: none;
       }
 
-      shop-select > shop-md-decorator > shop-underline {
+      stats4sd-select > stats4sd-md-decorator > stats4sd-underline {
         display: block;
         background-color: var(--app-accent-color);
         height: 2px;
@@ -77,26 +77,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         transition: transform 0.2s ease-in;
       }
 
-      shop-select > select:focus + shop-md-decorator > shop-underline {
+      stats4sd-select > select:focus + stats4sd-md-decorator > stats4sd-underline {
         -webkit-transform: scale3d(1, 1, 1);
         transform: scale3d(1, 1, 1);
         transition: -webkit-transform 0.2s ease-out;
         transition: transform 0.2s ease-out;
       }
 
-      shop-select > select:focus + shop-md-decorator::before,
-      shop-select > select:focus + shop-md-decorator::after,
-      shop-select > select:focus {
+      stats4sd-select > select:focus + stats4sd-md-decorator::before,
+      stats4sd-select > select:focus + stats4sd-md-decorator::after,
+      stats4sd-select > select:focus {
         color: black;
       }
 
       /* hide the focus ring in firefox */
-      shop-select > select:focus:-moz-focusring {
+      stats4sd-select > select:focus:-moz-focusring {
         color: transparent;
         text-shadow: 0 0 0 #000;
       }
 
-      shop-select > [prefix] {
+      stats4sd-select > [prefix] {
         position: absolute;
         left: 0px;
         top: calc(50% - 8px);

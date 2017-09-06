@@ -10,7 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
-<dom-module id="shop-tabs-overlay">
+<dom-module id="stats4sd-tabs-overlay">
   <template strip-whitespace>
     <style>
       :host {
@@ -28,9 +28,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
   <script>
 
-    class ShopTabsOverlay extends Polymer.Element {
+    class stats4sdTabsOverlay extends Polymer.Element {
 
-      static get is() { return 'shop-tabs-overlay'; }
+      static get is() { return 'stats4sd-tabs-overlay'; }
 
       static get properties() { return {
         /**
@@ -56,7 +56,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _targetChanged(newTarget, oldTarget) {
         if (!this._transitionsInFlight.length) {
           if (this._lastTarget) {
-            this._lastTarget.classList.remove('shop-tabs-overlay-static-above');
+            this._lastTarget.classList.remove('stats4sd-tabs-overlay-static-above');
           }
           this.style.display = 'block';
           this._move(oldTarget, newTarget);
@@ -81,7 +81,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this._lastTarget = this.target;
         } else {
           if (this._lastTarget) {
-            this._lastTarget.classList.add('shop-tabs-overlay-static-above');
+            this._lastTarget.classList.add('stats4sd-tabs-overlay-static-above');
           }
           this.style.display = 'none';
         }
@@ -177,7 +177,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    customElements.define(ShopTabsOverlay.is, ShopTabsOverlay);
+    customElements.define(stats4sdTabsOverlay.is, stats4sdTabsOverlay);
 
   </script>
 </dom-module>

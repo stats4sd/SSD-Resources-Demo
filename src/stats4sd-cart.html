@@ -9,15 +9,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="shop-button.html">
-<link rel="import" href="shop-common-styles.html">
-<link rel="import" href="shop-form-styles.html">
+<link rel="import" href="stats4sd-button.html">
+<link rel="import" href="stats4sd-common-styles.html">
+<link rel="import" href="stats4sd-form-styles.html">
 
-<dom-module id="shop-cart">
+<dom-module id="stats4sd-cart">
 
   <template>
 
-    <style include="shop-common-styles shop-button shop-form-styles">
+    <style include="stats4sd-common-styles stats4sd-button stats4sd-form-styles">
 
       .list {
         margin: 40px 0;
@@ -45,7 +45,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="main-frame">
       <div class="subsection" visible$="[[!_hasItems]]">
-        <p class="empty-cart">Your <iron-icon icon="shopping-cart"></iron-icon> is empty.</p>
+        <p class="empty-cart">Your <iron-icon icon="stats4sdping-cart"></iron-icon> is empty.</p>
       </div>
       <div class="subsection" visible$="[[_hasItems]]">
         <header>
@@ -55,15 +55,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div class="list">
           <dom-repeat items="[[cart]]" as="entry">
             <template>
-              <shop-cart-item entry="[[entry]]"></shop-cart-item>
+              <stats4sd-cart-item entry="[[entry]]"></stats4sd-cart-item>
             </template>
           </dom-repeat>
         </div>
         <div class="checkout-box">
           Total: <span class="subtotal">[[_formatTotal(total)]]</span>
-          <shop-button responsive>
+          <stats4sd-button responsive>
             <a href="/checkout">Checkout</a>
-          </shop-button>
+          </stats4sd-button>
         </div>
       </div>
     </div>
@@ -72,9 +72,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
 
-    class ShopCart extends Polymer.Element {
+    class stats4sdCart extends Polymer.Element {
 
-      static get is() { return 'shop-cart'; }
+      static get is() { return 'stats4sd-cart'; }
 
       static get properties() { return {
 
@@ -116,7 +116,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    customElements.define(ShopCart.is, ShopCart);
+    customElements.define(stats4sdCart.is, stats4sdCart);
 
   </script>
 

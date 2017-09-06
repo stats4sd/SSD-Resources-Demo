@@ -10,32 +10,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
-<dom-module id="shop-input">
+<dom-module id="stats4sd-input">
   <template>
     <style>
 
-      shop-input {
+      stats4sd-input {
         display: inline-block;
         margin: 20px 0;
       }
 
-      shop-input > input::-webkit-input-placeholder {
+      stats4sd-input > input::-webkit-input-placeholder {
         color: transparent;
       }
 
-      shop-input > input::-moz-placeholder {
+      stats4sd-input > input::-moz-placeholder {
         color: transparent;
       }
 
-      shop-input > input:-ms-input-placeholder {
+      stats4sd-input > input:-ms-input-placeholder {
         color: transparent;
       }
 
-      shop-input > input::-ms-input-placeholder {
+      stats4sd-input > input::-ms-input-placeholder {
         color: transparent;
       }
 
-      shop-input > input {
+      stats4sd-input > input {
         font-size: 1em;
         font-weight: 300;
         color: var(--app-primary-color);
@@ -45,12 +45,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         outline: none;
       }
 
-      shop-input > input:invalid {
+      stats4sd-input > input:invalid {
         /* reset the default style in FF */
         box-shadow: none;
       }
 
-      shop-input > shop-md-decorator {
+      stats4sd-input > stats4sd-md-decorator {
         display: block;
         height: 1px;
         width: 100%;
@@ -61,7 +61,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         transform: translateZ(0);
       }
 
-      shop-input shop-underline {
+      stats4sd-input stats4sd-underline {
         display: block;
         height: 2px;
         width: 100%;
@@ -77,7 +77,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       /* input label */
-      shop-input > shop-md-decorator > label {
+      stats4sd-input > stats4sd-md-decorator > label {
         display: block;
         pointer-events: none;
         opacity: 0.5;
@@ -96,7 +96,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       /* Error message */
-      shop-input > shop-md-decorator::after {
+      stats4sd-input > stats4sd-md-decorator::after {
         position: absolute;
         top: 0;
         left: 0;
@@ -108,7 +108,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         white-space: nowrap;
       }
 
-      shop-input > input:focus + shop-md-decorator > shop-underline {
+      stats4sd-input > input:focus + stats4sd-md-decorator > stats4sd-underline {
         -webkit-transform: scale3d(1, 1, 1);
         transform: scale3d(1, 1, 1);
         transition: -webkit-transform 0.2s ease-out;
@@ -116,32 +116,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       /* Label: valid state */
-      shop-input > input:focus + shop-md-decorator > label {
+      stats4sd-input > input:focus + stats4sd-md-decorator > label {
         -webkit-transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         opacity: 1;
       }
 
-      shop-input > input:optional:not(:placeholder-shown) + shop-md-decorator > label {
+      stats4sd-input > input:optional:not(:placeholder-shown) + stats4sd-md-decorator > label {
         -webkit-transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         opacity: 1;
       }
 
-      _:-ms-lang(x), shop-input > input + shop-md-decorator > label {
+      _:-ms-lang(x), stats4sd-input > input + stats4sd-md-decorator > label {
         -webkit-transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         opacity: 1;
       }
 
-      shop-input > input:optional:-moz-ui-valid + shop-md-decorator > label {
+      stats4sd-input > input:optional:-moz-ui-valid + stats4sd-md-decorator > label {
         -webkit-transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         opacity: 1;
       }
 
       /* Underline */
-      shop-input > input:not(:focus):not(:placeholder-shown):invalid + shop-md-decorator > shop-underline {
+      stats4sd-input > input:not(:focus):not(:placeholder-shown):invalid + stats4sd-md-decorator > stats4sd-underline {
         background-color: #dd2c00;
         -webkit-transform: scale3d(1, 1, 1);
         transform: scale3d(1, 1, 1);
@@ -149,7 +149,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         transition: transform 0.2s ease-out;
       }
 
-      shop-input > input:not(:focus):-moz-ui-invalid:invalid + shop-md-decorator > shop-underline {
+      stats4sd-input > input:not(:focus):-moz-ui-invalid:invalid + stats4sd-md-decorator > stats4sd-underline {
         background-color: #dd2c00;
         -webkit-transform: scale3d(1, 1, 1);
         transform: scale3d(1, 1, 1);
@@ -157,7 +157,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         transition: transform 0.2s ease-out;
       }
 
-      shop-input > input[aria-invalid='true']:not(:valid) + shop-md-decorator > shop-underline {
+      stats4sd-input > input[aria-invalid='true']:not(:valid) + stats4sd-md-decorator > stats4sd-underline {
         background-color: #dd2c00;
         -webkit-transform: scale3d(1, 1, 1);
         transform: scale3d(1, 1, 1);
@@ -166,34 +166,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       /* Error message */
-      shop-input > input:not(:focus):not(:placeholder-shown):invalid + shop-md-decorator::after {
+      stats4sd-input > input:not(:focus):not(:placeholder-shown):invalid + stats4sd-md-decorator::after {
         display: block;
       }
 
-      shop-input > input:not(:focus):-moz-ui-invalid:invalid + shop-md-decorator::after {
+      stats4sd-input > input:not(:focus):-moz-ui-invalid:invalid + stats4sd-md-decorator::after {
         display: block;
       }
 
-      shop-input > input[aria-invalid='true']:not(:valid) + shop-md-decorator::after {
+      stats4sd-input > input[aria-invalid='true']:not(:valid) + stats4sd-md-decorator::after {
         display: block;
       }
 
       /* Error label */
-      shop-input > input:not(:focus):not(:placeholder-shown):invalid + shop-md-decorator > label {
+      stats4sd-input > input:not(:focus):not(:placeholder-shown):invalid + stats4sd-md-decorator > label {
         -webkit-transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         opacity: 1;
         color: #dd2c00;
       }
 
-      shop-input > input:not(:focus):-moz-ui-invalid:invalid + shop-md-decorator > label {
+      stats4sd-input > input:not(:focus):-moz-ui-invalid:invalid + stats4sd-md-decorator > label {
         -webkit-transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         opacity: 1;
         color: #dd2c00;
       }
 
-      shop-input > input[aria-invalid='true']:not(:valid) + shop-md-decorator > label {
+      stats4sd-input > input[aria-invalid='true']:not(:valid) + stats4sd-md-decorator > label {
         -webkit-transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         opacity: 1;
@@ -201,7 +201,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       /* Valid label */
-      shop-input > input:not(:focus):required:valid + shop-md-decorator > label {
+      stats4sd-input > input:not(:focus):required:valid + stats4sd-md-decorator > label {
         -webkit-transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         transform: translate3d(0px, -3.4em, 0px) scale(0.8, 0.8);
         opacity: 1;

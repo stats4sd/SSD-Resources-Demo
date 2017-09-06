@@ -11,17 +11,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="shop-button.html">
-<link rel="import" href="shop-category-data.html">
-<link rel="import" href="shop-common-styles.html">
-<link rel="import" href="shop-image.html">
-<link rel="import" href="shop-select.html">
+<link rel="import" href="stats4sd-button.html">
+<link rel="import" href="stats4sd-category-data.html">
+<link rel="import" href="stats4sd-common-styles.html">
+<link rel="import" href="stats4sd-image.html">
+<link rel="import" href="stats4sd-select.html">
 
-<dom-module id="shop-detail">
+<dom-module id="stats4sd-detail">
 
   <template>
 
-    <style include="shop-common-styles shop-button shop-select">
+    <style include="stats4sd-common-styles stats4sd-button stats4sd-select">
 
       :host {
         display: block;
@@ -32,17 +32,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         @apply --layout-center-justified;
       }
 
-      shop-image {
+      stats4sd-image {
         position: relative;
         margin: 64px 32px;
         width: 50%;
         max-width: 600px;
-        --shop-image-img: {
+        --stats4sd-image-img: {
           @apply --layout-fit;
         };
       }
 
-      shop-image::before {
+      stats4sd-image::before {
         content: "";
         display: block;
         padding-top: 100%;
@@ -92,7 +92,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         border-top: 1px solid #ccc;
       }
 
-      shop-select > select {
+      stats4sd-select > select {
         font-size: 16px;
         padding: 16px 24px 16px 70px;
       }
@@ -104,7 +104,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           @apply --layout-center;
         }
 
-        shop-image {
+        stats4sd-image {
           margin: 0;
           width: 80%;
         }
@@ -140,22 +140,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data="{{routeData}}"></app-route>
 
     <!--
-      shop-category-data provides the item data for a given category and item name.
+      stats4sd-category-data provides the item data for a given category and item name.
     -->
-    <shop-category-data
+    <stats4sd-category-data
         id="categoryData"
         category-name="[[routeData.category]]"
         item-name="[[routeData.item]]"
         item="{{item}}"
-        failure="{{failure}}"></shop-category-data>
+        failure="{{failure}}"></stats4sd-category-data>
 
     <div id="content" hidden$="[[failure]]">
-      <shop-image alt="[[item.title]]" src="[[item.largeImage]]"></shop-image>
+      <stats4sd-image alt="[[item.title]]" src="[[item.largeImage]]"></stats4sd-image>
       <div class="detail" has-content$="[[_isDefined(item)]]">
         <h1>[[item.title]]</h1>
         <div class="price">[[_formatPrice(item.price)]]</div>
         <div class="pickers">
-          <shop-select>
+          <stats4sd-select>
             <label id="sizeLabel" prefix>Size</label>
             <select id="sizeSelect" aria-labelledby="sizeLabel">
               <option value="XS">XS</option>
@@ -164,11 +164,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <option value="L">L</option>
               <option value="XL">XL</option>
             </select>
-            <shop-md-decorator aria-hidden="true">
-              <shop-underline></shop-underline>
-            </shop-md-decorator>
-          </shop-select>
-          <shop-select>
+            <stats4sd-md-decorator aria-hidden="true">
+              <stats4sd-underline></stats4sd-underline>
+            </stats4sd-md-decorator>
+          </stats4sd-select>
+          <stats4sd-select>
             <label id="quantityLabel" prefix>Quantity</label>
             <select id="quantitySelect" aria-labelledby="quantityLabel">
               <option value="1" selected>1</option>
@@ -177,37 +177,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <option value="4">4</option>
               <option value="5">5</option>
             </select>
-            <shop-md-decorator aria-hidden="true">
-              <shop-underline></shop-underline>
-            </shop-md-decorator>
-          </shop-select>
+            <stats4sd-md-decorator aria-hidden="true">
+              <stats4sd-underline></stats4sd-underline>
+            </stats4sd-md-decorator>
+          </stats4sd-select>
         </div>
         <div class="description">
           <h2>Description</h2>
           <p id="desc"></p>
         </div>
-        <shop-button responsive>
+        <stats4sd-button responsive>
           <button on-click="_addToCart" aria-label="Add this item to cart">Add to Cart</button>
-        </shop-button>
+        </stats4sd-button>
       </div>
     </div>
 
     <!--
-      shop-network-warning shows a warning message when the items can't be rendered due
+      stats4sd-network-warning shows a warning message when the items can't be rendered due
       to network conditions.
     -->
-    <shop-network-warning
+    <stats4sd-network-warning
         hidden$="[[!failure]]"
         offline="[[offline]]"
-        on-try-reconnect="_tryReconnect"></shop-network-warning>
+        on-try-reconnect="_tryReconnect"></stats4sd-network-warning>
 
   </template>
 
   <script>
 
-    class ShopDetail extends Polymer.Element {
+    class stats4sdDetail extends Polymer.Element {
 
-      static get is() { return 'shop-detail'; }
+      static get is() { return 'stats4sd-detail'; }
 
       static get properties() { return {
 
@@ -268,7 +268,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _addToCart() {
-        // This event will be handled by shop-app.
+        // This event will be handled by stats4sd-app.
         this.dispatchEvent(new CustomEvent('add-cart-item', {
           bubbles: true, composed: true, detail: {
             item: this.item,
@@ -293,7 +293,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    customElements.define(ShopDetail.is, ShopDetail);
+    customElements.define(stats4sdDetail.is, stats4sdDetail);
 
   </script>
 

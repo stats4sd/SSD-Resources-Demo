@@ -9,20 +9,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="shop-button.html">
-<link rel="import" href="shop-image.html">
+<link rel="import" href="stats4sd-button.html">
+<link rel="import" href="stats4sd-image.html">
 
-<dom-module id="shop-home">
+<dom-module id="stats4sd-home">
 
   <template>
 
-    <style include="shop-button">
+    <style include="stats4sd-button">
 
       .image-link {
         outline: none;
       }
 
-      .image-link > shop-image::after {
+      .image-link > stats4sd-image::after {
         display: block;
         content: '';
         position: absolute;
@@ -40,7 +40,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         outline: -webkit-focus-ring-color auto 5px;
       }
 
-      .image-link:focus > shop-image::after {
+      .image-link:focus > stats4sd-image::after {
         opacity: 1;
       }
 
@@ -57,11 +57,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width: 50%;
       }
 
-      shop-image {
+      stats4sd-image {
         position: relative;
         height: 320px;
         overflow: hidden;
-        --shop-image-img: {
+        --stats4sd-image-img: {
           position: absolute;
           top: 0;
           bottom: 0;
@@ -83,7 +83,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       @media (max-width: 767px) {
-        shop-image {
+        stats4sd-image {
           height: 240px;
         }
 
@@ -91,8 +91,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin: 24px 0;
         }
 
-        .item:nth-of-type(3) > shop-button > a,
-        .item:nth-of-type(4) > shop-button > a {
+        .item:nth-of-type(3) > stats4sd-button > a,
+        .item:nth-of-type(4) > stats4sd-button > a {
           padding: 8px 24px;
         }
       }
@@ -103,12 +103,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <template strip-whitespace>
         <div class="item">
           <a class="image-link" href$="/list/[[item.name]]">
-            <shop-image src="[[item.image]]" alt="[[item.title]]" placeholder-img="[[item.placeholder]]"></shop-image>
+            <stats4sd-image src="[[item.image]]" alt="[[item.title]]" placeholder-img="[[item.placeholder]]"></stats4sd-image>
           </a>
           <h2>[[item.title]]</h2>
-          <shop-button>
-            <a aria-label$="[[item.title]] Shop Now" href$="/list/[[item.name]]">Shop Now</a>
-          </shop-button>
+          <stats4sd-button>
+            <a aria-label$="[[item.title]] stats4sd Now" href$="/list/[[item.name]]">stats4sd Now</a>
+          </stats4sd-button>
         </div>
       </template>
     </dom-repeat>
@@ -117,9 +117,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
 
-    class ShopHome extends Polymer.Element {
+    class stats4sdHome extends Polymer.Element {
 
-      static get is() { return 'shop-home'; }
+      static get is() { return 'stats4sd-home'; }
 
       static get properties() { return {
 
@@ -143,7 +143,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    customElements.define(ShopHome.is, ShopHome);
+    customElements.define(stats4sdHome.is, stats4sdHome);
 
   </script>
 

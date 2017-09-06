@@ -23,11 +23,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="shop-category-data.html">
+<link rel="import" href="stats4sd-category-data.html">
 <!-- Since 'home' is the default route, eagerly load it. -->
-<link rel="import" href="shop-home.html">
+<link rel="import" href="stats4sd-home.html">
 
-<dom-module id="shop-app">
+<dom-module id="stats4sd-app">
 
   <template>
 
@@ -111,23 +111,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: 66px;
       }
 
-      shop-tabs,
-      shop-tab {
-        --shop-tab-overlay: {
+      stats4sd-tabs,
+      stats4sd-tab {
+        --stats4sd-tab-overlay: {
           border-bottom: 2px solid var(--app-accent-color);
         }
         ;
       }
 
-      shop-tabs {
+      stats4sd-tabs {
         height: 100%;
       }
 
-      shop-tab {
+      stats4sd-tab {
         margin: 0 10px;
       }
 
-      shop-tab a {
+      stats4sd-tab a {
         display: inline-block;
         outline: none;
         padding: 9px 5px;
@@ -170,7 +170,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-weight: bold;
       }
 
-      shop-cart-modal {
+      stats4sd-cart-modal {
         z-index: 2;
       }
 
@@ -228,7 +228,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <shop-analytics key="UA-39334307-16"></shop-analytics>
+    <stats4sd-analytics key="UA-39334307-16"></stats4sd-analytics>
     <!--
       app-location and app-route elements provide the state of the URL for the app.
     -->
@@ -238,15 +238,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
     <!--
-      shop-category-data provides the list of categories.
+      stats4sd-category-data provides the list of categories.
     -->
-    <shop-category-data categories="{{categories}}"></shop-category-data>
+    <stats4sd-category-data categories="{{categories}}"></stats4sd-category-data>
 
     <!--
-      shop-cart-data maintains the state of the user's shopping cart (in localstorage) and
+      stats4sd-cart-data maintains the state of the user's stats4sdping cart (in localstorage) and
       calculates the total amount.
     -->
-    <shop-cart-data id="cart" cart="{{cart}}" num-items="{{numItems}}" total="{{total}}"></shop-cart-data>
+    <stats4sd-cart-data id="cart" cart="{{cart}}" num-items="{{numItems}}" total="{{total}}"></stats4sd-cart-data>
     <firebase-app name="SSD-Resources" api-key="AIzaSyCfl_Pe6Fb8KzIQRV1P2RIwwhN8Jl6BACo" storage-bucket="ssd-resources-demo.appspot.com"
       auth-domain="ssd-resources-demo.firebaseapp.com" database-url="https://ssd-resources-demo.firebaseio.com">
     </firebase-app>
@@ -266,10 +266,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-icon-button icon="arrow-back" aria-label="Go back"></paper-icon-button>
           </a>
         </div>
-        <div class="logo" main-title><a href="/" aria-label="SHOP Home">SHOP</a></div>
+        <div class="logo" main-title><a href="/" aria-label="stats4sd Home">stats4sd</a></div>
         <div class="cart-btn-container">
           <a href="/cart" tabindex="-1">
-            <paper-icon-button icon="shopping-cart" aria-label$="Shopping cart: [[_computePluralizedQuantity(numItems)]]"></paper-icon-button>
+            <paper-icon-button icon="stats4sdping-cart" aria-label$="stats4sdping cart: [[_computePluralizedQuantity(numItems)]]"></paper-icon-button>
           </a>
           <div class="cart-badge" aria-hidden="true" hidden$="[[!numItems]]">[[numItems]]</div>
         </div>
@@ -286,15 +286,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div id="tabContainer" sticky$="[[_shouldShowTabs]]" hidden$="[[!_shouldShowTabs]]">
         <dom-if if="[[_shouldRenderTabs]]">
           <template>
-            <shop-tabs selected="[[categoryName]]" attr-for-selected="name">
+            <stats4sd-tabs selected="[[categoryName]]" attr-for-selected="name">
               <dom-repeat items="[[categories]]" as="category" initial-count="4">
                 <template>
-                  <shop-tab name="[[category.name]]">
+                  <stats4sd-tab name="[[category.name]]">
                     <a href="/list/[[category.name]]">[[category.title]]</a>
-                  </shop-tab>
+                  </stats4sd-tab>
                 </template>
               </dom-repeat>
-            </shop-tabs>
+            </stats4sd-tabs>
           </template>
         </dom-if>
       </div>
@@ -318,17 +318,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
       <!-- home view -->
-      <shop-home name="home" categories="[[categories]]"></shop-home>
+      <stats4sd-home name="home" categories="[[categories]]"></stats4sd-home>
       <!-- list view of items in a category -->
-      <shop-list name="list" route="[[subroute]]" offline="[[offline]]"></shop-list>
+      <stats4sd-list name="list" route="[[subroute]]" offline="[[offline]]"></stats4sd-list>
       <!-- detail view of one item -->
-      <shop-detail name="detail" route="[[subroute]]" offline="[[offline]]"></shop-detail>
+      <stats4sd-detail name="detail" route="[[subroute]]" offline="[[offline]]"></stats4sd-detail>
       <!-- cart view -->
-      <shop-cart name="cart" cart="[[cart]]" total="[[total]]"></shop-cart>
+      <stats4sd-cart name="cart" cart="[[cart]]" total="[[total]]"></stats4sd-cart>
       <!-- checkout view -->
-      <shop-checkout name="checkout" cart="[[cart]]" total="[[total]]" route="{{subroute}}"></shop-checkout>
+      <stats4sd-checkout name="checkout" cart="[[cart]]" total="[[total]]" route="{{subroute}}"></stats4sd-checkout>
 
-      <shop-404-warning name="404"></shop-404-warning>
+      <stats4sd-404-warning name="404"></stats4sd-404-warning>
     </iron-pages>
 
     <footer>
@@ -343,11 +343,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
     // performance logging
-    window.performance && performance.mark && performance.mark('shop-app - before register');
+    window.performance && performance.mark && performance.mark('stats4sd-app - before register');
 
-    class ShopApp extends Polymer.Element {
+    class stats4sdApp extends Polymer.Element {
 
-      static get is() { return 'shop-app'; }
+      static get is() { return 'stats4sd-app'; }
 
       static get properties() {
         return {
@@ -393,7 +393,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       constructor() {
         super();
-        window.performance && performance.mark && performance.mark('shop-app.created');
+        window.performance && performance.mark && performance.mark('stats4sd-app.created');
       }
 
       ready() {
@@ -437,7 +437,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             // eagerly load the 404 page definition
             let cb = this._pageLoaded.bind(this, Boolean(oldPage));
             Polymer.importHref(
-              this.resolveUrl('shop-' + page + '.html'),
+              this.resolveUrl('stats4sd-' + page + '.html'),
               cb, cb, true);
           }
         }
@@ -477,7 +477,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // or if the network status changed.
         if (this.offline || (!this.offline && oldOffline === true)) {
           if (!this._networkSnackbar) {
-            this._networkSnackbar = document.createElement('shop-snackbar');
+            this._networkSnackbar = document.createElement('stats4sd-snackbar');
             this.root.appendChild(this._networkSnackbar);
           }
           this._networkSnackbar.innerHTML = this.offline ?
@@ -521,14 +521,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         // Announce the page's title
         if (detail.title) {
-          document.title = detail.title + ' - SHOP';
+          document.title = detail.title + ' - stats4sd';
           this._announce(detail.title + ', loaded');
         }
       }
 
       _onAddCartItem(event) {
         if (!this._cartModal) {
-          this._cartModal = document.createElement('shop-cart-modal');
+          this._cartModal = document.createElement('stats4sd-cart-modal');
           this.root.appendChild(this._cartModal);
         }
         this.$.cart.addItem(event.detail);
@@ -599,7 +599,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    customElements.define(ShopApp.is, ShopApp);
+    customElements.define(stats4sdApp.is, stats4sdApp);
   </script>
 
 </dom-module>

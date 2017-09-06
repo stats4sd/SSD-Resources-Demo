@@ -11,17 +11,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
 
-<dom-module id="shop-cart-data">
+<dom-module id="stats4sd-cart-data">
 
   <template>
-    <app-localstorage-document key="shop-cart-data" data="{{cart}}"></app-localstorage-document>
+    <app-localstorage-document key="stats4sd-cart-data" data="{{cart}}"></app-localstorage-document>
   </template>
 
   <script>
 
-    class ShopCartData extends Polymer.Element {
+    class stats4sdCartData extends Polymer.Element {
 
-      static get is() { return 'shop-cart-data'; }
+      static get is() { return 'stats4sd-cart-data'; }
 
       static get properties() { return {
 
@@ -110,7 +110,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    customElements.define(ShopCartData.is, ShopCartData);
+    customElements.define(stats4sdCartData.is, stats4sdCartData);
 
   </script>
 

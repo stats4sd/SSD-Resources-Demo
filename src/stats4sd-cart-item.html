@@ -11,15 +11,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="shop-icons.html">
-<link rel="import" href="shop-image.html">
-<link rel="import" href="shop-select.html">
+<link rel="import" href="stats4sd-icons.html">
+<link rel="import" href="stats4sd-image.html">
+<link rel="import" href="stats4sd-select.html">
 
-<dom-module id="shop-cart-item">
+<dom-module id="stats4sd-cart-item">
 
   <template strip-whitespace>
 
-    <style include="shop-select">
+    <style include="stats4sd-select">
 
       :host {
         @apply --layout-horizontal;
@@ -27,17 +27,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin-bottom: 24px;
       }
 
-      shop-image {
+      stats4sd-image {
         width: 72px;
         height: 72px;
       }
 
-      shop-select > select {
+      stats4sd-select > select {
         font-size: 16px;
         padding-left: 40px;
       }
 
-      shop-select > shop-md-decorator {
+      stats4sd-select > stats4sd-md-decorator {
         font-size: 12px;
         border: none;
       }
@@ -154,7 +154,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           top: -6px;
         }
 
-        shop-select > select {
+        stats4sd-select > select {
           padding: 2px 24px 2px 40px;
         }
 
@@ -167,7 +167,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
     <a href$="/detail/[[entry.item.category]]/[[entry.item.name]]" title$="[[entry.item.title]]">
-      <shop-image src="[[entry.item.image]]" alt="[[entry.item.title]]"></shop-image>
+      <stats4sd-image src="[[entry.item.image]]" alt="[[entry.item.title]]"></stats4sd-image>
     </a>
     <div class="flex">
       <div class="name">
@@ -175,7 +175,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
       <div class="detail">
         <div class="quantity">
-          <shop-select>
+          <stats4sd-select>
             <label prefix>Qty:</label>
             <select id="quantitySelect" aria-label="Change quantity" value="[[entry.quantity]]"
                 on-change="_quantityChange">
@@ -192,8 +192,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <option value="11">11</option>
               <option value="12">12</option>
             </select>
-            <shop-md-decorator aria-hidden="true"></shop-md-decorator>
-          </shop-select>
+            <stats4sd-md-decorator aria-hidden="true"></stats4sd-md-decorator>
+          </stats4sd-select>
         </div>
         <div class="size">Size: <span>[[entry.size]]</span></div>
         <div class="price">[[_formatPrice(entry.item.price)]]</div>
@@ -209,9 +209,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
 
-    class ShopCartItem extends Polymer.Element {
+    class stats4sdCartItem extends Polymer.Element {
 
-      static get is() { return 'shop-cart-item'; }
+      static get is() { return 'stats4sd-cart-item'; }
 
       static get properties() { return {
 
@@ -242,7 +242,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    customElements.define(ShopCartItem.is, ShopCartItem);
+    customElements.define(stats4sdCartItem.is, stats4sdCartItem);
 
   </script>
 

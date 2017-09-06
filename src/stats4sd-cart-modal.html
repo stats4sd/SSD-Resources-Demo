@@ -12,13 +12,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
-<link rel="import" href="shop-button.html">
+<link rel="import" href="stats4sd-button.html">
 
-<dom-module id="shop-cart-modal">
+<dom-module id="stats4sd-cart-modal">
 
   <template>
 
-    <style include="shop-button">
+    <style include="stats4sd-button">
 
       :host {
         display: block;
@@ -92,12 +92,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div class="label">Added to cart</div>
     </div>
     <div class="layout-horizontal">
-      <shop-button class="modal-button">
+      <stats4sd-button class="modal-button">
         <a href="/cart" on-click="close" id="viewCartAnchor">View Cart</a>
-      </shop-button>
-      <shop-button class="modal-button">
+      </stats4sd-button>
+      <stats4sd-button class="modal-button">
         <a href="/checkout" on-click="close">Checkout</a>
-      </shop-button>
+      </stats4sd-button>
     </div>
 
     <paper-icon-button icon="close" id="closeBtn" aria-label="Close dialog" on-click="close"></paper-icon-button>
@@ -106,10 +106,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
 
-    class ShopCartModal extends Polymer.mixinBehaviors(
+    class stats4sdCartModal extends Polymer.mixinBehaviors(
       [Polymer.IronOverlayBehaviorImpl], Polymer.Element) {
 
-      static get is() { return 'shop-cart-modal'; }
+      static get is() { return 'stats4sd-cart-modal'; }
 
       static get properties() { return {
         withBackdrop: {
@@ -166,7 +166,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    customElements.define(ShopCartModal.is, ShopCartModal);
+    customElements.define(stats4sdCartModal.is, stats4sdCartModal);
 
   </script>
 

@@ -1,4 +1,4 @@
-# SHOP
+# stats4sd
 
 ### Setup
 
@@ -11,13 +11,13 @@ Install [polymer-cli](https://github.com/Polymer/polymer-cli):
 
 ##### Setup
     # Using CLI
-    mkdir shop
-    cd shop
-    polymer init shop
+    mkdir stats4sd
+    cd stats4sd
+    polymer init stats4sd
 
     # Or cloning direct from GitHub
-    git clone https://github.com/Polymer/shop.git
-    cd shop
+    git clone https://github.com/Polymer/stats4sd.git
+    cd stats4sd
     bower install
 
 ### Start the development server
@@ -30,7 +30,7 @@ Install [polymer-cli](https://github.com/Polymer/polymer-cli):
 
 ### Build
 
-Build presets provide an easy way to define common build configurations in your `polymer.json` file. There are 2 build presets we put in `polymer.json` file in Shop:
+Build presets provide an easy way to define common build configurations in your `polymer.json` file. There are 2 build presets we put in `polymer.json` file in stats4sd:
 
 **es5-bundled**
 

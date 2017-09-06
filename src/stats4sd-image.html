@@ -11,7 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 
-<dom-module id="shop-image">
+<dom-module id="stats4sd-image">
 
   <template>
 
@@ -32,7 +32,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: 0 auto;
         opacity: 0;
         transition: 0.5s opacity;
-        @apply --shop-image-img;
+        @apply --stats4sd-image-img;
       }
 
     </style>
@@ -43,9 +43,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
 
-    class ShopImage extends Polymer.Element {
+    class stats4sdImage extends Polymer.Element {
 
-      static get is() { return 'shop-image'; }
+      static get is() { return 'stats4sd-image'; }
 
       static get properties() { return {
 
@@ -89,7 +89,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    customElements.define(ShopImage.is, ShopImage);
+    customElements.define(stats4sdImage.is, stats4sdImage);
 
   </script>
 
