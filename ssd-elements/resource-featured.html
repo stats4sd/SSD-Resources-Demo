@@ -1,0 +1,57 @@
+<link rel="import" href="../polymer/polymer-element.html">
+
+<dom-module id="resource-featured">
+  <template>
+    <style>
+       :host {
+        display: block;
+      }
+
+      #fade-container {
+        opacity: 0.2;
+        transition: 2.5s opacity;
+      }
+    </style>
+    <div id="fadeContainer">
+      <h2>[[resource.name]]!</h2>
+    </div>
+  </template>
+
+  <script>
+    /**
+     * `resource-featured`
+     * small element to display resources in a &#39;featured&#39; style
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class ResourceFeatured extends Polymer.Element {
+      static get is() { return 'resource-featured'; }
+      constructor() {
+          super();
+          console.log('element created')
+          
+        }
+      connectedCallback() {
+          super.connectedCallback();
+          var keyframes = [
+              { opacity: 0 },
+              { opacity: 1 }
+            ];
+          this.$.fadeContainer.animate(keyframes,1000);
+          // …
+        }  
+        //comment
+      static get properties() {
+        return {
+          resource: {
+            type: Object,
+          }
+        };
+      }
+    }
+
+    window.customElements.define(ResourceFeatured.is, ResourceFeatured);
+  </script>
+</dom-module>

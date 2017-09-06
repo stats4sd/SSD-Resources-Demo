@@ -1,80 +1,67 @@
-# SSD-Resources-Demo
-#Getting Set up
-install required tools and managers
-$npm install -g firebase-tools polymer-cli bower
+# SHOP
 
-install bower components
-$ bower install
+### Setup
 
-start the server. you can see the output at the localhost address given
-$ polymer serve --open
+##### Prerequisites
 
+Install [polymer-cli](https://github.com/Polymer/polymer-cli):
 
-#Add a page
-1. create a new html doc in the src folder. naming convention is ssd-[name].html
-2. copy ssd-viewTemplate contents to new page and update necessary code
-3. provide a reference for the menu in ssd-app.html <iron-pages> and <iron-selector> sections
-
-#Prepare for deployment
-NOTE- CURRENT SYSTEM FLAWED (6/6/17)
-for unknown reasons polymer build is not correctly copying over all bower components. As such after polymer build all components should be copied over again before deploying. 
-
-$ polymer build
-(service worker automatically generated)
-
-Copy bower components from main to build
-
-Vulcanise:
-$ vulcanize src/imports-core.html --strip-comments --out-html build/default/src/imports-core.html --inline-scripts --inline-css --strip-exclude bower_components/polymer/polymer.html
-
-(optional. test with $firebase serve)
-$firebase serve
-
-(optional. select firebase app to deploy to)
-$firebase use
-
-Deploy to server
-$firebase deploy
-
-#testing
-install polylint
-$ npm install -g polylint
-run from root directory and specify entry
-$ polylint --input src/ssd-app.html
-(expect undefined warnings for all pages as they are lazy loaded)
-
-#Learn more about the code used
-
-A few good guides to get started:
-
-https://www.polymer-project.org/1.0/start/ 
-2 guides, for building element and then app
-
-https://codelabs.developers.google.com/codelabs/polymer-firebase/index.html 
-First guide to using firebase for syncing data
-
-https://codelabs.developers.google.com/codelabs/firebase-web/index.html 
-Real time chat app using firebase
-
-https://codelabs.developers.google.com/codelabs/polymer-firebase-pwa/index.html 
-Progressive web app with firebase, poylmer fire and polymer components
+    npm install -g polymer-cli
 
 
-More links:
+##### Setup
+    # Using CLI
+    mkdir shop
+    cd shop
+    polymer init shop
 
-https://console.firebase.google.com 
-Backend database and services. Has account linked to ssd@stats4sd.org google account.
+    # Or cloning direct from GitHub
+    git clone https://github.com/Polymer/shop.git
+    cd shop
+    bower install
 
-https://www.youtube.com/watch?v=fFF2Yup2dMM
-Video more generally on google polymer and web apps
+### Start the development server
 
-https://www.polymer-project.org/1.0/toolbox/ 
-https://customelements.io/
-https://www.webcomponents.org/ 
+    polymer serve
 
-https://developers.google.com/drive/v3/web/about-sdk 
-https://developers.google.com/identity/protocols/OAuth2ServiceAccount
+### Run web-component-tester tests
 
+    polymer test
 
+### Build
 
+Build presets provide an easy way to define common build configurations in your `polymer.json` file. There are 2 build presets we put in `polymer.json` file in Shop:
 
+**es5-bundled**
+
+- js: {minify: true, compile: true}
+- css: {minify: true}
+- html: {minify: true}
+- bundle: true
+- addServiceWorker: true
+- addPushManifest: true
+- insertPrefetchLinks: true
+
+**es6-unbundled**
+
+- js: {minify: true, compile: false}
+- css: {minify: true}
+- html: {minify: true}
+- bundle: false
+- addServiceWorker: true
+- addPushManifest: true
+- insertPrefetchLinks: true
+
+Run the command to build the presets:
+
+    polymer build
+
+### Test the build
+
+This command serves the `es5-bundled` build version of the app:
+
+    polymer serve build/es5-bundled
+
+This command serves the `es6-unbundled` build version of the app:
+
+    polymer serve build/es6-unbundled

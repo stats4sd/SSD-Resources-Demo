@@ -1,30 +1,33 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/ssd-app.html",
+  "shell": "src/shop-app.html",
   "fragments": [
-    "src/ssd-resources.html",
-    "src/ssd-tags.html",
-    "src/ssd-home.html",
-    "src/ssd-search.html",
-    "src/ssd-view404.html"
+    "src/shop-list.html",
+    "src/shop-detail.html",
+    "src/shop-cart.html",
+    "src/shop-checkout.html",
+    "src/lazy-resources.html"
   ],
   "sources": [
     "src/**/*",
+    "data/**/*",
     "images/**/*",
-    "bower.json",
-    "index.html"
+    "bower.json"
   ],
   "extraDependencies": [
+    "app.yaml",
     "manifest.json",
-    "bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror-worker.js"
+    "bower_components/webcomponentsjs/*"
   ],
-  "builds": [{
-      "addServiceWorker": true
-  }],
   "lint": {
-    "rules": [
-      "polymer-hybrid"
-    ],
-    "ignoreWarnings": []
-  }
+    "rules": ["polymer-2-hybrid"]
+  },
+  "builds": [
+    {
+      "preset": "es5-bundled"
+    },
+    {
+      "preset": "es6-unbundled"
+    }
+  ]
 }
