@@ -70,7 +70,7 @@
     <!--uses ideas from http://philipwalton.github.io/solved-by-flexbox/demos/holy-grail/
     and http://jsfiddle.net/V2x6s/3/-->
 
-    <body class="resource-page-body" >
+    <body class="resource-page-body">
       <div class="resource-page-content" hidden$='[[resourceOpened]]'>
         <!--main section-->
         <main class="main-content">
@@ -148,15 +148,16 @@
         resources: {
           type: Object,
           notify: true,
+
         },
-        persistedResources:{
-          type:Object,
-          notify:true,
+        persistedResources: {
+          type: Object,
+          notify: true,
         },
         persistedTags: {
-            type: Object,
-            notify: true,
-          },
+          type: Object,
+          notify: true,
+        },
         tagActive: {
           type: Boolean,
           value: false
@@ -216,10 +217,12 @@
           type: String,
           notify: true,
           reflectToAttribute: true,
-          value:""
+          value: ""
         },
       },
-      // observers:[],
+      observers: [
+        'persistedResourcesChange(persistedResources.*)'
+      ],
       ready: function () {
         this.allResourcesPath = "/resources"
         console.log('downloading all resources')
@@ -234,11 +237,14 @@
         }
         if (newRoute.resourceSlug && newRoute.resourceSlug.length > 0) {
           //if already loaded via click don't bother
-          if (this.selectedResource.slug && this.selectedResource.slug == newRoute.resourceSlug) {}
+          if (this.selectedResource.slug && this.selectedResource.slug == newRoute.resourceSlug) { }
           else {
             this.loadResource(newRoute.resourceSlug)
           }
         }
+      },
+      persistedResourcesChange: function (newRes, oldRes) {
+        console.log('persisted resources changed', newRes)
       },
       resourceOpenChange: function (newState, oldState) {
         if (newState == false) {
@@ -274,12 +280,12 @@
 
       slugDocRetrieved: function (doc) {
         //should pull id as string or object length 20
-        console.log('slug doc',doc)
+        console.log('slug doc', doc)
         if (Object.keys(doc).length > 0) {
           console.log('slugDocRetrieved', doc)
           this.liveResourceID = doc
-          console.log('opening live resource id',doc)
-          this.$.liveResource.open({liveID:this.liveResourceID});
+          console.log('opening live resource id', doc)
+          this.$.liveResource.open({ liveID: this.liveResourceID });
         }
       },
 
