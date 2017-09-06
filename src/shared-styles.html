@@ -1,10 +1,7 @@
-
 <!-- shared styles for all views -->
 <dom-module id="shared-styles">
   <template>
     <style>
-     
-
       .card {
         margin: 12px;
         padding: 16px;
@@ -35,16 +32,33 @@
       paper-dialog.inline-dialog {
         position: static;
       }
-      .flex{
+
+      .flex {
         display: flex
       }
-      .wrap{
+
+      .wrap {
         flex-wrap: wrap;
       }
 
+      .sub-section-heading {
+        border-top: 1px solid #e0d9d9;
+        border-bottom: 1px solid #e0d9d9;
+        margin-bottom: 5px
+      }
 
-
-
+      .footer {
+        position: fixed;
+        left: 0px;
+        bottom: 0px;
+        width: 100%;
+        background: #999;
+        color: white;
+        padding: 10px;
+      }
+      .footer-padding{
+        height: 8em
+      }
     </style>
   </template>
 </dom-module>

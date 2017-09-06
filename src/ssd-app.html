@@ -1,4 +1,5 @@
 <!--All other imports pulled in from imports-core, which is vulcanized to build directory-->
+<link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="imports-core.html">
 
 <!--<link rel="import" href="firebase-auth.html">
@@ -96,14 +97,18 @@
       }
     </style>
 
-      
+
 
     <!-- Setup page routing -->
     <app-location route="{{route}}"></app-location>
     <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}" query-params="{{queryParams}}"></app-route>
-    
+
     <!--analytics tracking-->
     <iron-ga code="UA-84922436-4"></iron-ga>
+    <firebase-app name="SSD-Resources" api-key="AIzaSyCfl_Pe6Fb8KzIQRV1P2RIwwhN8Jl6BACo" storage-bucket="ssd-resources-demo.appspot.com"
+      auth-domain="ssd-resources-demo.firebaseapp.com" database-url="https://ssd-resources-demo.firebaseio.com">
+    </firebase-app>
+
 
     <!-- Check screen size -->
     <iron-media-query query="min-width: 650px" query-matches="{{wide}}"></iron-media-query>
@@ -169,10 +174,11 @@
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
           <ssd-home name="home"></ssd-home>
           <ssd-resources page-loaded="{{resourcesPageLoaded}}" page="{{routeData.page}}" route="{{subroute}}" name="resources" signed-in={{signedIn}}
-            id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}} persisted-resources="{{persistedResources}}" persisted-tags="{{persistedTags}}" user="{{user}}"></ssd-resources>
+            id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}} persisted-resources="{{persistedResources}}"
+            persisted-tags="{{persistedTags}}" user="{{user}}"></ssd-resources>
           <ssd-search name="search" id="searchPage" persisted-resources="{{persistedResources}}" signed-in={{signedIn}} persisted-tags="{{persistedTags}}"></ssd-search>
           <ssd-tags name="tags" id="tagsPage"></ssd-tags>
-          
+
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
@@ -220,7 +226,7 @@
         signedIn: {
           type: Boolean,
           observer: '_logStatus',
-          value:false
+          value: false
         },
         wide: {
           type: Boolean,
@@ -244,9 +250,10 @@
       },
 
       created: function () {
-          // Custom elements polyfill safe way to indicate an element has been upgraded.
-          // this.removeAttribute('unresolved');
-          console.log('element ssd-app created')
+        // Custom elements polyfill safe way to indicate an element has been upgraded.
+        // this.removeAttribute('unresolved');
+        console.log('element ssd-app created')
+        this.removeAttribute('unresolved');
       },
 
 
@@ -255,7 +262,7 @@
           this.$.drawer.opened = false;
         }
       },
-      _login:function(){
+      _login: function () {
         this.$$('#login').open();
       },
 
@@ -282,7 +289,7 @@
           // this.openSearch(this.searchText)
         }
         else {
-          console.log('loading page',page)
+          console.log('loading page', page)
           this.page = page;
         }
 
@@ -314,9 +321,9 @@
             break
         }
         this.updateStyles();
-        this.fire('iron-signal', { name: 'track-page', data: { path: "/"+href } });
+        this.fire('iron-signal', { name: 'track-page', data: { path: "/" + href } });
         // importHref(href, onload, onerror, optAsync). Dynamically imports an HTML document.
-        console.log('importing page',href)
+        console.log('importing page', href)
         this.importHref(
           this.resolveUrl(href),
           this._pageLoaded(page),
@@ -324,8 +331,8 @@
           true);
       },
 
-      _pageLoaded(page) {
-        if(!this.lazyLoadComplete){
+      _pageLoaded:function(page) {
+        if (!this.lazyLoadComplete) {
           console.log('start of lazy load')
           Polymer.RenderStatus.afterNextRender(this, function () {
             this.importHref(this.resolveUrl('imports-lazy-resources.html'), function () {
@@ -345,7 +352,7 @@
       },
       _logout: function () {
         this.$$('ssd-email-login-fire').signOut();
-        this.signedIn=false;
+        this.signedIn = false;
         console.log('logged out');
         //remove admin pages on sign out
         console.log('tag nav index', this.navItems.indexOf('tags'))

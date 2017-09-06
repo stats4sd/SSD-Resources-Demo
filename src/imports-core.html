@@ -1,8 +1,9 @@
 <!--Everything needed to load main structure, home and resources pages-->
-<link rel="import" href="../bower_components/polymer/polymer.html">
+
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/app-layout/app-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
@@ -19,6 +20,10 @@
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
 <link rel="import" href="../bower_components/iron-ga/iron-ga.html">
+<!-- Since 'home' is the default route, eagerly load it. -->
+<link rel="import" href="ssd-home.html">
+<link rel="import" href="ssd-resources.html">
+
 <link rel="import" href="ssd-email-login-fire.html">
 <link rel="stylesheet" href="open-sans.css" type="text/css">
 <link rel="stylesheet" href="roboto.css" type="text/css">
