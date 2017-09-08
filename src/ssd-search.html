@@ -83,7 +83,8 @@
                 color: white;
                 opacity: 0.85;
                 font-size: small;
-                display: flex
+                display: flex;
+                padding: 10px;
             }
 
             vaadin-combo-box {
@@ -134,12 +135,13 @@
             <paper-tags-dropdown items="[[_filterTags(allTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{filters.collections}}"></paper-tags-dropdown>
                 <paper-tags-dropdown items="[[_filterTags(allTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{filters.keywords}}"></paper-tags-dropdown>
         </div>-->
-        <div>
-            <vaadin-combo-box label="Resource Type" items="[[_filterTags(allTags,'Resource Type')]]" selected-item="{{filters.rTypes}}">
+        <div style="padding:10px">
+            <vaadin-combo-box id="typeSelect" label="Resource Type" items="[[_filterTags(persistedTags,'Resource-Type')]]" selected-item="{{activeFilter}}" focused="{{comboFocused}}">
             </vaadin-combo-box>
         </div>
-        <div class="resources-container">
-            <template id="persistedResources" is="dom-repeat" items="[[persistedResources]]" as="resource" sort="" filter="_searchFilter"rendered-item-count="{{totalResults}}">
+        <div class="resources-container" hidden$='{{resourceOpened}}'>
+            <template id="persistedResources" is="dom-repeat" items="[[persistedResources]]" as="resource" sort="" filter="_searchFilter"
+                rendered-item-count="{{totalResults}}">
                 <ssd-resource-search-result resource='[[resource]]' hidden$='[[!resource.name]]' on-tap='resourceTap'></ssd-resource-search-result>
             </template>
         </div>
@@ -147,8 +149,8 @@
             <span>search link: </span>
             <a class="share-link" href="/s/[[searchText]]">[[origin]]/s/[[searchText]]</a>
         </p>
-        <ssd-resource-full id="searchFulResource" resource='[[selectedResource]]' opened='{{resourceOpened}}'
-            signed-in='{{signedIn}}' persisted-tags="[[persistedTags]]" on-update="updateFired">
+        <ssd-resource-full id="searchFulResource" resource='[[selectedResource]]' opened='{{resourceOpened}}' signed-in='{{signedIn}}'
+            persisted-tags="[[persistedTags]]" on-update="updateFired" user="{{user}}">
         </ssd-resource-full>
 
     </template>
@@ -171,10 +173,6 @@
                     type: Object,
                     notify: true
                 },
-                filters: {
-                    type: Object,
-                    value: {}
-                },
                 searchText: {
                     type: String,
                     notify: true,
@@ -183,7 +181,7 @@
                 },
                 persistedTags: {
                     type: Object,
-                    notify: true,
+                    observer: '_persistedTagsChanged'
                 },
                 searchOpened: {
                     type: Boolean,
@@ -199,47 +197,89 @@
                 showLink: {
                     type: Boolean,
                     value: false
+                },
+                activeFilter: {
+                    type: Object,
+                    notify: true,
+                    observer: '_activeFilterChange'
+                },
+                page: {
+                    type: Object,
+                    observer: '_pageChanged'
+                },
+                //used to track when type select combo box is focused, will need to change if more used in future
+                comboFocused:{
+                    type:Boolean,
+                    observer:'_comboFocused'
                 }
             },
             attached: function () {
                 //populate tags on page entry, note still not loaded automatically if navigate direct to search page but assumed not vital
                 //and will try to populate after anything is typed
-                if (!this.allTags || this.allTags.length > 0) {
-                    this.set('allTags', this.persistedTags)
-                    console.log('all tags', this.allTags)
-                }
+
             },
             observers: [
-                '_filterChange(filters.*)',
+                // '_filterChange(filters.*)',
             ],
-
-            _filterChange: function (filter) {
-                console.log('filter changed')
+            // _filterChange: function (filter) {
+            //     console.log('filter changed',filter)
+            //     this.activeFilter=filter
+            //     console.log('activeFilter',this.activeFilter)
+            //     this.$.persistedResources.render();
+            // },
+            _activeFilterChange: function (filter) {
+                console.log('active Filter changed', filter);
                 this.$.persistedResources.render();
             },
-
+            //used to track when page entered, override to populate vaadin element
+            _pageChanged: function (page) {
+                if (!this.$.typeSelect.items || this.$.typeSelect.items.length == 0) {
+                    this._populateComboList();
+                }
+            },
+            _comboFocused:function(){
+                console.log('combo focused')
+                if (!this.$.typeSelect.items || this.$.typeSelect.items.length == 0) {
+                    this._populateComboList();
+                }
+            },
+           
             _filterTags: function (tags, filter) {
+                console.log('filtering tags', tags)
                 filteredTags = tags.filter(function (e) {
                     return e.type == filter;
                 })
+                console.log('filtered tags', filteredTags)
                 return filteredTags;
+            },
+            _persistedTagsChanged: function (tags) {
+                console.log('tags changed', tags)
             },
 
             _searchFilter: function (resource) {
+                console.log('running search filter')
                 //don't show deleted resources
                 if (resource.deleted == true) { return false }
-                //run through each filter via key, if not matched return false.
+                //conduct filter 
                 var totalFilters = 0
-                for (var key in this.filters) {
-                    //safeguard in case only proto info exists or null
-                    if (this.filters.hasOwnProperty(key) && this.filters[key]) {
-                        totalFilters++
-                        var value = this.filters[key].$key
-                        if (!resource.hasOwnProperty(key) || !resource[key][value]) {
-                            return false
-                        }
+                if (this.activeFilter && this.activeFilter.$key) {
+                    totalFilters = 1
+                    if (!resource.tags.hasOwnProperty(this.activeFilter.$key)) {
+                        return false
                     }
                 }
+                // 
+                // for (var key in this.filters) {
+                //     console.log('testing filter key',key)
+                //     //safeguard in case only proto info exists or null
+                //     if (this.filters.hasOwnProperty(key) && this.filters[key]) {
+                //         totalFilters++
+                //         var value = this.filters[key].$key
+                //         if (!resource.hasOwnProperty(key) || !resource[key][value]) {
+                //             return false
+                //         }
+                //     }
+                // }
                 //return entire category if no search text (2 char or less) but at least one filter selected,
                 if (!this.searchText || this.searchText.length <= 2) {
                     //if no filters either then just return empty (neater)
@@ -250,11 +290,11 @@
                 s = this.searchText.toLowerCase();
                 if (s.length > 2) {
                     // this.showLink = true
-                    if (resource.name && resource.name.toLowerCase().indexOf(s) > -1) {return true }
-                    if (resource.description && resource.description.toLowerCase().indexOf(s) > -1) {return true }
-                    if (resource.rTypes && resource.rTypes.toString().toLowerCase().indexOf(s) > -1) {return true }
-                    if (resource.tags && resource.tags.toString().toLowerCase().indexOf(s) > -1) {return true }
-                    if (resource.topics && resource.topics.toString().toLowerCase().indexOf(s) > -1) {return true }
+                    if (resource.name && resource.name.toLowerCase().indexOf(s) > -1) { return true }
+                    if (resource.description && resource.description.toLowerCase().indexOf(s) > -1) { return true }
+                    if (resource.rTypes && resource.rTypes.toString().toLowerCase().indexOf(s) > -1) { return true }
+                    if (resource.tags && resource.tags.toString().toLowerCase().indexOf(s) > -1) { return true }
+                    if (resource.topics && resource.topics.toString().toLowerCase().indexOf(s) > -1) { return true }
                     else {
                         // this.showLink = false;
                         return false
@@ -267,12 +307,8 @@
             },
             //manually call dom repeat resources to rerender with _textFilter checking search text
             searchTextChange: function (newVal, oldVal) {
-                console.log('persisted',this.persistedResources)
                 if (this.persistedResources && this.persistedResources.length > 0) {
                     this.$.persistedResources.render();
-                }
-                if (!this.allTags || this.allTags.length > 0) {
-                    this.set('allTags', this.persistedTags)
                 }
             },
             searchOpenChange: function (open) {
@@ -288,6 +324,14 @@
             getMainImage: function (resource) {
                 //console.log('no predefined image', resource)
                 return '/images/placeholder.png'
+            },
+            _populateComboList:function(){
+                let f = this.activeFilter;
+                    this.activeFilter = []
+                    let t = this.persistedTags;
+                    this.persistedTags = [];
+                    this.persistedTags = t
+                    this.activeFilter = f
             },
             resourceTap: function (e) {
                 console.log('resource', e.model.resource);
