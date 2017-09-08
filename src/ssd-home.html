@@ -108,12 +108,15 @@
     Polymer({
       is: 'ssd-home',
       properties: {
-        demo: {
-          type: Object,
-          value: {
-            "description": "When we have more resources, we can setup a 'browsing view' and start highlighting different resources",
-            "name": "Example Resource Card",
-          }
+        //propagates page change up when resource type selected
+        page: {
+          type: String,
+          observer: '_pageChanged',
+          notify: true
+        },
+        activeFilter:{
+          type:Object,
+          notify:true,
         }
       },
       observers: [
@@ -121,6 +124,8 @@
       ],
       ResourceTypeSelected:function(e){
         console.log('resource type selected',e.model.tag)
+        this.set("activeFilter", e.model.tag);
+        this.set("page", "search");
       },
       _tagFilter: function (type) {
         return function (tag) {
@@ -132,7 +137,11 @@
       _getImageSrc: function (tag) {
         let src = "/images/resourceTypes/" + tag.slug + ".jpg"
         return src
+      },
+      _pageChanged:function(){
+        console.log('page changed from ssd-home')
       }
+      
     });
   </script>
 </dom-module>

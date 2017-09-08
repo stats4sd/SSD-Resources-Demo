@@ -165,18 +165,18 @@
               Sign Out
             </div>
             <div class="user-name" hidden$="{{!signedIn}}">
-              Signed in as {{user.displayName}}
+              Signed in as {{user.email}}
             </div>
           </app-toolbar>
         </app-header>
 
         <!-- Main pages -->
         <iron-pages selected="{{routeData.page}}" attr-for-selected="name">
-          <ssd-home name="home"></ssd-home>
-          <ssd-resources page-loaded="{{resourcesPageLoaded}}" page="{{routeData.page}}" route="{{subroute}}" name="resources" signed-in={{signedIn}}
+          <ssd-home name="home" page="{{routeData.page}}" active-filter="{{activeFilter}}"></ssd-home>
+          <ssd-resources page-loaded="{{resourcesPageLoaded}}" page="{{routeData.page}}" route="{{subroute}}" name="resources" signed-in={{signedIn}} 
             id="resourcesPage" very-wide={{veryWide}} short-code={{shortCode}} persisted-resources="{{persistedResources}}"
             persisted-tags="{{persistedTags}}" user="{{user}}"></ssd-resources>
-          <ssd-search name="search" id="searchPage" persisted-resources="{{persistedResources}}" signed-in={{signedIn}} persisted-tags="{{persistedTags}}"></ssd-search>
+          <ssd-search page="{{routeData.page}}" name="search" id="searchPage" persisted-resources="{{persistedResources}}" signed-in={{signedIn}} persisted-tags="[[persistedTags]]" user="{{user}}" active-filter="{{activeFilter}}"></ssd-search>
           <ssd-tags name="tags" id="tagsPage"></ssd-tags>
 
         </iron-pages>
@@ -289,7 +289,6 @@
           // this.openSearch(this.searchText)
         }
         else {
-          console.log('loading page', page)
           this.page = page;
         }
 
@@ -323,7 +322,6 @@
         this.updateStyles();
         this.fire('iron-signal', { name: 'track-page', data: { path: "/" + href } });
         // importHref(href, onload, onerror, optAsync). Dynamically imports an HTML document.
-        console.log('importing page', href)
         this.importHref(
           this.resolveUrl(href),
           this._pageLoaded(page),
@@ -375,7 +373,7 @@
       },
 
       addResource: function () {
-        this.set("routeData.page ", "resources ");
+        this.set("routeData.page", "resources");
         this.$$('ssd-resources').addResource();
       },
     });
