@@ -11,7 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
-<link rel="import" href="./ssd-elements/resource-featured.html">
+<!-- <link rel="import" href="./ssd-elements/resource-featured.html"> -->
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
@@ -35,11 +35,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        :host {
         display: block;
         position: relative;
+        background-color: gray;
         padding-top: 130px;
-        padding-bottom: 64px;
-        min-height: 100vh;
-        --app-primary-color: #202020;
-        --app-secondary-color: #757575;
+        
+        /* min-height: 100vh; */
+        --app-primary-color: black;
+        --app-secondary-color: #d2232a;
+        background-color: var(--background-color, '#eeeeee');
         --app-accent-color: #172C50;
         --paper-button-ink-color: var(--app-accent-color);
         --paper-icon-button-ink-color: var(--app-accent-color);
@@ -51,7 +53,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app-header {
         @apply --layout-fixed-top;
         z-index: 1;
-        background-color: rgba(255, 255, 255, 0.95);
+        color:white;
+        background-color: rgba(210, 35, 42, 0.95);
         --app-header-shadow: {
           box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
           height: 10px;
@@ -72,7 +75,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-size: 16px;
         font-weight: 600;
         letter-spacing: 0.3em;
-        color: var(--app-primary-color);
+        color: white;
         text-decoration: none;
         /* required for IE 11, so this <a> can receive pointer events */
         display: inline-block;
@@ -85,6 +88,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .menu-btn {
         display: none;
+        color: white;
       }
 
       .cart-btn-container {
@@ -184,13 +188,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       footer {
-        position: absolute;
+        position: fixed;
+        padding: 10px;
         bottom: 0;
         left: 0;
         right: 0;
-        text-align: center;
-        margin-top: 20px;
         line-height: 24px;
+        background: #999;
+        color: white;
       }
 
       footer>a {
@@ -252,10 +257,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </firebase-app>
     <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}"></firebase-query>
     <app-indexeddb-mirror key="persistedResources" data="{{resources}}" session="keepAlways" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
-    <firebase-query id="query" app-name="SSD-Resources" path="/featured" data="{{featuredResources}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedResources" data="{{featuredResources}}" session="keepAlways" persisted-data="{{persistedFeatured}}"></app-indexeddb-mirror>
+    <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{tags}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedTags" data="{{tags}}" session="keepAlways" persisted-data="{{persistedTags}}"></app-indexeddb-mirror>
 
-    
+
 
     <app-header role="navigation" id="header" effects="waterfall" condenses reveals>
       <app-toolbar>
@@ -266,21 +271,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-icon-button icon="arrow-back" aria-label="Go back"></paper-icon-button>
           </a>
         </div>
-        <div class="logo" main-title><a href="/" aria-label="stats4sd Home">stats4sd</a></div>
+        <div class="logo" main-title><a href="/" aria-label="stats4sd Home">Stats4SD</a></div>
         <div class="cart-btn-container">
           <a href="/cart" tabindex="-1">
-            <paper-icon-button icon="stats4sdping-cart" aria-label$="stats4sdping cart: [[_computePluralizedQuantity(numItems)]]"></paper-icon-button>
+            <paper-icon-button icon="stats4sdping-cart" style="color:white" aria-label$="stats4sdping cart: [[_computePluralizedQuantity(numItems)]]"></paper-icon-button>
           </a>
           <div class="cart-badge" aria-hidden="true" hidden$="[[!numItems]]">[[numItems]]</div>
         </div>
       </app-toolbar>
-
-      <dom-repeat items="[[persistedFeatured]]" as="res" initial-count="5">
-        <template>
-          <!-- <firebase-document app-name="SSD-Resources" path="/resources/[[res.$val]]" data="{{resDocs}}"></firebase-document> -->
-          <resource-featured resource="{{res}}"></resource-featured>
-        </template>
-      </dom-repeat>
 
       <!-- Lazy-create the tabs for larger screen sizes. -->
       <div id="tabContainer" sticky$="[[_shouldShowTabs]]" hidden$="[[!_shouldShowTabs]]">
@@ -318,9 +316,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
       <!-- home view -->
-      <stats4sd-home name="home" categories="[[categories]]"></stats4sd-home>
+      <stats4sd-home name="home" persisted-tags="[[persistedTags]]" page="{{page}}"></stats4sd-home>
       <!-- list view of items in a category -->
-      <stats4sd-list name="list" route="[[subroute]]" offline="[[offline]]"></stats4sd-list>
+      <stats4sd-list name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
       <!-- detail view of one item -->
       <stats4sd-detail name="detail" route="[[subroute]]" offline="[[offline]]"></stats4sd-detail>
       <!-- cart view -->
@@ -328,12 +326,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- checkout view -->
       <stats4sd-checkout name="checkout" cart="[[cart]]" total="[[total]]" route="{{subroute}}"></stats4sd-checkout>
 
-      <stats4sd-404-warning name="404"></stats4sd-404-warning>
+      <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
-
     <footer>
-      <a href="https://www.polymer-project.org/1.0/toolbox/">Made by Polymer</a>
-      <div class="demo-label">Demo Only</div>
+      <div style='display:inline; color:yellow;font-weight:bold;'>Note</div>
+      <div style='padding-left:10px'>This platform is currently in development (v0.9.5).<br>To feedback on specific issues or requests please contact
+        <a style="color:wheat" href="mailto:c.clarke@stats4sd.org?Subject=Resources%20Site%20Feedback" target="_top">c.clarke@stats4sd.org</a>
+      </div>
     </footer>
 
     <!-- a11y announcer -->
@@ -374,10 +373,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             computed: '_computeShouldRenderDrawer(smallScreen, loadComplete)'
           },
 
-          resDocs:{
+          resDocs: {
             //bserver:'_resDocsChanged',
-            type:Array,
-            value:[]
+            type: Array,
+            value: []
           }
         }
       }
@@ -385,8 +384,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get observers() {
         return [
           '_routePageChanged(routeData.page)',
-          '_persistedChanged(persistedFeatured.splices)',
-          '_resDocsChanged(resDocs.*)',
+          // '_persistedChanged(persistedFeatured.splices)',
+          // '_resDocsChanged(resDocs.*)',
         ]
         // note, could use persistedFeatured.length to simply track number of items
       }
@@ -416,6 +415,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _routePageChanged(page) {
+        console.log('_routePageChanged',page)
         if (this.page === 'list') {
           this._listScrollTop = window.pageYOffset;
         }
@@ -488,13 +488,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _toggleDrawer() {
         this.drawerOpened = !this.drawerOpened;
-      }
-
-      _persistedChanged(newRes, oldRes) {
-        console.log('persisted changed', newRes)
-      }
-      _resDocsChanged(newDoc,oldDoc){
-        console.log('res doc changed',newDoc)
       }
 
       // Elements in the app can notify section changes.

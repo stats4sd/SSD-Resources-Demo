@@ -9,66 +9,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="stats4sd-button.html">
-<link rel="import" href="stats4sd-image.html">
+<link rel="import" href="shared-styles.html">
 
 <dom-module id="stats4sd-home">
 
   <template>
 
-    <style include="stats4sd-button">
-
-      .image-link {
-        outline: none;
-      }
-
-      .image-link > stats4sd-image::after {
-        display: block;
-        content: '';
-        position: absolute;
-        transition-property: opacity;
-        transition-duration: 0s;
-        transition-delay: 90ms;
-        pointer-events: none;
-        opacity: 0;
-        top: 5px;
-        left: 5px;
-        right: 5px;
-        bottom: 5px;
-        outline: #2196F3 auto 5px;
-        outline: -moz-mac-focusring auto 5px;
-        outline: -webkit-focus-ring-color auto 5px;
-      }
-
-      .image-link:focus > stats4sd-image::after {
-        opacity: 1;
-      }
-
-      .item {
-        display: block;
-        text-decoration: none;
-        text-align: center;
-        margin-bottom: 40px;
-      }
-
-      .item:nth-of-type(3),
-      .item:nth-of-type(4) {
-        display: inline-block;
-        width: 50%;
-      }
-
-      stats4sd-image {
-        position: relative;
-        height: 320px;
-        overflow: hidden;
-        --stats4sd-image-img: {
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: -9999px;
-          right: -9999px;
-          max-width: none;
-        };
+    <style include="shared-styles"></style>
+    <style>
+       :host {
+        padding: 10px
       }
 
       h2 {
@@ -76,30 +26,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-weight: 500;
         margin: 32px 0;
       }
+      /* can move all style out with template to new element in future */
 
-      .item:nth-of-type(3) > h2,
-      .item:nth-of-type(4) > h2 {
-        font-size: 1.1em;
+      .resource-type {
+        width: 12em;
+        border: 3px solid white;
+        margin-left: -3px;
+        margin-bottom: -3px;
+      }
+
+      .resource-type>img {
+        width: 12em;
+      }
+
+      .resource-label-container {
+        top: -2em;
+        position: relative;
+        line-height: 1em;
+        background-color: white;
+        width: 100%;
+        height: 2em;
+        opacity: 0.8;
+        margin-bottom: -2em;
+        display: table;
+      }
+
+      .resource-label {
+        text-align: center;
+        vertical-align: middle;
+        display: table-cell;
+        font-size: 0.9em;
       }
 
       @media (max-width: 767px) {
-        stats4sd-image {
-          height: 240px;
-        }
-
         h2 {
           margin: 24px 0;
-        }
-
-        .item:nth-of-type(3) > stats4sd-button > a,
-        .item:nth-of-type(4) > stats4sd-button > a {
           padding: 8px 24px;
         }
       }
 
+      @media (max-width: 320px) {
+        .resource-type>img,
+        .resource-type {
+          width: 100vw;
+        }
+      }
     </style>
 
-    <dom-repeat items="[[categories]]">
+    <!-- <dom-repeat items="[[categories]]">
       <template strip-whitespace>
         <div class="item">
           <a class="image-link" href$="/list/[[item.name]]">
@@ -111,40 +85,98 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </stats4sd-button>
         </div>
       </template>
-    </dom-repeat>
+    </dom-repeat> -->
+
+    <p class="padding">Welcome to the Stats4SD resource bank. You can browse all resources using the top or sidebar menus, or explore some the
+      links below
+    </p>
+    <div class="sub-section-heading">View Resources by Type</div>
+    <div class="flex wrap">
+      <template id="tagList" is="dom-repeat" items="[[persistedTags]]" as="tag" filter="{{_tagFilter('Resource-Type')}}">
+        <a href="{{_getLink(tag)}}" style="text-decoration: none; color:inherit">
+          <div class="resource-type">
+            <img src="{{_getImageSrc(tag)}}">
+            <div class="resource-label-container">
+              <div class="resource-label">[[tag.label]]</div>
+            </div>
+          </div>
+        </a>
+      </template>
+    </div>
+    <div class="sub-section-heading" style="margin-top:2em">Browse Collections</div>
+    <p class="padding" style="margin:1em 0 0 0;font-size:small">There are currently no collections</p>
 
   </template>
 
   <script>
-
     class stats4sdHome extends Polymer.Element {
 
       static get is() { return 'stats4sd-home'; }
+      static get observers() {
+        return [
+          // '_complexChange(page.*)'
+        ]
+      }
+      static get properties() {
+        return {
 
-      static get properties() { return {
+          categories: {
+            type: Array
+          },
 
-        categories: {
-          type: Array
-        },
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
+          },
+          persistedTags: {
+            type: Array,
+          },
+          page: {
+            type: String,
+            notify: true
+          }
 
-        visible: {
-          type: Boolean,
-          observer: '_visibleChanged'
         }
-
-      }}
+      }
+      _complexChange(change) {
+        console.log('complex change', change)
+      }
 
       _visibleChanged(visible) {
         if (visible) {
           this.dispatchEvent(new CustomEvent('change-section', {
-            bubbles: true, composed: true, detail: {title: 'Home'}}));
+            bubbles: true, composed: true, detail: { title: 'Home' }
+          }));
         }
       }
+
+      _tagFilter(type) {
+        return function (tag) {
+          if (!type) return true;
+          if (!tag) return false;
+          return (tag.type == type);
+        }
+      }
+      _getImageSrc(tag) {
+        let src = "/images/resourceTypes/" + tag.slug + ".jpg"
+        return src
+      }
+      _getLink(tag) {
+        let link = "/list/" + tag.slug
+        return link
+      }
+
+      // _ResourceTypeSelected(e) {
+      //   console.log('resource type selected', e.model.tag)
+      //   this.set("activeFilter", e.model.tag);
+      //   // this.dispatchEvent(new CustomEvent('change-section', {
+      //   //     bubbles: true, composed: true, detail: { title: 'List' }
+      //   //   }));
+      // }
 
     }
 
     customElements.define(stats4sdHome.is, stats4sdHome);
-
   </script>
 
 </dom-module>

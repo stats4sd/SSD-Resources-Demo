@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="./ssd-elements/resource-search-result.html">
 <link rel="import" href="stats4sd-category-data.html">
 <link rel="import" href="stats4sd-common-styles.html">
 <link rel="import" href="stats4sd-image.html">
@@ -104,6 +105,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </header>
 
     <ul class="grid" hidden$="[[failure]]">
+      <dom-repeat items="[[persistedResources]]" as="resource" initial-count="4">
+        <template>
+          <resource-search-result resource='[[resource]]'></resource-search-result>
+        </template>
+      </dom-repeat>
+    </ul>
+
+    <ul class="grid" hidden$="[[failure]]">
       <dom-repeat items="[[_getListItems(category.items)]]" initial-count="4">
         <template>
           <li>
@@ -186,6 +195,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _categoryChanged(category, visible) {
+        console.log('category changed',category)
         if (!visible) {
           return;
         }
@@ -199,8 +209,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   title: category.title
                 }}));
             } else {
-              this.dispatchEvent(new CustomEvent('show-invalid-url-warning', {
-                bubbles: true, composed: true}));
+              // this.dispatchEvent(new CustomEvent('show-invalid-url-warning', {
+              //   bubbles: true, composed: true}));
             }
           });
       }
