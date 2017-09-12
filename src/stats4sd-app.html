@@ -36,8 +36,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
         position: relative;
         background-color: gray;
-        padding-top: 130px;
-        
+        /* padding-top: 130px; */
+        padding-top: 65px;
         /* min-height: 100vh; */
         --app-primary-color: black;
         --app-secondary-color: #d2232a;
@@ -86,8 +86,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width: 40px;
       }
 
-      .menu-btn {
-        display: none;
+      .home-btn {
         color: white;
       }
 
@@ -187,48 +186,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: 0 auto;
       }
 
-      footer {
-        position: fixed;
-        padding: 10px;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        line-height: 24px;
-        background: #999;
-        color: white;
-      }
-
-      footer>a {
-        color: var(--app-secondary-color);
-        text-decoration: none;
-      }
-
-      footer>a:hover {
-        text-decoration: underline;
-      }
-
-      .demo-label {
-        box-sizing: border-box;
-        width: 120px;
-        padding: 6px;
-        margin: 8px auto 0;
-        background-color: var(--app-primary-color);
-        color: white;
-        text-transform: uppercase;
-      }
       /* small screen */
 
       @media (max-width: 767px) {
          :host {
           padding-top: 64px;
-        }
-
-        .menu-btn {
-          display: block;
-        }
-
-         :host([page=detail]) .menu-btn {
-          display: none;
         }
       }
     </style>
@@ -265,8 +227,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-header role="navigation" id="header" effects="waterfall" condenses reveals>
       <app-toolbar>
         <div class="left-bar-item">
-          <paper-icon-button class="menu-btn" icon="menu" on-click="_toggleDrawer" aria-label="Categories">
+          <a href="/">
+          <paper-icon-button class="home-btn" icon="home" aria-label="Home">
           </paper-icon-button>
+        </a>
           <a class="back-btn" href="/list/[[categoryName]]" tabindex="-1">
             <paper-icon-button icon="arrow-back" aria-label="Go back"></paper-icon-button>
           </a>
@@ -274,14 +238,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div class="logo" main-title><a href="/" aria-label="stats4sd Home">Stats4SD</a></div>
         <div class="cart-btn-container">
           <a href="/cart" tabindex="-1">
-            <paper-icon-button icon="stats4sdping-cart" style="color:white" aria-label$="stats4sdping cart: [[_computePluralizedQuantity(numItems)]]"></paper-icon-button>
+            <paper-icon-button icon="shopping-cart" style="color:white" aria-label$="stats4sdping cart: [[_computePluralizedQuantity(numItems)]]"></paper-icon-button>
           </a>
           <div class="cart-badge" aria-hidden="true" hidden$="[[!numItems]]">[[numItems]]</div>
         </div>
       </app-toolbar>
 
-      <!-- Lazy-create the tabs for larger screen sizes. -->
-      <div id="tabContainer" sticky$="[[_shouldShowTabs]]" hidden$="[[!_shouldShowTabs]]">
+      <!-- Lazy-create the tabs for larger screen sizes. ***NOT USING FOR NOW*** -->
+      <!-- <div id="tabContainer" sticky$="[[_shouldShowTabs]]" hidden$="[[!_shouldShowTabs]]">
         <dom-if if="[[_shouldRenderTabs]]">
           <template>
             <stats4sd-tabs selected="[[categoryName]]" attr-for-selected="name">
@@ -295,13 +259,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </stats4sd-tabs>
           </template>
         </dom-if>
-      </div>
+      </div> -->
     </app-header>
 
-    <!-- Lazy-create the drawer for small screen sizes. -->
+    <!-- Lazy-create the drawer for small screen sizes. ***NOT USING FOR NOW*** -->
     <dom-if if="[[_shouldRenderDrawer]]">
-      <template>
-        <!-- Two-way bind `drawerOpened` since app-drawer can update `opened` itself. -->
+      <!-- <template>
         <app-drawer opened="{{drawerOpened}}" swipe-open tabindex="0">
           <iron-selector role="navigation" class="drawer-list" selected="[[categoryName]]" attr-for-selected="name">
             <dom-repeat items="[[categories]]" as="category" initial-count="4">
@@ -311,7 +274,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </dom-repeat>
           </iron-selector>
         </app-drawer>
-      </template>
+      </template> -->
     </dom-if>
 
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
@@ -328,12 +291,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
-    <footer>
-      <div style='display:inline; color:yellow;font-weight:bold;'>Note</div>
-      <div style='padding-left:10px'>This platform is currently in development (v0.9.5).<br>To feedback on specific issues or requests please contact
-        <a style="color:wheat" href="mailto:c.clarke@stats4sd.org?Subject=Resources%20Site%20Feedback" target="_top">c.clarke@stats4sd.org</a>
-      </div>
-    </footer>
+   
 
     <!-- a11y announcer -->
     <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div>

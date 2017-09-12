@@ -1,14 +1,5 @@
-<!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
-
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="./ssd-elements/resource-types.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="stats4sd-home">
@@ -28,34 +19,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       /* can move all style out with template to new element in future */
 
-      .resource-type {
-        width: 12em;
-        border: 3px solid white;
-        margin-left: -3px;
-        margin-bottom: -3px;
+      
+      footer {
+        position: fixed;
+        padding: 10px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        line-height: 24px;
+        background: #999;
+        color: white;
       }
 
-      .resource-type>img {
-        width: 12em;
+      footer>a {
+        color: var(--app-secondary-color);
+        text-decoration: none;
       }
 
-      .resource-label-container {
-        top: -2em;
-        position: relative;
-        line-height: 1em;
-        background-color: white;
-        width: 100%;
-        height: 2em;
-        opacity: 0.8;
-        margin-bottom: -2em;
-        display: table;
-      }
-
-      .resource-label {
-        text-align: center;
-        vertical-align: middle;
-        display: table-cell;
-        font-size: 0.9em;
+      footer>a:hover {
+        text-decoration: underline;
       }
 
       @media (max-width: 767px) {
@@ -91,20 +73,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       links below
     </p>
     <div class="sub-section-heading">View Resources by Type</div>
-    <div class="flex wrap">
-      <template id="tagList" is="dom-repeat" items="[[persistedTags]]" as="tag" filter="{{_tagFilter('Resource-Type')}}">
-        <a href="{{_getLink(tag)}}" style="text-decoration: none; color:inherit">
-          <div class="resource-type">
-            <img src="{{_getImageSrc(tag)}}">
-            <div class="resource-label-container">
-              <div class="resource-label">[[tag.label]]</div>
-            </div>
-          </div>
-        </a>
-      </template>
-    </div>
+    <resource-types></resource-types>
+    
     <div class="sub-section-heading" style="margin-top:2em">Browse Collections</div>
     <p class="padding" style="margin:1em 0 0 0;font-size:small">There are currently no collections</p>
+
+    <footer>
+      <div style='display:inline; color:yellow;font-weight:bold;'>Note</div>
+      <div style='padding-left:10px'>This platform is currently in development (v0.9.5).<br>To feedback on specific issues or requests please contact
+        <a style="color:wheat" href="mailto:c.clarke@stats4sd.org?Subject=Resources%20Site%20Feedback" target="_top">c.clarke@stats4sd.org</a>
+      </div>
+    </footer>
 
   </template>
 
@@ -157,14 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return (tag.type == type);
         }
       }
-      _getImageSrc(tag) {
-        let src = "/images/resourceTypes/" + tag.slug + ".jpg"
-        return src
-      }
-      _getLink(tag) {
-        let link = "/list/" + tag.slug
-        return link
-      }
+      
 
       // _ResourceTypeSelected(e) {
       //   console.log('resource type selected', e.model.tag)
