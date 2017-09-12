@@ -21,26 +21,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <template>
 
-    <style include="stats4sd-common-styles">
-
-      .hero-image {
-        position: relative;
-        height: 320px;
-        overflow: hidden;
-        margin-bottom: 32px;
-      }
-
-      .hero-image {
-        --stats4sd-image-img: {
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: -9999px;
-          right: -9999px;
-          max-width: none;
-        };
-      }
-
+    <style include="shared-styles">
       .grid {
         @apply --layout-horizontal;
         @apply --layout-wrap;
@@ -99,20 +80,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         src="[[category.image]]"
         placeholder-img="[[category.placeholder]]" class="hero-image"></stats4sd-image> -->
 
-    <!-- <header>
-      <h1>[[category.title]]</h1>
+    <header>
+      <h1>[[routeData.category]]</h1>
       <span>[[_getPluralizedQuantity(category.items.length)]]</span>
-    </header> -->
+    </header>
 
     <ul class="grid" hidden$="[[failure]]">
-      <dom-repeat items="[[persistedResources]]" as="resource" initial-count="4">
+      <dom-repeat id="resourcesList" items="[[_getListItems(persistedResources)]]" as="resource" initial-count="4" filter="[[_resourceFilter()]]">
         <template>
           <resource-search-result resource='[[resource]]'></resource-search-result>
         </template>
       </dom-repeat>
     </ul>
 
-    <ul class="grid" hidden$="[[failure]]">
+    <!-- <ul class="grid" hidden$="[[failure]]">
       <dom-repeat items="[[_getListItems(category.items)]]" initial-count="4">
         <template>
           <li>
@@ -120,7 +101,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </li>
         </template>
       </dom-repeat>
-    </ul>
+    </ul> -->
 
     <!--
       stats4sd-network-warning shows a warning message when the items can't be rendered due
@@ -156,13 +137,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           observer: '_offlineChanged'
         },
+        persistedTags:{
+          type:Array,
+          value:[]
+        },
+        categoryMeta:{
+          type:Object,
+          value:{}
+        },
 
         failure: Boolean
 
       }}
 
       static get observers() { return [
-        '_categoryChanged(category, visible)'
+        '_categoryChanged(category, visible)',
       ]}
 
       connectedCallback() {
@@ -173,6 +162,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       disconnectedCallback() {
         super.disconnectedCallback();
         this.isAttached = false;
+      }
+
+      _resourceFilter(){
+        console.log('no resource filter function yet')
       }
 
       _getListItems(items) {
@@ -195,12 +188,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _categoryChanged(category, visible) {
-        console.log('category changed',category)
         if (!visible) {
           return;
         }
         this._changeSectionDebouncer = Polymer.Debouncer.debounce(this._changeSectionDebouncer,
           Polymer.Async.microTask, () => {
+            console.log('category',category)
             if (category) {
               // Notify the category and the page's title
               this.dispatchEvent(new CustomEvent('change-section', {
@@ -212,6 +205,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               // this.dispatchEvent(new CustomEvent('show-invalid-url-warning', {
               //   bubbles: true, composed: true}));
             }
+            this.$.resourcesList.render();
           });
       }
 

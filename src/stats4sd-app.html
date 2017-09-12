@@ -213,7 +213,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       stats4sd-cart-data maintains the state of the user's stats4sdping cart (in localstorage) and
       calculates the total amount.
     -->
-    <stats4sd-cart-data id="cart" cart="{{cart}}" num-items="{{numItems}}" total="{{total}}"></stats4sd-cart-data>
+    <!-- <stats4sd-cart-data id="cart" cart="{{cart}}" num-items="{{numItems}}" total="{{total}}"></stats4sd-cart-data> -->
     <firebase-app name="SSD-Resources" api-key="AIzaSyCfl_Pe6Fb8KzIQRV1P2RIwwhN8Jl6BACo" storage-bucket="ssd-resources-demo.appspot.com"
       auth-domain="ssd-resources-demo.firebaseapp.com" database-url="https://ssd-resources-demo.firebaseio.com">
     </firebase-app>
@@ -373,7 +373,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _routePageChanged(page) {
-        console.log('_routePageChanged',page)
         if (this.page === 'list') {
           this._listScrollTop = window.pageYOffset;
         }
