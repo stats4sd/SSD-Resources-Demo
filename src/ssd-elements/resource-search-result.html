@@ -4,35 +4,37 @@
 <dom-module id="resource-search-result">
   <template>
     <style>
-      :host {
+       :host {
         display: block;
+        width: 100%;
         margin-bottom: 1em;
         cursor: pointer;
       }
+
       img {
         /*max-width: 20vw;*/
         height: 6.5em;
         margin: auto;
         object-fit: cover;
         float: left;
-        padding-right:5px;
-      }
-      
-      .resource-info {
-        margin-left: 5.2em;
-        margin-right:2em;
+        padding-right: 5px;
       }
 
-      
+      .resource-info {
+        margin-left: 5.2em;
+        margin-right: 2em;
+      }
+
+
       .resource-title {
         color: black;
         line-height: 1em;
         overflow: hidden;
         font-weight: 700;
         text-overflow: ellipsis;
-        padding-bottom:0.5em;
+        padding-bottom: 0.5em;
       }
-      
+
       .resource-description {
         display: block;
         /* Fallback for non-webkit */
@@ -46,21 +48,29 @@
         line-height: 1.2em;
         overflow: hidden;
         text-overflow: ellipsis;
-        padding-bottom:1px
-        ;
+        padding-bottom: 1px;
       }
-      @media(max-width:360px){
-        img{display: none;}
-        .resource-info{margin-left:0}
+
+      @media(max-width:360px) {
+        img {
+          display: none;
+        }
+        .resource-info {
+          margin-left: 0
+        }
       }
     </style>
-    <div>
-      <img src="[[resource.featureImage]]">
-    </div>
-    <div class="resource-info">
-      <div class="resource-title">[[resource.name]]</div>
-      <div class="resource-description">[[resource.description]]</div>
-    </div>
+    <!-- <a href="[[_getHref(resource)]]" on-tap="_resourceClicked"> -->
+      <div on-click="_resourceClicked">
+        <div>
+          <img src="[[_getImage(resource)]]">
+        </div>
+        <div class="resource-info">
+          <div class="resource-title">[[resource.name]]</div>
+          <div class="resource-description">[[resource.description]]</div>
+        </div>
+      </div>
+    <!-- </a> -->
   </template>
 
   <script>
@@ -80,10 +90,37 @@
             type: String,
             value: 'resource-search-result'
           },
-          resource:{
-            type:Object
+          resource: {
+            type: Object
           }
         };
+      }
+      _getImage(res) {
+        // return feature image if exists. If not use resource type placeholder
+        if (res.featureImage != "") { return res.featureImage }
+        else {
+          let types = res.tags["Resource-Types"]
+          let slug = types[Object.keys(types)[0]].slug
+          console.log('slug', slug)
+          return ('/images/resourceTypes/' + slug + '.jpg')
+        }
+      }
+      // easier to use ahref than propagated
+      _getHref(res){
+        let href = "/resource/"+res.slug
+        return href
+      }
+      _test(){
+        console.log('test')
+      }
+      _resourceClicked(){
+        // dispatch event up to app so that it can bind the resource to the resource view page and navigate
+        // could also send the full resource but method would fail if navigating directly so no point
+        console.log('resource clicked',this.resource)
+        this.dispatchEvent(new CustomEvent('resource-change', {
+          bubbles: true, composed: true, detail: {
+            url:"/resource/"+this.resource.slug
+          }}));
       }
     }
 

@@ -104,10 +104,9 @@
               notify: true
             },
 
-            failure: {
-              type: Boolean,
-              notify: true,
-              readOnly: true
+            label:{
+              type:String,
+              notify:true
             }
 
           }
@@ -117,21 +116,18 @@
       ]}
 
       _resourcesChanged(res){
-        console.log('res changed',res)
-        console.log('slug',this.slug)
         if(res.length>0 && this.slug){
           let key = this._computeCategoryKey(this.slug)
-          console.log('key',key)
           this.filteredResources=[]
           this.filteredResources=res.filter(function(r){
             return (r.tags["Resource-Types"] && r.tags["Resource-Types"].hasOwnProperty(key)
           )})
-          console.log('filtered',this.filteredResources)
         }
       }
 
         _slugChanged(slug){
-          console.log('slug changed',slug)
+          this.key=this._computeCategoryKey()
+          this.set('label',categoryList[this.key])
           if(this.resources.length==0){
             
           }
@@ -143,7 +139,8 @@
           for (let key in categoryList) {
             let val = categoryList[key]
             if (val.slug == categoryName) {
-              console.log('matched key', key)
+              // set label and return key
+              this.set('label',val.label)
               return key
             }
           }

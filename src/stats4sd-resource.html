@@ -1,0 +1,137 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="stats4sd-category-data.html">
+<link rel="import" href="stats4sd-image.html">
+
+<dom-module id="stats4sd-resource">
+
+  <template>
+
+    <style include="shared-styles">
+
+      :host {
+        display: block;
+      }
+
+      #content {
+        @apply --layout-horizontal;
+        @apply --layout-center-justified;
+      }
+
+      stats4sd-image {
+        position: relative;
+        margin: 64px 32px;
+        width: 50%;
+        max-width: 600px;
+        --stats4sd-image-img: {
+          @apply --layout-fit;
+        };
+      }
+
+      stats4sd-image::before {
+        content: "";
+        display: block;
+        padding-top: 100%;
+      }
+
+      .resource {
+        margin: 64px 32px;
+        width: 50%;
+        max-width: 400px;
+        transition: opacity 0.4s;
+        opacity: 0;
+      }
+
+      .resource[has-content] {
+        opacity: 1;
+      }
+
+      h1 {
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 28px;
+        margin: 0;
+      }
+
+
+      @media (max-width: 767px) {
+
+        #content {
+          @apply --layout-vertical;
+          @apply --layout-center;
+        }
+
+        stats4sd-image {
+          margin: 0;
+          width: 80%;
+        }
+
+        .resource {
+          box-sizing: border-box;
+          margin: 32px 0;
+          padding: 0 24px;
+          width: 100%;
+          max-width: 600px;
+        }
+
+        h1 {
+          font-size: 20px;
+          line-height: 24px;
+        }
+
+      }
+
+    </style>
+
+    <!--
+      app-route provides the name of the category and the item.
+    -->
+    <app-route
+        route="[[route]]"
+        pattern="/:category/:item"
+        data="{{routeData}}"></app-route>
+
+
+        <div>Hello resource</div>
+        <div>[[resource]]</div>
+
+
+
+
+  </template>
+
+  <script>
+
+    class stats4sdResource extends Polymer.Element {
+
+      static get is() { return 'stats4sd-resource'; }
+
+      static get properties() { return {
+        item: Object,
+        route: Object,
+        routeData: Object,
+        visible: {
+          type: Boolean,
+          value: false
+        },
+        offline: {
+          type: Boolean,
+          observer: '_offlineChanged'
+        },
+        failure: Boolean
+
+      }}
+
+      static get observers() { return [
+        '_itemChanged(item, visible)'
+      ]}
+
+
+    }
+
+    customElements.define(stats4sdResource.is, stats4sdResource);
+
+  </script>
+
+</dom-module>

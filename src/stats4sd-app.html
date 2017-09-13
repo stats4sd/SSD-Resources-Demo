@@ -282,14 +282,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <stats4sd-home name="home" persisted-tags="[[persistedTags]]" page="{{page}}"></stats4sd-home>
       <!-- list view of items in a category -->
       <stats4sd-list name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
-      <!-- detail view of one item -->
-      <stats4sd-detail name="detail" route="[[subroute]]" offline="[[offline]]"></stats4sd-detail>
-      <!-- cart view -->
-      <stats4sd-cart name="cart" cart="[[cart]]" total="[[total]]"></stats4sd-cart>
-      <!-- checkout view -->
-      <stats4sd-checkout name="checkout" cart="[[cart]]" total="[[total]]" route="{{subroute}}"></stats4sd-checkout>
       <!--  admin page -->
       <stats4sd-admin name="admin" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]" page="{{page}}"></stats4sd-admin>
+       <!-- resource view page -->
+       <stats4sd-resource name="resource" route="[[subroute]]" persisted-resources="[[persistedResources]]" resourceKey=[[resourceKey]]  offline="[[offline]]"></stats4sd-resource>
 
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
@@ -366,6 +362,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.addEventListener('change-section', (e) => this._onChangeSection(e));
         this.addEventListener('announce', (e) => this._onAnnounce(e));
         this.addEventListener('dom-change', (e) => this._domChange(e));
+        this.addEventListener('resource-change', (e) => this._resourceChange(e));
         this.addEventListener('show-invalid-url-warning', (e) => this._onFallbackSelectionTriggered(e));
         // listen for online/offline
         Polymer.RenderStatus.afterNextRender(this, () => {
@@ -411,6 +408,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.$.header.resetLayout();
           }, 1);
         }
+      }
+      _resourceChange(e){
+        console.log('resource changed',e)
+        this.set('resource',e.detail.resource)
+        this.set('route.path',e.detail.url)
       }
 
       _ensureLazyLoaded() {
