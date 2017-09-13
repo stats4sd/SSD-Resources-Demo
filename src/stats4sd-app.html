@@ -217,9 +217,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <firebase-app name="SSD-Resources" api-key="AIzaSyCfl_Pe6Fb8KzIQRV1P2RIwwhN8Jl6BACo" storage-bucket="ssd-resources-demo.appspot.com"
       auth-domain="ssd-resources-demo.firebaseapp.com" database-url="https://ssd-resources-demo.firebaseio.com">
     </firebase-app>
-    <firebase-query id="query" app-name="SSD-Resources" path="/resources" data="{{resources}}"></firebase-query>
+    <firebase-query id="resQuery" app-name="SSD-Resources" path="/resources" data="{{resources}}"></firebase-query>
     <app-indexeddb-mirror key="persistedResources" data="{{resources}}" session="keepAlways" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
-    <firebase-query id="query" app-name="SSD-Resources" path="/tags" data="{{tags}}"></firebase-query>
+    <firebase-query id="tagsQuery" app-name="SSD-Resources" path="/tags" data="{{tags}}"></firebase-query>
     <app-indexeddb-mirror key="persistedTags" data="{{tags}}" session="keepAlways" persisted-data="{{persistedTags}}"></app-indexeddb-mirror>
 
 
@@ -288,6 +288,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <stats4sd-cart name="cart" cart="[[cart]]" total="[[total]]"></stats4sd-cart>
       <!-- checkout view -->
       <stats4sd-checkout name="checkout" cart="[[cart]]" total="[[total]]" route="{{subroute}}"></stats4sd-checkout>
+      <!--  admin page -->
+      <stats4sd-admin name="admin" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]" page="{{page}}"></stats4sd-admin>
 
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
