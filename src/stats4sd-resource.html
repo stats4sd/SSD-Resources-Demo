@@ -9,9 +9,12 @@
   <template>
 
     <style include="shared-styles">
-
-      :host {
+       :host {
         display: block;
+        padding: 10px;
+        background-color: #DBDBDB;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
       }
 
       #content {
@@ -26,7 +29,8 @@
         max-width: 600px;
         --stats4sd-image-img: {
           @apply --layout-fit;
-        };
+        }
+        ;
       }
 
       stats4sd-image::before {
@@ -51,7 +55,16 @@
         font-size: 24px;
         font-weight: 500;
         line-height: 28px;
-        margin: 0;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center
+      }
+
+      .resource-title {
+        font-size: 20px;
+        line-height: 24px;
+        margin-bottom: 0;
+        text-align: center
       }
 
 
@@ -74,27 +87,24 @@
           width: 100%;
           max-width: 600px;
         }
-
-        h1 {
-          font-size: 20px;
-          line-height: 24px;
-        }
-
       }
-
     </style>
 
     <!--
       app-route provides the name of the category and the item.
     -->
-    <app-route
-        route="[[route]]"
-        pattern="/:category/:item"
-        data="{{routeData}}"></app-route>
+    <app-route route="[[route]]" pattern="/:slug" data="{{routeData}}"></app-route>
+    <div hidden$="[[!resource.name]]">
+      <h1 class="resource-title">[[resource.name]]</h1>
+      <div class="url">
+        <a href="[[_getResourceUrl(resource)]]">[[_getResourceUrl(resource)]]</a>
+      </div>
+      <div class='bold'>Description: </div>
+      <p>[[resource.description]]</p>
+      <div class='bold'>Files: </div>
+      <p>Files go here (need to make element)</p>
+    </div>
 
-
-        <div>Hello resource</div>
-        <div>[[resource]]</div>
 
 
 
@@ -102,36 +112,78 @@
   </template>
 
   <script>
-
     class stats4sdResource extends Polymer.Element {
 
       static get is() { return 'stats4sd-resource'; }
 
-      static get properties() { return {
-        item: Object,
-        route: Object,
-        routeData: Object,
-        visible: {
-          type: Boolean,
-          value: false
-        },
-        offline: {
-          type: Boolean,
-          observer: '_offlineChanged'
-        },
-        failure: Boolean
+      static get properties() {
+        return {
+          item: Object,
+          route: Object,
+          routeData: Object,
+          visible: {
+            type: Boolean,
+            value: false
+          },
+          offline: {
+            type: Boolean,
+            // observer: '_offlineChanged'
+          },
+          failure: Boolean,
+          persistedResources: {
+            type: Array,
 
-      }}
+          },
+          resource: {
+            type: Object
+          },
 
-      static get observers() { return [
-        '_itemChanged(item, visible)'
-      ]}
+        }
+      }
+
+      static get observers() {
+        return [
+          '_persistedResourcesChanged(persistedResources)'
+        ]
+      }
+       connectedCallback() {
+          super.connectedCallback();
+          console.log('resource attached')
+          this.isAttached = true;
+        }
+
+        disconnectedCallback() {
+          super.disconnectedCallback();
+          console.log('resource unattached')
+          this.isAttached = false;
+        }
+
+
+      _persistedResourcesChanged(resources) {
+        // if page loaded directly then wait for persisted to populate and then filter for result
+        if (resources.length > 0 && this.resource == undefined) {
+          let resource = this._getResourceFromSlug(resources, this.routeData.slug)
+          this.set('resource', resource)
+        }
+      }
+
+      _getResourceFromSlug(resources, slug) {
+        // use route to get resource slug and lookup from resources array
+        // could be made more efficient from populated slug lookup db endpoint, or simply 
+        // letting slug be the resource id (although then will need to ensure all names unique)
+        for (let r of resources) {
+          if (r.slug == slug) { return r }
+        }
+      }
+      _getResourceUrl(resource) {
+
+        return (window.location.origin + "/resource/" + this.resource.slug)
+      }
 
 
     }
 
     customElements.define(stats4sdResource.is, stats4sdResource);
-
   </script>
 
 </dom-module>

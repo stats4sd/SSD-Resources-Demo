@@ -55,20 +55,6 @@
       }
     </style>
 
-    <!-- <dom-repeat items="[[categories]]">
-      <template strip-whitespace>
-        <div class="item">
-          <a class="image-link" href$="/list/[[item.name]]">
-            <stats4sd-image src="[[item.image]]" alt="[[item.title]]" placeholder-img="[[item.placeholder]]"></stats4sd-image>
-          </a>
-          <h2>[[item.title]]</h2>
-          <stats4sd-button>
-            <a aria-label$="[[item.title]] stats4sd Now" href$="/list/[[item.name]]">stats4sd Now</a>
-          </stats4sd-button>
-        </div>
-      </template>
-    </dom-repeat> -->
-
     <p class="padding">Welcome to the Stats4SD resource bank. You can browse all resources using the top or sidebar menus, or explore some the
       links below
     </p>
@@ -137,16 +123,6 @@
           return (tag.type == type);
         }
       }
-      
-
-      // _ResourceTypeSelected(e) {
-      //   console.log('resource type selected', e.model.tag)
-      //   this.set("activeFilter", e.model.tag);
-      //   // this.dispatchEvent(new CustomEvent('change-section', {
-      //   //     bubbles: true, composed: true, detail: { title: 'List' }
-      //   //   }));
-      // }
-
     }
 
     customElements.define(stats4sdHome.is, stats4sdHome);

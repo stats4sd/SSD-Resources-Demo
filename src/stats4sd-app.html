@@ -53,7 +53,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app-header {
         @apply --layout-fixed-top;
         z-index: 1;
-        color:white;
+        color: white;
         background-color: rgba(210, 35, 42, 0.95);
         --app-header-shadow: {
           box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
@@ -86,22 +86,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width: 40px;
       }
 
-      .home-btn {
+      .home-btn, .back-btn {
         color: white;
       }
 
-      .cart-btn-container {
-        position: relative;
-        width: 40px;
+       /* :host(:not([page=test])) .back-btn {
+        display: none;
+      } */
+      :host(:not([page=resource])) .back-btn {
+        display: none;
       }
-
-      .announcer {
-        position: fixed;
-        height: 0;
-        overflow: hidden;
-      }
-
-       :host(:not([page=detail])) .back-btn {
+      :host([page=resource]) .home-btn {
         display: none;
       }
 
@@ -109,10 +104,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: none !important;
       }
 
-      #tabContainer {
-        position: relative;
-        height: 66px;
-      }
 
       stats4sd-tabs,
       stats4sd-tab {
@@ -122,70 +113,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ;
       }
 
-      stats4sd-tabs {
-        height: 100%;
-      }
-
-      stats4sd-tab {
-        margin: 0 10px;
-      }
-
-      stats4sd-tab a {
-        display: inline-block;
-        outline: none;
-        padding: 9px 5px;
-        font-size: 13px;
-        font-weight: 500;
-        text-decoration: none;
-        color: var(--app-primary-color);
-      }
-
-      .cart-badge {
-        position: absolute;
-        top: -2px;
-        right: 0;
-        width: 20px;
-        height: 20px;
-        background-color: var(--app-accent-color);
-        border-radius: 50%;
-        color: white;
-        font-size: 12px;
-        font-weight: 500;
-        pointer-events: none;
-        @apply --layout-vertical;
-        @apply --layout-center-center;
-      }
-
-      .drawer-list {
-        margin: 0 20px;
-      }
-
-      .drawer-list a {
-        display: block;
-        padding: 0 16px;
-        line-height: 40px;
-        text-decoration: none;
-        color: var(--app-secondary-color);
-      }
-
-      .drawer-list a.iron-selected {
-        color: black;
-        font-weight: bold;
-      }
-
-      stats4sd-cart-modal {
-        z-index: 2;
-      }
-
-      app-drawer {
-        z-index: 3;
-      }
-
       iron-pages {
         max-width: 1440px;
+        min-height: 100vh;
         margin: 0 auto;
+        height: 100%;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
       }
-
       /* small screen */
 
       @media (max-width: 767px) {
@@ -223,19 +158,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-indexeddb-mirror key="persistedTags" data="{{tags}}" session="keepAlways" persisted-data="{{persistedTags}}"></app-indexeddb-mirror>
 
 
-
     <app-header role="navigation" id="header" effects="waterfall" condenses reveals>
       <app-toolbar>
         <div class="left-bar-item">
           <a href="/">
-          <paper-icon-button class="home-btn" icon="home" aria-label="Home">
-          </paper-icon-button>
-        </a>
+            <paper-icon-button class="home-btn" icon="home" aria-label="Home">
+            </paper-icon-button>
+          </a>
           <a class="back-btn" href="/list/[[categoryName]]" tabindex="-1">
-            <paper-icon-button icon="arrow-back" aria-label="Go back"></paper-icon-button>
+            <paper-icon-button class="back-btn" icon="arrow-back" aria-label="Go back"></paper-icon-button>
           </a>
         </div>
         <div class="logo" main-title><a href="/" aria-label="stats4sd Home">Stats4SD</a></div>
+        <div>[[page]]</div>
         <div class="cart-btn-container">
           <a href="/cart" tabindex="-1">
             <paper-icon-button icon="shopping-cart" style="color:white" aria-label$="stats4sdping cart: [[_computePluralizedQuantity(numItems)]]"></paper-icon-button>
@@ -243,57 +178,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <div class="cart-badge" aria-hidden="true" hidden$="[[!numItems]]">[[numItems]]</div>
         </div>
       </app-toolbar>
-
-      <!-- Lazy-create the tabs for larger screen sizes. ***NOT USING FOR NOW*** -->
-      <!-- <div id="tabContainer" sticky$="[[_shouldShowTabs]]" hidden$="[[!_shouldShowTabs]]">
-        <dom-if if="[[_shouldRenderTabs]]">
-          <template>
-            <stats4sd-tabs selected="[[categoryName]]" attr-for-selected="name">
-              <dom-repeat items="[[categories]]" as="category" initial-count="4">
-                <template>
-                  <stats4sd-tab name="[[category.name]]">
-                    <a href="/list/[[category.name]]">[[category.title]]</a>
-                  </stats4sd-tab>
-                </template>
-              </dom-repeat>
-            </stats4sd-tabs>
-          </template>
-        </dom-if>
-      </div> -->
     </app-header>
 
-    <!-- Lazy-create the drawer for small screen sizes. ***NOT USING FOR NOW*** -->
-    <dom-if if="[[_shouldRenderDrawer]]">
-      <!-- <template>
-        <app-drawer opened="{{drawerOpened}}" swipe-open tabindex="0">
-          <iron-selector role="navigation" class="drawer-list" selected="[[categoryName]]" attr-for-selected="name">
-            <dom-repeat items="[[categories]]" as="category" initial-count="4">
-              <template>
-                <a name="[[category.name]]" href="/list/[[category.name]]">[[category.title]]</a>
-              </template>
-            </dom-repeat>
-          </iron-selector>
-        </app-drawer>
-      </template> -->
-    </dom-if>
-
-    <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
+    <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
       <!-- home view -->
       <stats4sd-home name="home" persisted-tags="[[persistedTags]]" page="{{page}}"></stats4sd-home>
       <!-- list view of items in a category -->
       <stats4sd-list name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
       <!--  admin page -->
       <stats4sd-admin name="admin" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]" page="{{page}}"></stats4sd-admin>
-       <!-- resource view page -->
-       <stats4sd-resource name="resource" route="[[subroute]]" persisted-resources="[[persistedResources]]" resourceKey=[[resourceKey]]  offline="[[offline]]"></stats4sd-resource>
+      <!-- resource view page -->
+      <stats4sd-resource name="resource" route="[[subroute]]" persisted-resources="[[persistedResources]]" resource=[[resource]]
+        offline="[[offline]]"></stats4sd-resource>
 
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
-   
-
     <!-- a11y announcer -->
-    <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div>
-
+    <!-- <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div> -->
   </template>
 
   <script>
@@ -384,6 +285,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _pageChanged(page, oldPage) {
         if (page != null) {
+          console.log('loading page',page)
           // home route is eagerly loaded
           if (page == 'home') {
             this._pageLoaded(Boolean(oldPage));
@@ -409,10 +311,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }, 1);
         }
       }
-      _resourceChange(e){
-        console.log('resource changed',e)
-        this.set('resource',e.detail.resource)
-        this.set('route.path',e.detail.url)
+      _resourceChange(e) {
+        console.log('resource changed', e)
+        this.set('resource', e.detail.resource)
+        console.log('resource', this.resource)
+        this.set('route.path', e.detail.url)
       }
 
       _ensureLazyLoaded() {

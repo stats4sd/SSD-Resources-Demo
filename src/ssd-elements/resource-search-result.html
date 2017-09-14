@@ -101,7 +101,6 @@
         else {
           let types = res.tags["Resource-Types"]
           let slug = types[Object.keys(types)[0]].slug
-          console.log('slug', slug)
           return ('/images/resourceTypes/' + slug + '.jpg')
         }
       }
@@ -119,7 +118,8 @@
         console.log('resource clicked',this.resource)
         this.dispatchEvent(new CustomEvent('resource-change', {
           bubbles: true, composed: true, detail: {
-            url:"/resource/"+this.resource.slug
+            url:"/resource/"+this.resource.slug,
+            resource:this.resource
           }}));
       }
     }

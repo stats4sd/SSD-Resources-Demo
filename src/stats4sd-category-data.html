@@ -116,12 +116,20 @@
       ]}
 
       _resourcesChanged(res){
-        if(res.length>0 && this.slug){
+        // when resources are loaded, or method called from slug change populate filtered resources
+        // if no slug assumes /list selected and therefore should display all
+        // could change 'all resources' to pick specific slug if wanted
+        console.log('slug',this.slug)
+        if(res.length>0){
           let key = this._computeCategoryKey(this.slug)
           this.filteredResources=[]
-          this.filteredResources=res.filter(function(r){
-            return (r.tags["Resource-Types"] && r.tags["Resource-Types"].hasOwnProperty(key)
-          )})
+          if(this.slug==''||this.slug==undefined){console.log('showing all');this.filteredResources=res}
+          else{
+            this.filteredResources = res.filter(function (r) {
+              return (r.tags["Resource-Types"] && r.tags["Resource-Types"].hasOwnProperty(key)
+              )
+            })
+          }
         }
       }
 
