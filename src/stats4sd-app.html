@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <!-- <link rel="import" href="./ssd-elements/resource-featured.html"> -->
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
@@ -169,13 +170,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-icon-button class="back-btn" icon="arrow-back" aria-label="Go back"></paper-icon-button>
           </a>
         </div>
-        <div class="logo" main-title><a href="/" aria-label="stats4sd Home">Stats4SD</a></div>
-        <div>[[page]]</div>
-        <div class="cart-btn-container">
-          <a href="/cart" tabindex="-1">
-            <paper-icon-button icon="shopping-cart" style="color:white" aria-label$="stats4sdping cart: [[_computePluralizedQuantity(numItems)]]"></paper-icon-button>
-          </a>
-          <div class="cart-badge" aria-hidden="true" hidden$="[[!numItems]]">[[numItems]]</div>
+        <div class="logo" main-title>
+          <a hidden$="[[!smallScreen]]" href="/" aria-label="stats4sd Home">Stats4SD</a>
+          <a hidden$="[[smallScreen]]" href="/" aria-label="stats4sd Home">Statistics for Sustainable Development</a>
+        </div>
+        <!-- <div>[[page]]</div> -->
+        <div on-tap="_signInOpen">
+          <a style="font-size: 16px; cursor:pointer">Sign In</a>
+          <paper-icon-button icon="lock" style="color:white" aria-label$="Sign In"></paper-icon-button>       
         </div>
       </app-toolbar>
     </app-header>
@@ -195,6 +197,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </iron-pages>
     <!-- a11y announcer -->
     <!-- <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div> -->
+
+     <!-- Login box (starts hidden) -->
+     <paper-dialog id="login" modal>
+        <paper-dialog-scrollable>
+          <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources "></login-fire>-->
+          <login-element app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+          </login-element>
+        </paper-dialog-scrollable>
+      </paper-dialog>
+
   </template>
 
   <script>
@@ -352,6 +364,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _toggleDrawer() {
         this.drawerOpened = !this.drawerOpened;
+      }
+      _signInOpen(){
+        console.log('opening sign in');
+        this.$.login.open()
       }
 
       // Elements in the app can notify section changes.

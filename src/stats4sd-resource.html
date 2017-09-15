@@ -3,6 +3,7 @@
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="stats4sd-category-data.html">
 <link rel="import" href="stats4sd-image.html">
+<link rel="import" href="./ssd-elements/resource-file-download.html">
 
 <dom-module id="stats4sd-resource">
 
@@ -67,6 +68,25 @@
         text-align: center
       }
 
+      .meta-data {
+        display: flex;
+        flex-wrap: wrap;
+        
+      }
+
+      @media(min-width:1048px) {
+        .meta-data {
+          flex-wrap: nowrap;
+          justify-content: space-between;
+        }
+        .files-container{
+          margin-left:50px;
+          width:100%;
+          max-width:500px;
+
+        }
+      }
+
 
       @media (max-width: 767px) {
 
@@ -99,10 +119,22 @@
       <div class="url">
         <a href="[[_getResourceUrl(resource)]]">[[_getResourceUrl(resource)]]</a>
       </div>
-      <div class='bold'>Description: </div>
-      <p>[[resource.description]]</p>
-      <div class='bold'>Files: </div>
-      <p>Files go here (need to make element)</p>
+      <div class="meta-data">
+        <div style="min-width: 300px; max-width:700px">
+          <div class='bold'>Description: </div>
+          <p style="margin-top:5px; ">[[resource.description]]</p>
+        </div>
+        <div class="files-container" hidden$="[[!resource.uploadedFiles]]">
+          <div class='bold'>Files: </div>
+          <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
+            <resource-file-download file="[[file]]"></resource-file-download>
+          </template>
+        </div>
+      </div>
+
+
+
+
     </div>
 
 
@@ -146,17 +178,17 @@
           '_persistedResourcesChanged(persistedResources)'
         ]
       }
-       connectedCallback() {
-          super.connectedCallback();
-          console.log('resource attached')
-          this.isAttached = true;
-        }
+      connectedCallback() {
+        super.connectedCallback();
+        console.log('resource attached')
+        this.isAttached = true;
+      }
 
-        disconnectedCallback() {
-          super.disconnectedCallback();
-          console.log('resource unattached')
-          this.isAttached = false;
-        }
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        console.log('resource unattached')
+        this.isAttached = false;
+      }
 
 
       _persistedResourcesChanged(resources) {

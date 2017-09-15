@@ -1,0 +1,36 @@
+<link rel="import" href="../polymer/polymer-element.html">
+
+<dom-module id="resource-file-download">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]!</h2>
+  </template>
+
+  <script>
+    /**
+     * `resource-file-download`
+     * 
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class ResourceFileDownload extends Polymer.Element {
+      static get is() { return 'resource-file-download'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'resource-file-download'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(ResourceFileDownload.is, ResourceFileDownload);
+  </script>
+</dom-module>
