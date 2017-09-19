@@ -1,0 +1,120 @@
+<!-- <link rel="import" href="../polymer/polymer-element.html"> -->
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="resource-editor">
+  <template>
+    <style>
+       :host {
+        display: block;
+      }
+    </style>
+    <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
+    <span class="url">[[origin]]/[[slug]]</span>
+    <p>
+      <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required></paper-textarea>
+    </p>
+    <!-- REPLACED PAPER TABS WITH PAPER TAGS -->
+
+    <h4>Tags</h4>
+    <!--<paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{resource.topics}}"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{resource.collections}}"></paper-tags-dropdown>
+    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{resource.keywords}}"></paper-tags-dropdown>-->
+
+    <vaadin-combo-box label="Resource Types" id="Resource-TypeCombo" items="[[_filterTags(persistedTags,'Resource-Type')]]" selected-item="{{tags.Resource-Type}}"
+      filtered-items="{{filteredResource-Type}}" on-change="_comboChange" on-filter-changed="_filterChanged" focused="{{focused.Resource-Type}}"
+      item-value-path="$key" item-value-path="label" allow-custom-value>
+    </vaadin-combo-box>
+    <div hidden$="[[!newTag]]" on-tap="addTag">
+      <div hidden$="[[!focused.Resource-Type]]">Press enter to add tag: [[newTag.label]]</div>
+    </div>
+    <template is="dom-repeat" as="tag" items="[[_tagsToArray(resource.tags,'Resource-Type')]]" observe="tags resource.tags">
+      <paper-button class="tag-button">{{tag.label}}
+        <iron-icon icon="close" on-tap="removeTag"></iron-icon>
+      </paper-button>
+    </template>
+
+    <vaadin-combo-box label="Collections" id="CollectionCombo" items="[[_filterTags(persistedTags,'Collection')]]" selected-item="{{tags.Collection}}"
+      filtered-items="{{filteredCollections}}" on-change="_comboChange" on-filter-changed="_filterChanged" focused="{{focused.Collection}}"
+      item-value-path="$key" item-value-path="label" allow-custom-value>
+    </vaadin-combo-box>
+    <div hidden$="[[!newTag]]" on-tap="addTag">
+      <div hidden$="[[!focused.Collection]]">Press enter to add tag: [[newTag.label]]</div>
+    </div>
+    <template is="dom-repeat" as="tag" items="[[_tagsToArray(resource.tags,'Collection')]]" observe="tags resource.tags">
+      <paper-button class="tag-button">{{tag.label}}
+        <iron-icon icon="close" on-tap="removeTag"></iron-icon>
+      </paper-button>
+    </template>
+
+    <!--<paper-tags id="Resource-TypeTags" items="[[_tagsToArray(resource.tags,'Resource-Type')]]"></paper-tags>-->
+    <!--live tag editor-->
+    <firebase-document id="currentTag" app-name="SSD-Resources" data="{{currentTag}}" path="/tags/"></firebase-document>
+    <firebase-document id="allTags" app-name="SSD-Resources" data="{{allTags}}" path="/tags"></firebase-document>
+
+
+    <h4>External Links</h4>
+    <template id="externalLinks" is="dom-repeat" items="[[resource.externalLinks]]" as="link">
+      <!--{{link.number}} test-->
+      <div class='flex-container'>
+        <a href="{{link.url}}" target="_blank"><span>[[link.url]]</span></a>
+        <paper-icon-button suffix on-tap="editLink" class="green" icon="editor:mode-edit" alt="edit" title="edit">
+        </paper-icon-button>
+        <paper-icon-button on-tap="removeLink" class="red" icon="clear" alt="clear" title="clear">
+        </paper-icon-button>
+      </div>
+    </template>
+
+    <paper-input label="add any external links here" no-label-float value="{{resource.tempLinkUrl}}">
+      <iron-icon icon="language" prefix></iron-icon>
+      <paper-icon-button suffix on-tap="addLink" class="green" icon="add" alt="add" title="add" hidden$="{{link.saved}}">
+      </paper-icon-button>
+    </paper-input>
+
+    <h4>Uploaded Files</h4>
+    <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
+    <iron-icon slot="drop-label-icon" icon="description"></iron-icon>
+    <span slot="drop-label">Drop your favourite Novels here (PDF files only)</span>
+    <div class="delete" on-tap="delete">
+      <paper-icon-button icon="delete" class="delete-button"></paper-icon-button>
+      <span>Delete Resource</span>
+    </div>
+
+    <h4>Feature Image</h4>
+    <div class='flex-container'>
+      <iron-selector>
+        <template is="dom-repeat" as="tag" items="[[_tagsToArray(resource.tags,'Resource-Type')]]" observe="tags resource.tags">
+          <div on-tap="setFeatureImage" class="feature-image">
+            <img src="/images/resourceTypes/{{tag.slug}}.jpg">
+            <div class="image-label">{{tag.label}}</div>
+          </div>
+        </template>
+      </iron-selector>
+    </div>
+
+
+  </template>
+
+  <script>
+    /**
+     * `resource-editor`
+     * 
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class ResourceEditor extends Polymer.Element {
+      static get is() { return 'resource-editor'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'resource-editor'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(ResourceEditor.is, ResourceEditor);
+  </script>
+</dom-module>

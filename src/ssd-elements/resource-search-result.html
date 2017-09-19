@@ -115,7 +115,6 @@
       _resourceClicked(){
         // dispatch event up to app so that it can bind the resource to the resource view page and navigate
         // could also send the full resource but method would fail if navigating directly so no point
-        console.log('resource clicked',this.resource)
         this.dispatchEvent(new CustomEvent('resource-change', {
           bubbles: true, composed: true, detail: {
             url:"/resource/"+this.resource.slug,

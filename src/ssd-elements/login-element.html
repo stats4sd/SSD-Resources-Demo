@@ -144,21 +144,16 @@
       _signInEmailPW(e){
         this._cleanMessages();
         this.spinnerActive=true      
-        console.log('email password element 8',this.$.auth)
         this.$.loginForm.querySelector('paper-spinner-lite, paper-spinner').active=true
         this.$.auth.signInWithEmailAndPassword(this.email, this.pw)
           .then(function(success){
-            console.log('still there?',document.querySelector('paper-spinner-lite, paper-spinner'))
           })
           .catch(function(error){
-            console.log('failed sign in')
           })
       }
 
       _userChanged(user){
-        console.log('user changed',user)
         this.$.loginForm.querySelector('paper-spinner-lite, paper-spinner').active=false
-        console.log(document.getElementById('login'))
       }
 
       // _signUpEmailPW(e){
@@ -167,7 +162,6 @@
       // }
 
       _handleEmailPWError(err){
-        console.log('err',err)
         this.pw = null;
         this.$.emailPWError.textContent = err.detail.message;
         this.$.loginForm.querySelector('paper-spinner-lite, paper-spinner').active=false

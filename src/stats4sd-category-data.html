@@ -119,7 +119,6 @@
         // when resources are loaded, or method called from slug change populate filtered resources
         // if no slug assumes /list selected and therefore should display all
         // could change 'all resources' to pick specific slug if wanted
-        console.log('slug',this.slug)
         if(res.length>0){
           let key = this._computeCategoryKey(this.slug)
           this.filteredResources=[]

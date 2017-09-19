@@ -23,7 +23,9 @@
     "polymerfire": "firebase/polymerfire#^2.1.0",
     "paper-button": "PolymerElements/paper-button#^2.0.0",
     "paper-dialog": "PolymerElements/paper-dialog#^2.0.0",
-    "paper-input": "PolymerElements/paper-input#^2.0.2"
+    "paper-input": "PolymerElements/paper-input#^2.0.2",
+    "vaadin-combo-box": "vaadin/vaadin-combo-box#^2.0.0",
+    "vaadin-upload": "vaadin/vaadin-upload#^2.1.0"
   },
   "devDependencies": {
     "web-component-tester": "^6.0.0"

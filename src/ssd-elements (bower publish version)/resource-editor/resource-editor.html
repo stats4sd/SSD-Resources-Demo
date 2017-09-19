@@ -1,0 +1,36 @@
+<link rel="import" href="../polymer/polymer-element.html">
+
+<dom-module id="resource-editor">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]!</h2>
+  </template>
+
+  <script>
+    /**
+     * `resource-editor`
+     * 
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class ResourceEditor extends Polymer.Element {
+      static get is() { return 'resource-editor'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'resource-editor'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(ResourceEditor.is, ResourceEditor);
+  </script>
+</dom-module>

@@ -11,6 +11,25 @@
         /* padding: 10px */
       }
     </style>
+    <app-route route="[[route]]" pattern="/:slug" data="{{routeData}}"></app-route>
+
+    <template is="dom-if" if="{{signedIn}}">
+        <div on-tap="_signOut">
+          <a style="font-size: 16px; cursor:pointer">Sign Out</a>
+          <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
+        </div>
+        <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
+      </template>
+
+      <template is="dom-if" if="{{signedIn}}">
+          <div on-tap="_signOut">
+            <a style="font-size: 16px; cursor:pointer">Sign Out</a>
+            <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
+          </div>
+          <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
+        </template>
+
+        
     <firebase-document path="/tags" data="{{liveTags}}" app-name="SSD-Resources"></firebase-document>
     <firebase-document path="/resources" data="{{liveResources}}" app-name="SSD-Resources"></firebase-document>
 
@@ -18,7 +37,9 @@
       <h1>Admin</h1>
       <!-- <paper-button raised on-tap="_upgradeResources">Upgrade Resources (pre 0.9.5 format)</paper-button>
       <paper-button raised on-tap="_upgradeTags">Upgrade Tags (pre 0.9.5 format)</paper-button> -->
+      <paper-button raised on-tap="_buttonTest">Test</paper-button>
     </div>
+    <div>slug: {{routeData.slug}}</div>
 
 
   </template>
@@ -45,6 +66,9 @@
 
       _complexChange(change) {
         console.log('complex change', change)
+      }
+      _buttonTest(){
+        console.log('routeData',this.routeData)
       }
 
       _upgradeResources() {

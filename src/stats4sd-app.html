@@ -11,7 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
 <!-- <link rel="import" href="./ssd-elements/resource-featured.html"> -->
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
@@ -27,6 +27,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="stats4sd-category-data.html">
 <!-- Since 'home' is the default route, eagerly load it. -->
 <link rel="import" href="stats4sd-home.html">
+<link rel="import" href="stats4sd-icons.html">
 
 <dom-module id="stats4sd-app">
 
@@ -87,20 +88,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width: 40px;
       }
 
-      .home-btn, .back-btn {
+      .home-btn,
+      .back-btn {
         color: white;
       }
-
-       /* :host(:not([page=test])) .back-btn {
+      /* :host(:not([page=test])) .back-btn {
         display: none;
       } */
-      :host(:not([page=resource])) .back-btn {
+
+       :host(:not([page=resource])) .back-btn {
         display: none;
       }
-      :host([page=resource]) .home-btn {
+
+       :host([page=resource]) .home-btn {
         display: none;
       }
-      #signedInHeader{
+
+      #signedInHeader {
         position: absolute;
         top: 0;
         right: 20px;
@@ -129,9 +133,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         @apply(--layout-flex);
         @apply(--layout-vertical);
       }
-      .admin-toolbar{
+
+      .admin-toolbar {
         background-color: var(--paper-amber-200);
-        margin-top:-2px;
+        margin-top: -2px;
       }
       /* small screen */
 
@@ -188,18 +193,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <!-- <div>[[page]]</div> -->
         <div on-tap="_signInOpen" hidden$="[[signedIn]]">
           <a style="font-size: 16px; cursor:pointer">Sign In</a>
-          <paper-icon-button icon="lock" style="color:white" aria-label$="Sign In"></paper-icon-button>       
+          <paper-icon-button icon="lock" style="color:white" aria-label$="Sign In"></paper-icon-button>
         </div>
-        <div on-tap="_signOut" hidden$="[[!signedIn]]">
-          <a style="font-size: 16px; cursor:pointer">Sign Out</a>
-          <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>       
-        </div>
-        <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
+        <template is="dom-if" if="{{signedIn}}">
+          <div on-tap="_signOut">
+            <a style="font-size: 16px; cursor:pointer">Sign Out</a>
+            <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
+          </div>
+          <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
+        </template>
+
+
       </app-toolbar>
     </app-header>
 
     <div class="admin-toolbar" hidden$="[[!signedIn]]">
-      <paper-button><iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource</paper-icon-button>
+      <paper-button>
+        <a href="/resource/_/edit" class="href-plain">
+          <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource</paper-icon-button>
+        </a>
     </div>
 
     <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
@@ -208,7 +220,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- list view of items in a category -->
       <stats4sd-list name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
       <!--  admin page -->
-      <stats4sd-admin name="admin" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]" page="{{page}}"></stats4sd-admin>
+      <stats4sd-admin name="admin" route="[[subroute]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"
+        page="{{page}}"></stats4sd-admin>
       <!-- resource view page -->
       <stats4sd-resource name="resource" route="[[subroute]]" persisted-resources="[[persistedResources]]" resource=[[resource]]
         offline="[[offline]]"></stats4sd-resource>
@@ -218,14 +231,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!-- a11y announcer -->
     <!-- <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div> -->
 
-     <!-- Login box (starts hidden) -->
-     <paper-dialog id="login" modal>
-        <paper-dialog-scrollable>
-          <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources "></login-fire>-->
-          <login-element id="stats4sdLogin" app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
-          </login-element>
-        </paper-dialog-scrollable>
-      </paper-dialog>
+    <!-- Login box (starts hidden) -->
+    <paper-dialog id="login" modal>
+      <paper-dialog-scrollable>
+        <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources "></login-fire>-->
+        <login-element id="stats4sdLogin" app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+        </login-element>
+      </paper-dialog-scrollable>
+    </paper-dialog>
 
   </template>
 
@@ -267,9 +280,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Array,
             value: []
           },
-          signedIn:{
-            type:Boolean,
-            observer:'_signedInChange'
+          signedIn: {
+            type: Boolean,
+            observer: '_signedInChange'
           }
         }
       }
@@ -321,7 +334,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _pageChanged(page, oldPage) {
         if (page != null) {
-          console.log('loading page',page)
           // home route is eagerly loaded
           if (page == 'home') {
             this._pageLoaded(Boolean(oldPage));
@@ -389,14 +401,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _toggleDrawer() {
         this.drawerOpened = !this.drawerOpened;
       }
-      _signInOpen(){
+      _signInOpen() {
         this.$.login.open()
       }
-      _signOut(){
+      _signOut() {
         this.$.stats4sdLogin.signOut();
         this.signedIn = false;
       }
-      _signedInChange(){
+      _signedInChange() {
         this.$.login.close()
       }
 
