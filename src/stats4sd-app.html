@@ -32,7 +32,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <template>
 
-    <style>
+    <style include="shared-styles">
        :host {
         display: block;
         position: relative;
@@ -122,6 +122,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         @apply(--layout-flex);
         @apply(--layout-vertical);
       }
+      .admin-toolbar{
+        background-color: var(--paper-amber-200)
+      }
       /* small screen */
 
       @media (max-width: 767px) {
@@ -181,6 +184,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
       </app-toolbar>
     </app-header>
+
+    <div class="admin-toolbar">
+      <paper-button>Add Resource</paper-button>
+      <paper-button style="float:right">Sign Out</paper-button>
+    </div>
 
     <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
       <!-- home view -->
