@@ -100,6 +100,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       :host([page=resource]) .home-btn {
         display: none;
       }
+      #signedInHeader{
+        position: absolute;
+        top: 0;
+        right: 20px;
+        font-size: x-small;
+        padding: 5px;
+      }
 
       [hidden] {
         display: none !important;
@@ -123,7 +130,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         @apply(--layout-vertical);
       }
       .admin-toolbar{
-        background-color: var(--paper-amber-200)
+        background-color: var(--paper-amber-200);
+        margin-top:-2px;
       }
       /* small screen */
 
@@ -178,16 +186,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <a hidden$="[[smallScreen]]" href="/" aria-label="stats4sd Home">Statistics for Sustainable Development</a>
         </div>
         <!-- <div>[[page]]</div> -->
-        <div on-tap="_signInOpen">
+        <div on-tap="_signInOpen" hidden$="[[signedIn]]">
           <a style="font-size: 16px; cursor:pointer">Sign In</a>
           <paper-icon-button icon="lock" style="color:white" aria-label$="Sign In"></paper-icon-button>       
         </div>
+        <div on-tap="_signOut" hidden$="[[!signedIn]]">
+          <a style="font-size: 16px; cursor:pointer">Sign Out</a>
+          <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>       
+        </div>
+        <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
       </app-toolbar>
     </app-header>
 
-    <div class="admin-toolbar">
-      <paper-button>Add Resource</paper-button>
-      <paper-button style="float:right">Sign Out</paper-button>
+    <div class="admin-toolbar" hidden$="[[!signedIn]]">
+      <paper-button><iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource</paper-icon-button>
     </div>
 
     <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
@@ -210,7 +222,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
      <paper-dialog id="login" modal>
         <paper-dialog-scrollable>
           <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources "></login-fire>-->
-          <login-element app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+          <login-element id="stats4sdLogin" app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
           </login-element>
         </paper-dialog-scrollable>
       </paper-dialog>
@@ -254,6 +266,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             //bserver:'_resDocsChanged',
             type: Array,
             value: []
+          },
+          signedIn:{
+            type:Boolean,
+            observer:'_signedInChange'
           }
         }
       }
@@ -374,8 +390,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.drawerOpened = !this.drawerOpened;
       }
       _signInOpen(){
-        console.log('opening sign in');
         this.$.login.open()
+      }
+      _signOut(){
+        this.$.stats4sdLogin.signOut();
+        this.signedIn = false;
+      }
+      _signedInChange(){
+        this.$.login.close()
       }
 
       // Elements in the app can notify section changes.

@@ -60,13 +60,15 @@
       <div id="emailPWError"></div>
       <div id="emailPWMessage"></div>
     </div>
-    <form on-submit="_signInEmailPW">
+    <form id="loginForm" on-submit="_signInEmailPW">
       <paper-input id="emailInput" type="email" label="Email" value="{{email}}" validator="email-validator" error-message="Invalid email address" required auto-validate></paper-input>
       <paper-input id="pwInput" type="password" label="Password" value="{{pw}}" on-keypress="_checkEnter" required></paper-input>
       <p><a href="#" id="reset" on-click="_resetPW">Reset password for entered email</a></p>
       <!--<paper-button id="emailSignUp" type="submit" on-tap="_signUpEmailPW">Sign Up</paper-button>-->
-      <paper-button id="emailSignIn" type="submit" on-tap="_signInEmailPW" dialog-confirm autofocus>Sign In</paper-button>
+      <!-- <paper-button id="emailSignIn" type="submit" on-tap="_signInEmailPW" dialog-confirm autofocus>Sign In</paper-button> -->
+      <paper-button id="emailSignIn" type="submit" on-tap="_signInEmailPW" autofocus>Sign In</paper-button>
       <paper-button id="emailSignIn" type="submit" dialog-confirm autofocus>Cancel</paper-button>
+      <paper-spinner-lite id="spinner" alt="Signing In" active></paper-spinner-lite>
     </form>
 
   </template>
@@ -90,7 +92,8 @@
           user: {
             type: Object,
             notify: true,
-            reflectToAttribute: true
+            reflectToAttribute: true,
+            observer:'_userChanged'
           },
           signedIn: {
             type: Boolean,
@@ -118,6 +121,11 @@
           },
           pw:{
             type:String
+          },
+          spinnerActive:{
+            type:Boolean,
+            value:false,
+            reflectToAttribute:true
           }
         };
       }
@@ -135,20 +143,35 @@
 
       _signInEmailPW(e){
         this._cleanMessages();
+        this.spinnerActive=true      
         console.log('email password element 8',this.$.auth)
+        this.$.loginForm.querySelector('paper-spinner-lite, paper-spinner').active=true
         this.$.auth.signInWithEmailAndPassword(this.email, this.pw)
           .then(function(success){
-            console.log('signed in',success)
+            console.log('still there?',document.querySelector('paper-spinner-lite, paper-spinner'))
           })
           .catch(function(error){
-            console.log('error signing in',error)
-          });
+            console.log('failed sign in')
+          })
+      }
+
+      _userChanged(user){
+        console.log('user changed',user)
+        this.$.loginForm.querySelector('paper-spinner-lite, paper-spinner').active=false
+        console.log(document.getElementById('login'))
       }
 
       // _signUpEmailPW(e){
       //   this._cleanMessages();
       //   this.$.auth.createUserWithEmailAndPassword(this.email, this.pw);
       // }
+
+      _handleEmailPWError(err){
+        console.log('err',err)
+        this.pw = null;
+        this.$.emailPWError.textContent = err.detail.message;
+        this.$.loginForm.querySelector('paper-spinner-lite, paper-spinner').active=false
+      }
 
       // _handleEmailPWError(err){
       //   if(err.detail.code === "auth/user-not-found" && this.autoSignUp){
