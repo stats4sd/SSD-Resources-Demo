@@ -17,18 +17,11 @@
         font-weight: 500;
         margin: 32px 0;
       }
-      /* can move all style out with template to new element in future */
 
-      
-      footer {
-        position: fixed;
-        padding: 10px;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        line-height: 24px;
-        background: #999;
-        color: white;
+      paper-toast {
+        margin: 0;
+        padding: 5px;
+        /* max-width: 510px; */
       }
 
       footer>a {
@@ -60,17 +53,18 @@
     </p>
     <div class="sub-section-heading">View Resources by Type</div>
     <resource-types></resource-types>
-    
+
     <div class="sub-section-heading" style="margin-top:2em">Browse Collections</div>
     <p class="padding" style="margin:1em 0 0 0;font-size:small">There are currently no collections</p>
 
-    <footer class="flex">
-      <div style='display:inline; color:yellow;font-weight:bold;'>Note</div>
-      <div style='padding-left:10px'>This platform is currently in development (v0.9.5).<br>To feedback on specific issues or requests please contact
+
+    <paper-toast id="toast1" duration="0" opened class="flex">
+      <div>This platform is currently in development (v0.9.5). To feedback on specific issues or requests please contact:
         <a style="color:wheat" href="mailto:c.clarke@stats4sd.org?Subject=Resources%20Site%20Feedback" target="_top">c.clarke@stats4sd.org</a>
       </div>
-      <button class="align-right"><a href="/admin">Admin</a></button>
-    </footer>
+      <paper-button on-tap="_toastClose" style="margin:0;padding:5px;color:yellow">Got it!</paper-button>
+    </paper-toast>
+    <!-- <button class="align-right"><a href="/admin">Admin</a></button> -->
 
   </template>
 
@@ -122,6 +116,9 @@
           if (!tag) return false;
           return (tag.type == type);
         }
+      }
+      _toastClose(){
+        this.$.toast1.close()
       }
     }
 
