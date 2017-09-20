@@ -13,7 +13,7 @@
     <style include="shared-styles">
        :host {
         display: block;
-        padding: 10px;
+        
         background-color: #DBDBDB;
         @apply(--layout-flex);
         @apply(--layout-vertical);
@@ -113,10 +113,10 @@
       app-route provides the name of the category and the item.
     -->
     <app-route route="[[route]]" pattern="/:slug" data="{{routeData}}" tail="{{subroute}}"></app-route>
-    <app-route route="[[subroute]]" pattern="/:edit" data="{{subrouteData}}"></app-route>
+    <app-route route="[[subroute]]" pattern="/:edit" data="{{subrouteData}}"></app-route> 
 
     <!-- Main Resource View -->
-    <div hidden$="[[editMode]]">
+    <div hidden$="[[editMode]]" style="padding: 10px">
       <div hidden$="[[!resource.$key]]">
         <h1 class="resource-title">[[resource.name]]</h1>
         <div class="url">
@@ -137,9 +137,18 @@
       </div>
     </div>
 
+    <footer hidden$="[[!signedIn]]" class="footer">
+        <paper-button style="float:right" on-tap="_editResource" hidden$="{{editMode}}">
+            <iron-icon icon="mode-edit" aria-label="Edit Resource"></iron-icon>Edit Resource
+        </paper-button>
+        <paper-button style="float:right" on-tap="_saveResource" hidden$="{{!editMode}}">
+            <iron-icon icon="save" aria-label="Save Resource"></iron-icon>Save Resource
+        </paper-button>
+      </footer>
+
     <!-- Resource editor view (could be put into seperate component) -->
     <template is="dom-if" if="{{editMode}}">
-      <resource-editor resource="{{resource}}"></resource-editor>
+      <resource-editor resource="{{resource}}" tags="{{persistedTags}}"></resource-editor>
     </template>
 
 
@@ -178,9 +187,9 @@
           },
           editMode: {
             type: Boolean,
-            value: false
-
-          }
+            computed: '_editEnabled(subroute.path)'
+          },
+          persistedTags:Object
 
         }
       }
@@ -204,7 +213,6 @@
       }
       _subrouteChange() {
         //track when new resource created or edit mode enabled
-
         console.log('sub route changed', this.subrouteData)
         if (this.subrouteData && this.subrouteData.edit == "edit") {
           console.log('slug', this.routeData.slug)
@@ -215,6 +223,13 @@
           console.log('editing mode enabled')
           this.set('editMode', true)
         }
+      }
+      _editResource() {
+        this.set('route.path', this.route.path + '/edit')
+      }
+      _editEnabled(path){
+        // enable editing if /edit appears on resource subroute
+        return path=="/edit"
       }
 
       _createNewResource() {

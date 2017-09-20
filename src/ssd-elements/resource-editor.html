@@ -6,20 +6,49 @@
     <style>
        :host {
         display: block;
+        padding: 10px;
       }
     </style>
+
+    <!-- Firebase binding for live tag data -->
+    <firebase-document path="/tags" data="{{liveTags}}" app-name="SSD-Resources"></firebase-document>
+
+    <!-- Title and Description -->
     <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
     <span class="url">[[origin]]/[[slug]]</span>
     <p>
-      <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required always-float-label></paper-textarea>
+      <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required
+        always-float-label></paper-textarea>
     </p>
-    <!-- REPLACED PAPER TABS WITH PAPER TAGS -->
 
-    <h4>Tags</h4>
-    <!--<paper-tags-dropdown items="[[_filterTags(persistedTags,'Topic')]]" label="Topics" id-accessor="$key" value-object="{{resource.topics}}"></paper-tags-dropdown>
-    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Collection')]]" label="Collections" id-accessor="$key" value-object="{{resource.collections}}"></paper-tags-dropdown>
-    <paper-tags-dropdown items="[[_filterTags(persistedTags,'Keyword')]]" label="Keywords" id-accessor="$key" value-object="{{resource.keywords}}"></paper-tags-dropdown>-->
+    <!-- *** Need save function to track tags saved, possibly linked to combo change event to populate resource tags -->
 
+    <!-- Tags -->
+    <vaadin-combo-box label="Keywords" id="KeywordTypeCombo" items="[[_computeItems(liveTags,'Keywords')]]" item-value-path="key"
+      on-change="_keywordChange" allow-custom-value on-filter-changed="_keywordFilterChanged">
+    </vaadin-combo-box>
+    <div hidden$="[[!newTag]]" on-tap="addTag">
+      <div hidden$="[[!focused.Resource-Type]]">Press enter to add tag: [[newTag.label]]</div>
+    </div>
+
+    <vaadin-combo-box label="Resource Type" id="ResourceTypeCombo" items="[[_computeItems(liveTags,'Resource-Types')]]" item-value-path="key"
+      on-change="_resourceTypeChange">
+    </vaadin-combo-box>
+
+
+
+    <!-- **************************** possibly manage collections elsewhere? ************************ -->
+
+    <!-- <vaadin-combo-box label="Collections" id="Collection-TypeCombo" items="[[_computeItems(liveTags,'Collections')]]" item-value-path="key"
+    allow-custom-value>
+  </vaadin-combo-box> -->
+
+
+    <!-- Published Checkbox (include method to publish other resources also) -->
+    Published?
+
+
+    <!-- 
     <vaadin-combo-box label="Resource Types" id="Resource-TypeCombo" items="[[_filterTags(persistedTags,'Resource-Type')]]" selected-item="{{tags.Resource-Type}}"
       filtered-items="{{filteredResource-Type}}" on-change="_comboChange" on-filter-changed="_filterChanged" focused="{{focused.Resource-Type}}"
       item-value-path="$key" item-value-path="label" allow-custom-value>
@@ -45,16 +74,15 @@
         <iron-icon icon="close" on-tap="removeTag"></iron-icon>
       </paper-button>
     </template>
+     -->
 
-    <!--<paper-tags id="Resource-TypeTags" items="[[_tagsToArray(resource.tags,'Resource-Type')]]"></paper-tags>-->
     <!--live tag editor-->
-    <firebase-document id="currentTag" app-name="SSD-Resources" data="{{currentTag}}" path="/tags/"></firebase-document>
-    <firebase-document id="allTags" app-name="SSD-Resources" data="{{allTags}}" path="/tags"></firebase-document>
+    <!-- <firebase-document id="currentTag" app-name="SSD-Resources" data="{{currentTag}}" path="/tags/"></firebase-document>
+    <firebase-document id="allTags" app-name="SSD-Resources" data="{{allTags}}" path="/tags"></firebase-document> -->
 
-
+    <!-- 
     <h4>External Links</h4>
     <template id="externalLinks" is="dom-repeat" items="[[resource.externalLinks]]" as="link">
-      <!--{{link.number}} test-->
       <div class='flex-container'>
         <a href="{{link.url}}" target="_blank"><span>[[link.url]]</span></a>
         <paper-icon-button suffix on-tap="editLink" class="green" icon="mode-edit" alt="edit" title="edit">
@@ -89,7 +117,7 @@
           </div>
         </template>
       </iron-selector>
-    </div>
+    </div> -->
 
 
   </template>
@@ -111,14 +139,14 @@
             type: String,
             computed: '_toSlug(resource.name)'
           },
-          origin:{
-            type:String,
-            value:function(){return window.origin + '/resource'}
-          }
+          origin: {
+            type: String,
+            value: function () { return window.origin + '/resource' }
+          },
         };
       }
-       _toSlug(name) {
-          if(!name) {
+      _toSlug(name) {
+        if (!name) {
           //new resource
           this.resource.slug = ""
           return ""
@@ -130,6 +158,36 @@
           this.resource.slug = slug
           return slug
         }
+      }
+      _computeItems(tags, key) {
+        // take liveTags, select subset and put into correct format (un-nest json)
+        let items = tags[key]
+        let temp = []
+        for (let key in items) {
+          let t = items[key]
+          t.key = key
+          temp.push(t)
+        }
+        return temp
+      }
+      _keywordFilterChanged(e) {
+        // Refer to prior versions if wanting to make more general filter (e.g. same for keywords as well as collections on same page)
+        var filterText = e.detail.value.toLowerCase()
+        var items = this.$.KeywordTypeCombo.items
+        console.log('items', items)
+        if (!items) { items = [] }
+        var filtered = items.filter(function (el) {
+          var label = el.label.toLowerCase()
+          return label.indexOf(filterText) !== -1;
+        })
+        if (filtered.length == 0) {
+          this.newTag = {
+            label: filterText,
+            type: this.currentFilter
+          }
+        }
+        if (filterText == "") { this.newTag = false }
+        if (filtered.length > 0) { this.newTag = false }
       }
     }
 
