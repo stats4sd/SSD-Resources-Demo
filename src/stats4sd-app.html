@@ -210,8 +210,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div class="admin-toolbar" hidden$="[[!signedIn]]">
       <paper-button>
         <a href="/resource/_/edit" class="href-plain">
-          <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource</paper-icon-button>
+          <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource
         </a>
+      </paper-button>
+      <paper-button style="float:right" on-tap="_editResource" hidden$="{{_computeHidden(page,'resource','false')}}">
+          <iron-icon icon="mode-edit" aria-label="Edit Resource"></iron-icon>Edit Resource
+      </paper-button>
     </div>
 
     <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
@@ -224,7 +228,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         page="{{page}}"></stats4sd-admin>
       <!-- resource view page -->
       <stats4sd-resource name="resource" route="[[subroute]]" persisted-resources="[[persistedResources]]" resource=[[resource]]
-        offline="[[offline]]"></stats4sd-resource>
+        offline="[[offline]]" persisted-tags="[[persistedTags]]"></stats4sd-resource>
 
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
@@ -283,7 +287,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           signedIn: {
             type: Boolean,
             observer: '_signedInChange'
-          }
+          },
         }
       }
 
@@ -360,12 +364,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
       _resourceChange(e) {
-        console.log('resource changed', e)
         this.set('resource', e.detail.resource)
         console.log('resource', this.resource)
         this.set('route.path', e.detail.url)
       }
+      _editResource(){
+        this.set('route.path',this.route.path+'/edit')
+      }
+      _computeHidden(activePage,testPage,outcome){
+        // state whether to hide or show when active page matches test page
+        let bool = (outcome=='true')
+        if(activePage==testPage){
+          return bool
+        }
+        return !bool
 
+      }
       _ensureLazyLoaded() {
         // load lazy resources after render and set `loadComplete` when done.
         if (!this.loadComplete) {

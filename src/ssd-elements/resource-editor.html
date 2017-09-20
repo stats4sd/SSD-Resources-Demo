@@ -11,7 +11,7 @@
     <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
     <span class="url">[[origin]]/[[slug]]</span>
     <p>
-      <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required></paper-textarea>
+      <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required always-float-label></paper-textarea>
     </p>
     <!-- REPLACED PAPER TABS WITH PAPER TAGS -->
 
@@ -57,7 +57,7 @@
       <!--{{link.number}} test-->
       <div class='flex-container'>
         <a href="{{link.url}}" target="_blank"><span>[[link.url]]</span></a>
-        <paper-icon-button suffix on-tap="editLink" class="green" icon="editor:mode-edit" alt="edit" title="edit">
+        <paper-icon-button suffix on-tap="editLink" class="green" icon="mode-edit" alt="edit" title="edit">
         </paper-icon-button>
         <paper-icon-button on-tap="removeLink" class="red" icon="clear" alt="clear" title="clear">
         </paper-icon-button>
@@ -107,11 +107,29 @@
       static get is() { return 'resource-editor'; }
       static get properties() {
         return {
-          prop1: {
+          slug: {
             type: String,
-            value: 'resource-editor'
+            computed: '_toSlug(resource.name)'
+          },
+          origin:{
+            type:String,
+            value:function(){return window.origin + '/resource'}
           }
         };
+      }
+       _toSlug(name) {
+          if(!name) {
+          //new resource
+          this.resource.slug = ""
+          return ""
+        }
+        else {
+          //could definitely be combined into one expression but I suck at regex :( 
+          //make lower case, replace all spaces with '-' and remove special
+          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
+          this.resource.slug = slug
+          return slug
+        }
       }
     }
 

@@ -72,7 +72,6 @@
       .meta-data {
         display: flex;
         flex-wrap: wrap;
-        
       }
 
       @media(min-width:1048px) {
@@ -80,11 +79,10 @@
           flex-wrap: nowrap;
           justify-content: space-between;
         }
-        .files-container{
-          margin-left:50px;
-          width:100%;
-          max-width:500px;
-
+        .files-container {
+          margin-left: 50px;
+          width: 100%;
+          max-width: 500px;
         }
       }
 
@@ -118,26 +116,32 @@
     <app-route route="[[subroute]]" pattern="/:edit" data="{{subrouteData}}"></app-route>
 
     <!-- Main Resource View -->
-    <div hidden$="[[!resource.$key]]">
-      <h1 class="resource-title">[[resource.name]]</h1>
-      <div class="url">
-        <a href="[[_getResourceUrl(resource)]]">[[_getResourceUrl(resource)]]</a>
-      </div>
-      <div class="meta-data">
-        <div style="min-width: 300px; max-width:700px">
-          <div class='bold'>Description: </div>
-          <p style="margin-top:5px; ">[[resource.description]]</p>
+    <div hidden$="[[editMode]]">
+      <div hidden$="[[!resource.$key]]">
+        <h1 class="resource-title">[[resource.name]]</h1>
+        <div class="url">
+          <a href="[[_getResourceUrl(resource)]]">[[_getResourceUrl(resource)]]</a>
         </div>
-        <div class="files-container" hidden$="[[!resource.uploadedFiles]]">
-          <div class='bold'>Files: </div>
-          <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
-            <resource-file-download file="[[file]]"></resource-file-download>
-          </template>
+        <div class="meta-data">
+          <div style="min-width: 300px; max-width:700px">
+            <div class='bold'>Description: </div>
+            <p style="margin-top:5px; ">[[resource.description]]</p>
+          </div>
+          <div class="files-container" hidden$="[[!resource.uploadedFiles]]">
+            <div class='bold'>Files: </div>
+            <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
+              <resource-file-download file="[[file]]"></resource-file-download>
+            </template>
+          </div>
         </div>
       </div>
     </div>
+
     <!-- Resource editor view (could be put into seperate component) -->
-    <resource-editor resource="{{resource}}"></resource-editor>
+    <template is="dom-if" if="{{editMode}}">
+      <resource-editor resource="{{resource}}"></resource-editor>
+    </template>
+
 
 
 
@@ -155,7 +159,7 @@
           item: Object,
           route: Object,
           routeData: Object,
-          subrouteData:Object,
+          subrouteData: Object,
           visible: {
             type: Boolean,
             value: false
@@ -172,6 +176,11 @@
           resource: {
             type: Object
           },
+          editMode: {
+            type: Boolean,
+            value: false
+
+          }
 
         }
       }
@@ -193,27 +202,28 @@
         console.log('resource unattached')
         this.isAttached = false;
       }
-      _subrouteChange(){
+      _subrouteChange() {
         //track when new resource created or edit mode enabled
-        
-        console.log('sub route changed',this.subrouteData)
-        if(this.subrouteData&&this.subrouteData.edit=="edit"){
-          console.log('slug',this.routeData.slug)
-          if(this.routeData.slug=="_"){
-            
+
+        console.log('sub route changed', this.subrouteData)
+        if (this.subrouteData && this.subrouteData.edit == "edit") {
+          console.log('slug', this.routeData.slug)
+          if (this.routeData.slug == "_") {
+
             this._createNewResource()
           }
           console.log('editing mode enabled')
+          this.set('editMode', true)
         }
       }
 
-      _createNewResource(){
+      _createNewResource() {
         let id = this.generatePushID();
-        console.log('creating new resource',id)
+        console.log('creating new resource', id)
         var d = Date.now()
         var shortcode = this.generateShortCode()
         console.log('d', d)
-        let newResource= {
+        let newResource = {
           $key: id,
           shortcode: shortcode,
           description: '',
@@ -226,9 +236,9 @@
           editedBy: {},
           featureImage: ''
         }
-        this.resource=[]
-        this.resource=newResource
-        console.log('resource',this.resource)
+        this.resource = []
+        this.resource = newResource
+        console.log('resource', this.resource)
       }
 
 
@@ -252,7 +262,7 @@
 
         return (window.location.origin + "/resource/" + this.resource.slug)
       }
-      
+
 
       generatePushID() {
         var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
