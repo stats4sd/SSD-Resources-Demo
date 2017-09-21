@@ -13,7 +13,7 @@
     <style include="shared-styles">
        :host {
         display: block;
-        
+
         background-color: #DBDBDB;
         @apply(--layout-flex);
         @apply(--layout-vertical);
@@ -112,44 +112,67 @@
     <!--
       app-route provides the name of the category and the item.
     -->
-    <app-route route="[[route]]" pattern="/:slug" data="{{routeData}}" tail="{{subroute}}"></app-route>
-    <app-route route="[[subroute]]" pattern="/:edit" data="{{subrouteData}}"></app-route> 
+    <app-route route="{{route}}" pattern="/:slug" data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <app-route route="[[subroute]]" pattern="/:edit" data="{{subrouteData}}"></app-route>
 
     <!-- Main Resource View -->
-    <div hidden$="[[editMode]]" style="padding: 10px">
-      <div hidden$="[[!resource.$key]]">
-        <h1 class="resource-title">[[resource.name]]</h1>
-        <div class="url">
-          <a href="[[_getResourceUrl(resource)]]">[[_getResourceUrl(resource)]]</a>
-        </div>
-        <div class="meta-data">
-          <div style="min-width: 300px; max-width:700px">
-            <div class='bold'>Description: </div>
-            <p style="margin-top:5px; ">[[resource.description]]</p>
+    <template is="dom-if" if="{{!editMode}}">
+      <div style="padding: 10px">
+        <!-- Title and Description -->
+        <div hidden$="[[!resource.$key]]">
+          <h1 class="resource-title">[[resource.name]]</h1>
+          <div class="url">
+            <a href="[[_getResourceUrl(resource)]]">[[_getResourceUrl(resource)]]</a>
           </div>
-          <div class="files-container" hidden$="[[!resource.uploadedFiles]]">
-            <div class='bold'>Files: </div>
-            <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
-              <resource-file-download file="[[file]]"></resource-file-download>
+          <div class="meta-data">
+            <div style="min-width: 300px; max-width:700px">
+              <div class='bold'>Description: </div>
+              <p style="margin-top:5px; ">[[resource.description]]</p>
+            </div>
+            <!--  -->
+            <div class="files-container" hidden$="[[!resource.uploadedFiles]]">
+              <div class='bold'>Files: </div>
+              <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
+                <resource-file-download file="[[file]]"></resource-file-download>
+              </template>
+            </div>
+          </div>
+          <!-- Links and Videos -->
+          <div class='bold'>External Links: </div>
+          <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
+              <a href="[[link.url]]" target="_blank">
+                <iron-icon icon="language" prefix></iron-icon>
+                <span>[[link.url]]</span>
+              </a>
+              <template is="dom-if" if="{{_isYoutube(link)}}">
+                <div>Youtube Link</div>
+                <google-youtube video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0" autoplay="0">
+                </google-youtube>
+              </template>
             </template>
-          </div>
         </div>
       </div>
-    </div>
+    </template>
+
+
 
     <footer hidden$="[[!signedIn]]" class="footer">
-        <paper-button style="float:right" on-tap="_editResource" hidden$="{{editMode}}">
-            <iron-icon icon="mode-edit" aria-label="Edit Resource"></iron-icon>Edit Resource
-        </paper-button>
-        <paper-button style="float:right" on-tap="_saveResource" hidden$="{{!editMode}}">
-            <iron-icon icon="save" aria-label="Save Resource"></iron-icon>Save Resource
-        </paper-button>
-      </footer>
+      <paper-button style="float:right" on-tap="_editResource" hidden$="{{editMode}}">
+        <iron-icon icon="mode-edit" aria-label="Edit Resource"></iron-icon>Edit Resource
+      </paper-button>
+      <paper-button style="float:right" on-tap="_saveResource" hidden$="{{!editMode}}">
+        <iron-icon icon="save" aria-label="Save Resource"></iron-icon>Save Resource
+      </paper-button>
+    </footer>
 
     <!-- Resource editor view (could be put into seperate component) -->
     <template is="dom-if" if="{{editMode}}">
       <resource-editor resource="{{resource}}" tags="{{persistedTags}}"></resource-editor>
     </template>
+    <firebase-document id="firebaseResourceDoc" app-name="SSD-Resources" data="{{editableResource}}">
+    </firebase-document>
+    <firebase-document id="firebaseSlugDoc" app-name="SSD-Resources" data="{{editableSlug}}">
+    </firebase-document>
 
 
 
@@ -189,7 +212,7 @@
             type: Boolean,
             computed: '_editEnabled(subroute.path)'
           },
-          persistedTags:Object
+          persistedTags: Object
 
         }
       }
@@ -202,34 +225,30 @@
       }
       connectedCallback() {
         super.connectedCallback();
-        console.log('resource attached')
         this.isAttached = true;
       }
 
       disconnectedCallback() {
         super.disconnectedCallback();
-        console.log('resource unattached')
         this.isAttached = false;
       }
       _subrouteChange() {
         //track when new resource created or edit mode enabled
-        console.log('sub route changed', this.subrouteData)
         if (this.subrouteData && this.subrouteData.edit == "edit") {
-          console.log('slug', this.routeData.slug)
           if (this.routeData.slug == "_") {
 
             this._createNewResource()
           }
-          console.log('editing mode enabled')
+          console.log('editing resource', this.resource)
           this.set('editMode', true)
         }
       }
       _editResource() {
         this.set('route.path', this.route.path + '/edit')
       }
-      _editEnabled(path){
+      _editEnabled(path) {
         // enable editing if /edit appears on resource subroute
-        return path=="/edit"
+        return path == "/edit"
       }
 
       _createNewResource() {
@@ -237,7 +256,6 @@
         console.log('creating new resource', id)
         var d = Date.now()
         var shortcode = this.generateShortCode()
-        console.log('d', d)
         let newResource = {
           $key: id,
           shortcode: shortcode,
@@ -251,9 +269,7 @@
           editedBy: {},
           featureImage: ''
         }
-        this.resource = []
-        this.resource = newResource
-        console.log('resource', this.resource)
+        this.set('resource', newResource)
       }
 
 
@@ -270,12 +286,68 @@
         // could be made more efficient from populated slug lookup db endpoint, or simply 
         // letting slug be the resource id (although then will need to ensure all names unique)
         for (let r of resources) {
-          if (r.slug == slug) { return r }
+          if (r.slug == slug) {
+            return r
+          }
         }
       }
       _getResourceUrl(resource) {
 
         return (window.location.origin + "/resource/" + this.resource.slug)
+      }
+
+      _saveResource() {
+        //prompt validation
+        if (this.resource.name == "" || this.resource.description == "") {
+          this.emptyReourceNoteOpen = true;
+          return;
+        }
+        else {
+          // $key automatically populated by persisted resources, or created on new resource generated
+          let key = this.resource.$key
+          delete this.resource.$key
+          this.resource.modified = Date.now()
+          if (!this.resource.editedBy) { this.resource.editedBy = {} }
+          this.resource.editedBy[Date.now()] = this.user.email
+          this.set('editableResource', this.resource)
+          this.$.firebaseResourceDoc.saveValue('/resources', key).then(function () {
+            //save revision 
+            this.$.firebaseResourceDoc.saveValue('/revisions/' + key, Date.now())
+            this.$.firebaseResourceDoc.reset();
+            this.$.firebaseSlugDoc.saveValue('/slugs', this.resource.slug).then(function () {
+              this.$.firebaseSlugDoc.reset();
+            }.bind(this))
+            //notify app to present toast, add back $key in case resource edited again before persisted sync
+            this.resource.$key = key
+            this.dispatchEvent(new CustomEvent('resource-saved', {
+              bubbles: true, composed: true, detail: {
+                resource: this.resource
+              }
+            }))
+          }.bind(this)).catch(function (err) {
+            console.log('err', err)
+          })
+
+        }
+      }
+      _isYoutube(link) {
+        if (link.url.indexOf('https://youtu.be') > -1 || link.url.indexOf('https://www.youtube.com') > -1) {
+          return true
+        }
+      }
+      _getYoutubeID(link){
+        console.log('getting id',link)
+        let youtubeID=''
+        if (link.url.indexOf('https://youtu.be') > -1){
+          var temp = link.url.split('/')
+          youtubeID = temp[temp.length - 1]
+        }
+        if(link.url.indexOf('https://www.youtube.com') > -1){
+          var temp = link.url.split('/')
+          youtubeID = temp[temp.length - 1].replace('watch?v=','')
+        }
+        console.log('id?',youtubeID)
+        return youtubeID
       }
 
 

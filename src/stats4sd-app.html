@@ -211,8 +211,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <stats4sd-admin name="admin" route="[[subroute]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"
         page="{{page}}"></stats4sd-admin>
       <!-- resource view page -->
-      <stats4sd-resource name="resource" route="[[subroute]]" persisted-resources="[[persistedResources]]" resource=[[resource]]
-        offline="[[offline]]" persisted-tags="[[persistedTags]]"></stats4sd-resource>
+      <stats4sd-resource name="resource" route="{{subroute}}" persisted-resources="[[persistedResources]]" resource=[[resource]]
+        offline="[[offline]]" persisted-tags="[[persistedTags]]" user="{{user}}"></stats4sd-resource>
 
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
@@ -313,6 +313,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.addEventListener('dom-change', (e) => this._domChange(e));
         this.addEventListener('resource-change', (e) => this._resourceChange(e));
         this.addEventListener('show-invalid-url-warning', (e) => this._onFallbackSelectionTriggered(e));
+        this.addEventListener('resource-saved', (e) => this._resourceSaved(e));
         // listen for online/offline
         Polymer.RenderStatus.afterNextRender(this, () => {
           window.addEventListener('online', (e) => this._notifyNetworkStatus(e));
@@ -362,6 +363,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.set('resource', e.detail.resource)
         console.log('resource', this.resource)
         this.set('route.path', e.detail.url)
+      }
+      _resourceSaved(e){
+        console.log('resource saved',e)
+        this.set('route.path', '/resource/'+e.detail.resource.slug)
       }
       
       _computeHidden(activePage, testPage, outcome) {
