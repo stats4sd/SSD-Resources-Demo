@@ -69,12 +69,12 @@
     <header>
       <!-- add s onto end of label when loaded, could put into calcuation to check if already s exists of simply try to avoid when creating types -->
       <h1>[[_getPluralizedQuantity(label,2)]]</h1>
-      <div class="counter">[[filteredResources.length]] [[_getPluralizedQuantity('Resource',filteredResources.length)]]</div>
+      <div class="counter">[[resourcesRendered]] [[_getPluralizedQuantity('Resource',resourcesRendered)]]</div>
 
     </header>
 
     <ul class="flex wrap" hidden$="[[!failure]]">
-      <dom-repeat id="resourcesList" items="[[filteredResources]]" as="resource" initial-count="4">
+      <dom-repeat id="resourcesList" items="[[filteredResources]]" as="resource" initial-count="4" filter="resourceFilter" rendered-item-count="{{resourcesRendered}}" sort="resourceSort">
         <template>
           <resource-search-result resource='[[resource]]'></resource-search-result>
         </template>
@@ -127,6 +127,16 @@
       disconnectedCallback() {
         super.disconnectedCallback();
         this.isAttached = false;
+      }
+      resourceFilter(res){
+        // don't show resources marked as deleted or draft
+        if(res.deleted||res.draft){
+          return false
+        }
+        else{return true}
+      }
+      resourceSort(a,b){
+        return b.modified-a.modified
       }
 
       _failureCheck() {

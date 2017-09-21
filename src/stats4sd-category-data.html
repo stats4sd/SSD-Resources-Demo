@@ -125,8 +125,10 @@
           if(this.slug==''||this.slug==undefined){console.log('showing all');this.filteredResources=res}
           else{
             this.filteredResources = res.filter(function (r) {
+              if(r.hasOwnProperty('tags') && r.tags.hasOwnProperty('Resource-Types')){
               return (r.tags["Resource-Types"] && r.tags["Resource-Types"].hasOwnProperty(key)
-              )
+              )}
+              else{return false}
             })
           }
         }

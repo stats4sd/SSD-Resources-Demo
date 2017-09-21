@@ -74,6 +74,18 @@
         flex-wrap: wrap;
       }
 
+      .deleted {
+        font-weight: 700;
+        font-size: large;
+        margin-top: 10px;
+        height: 2em;
+        line-height: 2em;
+        text-align: center;
+        color: var(--paper-indigo-50);
+        background-color: var(--paper-indigo-500);
+        padding: 5px;
+      }
+
       @media(min-width:1048px) {
         .meta-data {
           flex-wrap: nowrap;
@@ -117,6 +129,10 @@
 
     <!-- Main Resource View -->
     <template is="dom-if" if="{{!editMode}}">
+      <!-- Deleted resource notification -->
+      <div class="deleted" hidden$="[[!resource.deleted]]">
+        <div>This resource has been deleted</div>
+      </div>
       <div style="padding: 10px">
         <!-- Title and Description -->
         <div hidden$="[[!resource.$key]]">
@@ -140,23 +156,31 @@
           <!-- Links and Videos -->
           <div class='bold'>External Links: </div>
           <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
-              <a href="[[link.url]]" target="_blank">
-                <iron-icon icon="language" prefix></iron-icon>
-                <span>[[link.url]]</span>
-              </a>
-              <template is="dom-if" if="{{_isYoutube(link)}}">
-                <div>Youtube Link</div>
-                <google-youtube video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0" autoplay="0">
-                </google-youtube>
-              </template>
+            <a href="[[link.url]]" target="_blank">
+              <iron-icon icon="language" prefix></iron-icon>
+              <span>[[link.url]]</span>
+            </a>
+            <template is="dom-if" if="{{_isYoutube(link)}}">
+              <div>Youtube Link</div>
+              <google-youtube video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0" autoplay="0">
+              </google-youtube>
             </template>
+          </template>
         </div>
       </div>
     </template>
 
 
 
-    <footer hidden$="[[!signedIn]]" class="footer">
+    <footer hidden$="[[!user.email]]" class="footer">
+      <div hidden$="{{!editMode}}" style="float:left">
+        <paper-button style="float:left" on-tap="_deleteResource" hidden$="{{resource.deleted}}">
+          <iron-icon icon="delete" aria-label="Delete Resource"></iron-icon>Delete Resource
+        </paper-button>
+        <paper-button style="float:left" on-tap="_restoreResource" hidden$="{{!resource.deleted}}">
+            <iron-icon icon="restore" aria-label="Restore Resource"></iron-icon>Restore Resource
+          </paper-button>
+      </div>
       <paper-button style="float:right" on-tap="_editResource" hidden$="{{editMode}}">
         <iron-icon icon="mode-edit" aria-label="Edit Resource"></iron-icon>Edit Resource
       </paper-button>
@@ -267,7 +291,9 @@
           created: d,
           modified: '',
           editedBy: {},
-          featureImage: ''
+          featureImage: '',
+          deleted: false,
+          draft: false
         }
         this.set('resource', newResource)
       }
@@ -327,26 +353,32 @@
           }.bind(this)).catch(function (err) {
             console.log('err', err)
           })
-
         }
       }
+      _deleteResource() {
+        this.set('resource.deleted', true)
+        this._saveResource()
+      }
+      _restoreResource() {
+        this.set('resource.deleted', false)
+        this._saveResource()
+      }
+
       _isYoutube(link) {
         if (link.url.indexOf('https://youtu.be') > -1 || link.url.indexOf('https://www.youtube.com') > -1) {
           return true
         }
       }
-      _getYoutubeID(link){
-        console.log('getting id',link)
-        let youtubeID=''
-        if (link.url.indexOf('https://youtu.be') > -1){
+      _getYoutubeID(link) {
+        let youtubeID = ''
+        if (link.url.indexOf('https://youtu.be') > -1) {
           var temp = link.url.split('/')
           youtubeID = temp[temp.length - 1]
         }
-        if(link.url.indexOf('https://www.youtube.com') > -1){
+        if (link.url.indexOf('https://www.youtube.com') > -1) {
           var temp = link.url.split('/')
-          youtubeID = temp[temp.length - 1].replace('watch?v=','')
+          youtubeID = temp[temp.length - 1].replace('watch?v=', '')
         }
-        console.log('id?',youtubeID)
         return youtubeID
       }
 

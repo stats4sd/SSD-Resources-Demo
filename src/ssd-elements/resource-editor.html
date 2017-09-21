@@ -52,13 +52,13 @@
       </div>
     </template>
     <div class="flex">
-        <iron-icon icon="public" prefix></iron-icon>
-        <paper-input style="flex-basis:100%" label="add external links here" no-label-float value="{{externalLinkUrl}}"></paper-input>
-        <paper-icon-button suffix on-tap="_addExternalLink" style="color:green" icon="add" alt="add" title="add" ></paper-icon-button>
+      <iron-icon icon="public" prefix></iron-icon>
+      <paper-input style="flex-basis:100%" label="add external links here" no-label-float value="{{externalLinkUrl}}"></paper-input>
+      <paper-icon-button suffix on-tap="_addExternalLink" style="color:green" icon="add" alt="add" title="add"></paper-icon-button>
     </div>
-    
-      
-      
+
+
+
     </paper-input>
 
     <!-- Draft/Published Checkbox -->
@@ -74,27 +74,18 @@
       </div>
     </div>
 
-
-
-    
     <h4>Uploaded Files</h4>
     <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
     <iron-icon slot="drop-label-icon" icon="description"></iron-icon>
     <span slot="drop-label"></span>
-    <div class="delete" on-tap="delete">
-      <paper-icon-button icon="delete" class="delete-button"></paper-icon-button>
-      <span>Delete Resource</span>
-    </div>
 
     <h4>Feature Image</h4>
-    <div class='flex-container'>
-      <iron-selector>
-          <div on-tap="setFeatureImage">
-            <img src="[[_getFeatureImage(resource.tags)]]" style="max-width:200px">
-          </div>
-        </template>
-      </iron-selector>
+    <div on-tap="setFeatureImage">
+      <img src="[[_getFeatureImage(resource.tags)]]" style="max-width:200px">
     </div>
+  </template>
+  </iron-selector>
+  </div>
   </template>
 
   <script>
@@ -118,9 +109,9 @@
             type: String,
             value: function () { return window.origin + '/resource' }
           },
-          externalLinkUrl:{
-            type:String,
-            value:''
+          externalLinkUrl: {
+            type: String,
+            value: ''
           }
         };
       }
@@ -203,16 +194,16 @@
         this.set('resource.tags', tags)
       }
       _addExternalLink(e) {
-        if(!this.resource.externalLinks){
-          this.set('resource.externalLinks',[])
-          }
+        if (!this.resource.externalLinks) {
+          this.set('resource.externalLinks', [])
+        }
         if (this.externalLinkUrl != '') {
           this.push('resource.externalLinks', {
             displayName: "",
             url: this.externalLinkUrl
           })
         }
-        this.set('externalLinkUrl', "")        
+        this.set('externalLinkUrl', "")
         console.log('resource', this.resource)
       }
       removeLink(e) {
@@ -220,23 +211,24 @@
         this.splice('resource.externalLinks', index, 1)
       }
       editLink(e) {
-        this.set('externalLinkUrl', e.model.link.url)  
+        this.set('externalLinkUrl', e.model.link.url)
         this.removeLink(e)
       }
-      _getFeatureImage(tags){
-        if(this.resource.featureImageUrl){return this.resource.featureImageUrl}
-        console.log('getting feature image',tags)
-        if(tags.hasOwnProperty('Resource-Types')){
+      _getFeatureImage(tags) {
+        if (this.resource.featureImageUrl) { return this.resource.featureImageUrl }
+        console.log('getting feature image', tags)
+        if (tags && tags.hasOwnProperty('Resource-Types')) {
           let key = Object.keys(tags['Resource-Types'])[0]
-          let url = '/images/resourceTypes/'+tags['Resource-Types'][key].slug+'.jpg'
+          let url = '/images/resourceTypes/' + tags['Resource-Types'][key].slug + '.jpg'
           return url
         }
-        else{
+        else {
           return "/images/resourceTypes/fallback-image.jpg"
         }
       }
       _tagsToArray(json, subProperty) {
         //lookup full tag
+        if (!json) { return }
         if (!json.hasOwnProperty(subProperty)) { return }
         let tags = json[subProperty]
         var tagsArray = []
@@ -247,6 +239,7 @@
         }
         return tagsArray
       }
+     
       fileupload(event) {
         event.preventDefault();
         //check resource name exists, give warning and remove files if not
@@ -271,10 +264,10 @@
           // Handle unsuccessful uploads
         }, function () {
           let index = this.getCurrentIndex(file.name);
-          console.log('index',index)
-          console.log('res',this.resource.uploadedFiles)
+          console.log('index', index)
+          console.log('res', this.resource.uploadedFiles)
           let res = this.resource.uploadedFiles[index]
-          console.log('res',res)
+          console.log('res', res)
           let temp = {
             lastModified: res.lastModified,
             name: res.name,
@@ -287,7 +280,7 @@
           }
           this.set('resource.uploadedFiles.' + index, [])
           this.set('resource.uploadedFiles.' + index, temp)
-          console.log('resource',this.resource)
+          console.log('resource', this.resource)
         }.bind(this));
       }
       getCurrentIndex(fileName) {
