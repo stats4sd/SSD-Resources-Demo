@@ -2,7 +2,6 @@
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="stats4sd-category-data.html">
-<link rel="import" href="stats4sd-image.html">
 <link rel="import" href="./ssd-elements/resource-file-download.html">
 <link rel="import" href="./ssd-elements/resource-editor.html">
 
@@ -22,23 +21,6 @@
       #content {
         @apply --layout-horizontal;
         @apply --layout-center-justified;
-      }
-
-      stats4sd-image {
-        position: relative;
-        margin: 64px 32px;
-        width: 50%;
-        max-width: 600px;
-        --stats4sd-image-img: {
-          @apply --layout-fit;
-        }
-        ;
-      }
-
-      stats4sd-image::before {
-        content: "";
-        display: block;
-        padding-top: 100%;
       }
 
       .resource {
@@ -104,11 +86,6 @@
         #content {
           @apply --layout-vertical;
           @apply --layout-center;
-        }
-
-        stats4sd-image {
-          margin: 0;
-          width: 80%;
         }
 
         .resource {

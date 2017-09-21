@@ -3,14 +3,12 @@
   "shell": "src/stats4sd-app.html",
   "fragments": [
     "src/stats4sd-list.html",
-    "src/stats4sd-detail.html",
-    "src/stats4sd-cart.html",
-    "src/stats4sd-checkout.html",
+    "src/stats4sd-home.html",
+    "src/stats4sd-resource.html",
     "src/lazy-resources.html"
   ],
   "sources": [
     "src/**/*",
-    "data/**/*",
     "images/**/*",
     "bower.json"
   ],
