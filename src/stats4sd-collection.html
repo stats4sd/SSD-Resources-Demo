@@ -1,0 +1,146 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="stats4sd-collection">
+
+  <template>
+
+    <style include="shared-styles">
+       :host {
+        display: block;
+        padding: 10px
+      }
+    </style>
+
+    <!--
+      app-route provides the name of the category.
+    -->
+    <app-route route="{{route}}" pattern="/:collectionSlug" data="{{routeData}}"></app-route>
+
+    <!-- main page view for / or blank endpoint -->
+    <div hidden$="[[_showIndividual(route.path,'false')]]">
+      <h1>All Collections</h1>
+      <div class="flex wrap">
+        <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]">
+          <collection-element collection={{collection}}></collection-element>
+        </template>
+        <paper-button hidden$="[[!user.email]]" style="height:180px; width:180px; color:var(--paper-green-700)">
+          <iron-icon icon="add"></iron-icon>Add Collection
+        </paper-button>
+      </div>
+    </div>
+
+    <!-- Template for individual collection set -->
+    <div hidden$="[[_showIndividual(route.path,'true')]]">
+      <h1>{{activeCollection.label}}</h1>
+    </div>
+
+
+
+  </template>
+
+  <script>
+    class stats4sdCollection extends Polymer.Element {
+
+      static get is() { return 'stats4sd-collection'; }
+
+      static get properties() {
+        return {
+
+          route: Object,
+          routeData: Object,
+          persistedTags: Array,
+          showAll: {
+            type: Boolean,
+            value: false
+          },
+          allCollections: {
+            type: Array,
+            value: [],
+            computed: "_getCollections(persistedTags)"
+          },
+          activeCollection: {
+            type: Object,
+            computed: '_getActiveCollection(routeData.collectionSlug,persistedTags)'
+          },
+          user: Object
+
+        }
+      }
+
+      static get observers() {
+        return [
+        ]
+      }
+      _showIndividual(path, hide) {
+        console.log('path',path, 'bool',hide)
+        // required for navigating back, collectionSlug change not detected. hide used to easily reverse condition
+        if (path == "" || path == "/") { return hide == 'true' }
+        else { return hide != 'true' }
+      }
+      _getActiveCollection(slug, persistedTags) {
+        console.log('_getActiveCollection')
+        // method runs when slug changed or persistedTags updated (e.g. first load)
+        // loads all collections on empty or / slug, otherwise loads individual
+        // double checks to make sure collections exist, and if not 
+        if (!slug || slug == "/") {
+          this.set('showAll', true)
+          return {}
+        }
+        if (!this.allCollections || this.allCollections.length == 0) {
+          this._getCollections(persistedTags)
+          return {}
+        }
+        else {
+          for (let collection of this.allCollections) {
+            if (collection.hasOwnProperty('slug') && collection.slug == slug) {
+              console.log('active collection', collection)
+              return collection
+            }
+          }
+        }
+      }
+
+      _getCollections(tags) {
+        // iterate over persisted tags array, identify which is collections (json property lost through indexeddb conversion)
+        // push to array
+        for (let key in tags) {
+          if (tags.hasOwnProperty(key)) {
+            if (tags[key].$key == "Collections") {
+              delete tags[key].$key
+              let collections = this._jsonToArray(tags[key])
+              console.log('all collections', collections)
+              return collections
+            }
+          }
+        }
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.isAttached = true;
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this.isAttached = false;
+      }
+
+      _jsonToArray(json) {
+        // push json to array, including $key field as key identifier (in same manner as indexeddb)
+        if (!json) { return }
+        var tagsArray = []
+        for (var key in json) {
+          if (json.hasOwnProperty(key)) {
+            tagsArray.push(json[key])
+          }
+        }
+        return tagsArray
+      }
+
+
+    }
+
+    customElements.define(stats4sdCollection.is, stats4sdCollection);
+  </script>
+
+</dom-module>

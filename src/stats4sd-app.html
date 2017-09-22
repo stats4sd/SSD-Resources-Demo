@@ -1,12 +1,3 @@
-<!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
@@ -200,7 +191,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-toolbar>
     </app-header>
 
-    
+
 
     <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
       <!-- home view -->
@@ -213,9 +204,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- resource view page -->
       <stats4sd-resource name="resource" route="{{subroute}}" persisted-resources="[[persistedResources]]" resource=[[resource]]
         offline="[[offline]]" persisted-tags="[[persistedTags]]" user="{{user}}"></stats4sd-resource>
+        <!-- collections page -->
+        <stats4sd-collection name="collection" user="{{user}}" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-collection>
 
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
+
     <!-- a11y announcer -->
     <!-- <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div> -->
 
@@ -229,15 +223,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </paper-dialog>
 
     <footer class="footer" hidden$="[[!signedIn]]">
-        <!-- don't show on resource page (could be linked to page change function) -->
-        <div hidden$="{{_computeHidden(page,'resource','true')}}">
-          <paper-button style="float:right">
-            <a href="/resource/_/edit" class="href-plain">
-              <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource
-            </a>
-          </paper-button>
-        </div>
-      </footer>
+      <!-- don't show on resource page, it has it's own footer -->
+      <div hidden$="{{_computeHidden(page,'resource','true')}}">
+          <paper-button style="float:right" >
+              <a href="/resource/_/edit" class="href-plain">
+                <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource
+              </a>
+            </paper-button>
+            <paper-button style="float:right">
+              <a href="/collection" class="href-plain">
+                <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
+              </a>
+            </paper-button>
+      </div>
+      
+    </footer>
 
   </template>
 
@@ -256,29 +256,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             reflectToAttribute: true,
             observer: '_pageChanged'
           },
-
-          numItems: {
-            type: Number,
-            value: 0
-          },
-
-          _shouldShowTabs: {
-            computed: '_computeShouldShowTabs(page, smallScreen)'
-          },
-
-          _shouldRenderTabs: {
-            computed: '_computeShouldRenderTabs(_shouldShowTabs, loadComplete)'
-          },
-
-          _shouldRenderDrawer: {
-            computed: '_computeShouldRenderDrawer(smallScreen, loadComplete)'
-          },
-
-          resDocs: {
-            //bserver:'_resDocsChanged',
-            type: Array,
-            value: []
-          },
           signedIn: {
             type: Boolean,
             observer: '_signedInChange'
@@ -289,8 +266,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get observers() {
         return [
           '_routePageChanged(routeData.page)',
-          // '_persistedChanged(persistedFeatured.splices)',
-          // '_resDocsChanged(resDocs.*)',
         ]
         // note, could use persistedFeatured.length to simply track number of items
       }
@@ -364,11 +339,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         console.log('resource', this.resource)
         this.set('route.path', e.detail.url)
       }
-      _resourceSaved(e){
-        console.log('resource saved',e)
-        this.set('route.path', '/resource/'+e.detail.resource.slug)
+      _resourceSaved(e) {
+        console.log('resource saved', e)
+        this.set('route.path', '/resource/' + e.detail.resource.slug)
       }
-      
+
       _computeHidden(activePage, testPage, outcome) {
         // state whether to hide or show when active page matches test page
         let bool = (outcome == 'true')
@@ -394,6 +369,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
+      _getEditUrl(page){
+        console.log('getting edit url')
+        console.log('route',this.route.path)
+        return this.route.path+"/edit"
+      }
+
       _notifyNetworkStatus() {
         let oldOffline = this.offline;
         this.offline = !navigator.onLine;
@@ -410,9 +391,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      _toggleDrawer() {
-        this.drawerOpened = !this.drawerOpened;
-      }
       _signInOpen() {
         this.$.login.open()
       }
@@ -423,6 +401,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _signedInChange() {
         this.$.login.close()
       }
+
+
+      // ************deprecated functions?? - to review ***************
 
       // Elements in the app can notify section changes.
       // Response by a11y announcing the section and syncronizing the category.
@@ -453,30 +434,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      _onAddCartItem(event) {
-        if (!this._cartModal) {
-          this._cartModal = document.createElement('stats4sd-cart-modal');
-          this.root.appendChild(this._cartModal);
-        }
-        this.$.cart.addItem(event.detail);
-        this._cartModal.open();
-        this._announce('Item added to the cart');
-      }
-
-      _onSetCartItem(event) {
-        let detail = event.detail;
-        this.$.cart.setItem(detail);
-        if (detail.quantity === 0) {
-          this._announce('Item deleted');
-        } else {
-          this._announce('Quantity changed to ' + detail.quantity);
-        }
-      }
-
-      _onClearCart() {
-        this.$.cart.clearCart();
-        this._announce('Cart cleared');
-      }
 
       // Elements in the app can notify a change to be a11y announced.
       _onAnnounce(e) {
@@ -506,22 +463,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _onFallbackSelectionTriggered() {
         this.page = '404';
-      }
-
-      _computeShouldShowTabs(page, smallScreen) {
-        return (page === 'home' || page === 'list' || page === 'detail') && !smallScreen;
-      }
-
-      _computeShouldRenderTabs(_shouldShowTabs, loadComplete) {
-        return _shouldShowTabs && loadComplete;
-      }
-
-      _computeShouldRenderDrawer(smallScreen, loadComplete) {
-        return smallScreen && loadComplete;
-      }
-
-      _computePluralizedQuantity(quantity) {
-        return quantity + ' ' + (quantity === 1 ? 'item' : 'items');
       }
 
     }

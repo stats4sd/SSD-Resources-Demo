@@ -155,14 +155,19 @@
           <iron-icon icon="delete" aria-label="Delete Resource"></iron-icon>Delete Resource
         </paper-button>
         <paper-button style="float:left" on-tap="_restoreResource" hidden$="{{!resource.deleted}}">
-            <iron-icon icon="restore" aria-label="Restore Resource"></iron-icon>Restore Resource
-          </paper-button>
+          <iron-icon icon="restore" aria-label="Restore Resource"></iron-icon>Restore Resource
+        </paper-button>
       </div>
       <paper-button style="float:right" on-tap="_editResource" hidden$="{{editMode}}">
         <iron-icon icon="mode-edit" aria-label="Edit Resource"></iron-icon>Edit Resource
       </paper-button>
       <paper-button style="float:right" on-tap="_saveResource" hidden$="{{!editMode}}">
         <iron-icon icon="save" aria-label="Save Resource"></iron-icon>Save Resource
+      </paper-button>
+      <paper-button style="float:right">
+        <a href="/collection" class="href-plain">
+          <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
+        </a>
       </paper-button>
     </footer>
 
