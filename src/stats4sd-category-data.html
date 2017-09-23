@@ -141,7 +141,6 @@
         _tagsChanged(tags) {
           //when tags received filter array into seperate categories and populate corresponding property
           //maintains a $key from nested json like in indexeddb
-          console.log('tags changed', tags)
           if(tags.length<=0){return}
           let temp = {}
           for (let el of tags) {
@@ -156,11 +155,11 @@
               }
             }
           }
-          console.log('temp', temp)
+          console.log('tags', temp)
           this.allCollections=[]
           this.allCollections=temp.Collection.reverse()
           this.newestCollections=[]
-          this.newestCollections=temp.Collection.reverse().slice(0,4)
+          this.newestCollections=this.allCollections.slice(0,4)
           this.allKeywords=[]
           this.allKeywords=temp.Keyword.reverse()
           this.allResourceTypes=[]

@@ -15,6 +15,8 @@
     <app-route route="{{route}}" pattern="/:collectionSlug" data="{{routeData}}"></app-route>
     <!-- category data provides meta info -->
     <stats4sd-category-data></stats4sd-category-data>
+    <!-- live db binding for new resource -->
+    <firebase-document id="liveCollectionDocument" data="{{liveCollection}}" app-name="SSD-Resources"></firebase-document>
 
     <!-- main page view for / or blank endpoint -->
     <div hidden$="[[_showIndividual(route.path,'false')]]">
@@ -23,7 +25,7 @@
         <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]">
           <collection-element collection={{collection}}></collection-element>
         </template>
-        <paper-button hidden$="[[!user.email]]" style="height:180px; width:180px; color:var(--paper-green-700)">
+        <paper-button hidden$="[[!user.email]]" style="height:180px; width:180px; color:var(--paper-green-700)" on-tap="_addCollection">
           <iron-icon icon="add"></iron-icon>Add Collection
         </paper-button>
       </div>
@@ -33,6 +35,19 @@
     <div hidden$="[[_showIndividual(route.path,'true')]]">
       <h1>{{activeCollection.label}}</h1>
     </div>
+
+    <!-- Template for add/edit collection -->
+    <paper-dialog id="collectionDialog" modal style="padding:5px; max-width:100vw; width:500px; min-height:500px">
+      <h2>Add New Collection</h2>
+      <paper-dialog-scrollable>
+        <paper-input always-float-label label="Collection Name" value="{{liveCollection.label}}"></paper-input>
+        <paper-textarea always-float-label label="Description" value="{{liveCollection.description}}"></paper-textarea>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus on-tap="createCollection">Continue</paper-button>
+      </div>
+    </paper-dialog>
 
 
 
@@ -57,7 +72,8 @@
             type: Object,
             computed: '_getActiveCollection(routeData.collectionSlug,allCollections)'
           },
-          user: Object
+          user: Object,
+          liveCollection:Object
 
         }
       }
@@ -72,14 +88,13 @@
         else { return hide != 'true' }
       }
       _getActiveCollection(slug, allCollections) {
-        console.log('_getActiveCollection')
         // method runs when slug changed or persisted collections updated (e.g. first load)
         // loads all collections on empty or / slug, otherwise loads individual
         if (!slug || slug == "/") {
           this.set('showAll', true)
           return {}
         }
-        if (!this.allCollections || this.allCollections.length == 0) {return {}}
+        if (!this.allCollections || this.allCollections.length == 0) { return {} }
         else {
           for (let collection of this.allCollections) {
             if (collection.hasOwnProperty('slug') && collection.slug == slug) {
@@ -87,6 +102,36 @@
               return collection
             }
           }
+        }
+      }
+
+      _addCollection(){
+        console.log('adding collection')
+        this.$.collectionDialog.open()
+      }
+      createCollection(e){
+        // ****Need to decide what meta to track and bring in *********
+        // ****Also need to ensure form completed, and possibly way to update current page
+        this.liveCollection.type="Collection";
+        this.liveCollection.created=Date.now();
+        this.liveCollection.modified=Date.now();
+        this.liveCollection.resources=[];
+        this.liveCollection.key=this.generatePushID();
+        this.liveCollection.slug=this._toSlug(this.liveCollection.label);
+        console.log('creating collection',this.liveCollection)
+        this.$.liveCollectionDocument.saveValue('/tags/Collections',this.liveCollection.key)
+        .then(()=>console.log('collection saved'))
+        .catch((err)=>{console.log('err',err)})
+        }
+
+      _getLiveCollectionPath(key){
+        console.log('setting live collection path for key',key)
+      }
+      _toSlug(name) {
+        if (!name) {return ""}
+        else {
+          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
+          return slug
         }
       }
 
@@ -111,9 +156,38 @@
         }
         return tagsArray
       }
-
-
+      generatePushID() {
+        var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+        var lastPushTime = 0;
+        var lastRandChars = [];
+        var now = new Date().getTime();
+        var duplicateTime = (now === lastPushTime);
+        lastPushTime = now;
+        var timeStampChars = new Array(8);
+        for (var i = 7; i >= 0; i--) {
+          timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+          now = Math.floor(now / 64);
+        }
+        if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+        var id = timeStampChars.join('');
+        if (!duplicateTime) {
+          for (i = 0; i < 12; i++) {
+            lastRandChars[i] = Math.floor(Math.random() * 64);
+          }
+        } else {
+          for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
+            lastRandChars[i] = 0;
+          }
+          lastRandChars[i]++;
+        }
+        for (i = 0; i < 12; i++) {
+          id += PUSH_CHARS.charAt(lastRandChars[i]);
+        }
+        if (id.length != 20) throw new Error('Length should be 20.');
+        return id;
+      }
     }
+
 
     customElements.define(stats4sdCollection.is, stats4sdCollection);
   </script>
