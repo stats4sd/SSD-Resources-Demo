@@ -195,7 +195,7 @@
 
     <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
       <!-- home view -->
-      <stats4sd-home name="home" persisted-tags="[[persistedTags]]" page="{{page}}"></stats4sd-home>
+      <stats4sd-home name="home" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]"></stats4sd-home>
       <!-- list view of items in a category -->
       <stats4sd-list name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
       <!--  admin page -->
@@ -205,10 +205,12 @@
       <stats4sd-resource name="resource" route="{{subroute}}" persisted-resources="[[persistedResources]]" resource=[[resource]]
         offline="[[offline]]" persisted-tags="[[persistedTags]]" user="{{user}}"></stats4sd-resource>
         <!-- collections page -->
-        <stats4sd-collection name="collection" user="{{user}}" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-collection>
-
+        <stats4sd-collection name="collection" user="{{user}}" route="[[subroute]]" offline="[[offline]]" all-collections="{{allCollections}}"></stats4sd-collection>
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
+
+    <!-- category data provides meta info -->
+    <stats4sd-category-data tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}" newest-collections="{{newestCollections}}"></stats4sd-category-data>
 
     <!-- a11y announcer -->
     <!-- <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div> -->

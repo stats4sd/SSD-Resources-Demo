@@ -96,7 +96,7 @@
 
             resources: {
               type: Array,
-              value:[]
+              value: []
             },
 
             filteredResources: {
@@ -104,43 +104,97 @@
               notify: true
             },
 
-            label:{
-              type:String,
-              notify:true
+            label: {
+              type: String,
+              notify: true
+            },
+
+            tags: {
+              type: Array
+            },
+            // populated meta data from tags
+            allCollections: {
+              type: Array,
+              notify: true
+            },
+            newestCollections: {
+              type: Array,
+              notify: true
+            },
+            allKeywords: {
+              type: Array,
+              notify: true
+            },
+            allResourceTypes: {
+              type: Array,
+              notify: true
             }
 
           }
         }
-        static get observers() { return [
-        '_resourcesChanged(resources)',
-      ]}
+        static get observers() {
+          return [
+            '_resourcesChanged(resources)',
+            '_tagsChanged(tags)'
+          ]
+        }
+        _tagsChanged(tags) {
+          //when tags received filter array into seperate categories and populate corresponding property
+          //maintains a $key from nested json like in indexeddb
+          console.log('tags changed', tags)
+          if(tags.length<=0){return}
+          let temp = {}
+          for (let el of tags) {
+            for (let key in el) {
+              if (el.hasOwnProperty(key)) {
+                let type = el[key].type
+                if (type != undefined) {
+                  if (!temp[type]) { temp[type] = [] }
+                  el[key].$key = key
+                  temp[type].push(el[key])
+                }
+              }
+            }
+          }
+          console.log('temp', temp)
+          this.allCollections=[]
+          this.allCollections=temp.Collection.reverse()
+          this.newestCollections=[]
+          this.newestCollections=temp.Collection.reverse().slice(0,4)
+          this.allKeywords=[]
+          this.allKeywords=temp.Keyword.reverse()
+          this.allResourceTypes=[]
+          this.allResourceTypes=temp['Resource-Type'].reverse()
+        }
 
-      _resourcesChanged(res){
-        // when resources are loaded, or method called from slug change populate filtered resources
-        // if no slug assumes /list selected and therefore should display all
-        // could change 'all resources' to pick specific slug if wanted
-        if(res.length>0){
-          let key = this._computeCategoryKey(this.slug)
-          this.filteredResources=[]
-          if(this.slug==''||this.slug==undefined){console.log('showing all');this.filteredResources=res}
-          else{
-            this.filteredResources = res.filter(function (r) {
-              if(r.hasOwnProperty('tags') && r.tags.hasOwnProperty('Resource-Types')){
-              return (r.tags["Resource-Types"] && r.tags["Resource-Types"].hasOwnProperty(key)
-              )}
-              else{return false}
-            })
+
+        _resourcesChanged(res) {
+          // when resources are loaded, or method called from slug change populate filtered resources
+          // if no slug assumes /list selected and therefore should display all
+          // could change 'all resources' to pick specific slug if wanted
+          if (res.length > 0) {
+            let key = this._computeCategoryKey(this.slug)
+            this.filteredResources = []
+            if (this.slug == '' || this.slug == undefined) { console.log('showing all'); this.filteredResources = res }
+            else {
+              this.filteredResources = res.filter(function (r) {
+                if (r.hasOwnProperty('tags') && r.tags.hasOwnProperty('Resource-Types')) {
+                  return (r.tags["Resource-Types"] && r.tags["Resource-Types"].hasOwnProperty(key)
+                  )
+                }
+                else { return false }
+              })
+            }
           }
         }
-      }
 
-        _slugChanged(slug){
-          this.key=this._computeCategoryKey()
-          this.set('label',categoryList[this.key])
-          if(this.resources.length==0){
-            
+        _slugChanged(slug) {
+          this.key = this._computeCategoryKey()
+          this.set('label', categoryList[this.key])
+          if (this.resources.length == 0) {
+
           }
-          else{this._resourcesChanged(this.resources)}
+          else { this._resourcesChanged(this.resources) }
         }
 
         _computeCategoryKey(categoryName) {
@@ -149,7 +203,7 @@
             let val = categoryList[key]
             if (val.slug == categoryName) {
               // set label and return key
-              this.set('label',val.label)
+              this.set('label', val.label)
               return key
             }
           }
@@ -157,55 +211,7 @@
 
         }
 
-        _computeCategory(categoryName) {
-          // Fetch the items of the category. Note that the fetch is asynchronous,
-          // which means `category.items` may not be set initially (but that path
-          // will be notified when the fetch completes).
-          let categoryObj = this._getCategoryObject(categoryName);
-          this._fetchItems(categoryObj, 1);
-          return categoryObj;
-        }
 
-        _fetchItems(category, attempts) {
-          // this._setFailure(false);
-          // // Only fetch the items of a category if it has not been previously set.
-          // if (!category || category.items) {
-          //   return;
-          // }
-          // this._getResource({
-          //   url: 'data/' + category.name + '.json',
-          //   onLoad(e) {
-          //     this.set('category.items', JSON.parse(e.target.responseText));
-          //   },
-          //   onError(e) {
-          //     this._setFailure(true);
-          //   }
-          // }, attempts);
-        }
-
-        _getResource(rq, attempts) {
-          // let xhr = new XMLHttpRequest();
-          // xhr.addEventListener('load', rq.onLoad.bind(this));
-          // xhr.addEventListener('error', (e) => {
-          //   // Flaky connections might fail fetching resources
-          //   if (attempts > 1) {
-          //     this._getResourceDebouncer = Polymer.Debouncer.debounce(this._getResourceDebouncer,
-          //       Polymer.Async.timeOut.after(200), this._getResource.bind(this, rq, attempts - 1));
-          //   } else {
-          //     rq.onError.call(this, e);
-          //   }
-          // });
-
-          // xhr.open('GET', rq.url);
-          // xhr.send();
-        }
-
-        refresh() {
-          if (this.categoryName) {
-            // Try at most 3 times to get the items.
-            this._fetchItems(this._getCategoryObject(this.categoryName), 3);
-          }
-        }
 
       }
 

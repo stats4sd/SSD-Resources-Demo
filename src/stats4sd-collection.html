@@ -11,10 +11,10 @@
       }
     </style>
 
-    <!--
-      app-route provides the name of the category.
-    -->
+    <!-- app-route provides the name of the category. -->
     <app-route route="{{route}}" pattern="/:collectionSlug" data="{{routeData}}"></app-route>
+    <!-- category data provides meta info -->
+    <stats4sd-category-data></stats4sd-category-data>
 
     <!-- main page view for / or blank endpoint -->
     <div hidden$="[[_showIndividual(route.path,'false')]]">
@@ -48,19 +48,14 @@
 
           route: Object,
           routeData: Object,
-          persistedTags: Array,
           showAll: {
             type: Boolean,
             value: false
           },
-          allCollections: {
-            type: Array,
-            value: [],
-            computed: "_getCollections(persistedTags)"
-          },
+          allCollections: Array,
           activeCollection: {
             type: Object,
-            computed: '_getActiveCollection(routeData.collectionSlug,persistedTags)'
+            computed: '_getActiveCollection(routeData.collectionSlug,allCollections)'
           },
           user: Object
 
@@ -72,44 +67,24 @@
         ]
       }
       _showIndividual(path, hide) {
-        console.log('path',path, 'bool',hide)
         // required for navigating back, collectionSlug change not detected. hide used to easily reverse condition
         if (path == "" || path == "/") { return hide == 'true' }
         else { return hide != 'true' }
       }
-      _getActiveCollection(slug, persistedTags) {
+      _getActiveCollection(slug, allCollections) {
         console.log('_getActiveCollection')
-        // method runs when slug changed or persistedTags updated (e.g. first load)
+        // method runs when slug changed or persisted collections updated (e.g. first load)
         // loads all collections on empty or / slug, otherwise loads individual
-        // double checks to make sure collections exist, and if not 
         if (!slug || slug == "/") {
           this.set('showAll', true)
           return {}
         }
-        if (!this.allCollections || this.allCollections.length == 0) {
-          this._getCollections(persistedTags)
-          return {}
-        }
+        if (!this.allCollections || this.allCollections.length == 0) {return {}}
         else {
           for (let collection of this.allCollections) {
             if (collection.hasOwnProperty('slug') && collection.slug == slug) {
               console.log('active collection', collection)
               return collection
-            }
-          }
-        }
-      }
-
-      _getCollections(tags) {
-        // iterate over persisted tags array, identify which is collections (json property lost through indexeddb conversion)
-        // push to array
-        for (let key in tags) {
-          if (tags.hasOwnProperty(key)) {
-            if (tags[key].$key == "Collections") {
-              delete tags[key].$key
-              let collections = this._jsonToArray(tags[key])
-              console.log('all collections', collections)
-              return collections
             }
           }
         }

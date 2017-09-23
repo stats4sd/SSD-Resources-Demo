@@ -72,7 +72,7 @@
     </header>
 
     <ul class="flex wrap" hidden$="[[!failure]]">
-      <dom-repeat id="resourcesList" items="[[filteredResources]]" as="resource" initial-count="4" filter="resourceFilter" rendered-item-count="{{resourcesRendered}}" sort="resourceSort">
+      <dom-repeat id="resourcesList" items="[[filteredResources]]" as="resource" initial-count="10" filter="resourceFilter" rendered-item-count="{{resourcesRendered}}" sort="resourceSort">
         <template>
           <resource-search-result resource='[[resource]]'></resource-search-result>
         </template>
