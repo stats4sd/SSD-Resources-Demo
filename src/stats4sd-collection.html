@@ -25,9 +25,6 @@
         <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]">
           <collection-element collection={{collection}}></collection-element>
         </template>
-        <paper-button hidden$="[[!user.email]]" style="height:180px; width:180px; color:var(--paper-green-700)" on-tap="_addCollection">
-          <iron-icon icon="add"></iron-icon>Add Collection
-        </paper-button>
       </div>
     </div>
 
@@ -37,6 +34,7 @@
     </div>
 
     <!-- Template for add/edit collection -->
+    <!-- *** add display none for when loading or similar (e.g. when resource updated) -->
     <paper-dialog id="collectionDialog" modal style="padding:5px; max-width:100vw; width:500px; min-height:500px">
       <h2>Add New Collection</h2>
       <paper-dialog-scrollable>
@@ -45,7 +43,7 @@
       </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm autofocus on-tap="createCollection">Continue</paper-button>
+        <paper-button dialog-confirm autofocus on-tap="saveCollection">Continue</paper-button>
       </div>
     </paper-dialog>
 
@@ -82,6 +80,15 @@
         return [
         ]
       }
+      _editCollection(){
+        console.log('live collection',this.liveCollection)
+        delete this.activeCollection.$key
+        console.log('active collection',this.activeCollection)
+        this.set('liveCollection',{})
+        this.set('liveCollection',this.activeCollection)
+        console.log('editing collection',this.liveCollection)
+        this.$.collectionDialog.open()
+      }
       _showIndividual(path, hide) {
         // required for navigating back, collectionSlug change not detected. hide used to easily reverse condition
         if (path == "" || path == "/") { return hide == 'true' }
@@ -109,18 +116,28 @@
         console.log('adding collection')
         this.$.collectionDialog.open()
       }
-      createCollection(e){
+      saveCollection(e){
         // ****Need to decide what meta to track and bring in *********
         // ****Also need to ensure form completed, and possibly way to update current page
         this.liveCollection.type="Collection";
-        this.liveCollection.created=Date.now();
         this.liveCollection.modified=Date.now();
-        this.liveCollection.resources=[];
-        this.liveCollection.key=this.generatePushID();
         this.liveCollection.slug=this._toSlug(this.liveCollection.label);
+        if(!this.liveCollection.hasOwnProperty('key')){
+          this.liveCollection.key=this.generatePushID()
+        }
+        if(!this.liveCollection.hasOwnProperty('created')){
+          this.liveCollection.created=Date.now();
+        }
+        if(!this.liveCollection.hasOwnProperty('resources')){
+          this.liveCollection.resources=[];
+        }         
         console.log('creating collection',this.liveCollection)
         this.$.liveCollectionDocument.saveValue('/tags/Collections',this.liveCollection.key)
-        .then(()=>console.log('collection saved'))
+        .then(()=>{
+          // force refresh/newslug redirect to update local cache
+          // could probably be done without refresh by pushing/updating values and various callback, possibly improve later
+          window.location.replace(window.location.origin+'/collection/'+this.liveCollection.slug);
+        })
         .catch((err)=>{console.log('err',err)})
         }
 

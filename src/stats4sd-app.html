@@ -195,22 +195,23 @@
 
     <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
       <!-- home view -->
-      <stats4sd-home name="home" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]"></stats4sd-home>
+      <stats4sd-home id="homePage" name="home" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]"></stats4sd-home>
       <!-- list view of items in a category -->
-      <stats4sd-list name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
+      <stats4sd-list id="listPage" name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
       <!--  admin page -->
-      <stats4sd-admin name="admin" route="[[subroute]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"
+      <stats4sd-admin id="adminPage" name="admin" route="[[subroute]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"
         page="{{page}}"></stats4sd-admin>
       <!-- resource view page -->
-      <stats4sd-resource name="resource" route="{{subroute}}" persisted-resources="[[persistedResources]]" resource=[[resource]]
+      <stats4sd-resource id="resourcePage" name="resource" route="{{subroute}}" persisted-resources="[[persistedResources]]" resource=[[resource]]
         offline="[[offline]]" persisted-tags="[[persistedTags]]" user="{{user}}"></stats4sd-resource>
-        <!-- collections page -->
-        <stats4sd-collection name="collection" user="{{user}}" route="[[subroute]]" offline="[[offline]]" all-collections="{{allCollections}}"></stats4sd-collection>
+      <!-- collections page -->
+      <stats4sd-collection id="collectionPage" name="collection" user="{{user}}" route="{{subroute}}" offline="[[offline]]" all-collections="{{allCollections}}"></stats4sd-collection>
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
 
     <!-- category data provides meta info -->
-    <stats4sd-category-data tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}" newest-collections="{{newestCollections}}"></stats4sd-category-data>
+    <stats4sd-category-data tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}"
+      newest-collections="{{newestCollections}}"></stats4sd-category-data>
 
     <!-- a11y announcer -->
     <!-- <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div> -->
@@ -225,20 +226,41 @@
     </paper-dialog>
 
     <footer class="footer" hidden$="[[!signedIn]]">
-      <!-- don't show on resource page, it has it's own footer -->
-      <div hidden$="{{_computeHidden(page,'resource','true')}}">
-          <paper-button style="float:right" >
-              <a href="/resource/_/edit" class="href-plain">
-                <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource
-              </a>
-            </paper-button>
-            <paper-button style="float:right">
-              <a href="/collection" class="href-plain">
-                <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
-              </a>
-            </paper-button>
+      <!-- buttons show/hide on various paths -->
+      <div id="rightButtons" style="float:right">
+
+        <paper-button hidden$="{{_hideOnPaths(route.path,'/collection')}}">
+          <a href="/collection" class="href-plain">
+            <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
+          </a>
+        </paper-button>
+
+        <paper-button hidden$="{{_showOnPaths(route.path,'/collection/*')}}" on-tap="_editCollection">
+          <a class="href-plain">
+            <iron-icon icon="mode-edit" aria-label="Manage Collections"></iron-icon>Edit Collection
+          </a>
+        </paper-button>
+
+        <paper-button hidden$="{{_showOnPaths(route.path,'/collection')}}" on-tap="_addCollection">
+          <a href="/collection" class="href-plain">
+            <iron-icon icon="add" aria-label="Manage Collections"></iron-icon>Add Collection
+          </a>
+        </paper-button>
+
+        <paper-button hidden$="{{_hideOnPaths(route.path,'/resource/*_/collection*')}}">
+          <a href="/resource/_/edit" class="href-plain">
+            <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource
+          </a>
+        </paper-button>
+
+        <paper-button hidden$="{{_showOnPaths(route.path,'/resource/*')}}">
+          <a class="href-plain">
+            <iron-icon icon="mode-edit" aria-label="Add Resource"></iron-icon>Edit Resource
+          </a>
+        </paper-button>
+
       </div>
-      
+
     </footer>
 
   </template>
@@ -282,12 +304,6 @@
         // Custom elements polyfill safe way to indicate an element has been upgraded.
         this.removeAttribute('unresolved');
         // listen for custom events
-        this.addEventListener('add-cart-item', (e) => this._onAddCartItem(e));
-        this.addEventListener('set-cart-item', (e) => this._onSetCartItem(e));
-        this.addEventListener('clear-cart', (e) => this._onClearCart(e));
-        this.addEventListener('change-section', (e) => this._onChangeSection(e));
-        this.addEventListener('announce', (e) => this._onAnnounce(e));
-        this.addEventListener('dom-change', (e) => this._domChange(e));
         this.addEventListener('resource-change', (e) => this._resourceChange(e));
         this.addEventListener('show-invalid-url-warning', (e) => this._onFallbackSelectionTriggered(e));
         this.addEventListener('resource-saved', (e) => this._resourceSaved(e));
@@ -346,14 +362,31 @@
         this.set('route.path', '/resource/' + e.detail.resource.slug)
       }
 
-      _computeHidden(activePage, testPage, outcome) {
+      _hideOnPaths(activePath, pathsString) {
+        // uses _ to seperate paths to hide on
+        let paths = pathsString.split('_')
         // state whether to hide or show when active page matches test page
-        let bool = (outcome == 'true')
-        if (activePage == testPage) {
-          return bool
+        for (let path of paths) {
+          // identify wildcard, if yes allow fuzzy match
+          if (path.indexOf('*') > -1) {
+            path = path.slice(0, -1)
+            if (activePath.indexOf(path) > -1) {
+              return true
+            }
+          }
+          else {
+            if (activePath == path) {
+              return true
+            }
+          }
         }
-        return !bool
-
+        return false
+      }
+      _editCollection() {this.$.collectionPage._editCollection();}
+      _addCollection() {this.$.collectionPage._addCollection();}
+      _showOnPaths(activePath, pathsString) {
+        let hide = this._hideOnPaths(activePath, pathsString)
+        return !hide
       }
       _ensureLazyLoaded() {
         // load lazy resources after render and set `loadComplete` when done.
@@ -371,10 +404,10 @@
         }
       }
 
-      _getEditUrl(page){
+      _getEditUrl(page) {
         console.log('getting edit url')
-        console.log('route',this.route.path)
-        return this.route.path+"/edit"
+        console.log('route', this.route.path)
+        return this.route.path + "/edit"
       }
 
       _notifyNetworkStatus() {

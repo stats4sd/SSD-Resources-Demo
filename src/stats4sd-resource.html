@@ -149,7 +149,7 @@
 
 
 
-    <footer hidden$="[[!user.email]]" class="footer">
+    <!-- <footer hidden$="[[!user.email]]" class="footer">
       <div hidden$="{{!editMode}}" style="float:left">
         <paper-button style="float:left" on-tap="_deleteResource" hidden$="{{resource.deleted}}">
           <iron-icon icon="delete" aria-label="Delete Resource"></iron-icon>Delete Resource
@@ -169,7 +169,7 @@
           <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
         </a>
       </paper-button>
-    </footer>
+    </footer> -->
 
     <!-- Resource editor view (could be put into seperate component) -->
     <template is="dom-if" if="{{editMode}}">
