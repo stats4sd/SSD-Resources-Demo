@@ -244,9 +244,15 @@
           </a>
         </paper-button>
 
-        <paper-button hidden$="{{_showOnPaths(route.path,'/resource/*')}}">
+        <paper-button hidden$="{{_hideResourceEdit(route.path)}}" on-tap="_editResource">
           <a class="href-plain">
             <iron-icon icon="mode-edit" aria-label="Add Resource"></iron-icon>Edit Resource
+          </a>
+        </paper-button>
+
+        <paper-button hidden$="{{_hideResourceSave(route.path)}}" on-tap="_saveResource">
+          <a class="href-plain">
+            <iron-icon icon="save" aria-label="Add Resource"></iron-icon>Save Resource
           </a>
         </paper-button>
 
@@ -345,12 +351,12 @@
           }, 1);
         }
       }
-      _search(e){
+      _search(e) {
         this.$.categoryData.search(e.detail)
       }
       goBack() {
-          window.history.back()
-        }
+        window.history.back()
+      }
       goHome() {
         this.set('route.path', '/')
       }
@@ -385,23 +391,42 @@
         }
         return false
       }
-      _editCollection() { this.$.collectionPage._editCollection(); }
-      _addCollection() { this.$.collectionPage._addCollection(); }
-      _showOnPaths(activePath, pathsString) {
-        let hide = this._hideOnPaths(activePath, pathsString)
-        return !hide
+      _hideResourceEdit(path) {
+        //show on /resource/* but not on /resource/[slug]/edit
+        if (path.indexOf('/resource/') > -1 && path.split('/').indexOf('edit') == -1) {
+          return false
+        }
+        return true
+      }
+      _hideResourceSave(path) {
+        //only show on /resource/[slug]/edit
+        let split = path.split('/')
+        if (split.length > 3 && split[3] == 'edit') {
+          return false
+        }
+        return true
       }
       _hideHomeButton(path) {
-        console.log('hide home button?', path)
         if (path == "/") {
           return false
         }
         if (path.indexOf('/list/') > -1) { return false }
         else {
-          console.log('hiding')
           return true
         }
       }
+
+      _editCollection() { this.$.collectionPage._editCollection(); }
+      _addCollection() { this.$.collectionPage._addCollection(); }
+      _saveResource() { this.$.resourcePage._saveResource() }
+      _editResource() {
+        this.set('route.path', this.route.path + '/edit')
+      }
+      _showOnPaths(activePath, pathsString) {
+        let hide = this._hideOnPaths(activePath, pathsString)
+        return !hide
+      }
+
       _ensureLazyLoaded() {
         // load lazy resources after render and set `loadComplete` when done.
         if (!this.loadComplete) {
@@ -416,12 +441,6 @@
             });
           });
         }
-      }
-
-      _getEditUrl(page) {
-        console.log('getting edit url')
-        console.log('route', this.route.path)
-        return this.route.path + "/edit"
       }
 
       _notifyNetworkStatus() {
