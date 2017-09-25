@@ -6,6 +6,8 @@
     "src/stats4sd-home.html",
     "src/stats4sd-resource.html",
     "src/stats4sd-collection.html",
+    "src/stats4sd-search.html",
+    "src/stats4sd-admin.html",
     "src/lazy-resources.html"
   ],
   "sources": [
@@ -19,7 +21,9 @@
     "bower_components/webcomponentsjs/*"
   ],
   "lint": {
-    "rules": ["polymer-2-hybrid"]
+    "rules": [
+      "polymer-2-hybrid"
+    ]
   },
   "builds": [
     {

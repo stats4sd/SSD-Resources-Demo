@@ -47,7 +47,7 @@
         @apply --layout-fixed-top;
         z-index: 1;
         color: white;
-        background-color: rgba(210, 35, 42, 0.95);
+        background-color: #d2232a;
         --app-header-shadow: {
           box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
           height: 10px;
@@ -86,14 +86,9 @@
       /* :host(:not([page=test])) .back-btn {
         display: none;
       } */
-
-       :host(:not([page=resource])) .back-btn {
+      /* :host(:not([page=resource])) .back-btn {
         display: none;
-      }
-
-       :host([page=resource]) .home-btn {
-        display: none;
-      }
+      } */
 
       #signedInHeader {
         position: absolute;
@@ -164,13 +159,13 @@
     <app-header role="navigation" id="header" effects="waterfall" condenses reveals>
       <app-toolbar>
         <div class="left-bar-item">
-          <a href="/">
-            <paper-icon-button class="home-btn" icon="home" aria-label="Home">
-            </paper-icon-button>
+          <a href="/" hidden$="{{_showOnPaths(route.path,'/_/collection_/list_/list/*')}}">
+            <paper-icon-button on-tap="goHome" class="home-btn" icon="home" aria-label="Home"></paper-icon-button>
           </a>
-          <a class="back-btn" href="/list/[[categoryName]]" tabindex="-1">
-            <paper-icon-button class="back-btn" icon="arrow-back" aria-label="Go back"></paper-icon-button>
-          </a>
+
+          <paper-icon-button on-tap="goBack" class="back-btn" hidden$="{{!_showOnPaths(route.path,'/_/collection_/list_/list/*')}}"
+            icon="arrow-back" aria-label="Go back"></paper-icon-button>
+
         </div>
         <div class="logo" main-title>
           <a hidden$="[[!smallScreen]]" href="/" aria-label="stats4sd Home">Stats4SD</a>
@@ -194,24 +189,20 @@
 
 
     <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
-      <!-- home view -->
       <stats4sd-home id="homePage" name="home" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]"></stats4sd-home>
-      <!-- list view of items in a category -->
       <stats4sd-list id="listPage" name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
-      <!--  admin page -->
       <stats4sd-admin id="adminPage" name="admin" route="[[subroute]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"
         page="{{page}}"></stats4sd-admin>
-      <!-- resource view page -->
       <stats4sd-resource id="resourcePage" name="resource" route="{{subroute}}" persisted-resources="[[persistedResources]]" resource=[[resource]]
         offline="[[offline]]" persisted-tags="[[persistedTags]]" user="{{user}}"></stats4sd-resource>
-      <!-- collections page -->
       <stats4sd-collection id="collectionPage" name="collection" user="{{user}}" route="{{subroute}}" offline="[[offline]]" all-collections="{{allCollections}}"></stats4sd-collection>
+      <stats4sd-search id="searchPage" name="search" route="{{route}}" page="{{page}}" search-results="[[searchResults]]"></stats4sd-search>
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
 
     <!-- category data provides meta info -->
-    <stats4sd-category-data tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}"
-      newest-collections="{{newestCollections}}"></stats4sd-category-data>
+    <stats4sd-category-data id="categoryData" tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}"
+      newest-collections="{{newestCollections}}" search-results="{{searchResults}}"></stats4sd-category-data>
 
     <!-- a11y announcer -->
     <!-- <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div> -->
@@ -307,6 +298,7 @@
         this.addEventListener('resource-change', (e) => this._resourceChange(e));
         this.addEventListener('show-invalid-url-warning', (e) => this._onFallbackSelectionTriggered(e));
         this.addEventListener('resource-saved', (e) => this._resourceSaved(e));
+        this.addEventListener('search', (e) => this._search(e));
         // listen for online/offline
         Polymer.RenderStatus.afterNextRender(this, () => {
           window.addEventListener('online', (e) => this._notifyNetworkStatus(e));
@@ -326,6 +318,7 @@
       }
 
       _pageChanged(page, oldPage) {
+        window.scrollTo(0, 0);
         if (page != null) {
           // home route is eagerly loaded
           if (page == 'home') {
@@ -352,6 +345,16 @@
           }, 1);
         }
       }
+      _search(e){
+        this.$.categoryData.search(e.detail)
+      }
+      goBack() {
+          window.history.back()
+        }
+      goHome() {
+        this.set('route.path', '/')
+      }
+
       _resourceChange(e) {
         this.set('resource', e.detail.resource)
         console.log('resource', this.resource)
@@ -382,11 +385,22 @@
         }
         return false
       }
-      _editCollection() {this.$.collectionPage._editCollection();}
-      _addCollection() {this.$.collectionPage._addCollection();}
+      _editCollection() { this.$.collectionPage._editCollection(); }
+      _addCollection() { this.$.collectionPage._addCollection(); }
       _showOnPaths(activePath, pathsString) {
         let hide = this._hideOnPaths(activePath, pathsString)
         return !hide
+      }
+      _hideHomeButton(path) {
+        console.log('hide home button?', path)
+        if (path == "/") {
+          return false
+        }
+        if (path.indexOf('/list/') > -1) { return false }
+        else {
+          console.log('hiding')
+          return true
+        }
       }
       _ensureLazyLoaded() {
         // load lazy resources after render and set `loadComplete` when done.

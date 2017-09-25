@@ -1,0 +1,165 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="stats4sd-search">
+
+  <template>
+
+    <style include="shared-styles"></style>
+    <style>
+       :host {
+        padding: 0 10px 0 10px;
+        display: block;
+        background-color: #d2232a;
+        color: black;
+        margin-top: -2px;
+        height: 100vh;
+      }
+
+      .resources-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 1em;
+        background-color: white;
+      }
+
+      .search-box {
+        display: flex;
+        /*justify-content: center;*/
+        margin: 1em 0 1em 0;
+      }
+
+      .search-input {
+        align-self: center;
+        width: 50vw;
+      }
+
+      .close-search {
+        align-self: flex-start;
+        margin-left: 30px;
+        color: white;
+      }
+
+      .search-filters {
+        display: flex;
+      }
+
+      .share,
+      .share-link {
+        color: white;
+        opacity: 0.95;
+        font-size: x-small
+      }
+
+      paper-input,
+      paper-dropdown-menu {
+        --paper-input-container-color: white;
+        --paper-input-container-underline: white;
+        --paper-input-container-underline-focus: yellow;
+        --paper-input-container-invalid-color: yellow;
+        --paper-input-container-focus-color: white;
+        --paper-input-container-input: {
+          color: white;
+          font-size: 2em;
+        }
+        paper-badge {}
+      }
+
+      paper-dropdown-menu,
+      paper-tags-dropdown {
+        --paper-input-container-label: {
+          color: white;
+          font-style: italic
+        }
+        --paper-input-container-input: {
+          color: yellow;
+        }
+        --paper-input-container-underline: {
+          /*display: none;*/
+          opacity: 0.3
+        }
+        ;
+      }
+    </style>
+    <style is="custom-style">
+      .big {
+        --iron-icon-height: 6em;
+        --iron-icon-width: 6em;
+        --iron-icon-fill-color: white;
+      }
+      /*.results-badge {
+        --paper-badge-background: white;
+        --paper-badge-width: 30px;
+        --paper-badge-height: 30px;
+        --paper-badge: {
+          font-size: 18px;
+          color:var(--paper-red-900);
+        }
+      }*/
+    </style>
+    <app-route route="[[route]]" pattern="/:slug" data="{{routeData}}"></app-route>
+
+    <div class="search-box">
+      <iron-icon class="big" icon="search"></iron-icon>
+      <div class=search-input>
+        <paper-input id="searchBox" value="{{searchText}}" name="search" label="search" auto-validate pattern="[a-zA-Z0-9 ']*" error-message="no special characters!"
+          on-input="_sendSearch"></paper-input>
+      </div>
+      <div>
+        <!--don't like badge look, but worth remembering code-->
+        <!--<span></span>
+        <paper-badge class="results-badge" label="[[totalResults]]"></paper-badge>-->
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class stats4sdSearch extends Polymer.Element {
+
+      static get is() { return 'stats4sd-search'; }
+      static get observers() {
+        return [
+          // '_complexChange(page.*)'
+        ]
+      }
+      static get properties() {
+        return {
+          persistedTags: {
+            type: Array,
+          },
+          persistedResources: {
+            type: Array,
+          },
+          searchResults: {
+            type: Object
+          }
+
+        }
+      }
+      _sendSearch(e) {
+        // dispatch to stats4sd-app element to search via category data component (if more than 2 characters typed)
+        let searchText = e.target.value
+        if (searchText.length > 2) {
+          console.log('seraching', e.target.value)
+          this.dispatchEvent(new CustomEvent('search', {
+            bubbles: true, composed: true, detail: {
+              searchText: searchText,
+              filters: {
+                keyword:true,
+                title:true,
+                description:true,
+                uploads:false,
+                collections:true,
+
+              }
+            }
+          }));
+        }
+      }
+    }
+
+    customElements.define(stats4sdSearch.is, stats4sdSearch);
+  </script>
+
+</dom-module>

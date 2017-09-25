@@ -31,11 +31,13 @@
         display: block;
         text-decoration: none;
       }
-      h1{
+
+      h1 {
         text-align: center;
         margin-bottom: 0
       }
-      .counter{
+
+      .counter {
         text-align: center;
         margin-bottom: 16px;
       }
@@ -67,12 +69,16 @@
     <header>
       <!-- add s onto end of label when loaded, could put into calcuation to check if already s exists of simply try to avoid when creating types -->
       <h1>[[_getPluralizedQuantity(label,2)]]</h1>
-      <div class="counter">[[resourcesRendered]] [[_getPluralizedQuantity('Resource',resourcesRendered)]]</div>
+      <div class="counter" style="margin-bottom:0">[[resourcesRendered]] [[_getPluralizedQuantity('Resource',resourcesRendered)]]</div>
+      <!-- <div class="searchBox" style="max-width: 500px;align-self:center;margin:auto;padding-bottom:24px;">
+        <paper-input id="searchBox" value="{{searchText}}" name="search" label="search" no-label-float on-input="_search"></paper-input>
+      </div> -->
 
     </header>
 
     <ul class="flex wrap" hidden$="[[!failure]]">
-      <dom-repeat id="resourcesList" items="[[filteredResources]]" as="resource" initial-count="10" filter="resourceFilter" rendered-item-count="{{resourcesRendered}}" sort="resourceSort">
+      <dom-repeat id="resourcesList" items="[[filteredResources]]" as="resource" initial-count="10" filter="resourceFilter" rendered-item-count="{{resourcesRendered}}"
+        sort="resourceSort">
         <template>
           <resource-search-result resource='[[resource]]'></resource-search-result>
         </template>
@@ -126,15 +132,15 @@
         super.disconnectedCallback();
         this.isAttached = false;
       }
-      resourceFilter(res){
+      resourceFilter(res) {
         // don't show resources marked as deleted or draft
-        if(res.deleted||res.draft){
+        if (res.deleted || res.draft) {
           return false
         }
-        else{return true}
+        else { return true }
       }
-      resourceSort(a,b){
-        return b.modified-a.modified
+      resourceSort(a, b) {
+        return b.modified - a.modified
       }
 
       _failureCheck() {
@@ -142,17 +148,17 @@
       }
 
       _categoryKeyChange(key) {
-        console.log('cat key change',key)
+        console.log('cat key change', key)
         this.$.resourcesList.render()
       }
 
-      _getPluralizedQuantity(label,quantity) {
-        if(!label){return ''}
-        if(!quantity){return label+'s'}
-        if(quantity==1 || label.slice(-1)=='s'){
+      _getPluralizedQuantity(label, quantity) {
+        if (!label) { return '' }
+        if (!quantity) { return label + 's' }
+        if (quantity == 1 || label.slice(-1) == 's') {
           return label
         }
-        else{return label+'s'}
+        else { return label + 's' }
       }
 
       _tryReconnect() {
@@ -164,6 +170,12 @@
           this._tryReconnect();
         }
       }
+      // _search(e){
+      //   let value=e.target.value
+      //   console.log('searching',value,value.length)
+      //   if(value.lenth>2 && this.filteredResources.length>0 ){
+      //   }
+      // }
 
     }
 
