@@ -116,10 +116,6 @@
           persistedResources: {
             type: Array,
           },
-          searchResults: {
-            type: Object,
-            observers: 'resultsUpdated'
-          }
 
         }
       }
@@ -144,6 +140,9 @@
               }
             }
           }));
+        }
+        else{
+          this.searchResults=[]
         }
       }
     }
