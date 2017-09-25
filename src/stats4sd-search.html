@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="./ssd-elements/resource-search-result.html">
 
 <dom-module id="stats4sd-search">
 
@@ -13,14 +14,8 @@
         background-color: #d2232a;
         color: black;
         margin-top: -2px;
-        height: 100vh;
-      }
-
-      .resources-container {
-        display: flex;
-        flex-wrap: wrap;
-        margin-top: 1em;
-        background-color: white;
+        height: 100%;
+        min-height: 100vh;
       }
 
       .search-box {
@@ -32,23 +27,6 @@
       .search-input {
         align-self: center;
         width: 50vw;
-      }
-
-      .close-search {
-        align-self: flex-start;
-        margin-left: 30px;
-        color: white;
-      }
-
-      .search-filters {
-        display: flex;
-      }
-
-      .share,
-      .share-link {
-        color: white;
-        opacity: 0.95;
-        font-size: x-small
       }
 
       paper-input,
@@ -111,7 +89,14 @@
         <paper-badge class="results-badge" label="[[totalResults]]"></paper-badge>-->
       </div>
     </div>
-
+    <div style="background-color: rgba(255, 255, 255, 0.8)">
+    <dom-repeat id="resourcesList" items="[[searchResults]]" as="res" initial-count="10" rendered-item-count="{{resourcesRendered}}">
+      <template>
+        <resource-search-result resource="[[res]]" style="padding:5px"></resource-search-result>
+        <hr>
+      </template>
+    </dom-repeat>
+    </div>
   </template>
 
   <script>
@@ -132,10 +117,14 @@
             type: Array,
           },
           searchResults: {
-            type: Object
+            type: Object,
+            observers: 'resultsUpdated'
           }
 
         }
+      }
+      test() {
+        console.log('search results', this.searchResults)
       }
       _sendSearch(e) {
         // dispatch to stats4sd-app element to search via category data component (if more than 2 characters typed)
@@ -146,11 +135,11 @@
             bubbles: true, composed: true, detail: {
               searchText: searchText,
               filters: {
-                keyword:true,
-                title:true,
-                description:true,
-                uploads:false,
-                collections:true,
+                keyword: true,
+                title: true,
+                description: true,
+                uploads: false,
+                collections: true,
 
               }
             }
