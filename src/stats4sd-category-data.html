@@ -98,9 +98,24 @@
               type: Array,
               value: []
             },
+            resourcesJson: {
+              type: Object,
+              computed: '_resourcesToJson(resources)',
+              notify: true
+            },
 
             filteredResources: {
               type: Array,
+              notify: true
+            },
+            searchDetails: {
+              type: Object,
+              value: {},
+              notify: true
+            },
+            searchResults: {
+              type: Array,
+              value: [],
               notify: true
             },
 
@@ -141,7 +156,7 @@
         _tagsChanged(tags) {
           //when tags received filter array into seperate categories and populate corresponding property
           //maintains a $key from nested json like in indexeddb
-          if(tags.length<=0){return}
+          if (tags.length <= 0) { return }
           let temp = {}
           for (let el of tags) {
             for (let key in el) {
@@ -156,14 +171,14 @@
             }
           }
           console.log('tags', temp)
-          this.allCollections=[]
-          this.allCollections=temp.Collection.reverse()
-          this.newestCollections=[]
-          this.newestCollections=this.allCollections.slice(0,4)
-          this.allKeywords=[]
-          this.allKeywords=temp.Keyword.reverse()
-          this.allResourceTypes=[]
-          this.allResourceTypes=temp['Resource-Type'].reverse()
+          this.allCollections = []
+          this.allCollections = temp.Collection.reverse()
+          this.newestCollections = []
+          this.newestCollections = this.allCollections.slice(0, 4)
+          this.allKeywords = []
+          this.allKeywords = temp.Keyword.reverse()
+          this.allResourceTypes = []
+          this.allResourceTypes = temp['Resource-Type'].reverse()
         }
 
 
@@ -207,10 +222,93 @@
             }
           }
           return ""
+        }
 
+        _resourcesToJson(resources) {
+          // convert persisted resources back to json by key for quick lookup
+          if (resources.length > 0) {
+            let temp = {}
+            for (let r of resources) {
+              temp[r.$key] = r
+            }
+            console.log('resources json', temp)
+            return temp
+          }
         }
 
 
+        search(detail) {
+          // detail of format {searchText:String; filters:{}}
+          console.log('detail', detail)
+          let searchText = detail.searchText.toLowerCase()
+          console.log('searching for text', searchText)
+          console.log('all resources', this.resources)
+          this.searchDetails.rankedJson = {}
+          // match by resource name
+          this.searchDetails.name = this.resources.filter((r) => {
+            if (r.name.toLowerCase().indexOf(searchText) > -1) {
+              this._addToSearchRank(r, 3)
+              return true
+            }
+          })
+          // match by description
+          this.searchDetails.description = this.resources.filter((r) => {
+            if (r.description.toLowerCase().indexOf(searchText) > -1) {
+              this._addToSearchRank(r, 1)
+              return true
+            }
+          })
+          // match by keyword (exact match, inefficient as currently iterates over every resource each time
+          // needs resource by keyword lookup or 2-way binding
+          console.log('all keywords', this.allKeywords)
+          this.searchDetails.keyword = {}
+          for (let k of this.allKeywords) {
+            if (k.label.toLowerCase() == searchText) {
+              this.searchDetails.keyword[k.label] = this.resources.filter((r) => {
+                if (r.tags.hasOwnProperty('Keywords') && r.tags.Keywords.hasOwnProperty(k.$key)) {
+                  this._addToSearchRank(r, 5)
+                  return true
+                }
+              })
+            }
+          }
+          // *********** match by collection (not currently implemented) ***********
+          console.log('testing collections', this.allCollections)
+          // *********** match by attachment names (not currently implemented) ***********
+
+          // sort overall ranking
+          this.searchDetails.rankedArray = []
+          let tempArray = []
+          for (let key in this.searchDetails.rankedJson) {
+            if (this.searchDetails.rankedJson.hasOwnProperty(key)) {
+              let val = this.searchDetails.rankedJson[key]
+              tempArray.push(
+                [val.resource, val.value]
+              )
+            }
+          }
+          tempArray.sort(function (a, b) {
+            return b[1] - a[1]
+          })
+          for (let r of tempArray) {
+            r[0].matchRating = r[1]
+            this.searchDetails.rankedArray.push(r[0])
+          }
+          this.searchResults = []
+          this.searchResults = this.searchDetails.rankedArray
+          console.log('results', this.searchDetails)
+        }
+        _addToSearchRank(resource, value) {
+          if (this.searchDetails.rankedJson.hasOwnProperty(resource.$key)) {
+            this.searchDetails.rankedJson[resource.$key].value = this.searchDetails.rankedJson[resource.$key].value + value
+          }
+          else {
+            this.searchDetails.rankedJson[resource.$key] = {
+              value: value,
+              resource: resource
+            }
+          }
+        }
 
       }
 

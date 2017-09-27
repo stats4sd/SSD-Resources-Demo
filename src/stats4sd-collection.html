@@ -13,8 +13,6 @@
 
     <!-- app-route provides the name of the category. -->
     <app-route route="{{route}}" pattern="/:collectionSlug" data="{{routeData}}"></app-route>
-    <!-- category data provides meta info -->
-    <stats4sd-category-data></stats4sd-category-data>
     <!-- live db binding for new resource -->
     <firebase-document id="liveCollectionDocument" data="{{liveCollection}}" app-name="SSD-Resources"></firebase-document>
 
@@ -31,14 +29,15 @@
     <!-- Template for individual collection set -->
     <div hidden$="[[_showIndividual(route.path,'true')]]">
       <h1 style="display: inline-block">{{activeCollection.label}}</h1>
-      <dom-if if="{{user.email}}">
-        <template>
-          <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
-        </template>
-      </dom-if>
+      <template is="dom-if" if="{{user.email}}">
+        <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
+      </template>
       <h2>Resources</h2>
+      <template id="resourcesInCollection" is="dom-repeat" as="res" items="{{_getCollectionResources(activeCollection.resources,resourcesJson)}}">
+        <resource-search-result resource='[[res]]'></resource-search-result>
+      </template>
       <a class="href-plain" on-tap="_collectionResourcesAdd">
-        <paper-button style="height:180px; width:180px; color:var(--paper-green-700)">
+        <paper-button style="color:var(--paper-green-700)">
           <iron-icon icon="add"></iron-icon>Add Resources
         </paper-button>
       </a>
@@ -82,17 +81,24 @@
           allCollections: Array,
           activeCollection: {
             type: Object,
-            computed: '_getActiveCollection(routeData.collectionSlug,allCollections)'
+            computed: '_getActiveCollection(routeData.collectionSlug,allCollections)',
+            notify: true
           },
           user: Object,
-          liveCollection: Object
-
+          liveCollection: {
+            type: Object,
+            notify: true
+          },
+          resourcesJson:Object,
         }
       }
 
       static get observers() {
         return [
         ]
+      }
+      test(){
+        console.log('res json',this.resourcesJson)
       }
       _editCollection() {
         console.log('live collection', this.liveCollection)
@@ -119,11 +125,25 @@
         else {
           for (let collection of this.allCollections) {
             if (collection.hasOwnProperty('slug') && collection.slug == slug) {
+              if (!collection.resources) { collection.resources = {} }
               console.log('active collection', collection)
               return collection
             }
           }
         }
+      }
+
+      _getCollectionResources(resourceKeys,resourcesJson){
+        let temp = []
+        if(resourcesJson){
+          for(let key in resourceKeys){
+            if(resourcesJson.hasOwnProperty(key)){
+              temp.push(resourcesJson[key])
+            }
+          }
+          console.log('temp',temp)
+        }
+        return temp
       }
 
       _addCollection() {
@@ -132,6 +152,13 @@
       }
       _collectionResourcesAdd() {
         console.log('collection resource adding')
+        console.log('live collection', this.liveCollection)
+        delete this.activeCollection.$key
+        console.log('active collection', this.activeCollection)
+        this.set('liveCollection', {})
+        this.set('liveCollection', this.activeCollection)
+        console.log('editing collection', this.liveCollection)
+
         this.dispatchEvent(new CustomEvent('collection-resources-add', {
           bubbles: true, composed: true, detail: {
             collection: this.collection,
@@ -139,7 +166,7 @@
         }));
       }
 
-      saveCollection(e) {
+      saveCollection() {
         // ****Need to decide what meta to track and bring in *********
         // ****Also need to ensure form completed, and possibly way to update current page
         this.liveCollection.type = "Collection";
@@ -155,11 +182,12 @@
           this.liveCollection.resources = [];
         }
         console.log('creating collection', this.liveCollection)
+        let redirectURL = window.location.origin + '/collection/' + this.liveCollection.slug
         this.$.liveCollectionDocument.saveValue('/tags/Collections', this.liveCollection.key)
           .then(() => {
             // force refresh/newslug redirect to update local cache
             // could probably be done without refresh by pushing/updating values and various callback, possibly improve later
-            window.location.replace(window.location.origin + '/collection/' + this.liveCollection.slug);
+            window.location.replace(redirectURL);
           })
           .catch((err) => { console.log('err', err) })
       }

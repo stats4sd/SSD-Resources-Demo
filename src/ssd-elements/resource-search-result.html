@@ -21,8 +21,8 @@
       }
 
       .resource-info {
-        margin-left: 5.2em;
-        margin-right: 2em;
+        margin-left: 1em;
+        margin-right: 1em;
       }
 
 
@@ -51,6 +51,17 @@
         padding-bottom: 1px;
       }
 
+      paper-icon-button {
+        vertical-align: middle;
+        /* This border-radius is neccessary for any button which may later gain the .hover class to prevent visual glitching */
+        border-radius: 50%;
+      }
+
+      paper-icon-button[active] {
+        color: var(--paper-green-500);
+      }
+
+
       @media(max-width:360px) {
         img {
           display: none;
@@ -61,15 +72,22 @@
       }
     </style>
     <!-- <a href="[[_getHref(resource)]]" on-tap="_resourceClicked"> -->
+    <div style="display:flex">
       <div on-click="_resourceClicked">
-        <div>
-          <img src="[[_getImage(resource)]]">
-        </div>
-        <div class="resource-info">
-          <div class="resource-title">[[resource.name]]</div>
-          <div class="resource-description">[[resource.description]]</div>
-        </div>
+        <img src="[[_getImage(resource)]]">
       </div>
+      <div class="resource-info" style="flex-basis: 100%" on-click="_resourceClicked">
+        <div class="resource-title">[[resource.name]]</div>
+        <div class="resource-description">[[resource.description]]</div>
+      </div>
+      <template is="dom-if" if="{{collectionAddMode}}">
+        <div style="padding:5px">
+          <paper-icon-button icon="library-add" style="vertical-align:middle" active="{{ _resourceInCollection(resource,liveCollection)}}"
+            toggles on-tap="_collectionToggle"></paper-icon-button>
+        </div>
+      </template>
+
+    </div>
     <!-- </a> -->
   </template>
 
@@ -86,19 +104,35 @@
       static get is() { return 'resource-search-result'; }
       static get properties() {
         return {
-          prop1: {
-            type: String,
-            value: 'resource-search-result'
-          },
           resource: {
             type: Object
-          }
+          },
+          collectionAddMode: Boolean,
+          liveCollection: {
+            type: Object,
+            notify: true
+          },
         };
+      }
+      _collectionToggle(e) {
+        //add or remove toggled resource from live collection
+        let key = this.resource.$key
+        if(this.liveCollection.resources.hasOwnProperty(key)){
+          delete this.liveCollection.resources[key]
+        }
+        else{
+          this.liveCollection.resources[key]=Date.now()
+        }
+        console.log('resource added',this.liveCollection)
+      }
+      _resourceInCollection(resource,liveCollection){
+        let key=resource.$key
+        return (liveCollection.resources.hasOwnProperty(key))
       }
       _getImage(res) {
         // return feature image if exists. If not use resource type placeholder
         if (res.featureImage != "") { return res.featureImage }
-        if(res.hasOwnProperty('tags') && res.tags.hasOwnProperty('Resource-Types')){
+        if (res.hasOwnProperty('tags') && res.tags.hasOwnProperty('Resource-Types')) {
           let types = res.tags["Resource-Types"]
           let slug = types[Object.keys(types)[0]].slug
           return ('/images/resourceTypes/' + slug + '.jpg')
@@ -108,21 +142,19 @@
         }
       }
       // easier to use ahref than propagated
-      _getHref(res){
-        let href = "/resource/"+res.slug
+      _getHref(res) {
+        let href = "/resource/" + res.slug
         return href
       }
-      _test(){
-        console.log('test')
-      }
-      _resourceClicked(){
+      _resourceClicked() {
         // dispatch event up to app so that it can bind the resource to the resource view page and navigate
         // could also send the full resource but method would fail if navigating directly so no point
         this.dispatchEvent(new CustomEvent('resource-change', {
           bubbles: true, composed: true, detail: {
-            url:"/resource/"+this.resource.slug,
-            resource:this.resource
-          }}));
+            url: "/resource/" + this.resource.slug,
+            resource: this.resource
+          }
+        }));
       }
     }
 
