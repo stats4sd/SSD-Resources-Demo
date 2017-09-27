@@ -30,7 +30,21 @@
 
     <!-- Template for individual collection set -->
     <div hidden$="[[_showIndividual(route.path,'true')]]">
-      <h1>{{activeCollection.label}}</h1>
+      <h1 style="display: inline-block">{{activeCollection.label}}</h1>
+      <dom-if if="{{user.email}}">
+        <template>
+          <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
+        </template>
+      </dom-if>
+      <h2>Resources</h2>
+      <a class="href-plain" on-tap="_collectionResourcesAdd">
+        <paper-button style="height:180px; width:180px; color:var(--paper-green-700)">
+          <iron-icon icon="add"></iron-icon>Add Resources
+        </paper-button>
+      </a>
+
+
+
     </div>
 
     <!-- Template for add/edit collection -->
@@ -43,7 +57,7 @@
       </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm autofocus on-tap="saveCollection">Continue</paper-button>
+        <paper-button dialog-confirm autofocus on-tap="saveCollection">Save</paper-button>
       </div>
     </paper-dialog>
 
@@ -71,7 +85,7 @@
             computed: '_getActiveCollection(routeData.collectionSlug,allCollections)'
           },
           user: Object,
-          liveCollection:Object
+          liveCollection: Object
 
         }
       }
@@ -80,13 +94,13 @@
         return [
         ]
       }
-      _editCollection(){
-        console.log('live collection',this.liveCollection)
+      _editCollection() {
+        console.log('live collection', this.liveCollection)
         delete this.activeCollection.$key
-        console.log('active collection',this.activeCollection)
-        this.set('liveCollection',{})
-        this.set('liveCollection',this.activeCollection)
-        console.log('editing collection',this.liveCollection)
+        console.log('active collection', this.activeCollection)
+        this.set('liveCollection', {})
+        this.set('liveCollection', this.activeCollection)
+        console.log('editing collection', this.liveCollection)
         this.$.collectionDialog.open()
       }
       _showIndividual(path, hide) {
@@ -112,40 +126,49 @@
         }
       }
 
-      _addCollection(){
+      _addCollection() {
         console.log('adding collection')
         this.$.collectionDialog.open()
       }
-      saveCollection(e){
+      _collectionResourcesAdd() {
+        console.log('collection resource adding')
+        this.dispatchEvent(new CustomEvent('collection-resources-add', {
+          bubbles: true, composed: true, detail: {
+            collection: this.collection,
+          }
+        }));
+      }
+
+      saveCollection(e) {
         // ****Need to decide what meta to track and bring in *********
         // ****Also need to ensure form completed, and possibly way to update current page
-        this.liveCollection.type="Collection";
-        this.liveCollection.modified=Date.now();
-        this.liveCollection.slug=this._toSlug(this.liveCollection.label);
-        if(!this.liveCollection.hasOwnProperty('key')){
-          this.liveCollection.key=this.generatePushID()
+        this.liveCollection.type = "Collection";
+        this.liveCollection.modified = Date.now();
+        this.liveCollection.slug = this._toSlug(this.liveCollection.label);
+        if (!this.liveCollection.hasOwnProperty('key')) {
+          this.liveCollection.key = this.generatePushID()
         }
-        if(!this.liveCollection.hasOwnProperty('created')){
-          this.liveCollection.created=Date.now();
+        if (!this.liveCollection.hasOwnProperty('created')) {
+          this.liveCollection.created = Date.now();
         }
-        if(!this.liveCollection.hasOwnProperty('resources')){
-          this.liveCollection.resources=[];
-        }         
-        console.log('creating collection',this.liveCollection)
-        this.$.liveCollectionDocument.saveValue('/tags/Collections',this.liveCollection.key)
-        .then(()=>{
-          // force refresh/newslug redirect to update local cache
-          // could probably be done without refresh by pushing/updating values and various callback, possibly improve later
-          window.location.replace(window.location.origin+'/collection/'+this.liveCollection.slug);
-        })
-        .catch((err)=>{console.log('err',err)})
+        if (!this.liveCollection.hasOwnProperty('resources')) {
+          this.liveCollection.resources = [];
         }
+        console.log('creating collection', this.liveCollection)
+        this.$.liveCollectionDocument.saveValue('/tags/Collections', this.liveCollection.key)
+          .then(() => {
+            // force refresh/newslug redirect to update local cache
+            // could probably be done without refresh by pushing/updating values and various callback, possibly improve later
+            window.location.replace(window.location.origin + '/collection/' + this.liveCollection.slug);
+          })
+          .catch((err) => { console.log('err', err) })
+      }
 
-      _getLiveCollectionPath(key){
-        console.log('setting live collection path for key',key)
+      _getLiveCollectionPath(key) {
+        console.log('setting live collection path for key', key)
       }
       _toSlug(name) {
-        if (!name) {return ""}
+        if (!name) { return "" }
         else {
           var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
           return slug

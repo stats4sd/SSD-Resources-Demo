@@ -235,11 +235,11 @@
           </a>
         </paper-button>
 
-        <paper-button hidden$="{{_showOnPaths(route.path,'/collection/*')}}" on-tap="_editCollection">
+        <!-- <paper-button hidden$="{{_showOnPaths(route.path,'/collection/*')}}" on-tap="_editCollection">
           <a class="href-plain">
             <iron-icon icon="mode-edit" aria-label="Manage Collections"></iron-icon>Edit Collection
           </a>
-        </paper-button>
+        </paper-button> -->
 
         <paper-button hidden$="{{_showOnPaths(route.path,'/collection')}}" on-tap="_addCollection">
           <a href="/collection" class="href-plain">
@@ -307,6 +307,8 @@
         this.addEventListener('resource-change', (e) => this._resourceChange(e));
         this.addEventListener('show-invalid-url-warning', (e) => this._onFallbackSelectionTriggered(e));
         this.addEventListener('resource-saved', (e) => this._resourceSaved(e));
+        this.addEventListener('collection-resources-add', (e) => this._collectionResourcesAdd(e));
+
         // listen for online/offline
         Polymer.RenderStatus.afterNextRender(this, () => {
           window.addEventListener('online', (e) => this._notifyNetworkStatus(e));
@@ -382,8 +384,15 @@
         }
         return false
       }
-      _editCollection() {this.$.collectionPage._editCollection();}
-      _addCollection() {this.$.collectionPage._addCollection();}
+      _editCollection() { this.$.collectionPage._editCollection(); }
+      _addCollection() { this.$.collectionPage._addCollection(); }
+      _collectionResourcesAdd() {
+        console.log('c r add');
+        this.collectionResourcesAdd = true
+        this.set('route.path', '/search')
+
+      }
+
       _showOnPaths(activePath, pathsString) {
         let hide = this._hideOnPaths(activePath, pathsString)
         return !hide
