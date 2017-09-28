@@ -1,0 +1,560 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<!-- <link rel="import" href="./ssd-elements/resource-featured.html"> -->
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-layout/helpers/helpers.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="stats4sd-category-data.html">
+<!-- Since 'home' is the default route, eagerly load it. -->
+<link rel="import" href="stats4sd-home.html">
+<link rel="import" href="stats4sd-icons.html">
+
+<dom-module id="stats4sd-app">
+
+  <template>
+
+    <style include="shared-styles">
+       :host {
+        display: block;
+        position: relative;
+        background-color: gray;
+        /* padding-top: 130px; */
+        padding-top: 65px;
+        /* min-height: 100vh; */
+        --app-primary-color: black;
+        --app-secondary-color: #d2232a;
+        background-color: var(--background-color, '#eeeeee');
+        --app-accent-color: #172C50;
+        --paper-button-ink-color: var(--app-accent-color);
+        --paper-icon-button-ink-color: var(--app-accent-color);
+        --paper-spinner-color: var(--app-accent-color);
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        color: var(--app-primary-color);
+      }
+
+      app-header {
+        @apply --layout-fixed-top;
+        z-index: 1;
+        color: white;
+        background-color: #d2232a;
+        --app-header-shadow: {
+          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
+          height: 10px;
+          bottom: -10px;
+        }
+        ;
+      }
+
+      paper-icon-button {
+        color: var(--app-primary-color);
+      }
+
+      .logo {
+        text-align: center;
+      }
+
+      .logo a {
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        color: white;
+        text-decoration: none;
+        /* required for IE 11, so this <a> can receive pointer events */
+        display: inline-block;
+        pointer-events: auto;
+      }
+
+      .left-bar-item {
+        width: 40px;
+      }
+
+      .home-btn,
+      .back-btn {
+        color: white;
+      }
+      /* :host(:not([page=test])) .back-btn {
+        display: none;
+      } */
+      /* :host(:not([page=resource])) .back-btn {
+        display: none;
+      } */
+
+      #signedInHeader {
+        position: absolute;
+        top: 0;
+        right: 20px;
+        font-size: x-small;
+        padding: 5px;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+
+      stats4sd-tabs,
+      stats4sd-tab {
+        --stats4sd-tab-overlay: {
+          border-bottom: 2px solid var(--app-accent-color);
+        }
+        ;
+      }
+
+      iron-pages {
+        max-width: 1440px;
+        min-height: 100vh;
+        margin: 0 auto;
+        height: 100%;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+      }
+      /* small screen */
+
+      @media (max-width: 767px) {
+         :host {
+          padding-top: 64px;
+        }
+      }
+    </style>
+
+    <stats4sd-analytics key="UA-84922436-4"></stats4sd-analytics>
+    <!--
+      app-location and app-route elements provide the state of the URL for the app.
+    -->
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+
+    <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
+
+    <!--
+      stats4sd-cart-data maintains the state of the user's stats4sdping cart (in localstorage) and
+      calculates the total amount.
+    -->
+    <!-- <stats4sd-cart-data id="cart" cart="{{cart}}" num-items="{{numItems}}" total="{{total}}"></stats4sd-cart-data> -->
+    <firebase-app name="SSD-Resources" api-key=" AIzaSyBD5pjMlrhbmtkBU32-zvoJImF010wgFxY" storage-bucket="ssd-resources-demo.appspot.com"
+      auth-domain="ssd-resources-demo.firebaseapp.com" database-url="https://ssd-resources-demo.firebaseio.com">
+    </firebase-app>
+    <firebase-query id="resQuery" app-name="SSD-Resources" path="/resources" data="{{resources}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedResources" data="{{resources}}" session="keepAlways" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
+    <firebase-query id="tagsQuery" app-name="SSD-Resources" path="/tags" data="{{tags}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedTags" data="{{tags}}" session="keepAlways" persisted-data="{{persistedTags}}"></app-indexeddb-mirror>
+
+
+    <app-header role="navigation" id="header" effects="waterfall" condenses reveals>
+      <app-toolbar>
+        <div class="left-bar-item">
+          <a href="/" hidden$="{{_showOnPaths(route.path,'/_/collection_/list_/list/*')}}">
+            <paper-icon-button on-tap="goHome" class="home-btn" icon="home" aria-label="Home"></paper-icon-button>
+          </a>
+
+          <paper-icon-button on-tap="goBack" class="back-btn" hidden$="{{!_showOnPaths(route.path,'/_/collection_/list_/list/*')}}"
+            icon="arrow-back" aria-label="Go back"></paper-icon-button>
+
+        </div>
+        <div class="logo" main-title>
+          <a hidden$="[[!smallScreen]]" href="/" aria-label="stats4sd Home">Stats4SD</a>
+          <a hidden$="[[smallScreen]]" href="/" aria-label="stats4sd Home">Statistics for Sustainable Development</a>
+        </div>
+        <!-- <div>[[page]]</div> -->
+        <div on-tap="_signInOpen" hidden$="[[signedIn]]">
+          <a style="font-size: 16px; cursor:pointer">Sign In</a>
+          <paper-icon-button icon="lock" style="color:white" aria-label$="Sign In"></paper-icon-button>
+        </div>
+        <template is="dom-if" if="{{signedIn}}">
+          <div on-tap="_signOut">
+            <a style="font-size: 16px; cursor:pointer">Sign Out</a>
+            <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
+          </div>
+          <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
+        </template>
+      </app-toolbar>
+    </app-header>
+
+
+
+    <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
+      <stats4sd-home id="homePage" name="home" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]"></stats4sd-home>
+      <stats4sd-list id="listPage" name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
+      <stats4sd-admin id="adminPage" name="admin" route="[[subroute]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"
+        page="{{page}}"></stats4sd-admin>
+      <stats4sd-resource id="resourcePage" name="resource" route="{{subroute}}" persisted-resources="[[persistedResources]]" resource=[[resource]]
+        offline="[[offline]]" persisted-tags="[[persistedTags]]" user="{{user}}"></stats4sd-resource>
+      <stats4sd-collection id="collectionPage" name="collection" user="{{user}}" route="{{subroute}}" offline="[[offline]]" all-collections="{{allCollections}}"
+        active-collection="{{activeCollection}}" live-collection="{{liveCollection}}" resources-json="[[resourcesJson]]"></stats4sd-collection>
+      <stats4sd-search id="searchPage" name="search" route="{{route}}" page="{{page}}" search-results="[[searchResults]]" collection-add-mode="[[collectionAddMode]]"
+        active-collection="{{activeCollection}}" live-collection="{{liveCollection}}"></stats4sd-search>
+      <stats4sd-404 name="404"></stats4sd-404>
+    </iron-pages>
+
+    <!-- category data provides meta info -->
+    <stats4sd-category-data id="categoryData" tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}"
+      newest-collections="{{newestCollections}}" search-results="{{searchResults}}" resources-json="{{resourcesJson}}"></stats4sd-category-data>
+
+    <!-- a11y announcer -->
+    <!-- <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div> -->
+
+    <!-- Login box (starts hidden) -->
+    <paper-dialog id="login" modal>
+      <paper-dialog-scrollable>
+        <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources "></login-fire>-->
+        <login-element id="stats4sdLogin" app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+        </login-element>
+      </paper-dialog-scrollable>
+    </paper-dialog>
+
+    <footer class="footer" hidden$="[[!signedIn]]">
+      <!-- buttons show/hide on various paths -->
+      <div id="rightButtons" style="float:right">
+
+        <paper-button hidden$="{{_hideOnPaths(route.path,'/collection')}}">
+          <a href="/collection" class="href-plain">
+            <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
+          </a>
+        </paper-button>
+
+        <!-- <paper-button hidden$="{{_showOnPaths(route.path,'/collection/*')}}" on-tap="_editCollection">
+          <a class="href-plain">
+            <iron-icon icon="mode-edit" aria-label="Manage Collections"></iron-icon>Edit Collection
+          </a>
+        </paper-button> -->
+
+        <paper-button hidden$="{{_showOnPaths(route.path,'/collection')}}" on-tap="_addCollection">
+          <a href="/collection" class="href-plain">
+            <iron-icon icon="add" aria-label="Manage Collections"></iron-icon>Add Collection
+          </a>
+        </paper-button>
+        <paper-button hidden$="{{!collectionAddMode}}" on-tap="_saveCollection">
+          <a href="/collection" class="href-plain">
+            <iron-icon icon="save" aria-label="Save Collection"></iron-icon>Save Collection
+          </a>
+        </paper-button>
+
+        <paper-button hidden$="{{_hideOnPaths(route.path,'/resource/*_/collection*')}}">
+          <a href="/resource/_/edit" class="href-plain">
+            <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource
+          </a>
+        </paper-button>
+
+        <paper-button hidden$="{{_hideResourceEdit(route.path)}}" on-tap="_editResource">
+          <a class="href-plain">
+            <iron-icon icon="mode-edit" aria-label="Add Resource"></iron-icon>Edit Resource
+          </a>
+        </paper-button>
+
+        <paper-button hidden$="{{_hideResourceSave(route.path)}}" on-tap="_saveResource">
+          <a class="href-plain">
+            <iron-icon icon="save" aria-label="Add Resource"></iron-icon>Save Resource
+          </a>
+        </paper-button>
+
+      </div>
+
+    </footer>
+
+  </template>
+
+  <script>
+    // performance logging
+    window.performance && performance.mark && performance.mark('stats4sd-app - before register');
+
+    class stats4sdApp extends Polymer.Element {
+
+      static get is() { return 'stats4sd-app'; }
+
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged'
+          },
+          signedIn: {
+            type: Boolean,
+            observer: '_signedInChange'
+          },
+          collectionAddMode: {
+            type: Boolean,
+            value: false
+          },
+          resourcesjson:{
+            type:Object,
+            notify:true,
+            value:{test:123}
+          }
+        }
+      }
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)',
+        ]
+        // note, could use persistedFeatured.length to simply track number of items
+      }
+
+      constructor() {
+        super();
+        window.performance && performance.mark && performance.mark('stats4sd-app.created');
+      }
+
+      ready() {
+        super.ready();
+        // Custom elements polyfill safe way to indicate an element has been upgraded.
+        this.removeAttribute('unresolved');
+        // listen for custom events
+        this.addEventListener('resource-change', (e) => this._resourceChange(e));
+        this.addEventListener('show-invalid-url-warning', (e) => this._onFallbackSelectionTriggered(e));
+        this.addEventListener('resource-saved', (e) => this._resourceSaved(e));
+        this.addEventListener('collection-resources-add', (e) => this._collectionResourcesAdd(e));
+        this.addEventListener('search', (e) => this._search(e));
+        // listen for online/offline
+        Polymer.RenderStatus.afterNextRender(this, () => {
+          // window.addEventListener('online', (e) => this._notifyNetworkStatus(e));
+          // window.addEventListener('offline', (e) => this._notifyNetworkStatus(e));
+        });
+      }
+
+      _routePageChanged(page) {
+        if (this.page === 'list') {
+          this._listScrollTop = window.pageYOffset;
+        }
+
+        this.page = page || 'home';
+
+        // Close the drawer - in case the *route* change came from a link in the drawer.
+        this.drawerOpened = false;
+      }
+
+      _pageChanged(page, oldPage) {
+        window.scrollTo(0, 0);
+        if (page != null) {
+          // home route is eagerly loaded
+          if (page == 'home') {
+            this._pageLoaded(Boolean(oldPage));
+            // other routes are lazy loaded
+          } else {
+            // When a load failed, it triggered a 404 which means we need to
+            // eagerly load the 404 page definition
+            let cb = this._pageLoaded.bind(this, Boolean(oldPage));
+            Polymer.importHref(
+              this.resolveUrl('stats4sd-' + page + '.html'),
+              cb, cb, true);
+          }
+        }
+      }
+
+      _pageLoaded(shouldResetLayout) {
+        this._ensureLazyLoaded();
+        if (shouldResetLayout) {
+          // The size of the header depends on the page (e.g. on some pages the tabs
+          // do not appear), so reset the header's layout only when switching pages.
+          Polymer.Async.timeOut.run(() => {
+            this.$.header.resetLayout();
+          }, 1);
+        }
+      }
+      _search(e) {
+        this.$.categoryData.search(e.detail)
+      }
+      goBack() {
+        window.history.back()
+      }
+      goHome() {
+        this.set('route.path', '/')
+      }
+
+      _resourceChange(e) {
+        this.set('resource', e.detail.resource)
+        console.log('resource', this.resource)
+        this.set('route.path', e.detail.url)
+      }
+      _resourceSaved(e) {
+        console.log('resource saved', e)
+        this.set('route.path', '/resource/' + e.detail.resource.slug)
+      }
+
+      _hideOnPaths(activePath, pathsString) {
+        // uses _ to seperate paths to hide on
+        let paths = pathsString.split('_')
+        // state whether to hide or show when active page matches test page
+        for (let path of paths) {
+          // identify wildcard, if yes allow fuzzy match
+          if (path.indexOf('*') > -1) {
+            path = path.slice(0, -1)
+            if (activePath.indexOf(path) > -1) {
+              return true
+            }
+          }
+          else {
+            if (activePath == path) {
+              return true
+            }
+          }
+        }
+        return false
+      }
+      _editCollection() { this.$.collectionPage._editCollection(); }
+      _addCollection() { this.$.collectionPage._addCollection(); }
+      _collectionResourcesAdd() {
+        console.log('adding resources to collection',this.activeCollection);
+        this.collectionAddMode = true
+        this.set('route.path', '/search')
+      }
+      _saveCollection(){this.$.collectionPage.saveCollection()}
+
+      _hideResourceEdit(path) {
+        //show on /resource/* but not on /resource/[slug]/edit
+        if (path.indexOf('/resource/') > -1 && path.split('/').indexOf('edit') == -1) {
+          return false
+        }
+        return true
+      }
+      _hideResourceSave(path) {
+        //only show on /resource/[slug]/edit
+        let split = path.split('/')
+        if (split.length > 3 && split[3] == 'edit') {
+          return false
+        }
+        return true
+      }
+      _hideHomeButton(path) {
+        if (path == "/") {
+          return false
+        }
+        if (path.indexOf('/list/') > -1) { return false }
+        else {
+          return true
+        }
+      }
+      _saveResource() { this.$.resourcePage._saveResource() }
+      _editResource() {
+        this.set('route.path', this.route.path + '/edit')
+      }
+      _showOnPaths(activePath, pathsString) {
+        let hide = this._hideOnPaths(activePath, pathsString)
+        return !hide
+      }
+
+      _ensureLazyLoaded() {
+        // load lazy resources after render and set `loadComplete` when done.
+        if (!this.loadComplete) {
+          Polymer.RenderStatus.afterNextRender(this, () => {
+            Polymer.importHref(this.resolveUrl('lazy-resources.html'), () => {
+              // Register service worker if supported.
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('service-worker.js', { scope: '/' });
+              }
+              // this._notifyNetworkStatus();
+              this.loadComplete = true;
+            });
+          });
+        }
+      }
+
+      // _notifyNetworkStatus() {
+      //   let oldOffline = this.offline;
+      //   this.offline = !navigator.onLine;
+      //   // Show the snackbar if the user is offline when starting a new session
+      //   // or if the network status changed.
+      //   if (this.offline || (!this.offline && oldOffline === true)) {
+      //     if (!this._networkSnackbar) {
+      //       this._networkSnackbar = document.createElement('stats4sd-snackbar');
+      //       this.root.appendChild(this._networkSnackbar);
+      //     }
+      //     this._networkSnackbar.innerHTML = this.offline ?
+      //       'You are offline' : 'You are online';
+      //     this._networkSnackbar.open();
+      //   }
+      // }
+
+      _signInOpen() {
+        this.$.login.open()
+      }
+      _signOut() {
+        this.$.stats4sdLogin.signOut();
+        this.signedIn = false;
+      }
+      _signedInChange() {
+        this.$.login.close()
+      }
+
+
+      // ************deprecated functions?? - to review ***************
+
+      // Elements in the app can notify section changes.
+      // Response by a11y announcing the section and syncronizing the category.
+      _onChangeSection(event) {
+        let detail = event.detail;
+
+        // Scroll to the top of the page when navigating to a non-list page. For list view,
+        // scroll to the last saved position only if the category has not changed.
+        let scrollTop = 0;
+        if (this.page === 'list') {
+          if (this.categoryName === detail.category) {
+            scrollTop = this._listScrollTop;
+          } else {
+            // Reset the list view scrollTop if the category changed.
+            this._listScrollTop = 0;
+          }
+        }
+        // Use `Polymer.AppLayout.scroll` with `behavior: 'silent'` to disable header scroll
+        // effects during the scroll.
+        Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });
+
+        this.categoryName = detail.category || '';
+
+        // Announce the page's title
+        if (detail.title) {
+          document.title = detail.title + ' - stats4sd';
+          this._announce(detail.title + ', loaded');
+        }
+      }
+
+
+      // Elements in the app can notify a change to be a11y announced.
+      _onAnnounce(e) {
+        this._announce(e.detail);
+      }
+
+      // A11y announce the given message.
+      _announce(message) {
+        this._a11yLabel = '';
+        this._announceDebouncer = Polymer.Debouncer.debounce(this._announceDebouncer,
+          Polymer.Async.timeOut.after(100), () => {
+            this._a11yLabel = message;
+          });
+      }
+
+      // This is for performance logging only.
+      _domChange(e) {
+        if (window.performance && performance.mark && !this.__loggedDomChange) {
+          let target = e.composedPath()[0];
+          let host = target.getRootNode().host;
+          if (host && host.localName.match(this.page)) {
+            this.__loggedDomChange = true;
+            performance.mark(host.localName + '.domChange');
+          }
+        }
+      }
+
+      _onFallbackSelectionTriggered() {
+        this.page = '404';
+      }
+
+    }
+
+    customElements.define(stats4sdApp.is, stats4sdApp);
+  </script>
+
+</dom-module>

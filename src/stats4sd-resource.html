@@ -1,0 +1,412 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="stats4sd-category-data.html">
+<link rel="import" href="./ssd-elements/resource-file-download.html">
+<link rel="import" href="./ssd-elements/resource-editor.html">
+
+<dom-module id="stats4sd-resource">
+
+  <template>
+
+    <style include="shared-styles">
+       :host {
+        display: block;
+
+        background-color: #DBDBDB;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+      }
+
+      #content {
+        @apply --layout-horizontal;
+        @apply --layout-center-justified;
+      }
+
+      .resource {
+        margin: 64px 32px;
+        width: 50%;
+        max-width: 400px;
+        transition: opacity 0.4s;
+        opacity: 0;
+      }
+
+      .resource[has-content] {
+        opacity: 1;
+      }
+
+      h1 {
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 28px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center
+      }
+
+      .resource-title {
+        font-size: 20px;
+        line-height: 24px;
+        margin-bottom: 0;
+        text-align: center
+      }
+
+      .meta-data {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .deleted {
+        font-weight: 700;
+        font-size: large;
+        margin-top: 10px;
+        height: 2em;
+        line-height: 2em;
+        text-align: center;
+        color: var(--paper-indigo-50);
+        background-color: var(--paper-indigo-500);
+        padding: 5px;
+      }
+
+      @media(min-width:1048px) {
+        .meta-data {
+          flex-wrap: nowrap;
+          justify-content: space-between;
+        }
+        .files-container {
+          margin-left: 50px;
+          width: 100%;
+          max-width: 500px;
+        }
+      }
+
+
+      @media (max-width: 767px) {
+
+        #content {
+          @apply --layout-vertical;
+          @apply --layout-center;
+        }
+
+        .resource {
+          box-sizing: border-box;
+          margin: 32px 0;
+          padding: 0 24px;
+          width: 100%;
+          max-width: 600px;
+        }
+      }
+    </style>
+
+    <!--
+      app-route provides the name of the category and the item.
+    -->
+    <app-route route="{{route}}" pattern="/:slug" data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <app-route route="[[subroute]]" pattern="/:edit" data="{{subrouteData}}"></app-route>
+
+    <!-- Main Resource View -->
+    <template is="dom-if" if="{{!editMode}}">
+      <!-- Deleted resource notification -->
+      <div class="deleted" hidden$="[[!resource.deleted]]">
+        <div>This resource has been deleted</div>
+      </div>
+      <div style="padding: 10px">
+        <!-- Title and Description -->
+        <div hidden$="[[!resource.$key]]">
+          <h1 class="resource-title">[[resource.name]]</h1>
+          <div class="url">
+            <a href="[[_getResourceUrl(resource)]]">[[_getResourceUrl(resource)]]</a>
+          </div>
+          <div class="meta-data">
+            <div style="min-width: 300px; max-width:700px">
+              <div class='bold'>Description: </div>
+              <p style="margin-top:5px; ">[[resource.description]]</p>
+            </div>
+            <!--  -->
+            <div class="files-container" hidden$="[[!resource.uploadedFiles]]">
+              <div class='bold'>Files: </div>
+              <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
+                <resource-file-download file="[[file]]"></resource-file-download>
+              </template>
+            </div>
+          </div>
+          <!-- Links and Videos -->
+          <div class='bold'>External Links: </div>
+          <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
+            <a href="[[link.url]]" target="_blank">
+              <iron-icon icon="language" prefix></iron-icon>
+              <span>[[link.url]]</span>
+            </a>
+            <template is="dom-if" if="{{_isYoutube(link)}}">
+              <div>Youtube Link</div>
+              <google-youtube video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0" autoplay="0">
+              </google-youtube>
+            </template>
+          </template>
+        </div>
+      </div>
+    </template>
+
+
+
+    <!-- <footer hidden$="[[!user.email]]" class="footer">
+      <div hidden$="{{!editMode}}" style="float:left">
+        <paper-button style="float:left" on-tap="_deleteResource" hidden$="{{resource.deleted}}">
+          <iron-icon icon="delete" aria-label="Delete Resource"></iron-icon>Delete Resource
+        </paper-button>
+        <paper-button style="float:left" on-tap="_restoreResource" hidden$="{{!resource.deleted}}">
+          <iron-icon icon="restore" aria-label="Restore Resource"></iron-icon>Restore Resource
+        </paper-button>
+      </div>
+      <paper-button style="float:right" on-tap="_editResource" hidden$="{{editMode}}">
+        <iron-icon icon="mode-edit" aria-label="Edit Resource"></iron-icon>Edit Resource
+      </paper-button>
+      <paper-button style="float:right" on-tap="_saveResource" hidden$="{{!editMode}}">
+        <iron-icon icon="save" aria-label="Save Resource"></iron-icon>Save Resource
+      </paper-button>
+      <paper-button style="float:right">
+        <a href="/collection" class="href-plain">
+          <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
+        </a>
+      </paper-button>
+    </footer> -->
+
+    <!-- Resource editor view (could be put into seperate component) -->
+    <template is="dom-if" if="{{editMode}}">
+      <resource-editor resource="{{resource}}" tags="{{persistedTags}}"></resource-editor>
+    </template>
+    <firebase-document id="firebaseResourceDoc" app-name="SSD-Resources" data="{{editableResource}}">
+    </firebase-document>
+    <firebase-document id="firebaseSlugDoc" app-name="SSD-Resources" data="{{editableSlug}}">
+    </firebase-document>
+
+
+
+
+
+
+  </template>
+
+  <script>
+    class stats4sdResource extends Polymer.Element {
+
+      static get is() { return 'stats4sd-resource'; }
+
+      static get properties() {
+        return {
+          item: Object,
+          route: Object,
+          routeData: Object,
+          subrouteData: Object,
+          visible: {
+            type: Boolean,
+            value: false
+          },
+          offline: {
+            type: Boolean,
+            // observer: '_offlineChanged'
+          },
+          failure: Boolean,
+          persistedResources: {
+            type: Array,
+
+          },
+          resource: {
+            type: Object
+          },
+          editMode: {
+            type: Boolean,
+            computed: '_editEnabled(subroute.path)'
+          },
+          persistedTags: Object
+
+        }
+      }
+
+      static get observers() {
+        return [
+          '_persistedResourcesChanged(persistedResources)',
+          '_subrouteChange(subrouteData.slug)'
+        ]
+      }
+      connectedCallback() {
+        super.connectedCallback();
+        this.isAttached = true;
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this.isAttached = false;
+      }
+      _subrouteChange() {
+        //track when new resource created or edit mode enabled
+        if (this.subrouteData && this.subrouteData.edit == "edit") {
+          if (this.routeData.slug == "_") {
+
+            this._createNewResource()
+          }
+          console.log('editing resource', this.resource)
+          this.set('editMode', true)
+        }
+      }
+      _editResource() {
+        this.set('route.path', this.route.path + '/edit')
+      }
+      _editEnabled(path) {
+        // enable editing if /edit appears on resource subroute
+        return path == "/edit"
+      }
+
+      _createNewResource() {
+        let id = this.generatePushID();
+        console.log('creating new resource', id)
+        var d = Date.now()
+        var shortcode = this.generateShortCode()
+        let newResource = {
+          $key: id,
+          shortcode: shortcode,
+          description: '',
+          name: '',
+          tags: {},
+          uploadedFiles: [],
+          externalLinks: [],
+          created: d,
+          modified: '',
+          editedBy: {},
+          featureImage: '',
+          deleted: false,
+          draft: false
+        }
+        this.set('resource', newResource)
+      }
+
+
+      _persistedResourcesChanged(resources) {
+        // if page loaded directly then wait for persisted to populate and then filter for result
+        if (resources.length > 0 && this.resource == undefined) {
+          let resource = this._getResourceFromSlug(resources, this.routeData.slug)
+          this.set('resource', resource)
+        }
+      }
+
+      _getResourceFromSlug(resources, slug) {
+        // use route to get resource slug and lookup from resources array
+        // could be made more efficient from populated slug lookup db endpoint, or simply 
+        // letting slug be the resource id (although then will need to ensure all names unique)
+        for (let r of resources) {
+          if (r.slug == slug) {
+            return r
+          }
+        }
+      }
+      _getResourceUrl(resource) {
+
+        return (window.location.origin + "/resource/" + this.resource.slug)
+      }
+
+      _saveResource() {
+        //prompt validation
+        if (this.resource.name == "" || this.resource.description == "") {
+          this.emptyReourceNoteOpen = true;
+          return;
+        }
+        else {
+          // $key automatically populated by persisted resources, or created on new resource generated
+          let key = this.resource.$key
+          delete this.resource.$key
+          this.resource.modified = Date.now()
+          if (!this.resource.editedBy) { this.resource.editedBy = {} }
+          this.resource.editedBy[Date.now()] = this.user.email
+          this.set('editableResource', this.resource)
+          this.$.firebaseResourceDoc.saveValue('/resources', key).then(function () {
+            //save revision 
+            this.$.firebaseResourceDoc.saveValue('/revisions/' + key, Date.now())
+            this.$.firebaseResourceDoc.reset();
+            this.$.firebaseSlugDoc.saveValue('/slugs', this.resource.slug).then(function () {
+              this.$.firebaseSlugDoc.reset();
+            }.bind(this))
+            //notify app to present toast, add back $key in case resource edited again before persisted sync
+            this.resource.$key = key
+            this.dispatchEvent(new CustomEvent('resource-saved', {
+              bubbles: true, composed: true, detail: {
+                resource: this.resource
+              }
+            }))
+          }.bind(this)).catch(function (err) {
+            console.log('err', err)
+          })
+        }
+      }
+      _deleteResource() {
+        this.set('resource.deleted', true)
+        this._saveResource()
+      }
+      _restoreResource() {
+        this.set('resource.deleted', false)
+        this._saveResource()
+      }
+
+      _isYoutube(link) {
+        if (link.url.indexOf('https://youtu.be') > -1 || link.url.indexOf('https://www.youtube.com') > -1) {
+          return true
+        }
+      }
+      _getYoutubeID(link) {
+        let youtubeID = ''
+        if (link.url.indexOf('https://youtu.be') > -1) {
+          var temp = link.url.split('/')
+          youtubeID = temp[temp.length - 1]
+        }
+        if (link.url.indexOf('https://www.youtube.com') > -1) {
+          var temp = link.url.split('/')
+          youtubeID = temp[temp.length - 1].replace('watch?v=', '')
+        }
+        return youtubeID
+      }
+
+
+      generatePushID() {
+        var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+        var lastPushTime = 0;
+        var lastRandChars = [];
+        var now = new Date().getTime();
+        var duplicateTime = (now === lastPushTime);
+        lastPushTime = now;
+        var timeStampChars = new Array(8);
+        for (var i = 7; i >= 0; i--) {
+          timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+          now = Math.floor(now / 64);
+        }
+        if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+        var id = timeStampChars.join('');
+        if (!duplicateTime) {
+          for (i = 0; i < 12; i++) {
+            lastRandChars[i] = Math.floor(Math.random() * 64);
+          }
+        } else {
+          for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
+            lastRandChars[i] = 0;
+          }
+          lastRandChars[i]++;
+        }
+        for (i = 0; i < 12; i++) {
+          id += PUSH_CHARS.charAt(lastRandChars[i]);
+        }
+        if (id.length != 20) throw new Error('Length should be 20.');
+        return id;
+      }
+      generateShortCode() {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwyz123456789";
+        for (var i = 0; i < 4; i++)
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+        return text;
+      }
+
+
+    }
+
+    customElements.define(stats4sdResource.is, stats4sdResource);
+  </script>
+
+</dom-module>

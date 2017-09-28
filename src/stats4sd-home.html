@@ -1,0 +1,133 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="./ssd-elements/resource-types.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="stats4sd-home">
+
+  <template>
+
+    <style include="shared-styles"></style>
+    <style>
+       :host {
+        padding: 10px
+      }
+
+      h2 {
+        font-size: 1.3em;
+        font-weight: 500;
+        margin: 32px 0;
+      }
+
+      paper-toast {
+        margin: 0;
+        padding: 5px;
+        /* max-width: 510px; */
+      }
+
+      @media (max-width: 767px) {
+        h2 {
+          margin: 24px 0;
+          padding: 8px 24px;
+        }
+      }
+
+      @media (max-width: 320px) {
+        .resource-type>img,
+        .resource-type {
+          width: 100vw;
+        }
+      }
+    </style>
+
+    <p class="padding">Welcome to the Stats4SD resource bank. You can browse all resources using the top or sidebar menus, or explore some the
+      links below
+    </p>
+    <div class="sub-section-heading">
+      <div style="float:left"> View Resources by Type</div>
+      <div style="float:right; cursor:pointer; font-weight:700">
+        <a href="/search" class="href-plain">
+          <iron-icon icon="search"></iron-icon>
+          <span>Search All Resources</span>
+        </a>
+
+      </div>
+    </div>
+
+    <resource-types></resource-types>
+
+    <div class="sub-section-heading" style="margin-top:2em">
+      Latest Collections
+    </div>
+
+    <div class="flex wrap">
+      <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]">
+        <collection-element collection={{collection}}></collection-element>
+      </template>
+      <a href="/collection" class="href-plain">
+        <paper-button style="height:180px; width:180px; color:var(--paper-green-700)">
+          <iron-icon icon="view-module"></iron-icon>All Collections
+        </paper-button>
+      </a>
+
+    </div>
+
+
+
+
+    <paper-toast id="toast1" duration="0" opened class="flex">
+      <div>This platform is currently in development (v0.9.5). To feedback on specific issues or requests please contact:
+        <a style="color:wheat" href="mailto:c.clarke@stats4sd.org?Subject=Resources%20Site%20Feedback" target="_top">c.clarke@stats4sd.org</a>
+      </div>
+      <paper-button on-tap="_toastClose" style="margin:0;padding:5px;color:yellow">Got it!</paper-button>
+    </paper-toast>
+    <!-- <button class="align-right"><a href="/admin">Admin</a></button> -->
+
+  </template>
+
+  <script>
+    class stats4sdHome extends Polymer.Element {
+
+      static get is() { return 'stats4sd-home'; }
+      static get observers() {
+        return [
+          // '_complexChange(page.*)'
+        ]
+      }
+      static get properties() {
+        return {
+
+          categories: {
+            type: Array
+          },
+
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
+          },
+          page: {
+            type: String,
+            notify: true
+          },
+          newestCollections: Array
+        }
+      }
+      _complexChange(change) {
+        console.log('complex change', change)
+      }
+
+      _visibleChanged(visible) {
+        if (visible) {
+          this.dispatchEvent(new CustomEvent('change-section', {
+            bubbles: true, composed: true, detail: { title: 'Home' }
+          }));
+        }
+      }
+      _toastClose() {
+        this.$.toast1.close()
+      }
+    }
+
+    customElements.define(stats4sdHome.is, stats4sdHome);
+  </script>
+
+</dom-module>

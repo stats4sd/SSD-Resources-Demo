@@ -1,0 +1,155 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="stats4sd-admin">
+
+  <template>
+
+    <style include="shared-styles"></style>
+    <style>
+       :host {
+        /* padding: 10px */
+      }
+    </style>
+    <app-route route="[[route]]" pattern="/:slug" data="{{routeData}}"></app-route>
+
+    <template is="dom-if" if="{{signedIn}}">
+        <div on-tap="_signOut">
+          <a style="font-size: 16px; cursor:pointer">Sign Out</a>
+          <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
+        </div>
+        <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
+      </template>
+
+      <template is="dom-if" if="{{signedIn}}">
+          <div on-tap="_signOut">
+            <a style="font-size: 16px; cursor:pointer">Sign Out</a>
+            <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
+          </div>
+          <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
+        </template>
+
+        
+    <firebase-document path="/tags" data="{{liveTags}}" app-name="SSD-Resources"></firebase-document>
+    <firebase-document path="/resources" data="{{liveResources}}" app-name="SSD-Resources"></firebase-document>
+
+    <div class="padding">
+      <h1>Admin</h1>
+      <!-- <paper-button raised on-tap="_upgradeResources">Upgrade Resources (pre 0.9.5 format)</paper-button>
+      <paper-button raised on-tap="_upgradeTags">Upgrade Tags (pre 0.9.5 format)</paper-button> -->
+      <paper-button raised on-tap="_buttonTest">Test</paper-button>
+    </div>
+    <div>slug: {{routeData.slug}}</div>
+
+
+  </template>
+
+  <script>
+    class stats4sdAdmin extends Polymer.Element {
+
+      static get is() { return 'stats4sd-admin'; }
+      static get observers() {
+        return [
+          // '_complexChange(page.*)'
+        ]
+      }
+      static get properties() {
+        return {
+          persistedTags: {
+            type: Array,
+          },
+          persistedResources: {
+            type: Array,
+          },
+        }
+      }
+
+      _complexChange(change) {
+        console.log('complex change', change)
+      }
+      _buttonTest(){
+        console.log('routeData',this.routeData)
+      }
+
+      _upgradeResources() {
+        // method to convert old tags format to newer, unlikely to be used again
+        // first let's go through each resource
+        let updates = 0
+        for (let resKey in this.liveResources) {
+          let resVal = this.liveResources[resKey]
+          // rewrite tags structure to be in 3 seperate sections, move old to tagsDeprecated
+          // only do this if hasn't already been done
+          if (this.liveResources[resKey].hasOwnProperty('tagsDeprecated')) {
+            console.log('skipping resource, already upgraded')
+          }
+          else {
+            updates++
+            this.liveResources[resKey].tagsDeprecated = this.liveResources[resKey].tags
+            this.liveResources[resKey].tags = {
+              "Resource-Types": {},
+              "Keywords": {},
+              "Collections": {}
+            }
+            // populate tags2 from live tags data
+            for (let tagKey in resVal.tagsDeprecated) {
+              let tagVal = resVal.tagsDeprecated[tagKey]
+              if (tagVal == "Resource-Type") {
+                this.liveResources[resKey].tags["Resource-Types"][tagKey] = this.liveTags[tagKey]
+              }
+              else if (tagVal == "Collection") {
+                this.liveResources[resKey].tags["Collections"][tagKey] = this.liveTags[tagKey]
+              }
+              else if (tagVal == "Topic") {
+                this.liveResources[resKey].tags["Keywords"][tagKey] = this.liveTags[tagKey]
+              }
+            }
+          }
+        }
+        if (updates > 0) {
+          console.log('saving updated resource', this.liveResources)
+          // notify change
+          let temp = this.liveResources
+          this.liveResources = []
+          this.liveResources = temp
+        }
+      }
+
+      _upgradeTags() {
+        // change tags to be split type
+        // only do this if not already done
+        if (this.liveTags.hasOwnProperty('Resource-Types')) {
+          console.log('skipping tags,already upgraded')
+        }
+        else{
+          let temp = {
+            "Resource-Types": {},
+            "Collections": {},
+            "Keywords": {}
+          }
+          for (let tagKey in this.liveTags) {
+            let tagVal = this.liveTags[tagKey]
+            console.log('upgrading tag', tagKey, tagVal)
+            // rewrite tags structure to be in 3 seperate sections, move old to tagsDeprecated
+            // only do this if hasn't already been done
+            if (tagVal.type == "Resource-Type") {
+              temp["Resource-Types"][tagKey] = tagVal
+            }
+            else if (tagVal.type == "Collection") {
+              temp["Collections"][tagKey] = tagVal
+            }
+            else if (tagVal.type == "Topic") {
+              tagVal.type = "Keyword"
+              temp["Keywords"][tagKey] = tagVal
+            }
+          }
+          console.log('saving live tags', temp)
+          this.liveTags = []
+          this.liveTags = temp
+        }
+      }
+    }
+
+    customElements.define(stats4sdAdmin.is, stats4sdAdmin);
+  </script>
+
+</dom-module>

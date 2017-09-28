@@ -1,0 +1,104 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="collection-element">
+  <template>
+    <style>
+       :host {
+        display: inline-block;
+        width: 180px;
+        height: 180px;
+        border-radius: 2px;
+        margin: 6px 3px 6px 3px;
+        background-color: white;
+        cursor: pointer;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      .background-image {
+        width: 100%;
+        filter: blur(1px);
+        object-fit: cover;
+      }
+
+      .container {
+        position: relative;
+        text-align: center;
+        color: white;
+      }
+
+      .title {
+        position: absolute;
+        top: 90px;
+        left: 90px;
+        transform: translate(-50%, -50%);
+        font-size: large;
+        /* background: rgba(0, 0, 0, 0.2); */
+        width: 100%;
+        z-index: 2;
+        text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+      }
+
+      .overlay {
+        height: 180px;
+        width: 180px;
+        position: absolute;
+        top: 90px;
+        left: 90px;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+        box-sizing: border-box;
+      }
+
+      .bottom-bar {
+        position: absolute;
+        bottom: 5px;
+        line-height: 1.5em;
+        color: black;
+        width: 100%;
+        background-color: white;
+        z-index: 3;
+      }
+    </style>
+    <a href="[[_getHref(collection)]]">
+      <div class="container">
+        <image id="img" class="background-image" src="[[_getFeatureImage(collection)]]" on-error="_onImgError"></image>
+        <div class="title">[[collection.label]]</div>
+        <div class="overlay"></div>
+        <div class="bottom-bar">[[collection.resources.length]] Resources</div>
+      </div>
+    </a>
+  </template>
+
+  <script>
+    /**
+     * `collection-element`
+     * 
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class CollectionElement extends Polymer.Element {
+      static get is() { return 'collection-element'; }
+      static get properties() {
+        return {
+          collection: {
+            type: Object
+          }
+        };
+      }
+      _onImgError() {
+        this.$.img.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#CCC" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>');
+      }
+      _getFeatureImage(collection) {
+        return collection.featureImage
+      }
+      _getHref(collection){
+        return window.location.origin+'/collection/'+collection.slug
+      }
+    }
+
+    window.customElements.define(CollectionElement.is, CollectionElement);
+  </script>
+</dom-module>

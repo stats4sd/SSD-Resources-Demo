@@ -1,0 +1,163 @@
+<!-- <link rel="import" href="../polymer/polymer-element.html"> -->
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="resource-search-result">
+  <template>
+    <style>
+       :host {
+        display: block;
+        width: 100%;
+        margin-bottom: 1em;
+        cursor: pointer;
+      }
+
+      img {
+        /*max-width: 20vw;*/
+        height: 6.5em;
+        margin: auto;
+        object-fit: cover;
+        float: left;
+        padding-right: 5px;
+      }
+
+      .resource-info {
+        margin-left: 1em;
+        margin-right: 1em;
+      }
+
+
+      .resource-title {
+        color: black;
+        line-height: 1em;
+        overflow: hidden;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        padding-bottom: 0.5em;
+      }
+
+      .resource-description {
+        display: block;
+        /* Fallback for non-webkit */
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        margin: 0 auto;
+        color: black;
+        opacity: 0.8;
+        height: 4.5em;
+        line-height: 1.2em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-bottom: 1px;
+      }
+
+      paper-icon-button {
+        vertical-align: middle;
+        /* This border-radius is neccessary for any button which may later gain the .hover class to prevent visual glitching */
+        border-radius: 50%;
+      }
+
+      paper-icon-button[active] {
+        color: var(--paper-green-500);
+      }
+
+
+      @media(max-width:360px) {
+        img {
+          display: none;
+        }
+        .resource-info {
+          margin-left: 0
+        }
+      }
+    </style>
+    <!-- <a href="[[_getHref(resource)]]" on-tap="_resourceClicked"> -->
+    <div style="display:flex">
+      <div on-click="_resourceClicked">
+        <img src="[[_getImage(resource)]]">
+      </div>
+      <div class="resource-info" style="flex-basis: 100%" on-click="_resourceClicked">
+        <div class="resource-title">[[resource.name]]</div>
+        <div class="resource-description">[[resource.description]]</div>
+      </div>
+      <template is="dom-if" if="{{collectionAddMode}}">
+        <div style="padding:5px">
+          <paper-icon-button icon="library-add" style="vertical-align:middle" active="{{ _resourceInCollection(resource,liveCollection)}}"
+            toggles on-tap="_collectionToggle"></paper-icon-button>
+        </div>
+      </template>
+
+    </div>
+    <!-- </a> -->
+  </template>
+
+  <script>
+    /**
+     * `resource-search-result`
+     * 
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class ResourceSearchResult extends Polymer.Element {
+      static get is() { return 'resource-search-result'; }
+      static get properties() {
+        return {
+          resource: {
+            type: Object
+          },
+          collectionAddMode: Boolean,
+          liveCollection: {
+            type: Object,
+            notify: true
+          },
+        };
+      }
+      _collectionToggle(e) {
+        //add or remove toggled resource from live collection
+        let key = this.resource.$key
+        if(this.liveCollection.resources.hasOwnProperty(key)){
+          delete this.liveCollection.resources[key]
+        }
+        else{
+          this.liveCollection.resources[key]=Date.now()
+        }
+        console.log('resource added',this.liveCollection)
+      }
+      _resourceInCollection(resource,liveCollection){
+        let key=resource.$key
+        return (liveCollection.resources.hasOwnProperty(key))
+      }
+      _getImage(res) {
+        // return feature image if exists. If not use resource type placeholder
+        if (res.featureImage != "") { return res.featureImage }
+        if (res.hasOwnProperty('tags') && res.tags.hasOwnProperty('Resource-Types')) {
+          let types = res.tags["Resource-Types"]
+          let slug = types[Object.keys(types)[0]].slug
+          return ('/images/resourceTypes/' + slug + '.jpg')
+        }
+        else {
+          return '/images/resourceTypes/fallback-image.jpg'
+        }
+      }
+      // easier to use ahref than propagated
+      _getHref(res) {
+        let href = "/resource/" + res.slug
+        return href
+      }
+      _resourceClicked() {
+        // dispatch event up to app so that it can bind the resource to the resource view page and navigate
+        // could also send the full resource but method would fail if navigating directly so no point
+        this.dispatchEvent(new CustomEvent('resource-change', {
+          bubbles: true, composed: true, detail: {
+            url: "/resource/" + this.resource.slug,
+            resource: this.resource
+          }
+        }));
+      }
+    }
+
+    window.customElements.define(ResourceSearchResult.is, ResourceSearchResult);
+  </script>
+</dom-module>

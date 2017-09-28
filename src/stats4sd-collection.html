@@ -1,0 +1,263 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="stats4sd-collection">
+
+  <template>
+
+    <style include="shared-styles">
+       :host {
+        display: block;
+        padding: 10px
+      }
+    </style>
+
+    <!-- app-route provides the name of the category. -->
+    <app-route route="{{route}}" pattern="/:collectionSlug" data="{{routeData}}"></app-route>
+    <!-- live db binding for new resource -->
+    <firebase-document id="liveCollectionDocument" data="{{liveCollection}}" app-name="SSD-Resources"></firebase-document>
+
+    <!-- main page view for / or blank endpoint -->
+    <div hidden$="[[_showIndividual(route.path,'false')]]">
+      <h1>All Collections</h1>
+      <div class="flex wrap">
+        <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]">
+          <collection-element collection={{collection}}></collection-element>
+        </template>
+      </div>
+    </div>
+
+    <!-- Template for individual collection set -->
+    <div hidden$="[[_showIndividual(route.path,'true')]]">
+      <h1 style="display: inline-block">{{activeCollection.label}}</h1>
+      <template is="dom-if" if="{{user.email}}">
+        <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
+      </template>
+      <h2>Resources</h2>
+      <template id="resourcesInCollection" is="dom-repeat" as="res" items="{{_getCollectionResources(activeCollection.resources,resourcesJson)}}">
+        <resource-search-result resource='[[res]]'></resource-search-result>
+      </template>
+      <a class="href-plain" on-tap="_collectionResourcesAdd">
+        <paper-button style="color:var(--paper-green-700)">
+          <iron-icon icon="add"></iron-icon>Add Resources
+        </paper-button>
+      </a>
+
+
+
+    </div>
+
+    <!-- Template for add/edit collection -->
+    <!-- *** add display none for when loading or similar (e.g. when resource updated) -->
+    <paper-dialog id="collectionDialog" modal style="padding:5px; max-width:100vw; width:500px; min-height:500px">
+      <h2>Add New Collection</h2>
+      <paper-dialog-scrollable>
+        <paper-input always-float-label label="Collection Name" value="{{liveCollection.label}}"></paper-input>
+        <paper-textarea always-float-label label="Description" value="{{liveCollection.description}}"></paper-textarea>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus on-tap="saveCollection">Save</paper-button>
+      </div>
+    </paper-dialog>
+
+
+
+  </template>
+
+  <script>
+    class stats4sdCollection extends Polymer.Element {
+
+      static get is() { return 'stats4sd-collection'; }
+
+      static get properties() {
+        return {
+
+          route: Object,
+          routeData: Object,
+          showAll: {
+            type: Boolean,
+            value: false
+          },
+          allCollections: Array,
+          activeCollection: {
+            type: Object,
+            computed: '_getActiveCollection(routeData.collectionSlug,allCollections)',
+            notify: true
+          },
+          user: Object,
+          liveCollection: {
+            type: Object,
+            notify: true
+          },
+          resourcesJson:Object,
+        }
+      }
+
+      static get observers() {
+        return [
+        ]
+      }
+      test(){
+        console.log('res json',this.resourcesJson)
+      }
+      _editCollection() {
+        console.log('live collection', this.liveCollection)
+        delete this.activeCollection.$key
+        console.log('active collection', this.activeCollection)
+        this.set('liveCollection', {})
+        this.set('liveCollection', this.activeCollection)
+        console.log('editing collection', this.liveCollection)
+        this.$.collectionDialog.open()
+      }
+      _showIndividual(path, hide) {
+        // required for navigating back, collectionSlug change not detected. hide used to easily reverse condition
+        if (path == "" || path == "/") { return hide == 'true' }
+        else { return hide != 'true' }
+      }
+      _getActiveCollection(slug, allCollections) {
+        // method runs when slug changed or persisted collections updated (e.g. first load)
+        // loads all collections on empty or / slug, otherwise loads individual
+        if (!slug || slug == "/") {
+          this.set('showAll', true)
+          return {}
+        }
+        if (!this.allCollections || this.allCollections.length == 0) { return {} }
+        else {
+          for (let collection of this.allCollections) {
+            if (collection.hasOwnProperty('slug') && collection.slug == slug) {
+              if (!collection.resources) { collection.resources = {} }
+              console.log('active collection', collection)
+              return collection
+            }
+          }
+        }
+      }
+
+      _getCollectionResources(resourceKeys,resourcesJson){
+        let temp = []
+        if(resourcesJson){
+          for(let key in resourceKeys){
+            if(resourcesJson.hasOwnProperty(key)){
+              temp.push(resourcesJson[key])
+            }
+          }
+          console.log('temp',temp)
+        }
+        return temp
+      }
+
+      _addCollection() {
+        console.log('adding collection')
+        this.$.collectionDialog.open()
+      }
+      _collectionResourcesAdd() {
+        console.log('collection resource adding')
+        console.log('live collection', this.liveCollection)
+        delete this.activeCollection.$key
+        console.log('active collection', this.activeCollection)
+        this.set('liveCollection', {})
+        this.set('liveCollection', this.activeCollection)
+        console.log('editing collection', this.liveCollection)
+
+        this.dispatchEvent(new CustomEvent('collection-resources-add', {
+          bubbles: true, composed: true, detail: {
+            collection: this.collection,
+          }
+        }));
+      }
+
+      saveCollection() {
+        // ****Need to decide what meta to track and bring in *********
+        // ****Also need to ensure form completed, and possibly way to update current page
+        this.liveCollection.type = "Collection";
+        this.liveCollection.modified = Date.now();
+        this.liveCollection.slug = this._toSlug(this.liveCollection.label);
+        if (!this.liveCollection.hasOwnProperty('key')) {
+          this.liveCollection.key = this.generatePushID()
+        }
+        if (!this.liveCollection.hasOwnProperty('created')) {
+          this.liveCollection.created = Date.now();
+        }
+        if (!this.liveCollection.hasOwnProperty('resources')) {
+          this.liveCollection.resources = [];
+        }
+        console.log('creating collection', this.liveCollection)
+        let redirectURL = window.location.origin + '/collection/' + this.liveCollection.slug
+        this.$.liveCollectionDocument.saveValue('/tags/Collections', this.liveCollection.key)
+          .then(() => {
+            // force refresh/newslug redirect to update local cache
+            // could probably be done without refresh by pushing/updating values and various callback, possibly improve later
+            window.location.replace(redirectURL);
+          })
+          .catch((err) => { console.log('err', err) })
+      }
+
+      _getLiveCollectionPath(key) {
+        console.log('setting live collection path for key', key)
+      }
+      _toSlug(name) {
+        if (!name) { return "" }
+        else {
+          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
+          return slug
+        }
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.isAttached = true;
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this.isAttached = false;
+      }
+
+      _jsonToArray(json) {
+        // push json to array, including $key field as key identifier (in same manner as indexeddb)
+        if (!json) { return }
+        var tagsArray = []
+        for (var key in json) {
+          if (json.hasOwnProperty(key)) {
+            tagsArray.push(json[key])
+          }
+        }
+        return tagsArray
+      }
+      generatePushID() {
+        var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+        var lastPushTime = 0;
+        var lastRandChars = [];
+        var now = new Date().getTime();
+        var duplicateTime = (now === lastPushTime);
+        lastPushTime = now;
+        var timeStampChars = new Array(8);
+        for (var i = 7; i >= 0; i--) {
+          timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+          now = Math.floor(now / 64);
+        }
+        if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+        var id = timeStampChars.join('');
+        if (!duplicateTime) {
+          for (i = 0; i < 12; i++) {
+            lastRandChars[i] = Math.floor(Math.random() * 64);
+          }
+        } else {
+          for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
+            lastRandChars[i] = 0;
+          }
+          lastRandChars[i]++;
+        }
+        for (i = 0; i < 12; i++) {
+          id += PUSH_CHARS.charAt(lastRandChars[i]);
+        }
+        if (id.length != 20) throw new Error('Length should be 20.');
+        return id;
+      }
+    }
+
+
+    customElements.define(stats4sdCollection.is, stats4sdCollection);
+  </script>
+
+</dom-module>

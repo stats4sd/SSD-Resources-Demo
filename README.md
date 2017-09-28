@@ -1,75 +1,77 @@
-# SSD-Resources-Demo
-#Getting Set up
-install required tools and managers
-$npm install -g firebase-tools polymer-cli bower
+# stats4sd
 
-install bower components
-$ bower install
-
-start the server. you can see the output at the localhost address given
-$ polymer serve --open
-
-
-#Add a page
-1. create a new html doc in the src folder. naming convention is ssd-[name].html
-2. copy ssd-viewTemplate contents to new page and update necessary code
-3. provide a reference for the menu in ssd-app.html <iron-pages> and <iron-selector> sections
-
-#Prepare for deployment
-$ polymer build
-(service worker automatically generated)
-
-Vulcanise:
-$ vulcanize src/imports-core.html --strip-comments --out-html build/default/src/imports-core.html --inline-scripts --inline-css --strip-exclude bower_components/polymer/polymer.html
-
-(optional. test with $firebase serve)
-$firebase serve
-
-(optional. select firebase app to deploy to)
-$firebase use
-
-Deploy to server
-$firebase deploy
-
-#testing
-install polylint
-$ npm install -g polylint
-run from root directory and specify entry
-$ polylint --input src/ssd-app.html
-(expect undefined warnings for all pages as they are lazy loaded)
-
-#Learn more about the code used
-
-A few good guides to get started:
-
-https://www.polymer-project.org/1.0/start/ 
-2 guides, for building element and then app
-
-https://codelabs.developers.google.com/codelabs/polymer-firebase/index.html 
-First guide to using firebase for syncing data
-
-https://codelabs.developers.google.com/codelabs/firebase-web/index.html 
-Real time chat app using firebase
-
-https://codelabs.developers.google.com/codelabs/polymer-firebase-pwa/index.html 
-Progressive web app with firebase, poylmer fire and polymer components
+### Preparing SSD-Elements for publishing
+Currently ssd-elements exist in 2 formats, simple to import direct into projects and ready to publish and import via bower.
+In future if wish to publish need to 
+1. change each element polymer import:
+$<link rel="import" href="../../bower_components/polymer/polymer-element.html">-><link rel="import" href="../polymer/polymer-element.html">
+2. override copy in the existing ssd-elements (bower publish version) folder
+3. change app import to be via bower component versions of ssd-elements
+(note, if running polymer lint will show up as error as paths won't resolve, this is fine and build should still work)
 
 
-More links:
+### Setup
 
-https://console.firebase.google.com 
-Backend database and services. Has account linked to ssd@stats4sd.org google account.
+##### Prerequisites
 
-https://www.youtube.com/watch?v=fFF2Yup2dMM
-Video more generally on google polymer and web apps
+Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli):
 
-https://www.polymer-project.org/1.0/toolbox/ 
-https://customelements.io/
-https://www.webcomponents.org/ 
-
-https://developers.google.com/drive/v3/web/about-sdk 
-https://developers.google.com/identity/protocols/OAuth2ServiceAccount
+    npm install -g polymer-cli
 
 
+##### Setup
+    # Using CLI
+    mkdir stats4sd
+    cd stats4sd
+    polymer init stats4sd
 
+    # Or cloning direct from GitHub
+    git clone https://github.com/Polymer/stats4sd.git
+    cd stats4sd
+    bower install
 
+### Start the development server
+
+    polymer serve
+
+### Run web-component-tester tests
+
+    polymer test
+
+### Build
+
+Build presets provide an easy way to define common build configurations in your `polymer.json` file. There are 2 build presets we put in `polymer.json` file in stats4sd:
+
+**es5-bundled**
+
+- js: {minify: true, compile: true}
+- css: {minify: true}
+- html: {minify: true}
+- bundle: true
+- addServiceWorker: true
+- addPushManifest: true
+- insertPrefetchLinks: true
+
+**es6-unbundled**
+
+- js: {minify: true, compile: false}
+- css: {minify: true}
+- html: {minify: true}
+- bundle: false
+- addServiceWorker: true
+- addPushManifest: true
+- insertPrefetchLinks: true
+
+Run the command to build the presets:
+
+    polymer build
+
+### Test the build
+
+This command serves the `es5-bundled` build version of the app:
+
+    polymer serve build/es5-bundled
+
+This command serves the `es6-unbundled` build version of the app:
+
+    polymer serve build/es6-unbundled

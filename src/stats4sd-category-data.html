@@ -1,0 +1,320 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="stats4sd-category-data">
+
+  <script>
+    (function () {
+      let categoryList = {
+        "-KijSiLb_oGKl4dOKkUH": {
+          "image": "https://firebasestorage.googleapis.com/v0/b/ssd-resources-demo.appspot.com/o/images%2FrTypes%2Facademic_paper.jpg?alt=media&token=718b8dcd-ce4d-4f65-a66e-c6800f926d96",
+          "label": "Academic / Research Paper",
+          "modified": 1493297456599,
+          "slug": "academic--research-paper",
+          "type": "Resource-Type"
+        },
+        "-KijSkrdzRFfid9Z-UEU": {
+          "image": "https://firebasestorage.googleapis.com/v0/b/ssd-resources-demo.appspot.com/o/images%2FrTypes%2Faudio.jpg?alt=media&token=564cb1b0-db9a-4867-a2f3-1be7d1e47503",
+          "label": "Audio File",
+          "modified": 1493297466905,
+          "slug": "audio-file",
+          "type": "Resource-Type"
+        },
+        "-KijSmFY6UQgHvoWBTSP": {
+          "image": "https://firebasestorage.googleapis.com/v0/b/ssd-resources-demo.appspot.com/o/images%2FrTypes%2Fbook.jpg?alt=media&token=60a05982-d68d-43e7-8632-2414603254bc",
+          "label": "Book",
+          "modified": 1493297472596,
+          "slug": "book",
+          "type": "Resource-Type"
+        },
+        "-KijSqPXSYxFOraiV9k3": {
+          "image": "https://firebasestorage.googleapis.com/v0/b/ssd-resources-demo.appspot.com/o/images%2FrTypes%2Fcode.jpg?alt=media&token=c8d96cb0-5b46-4b40-83c6-fb886eccdfb9",
+          "label": "Script file / Code",
+          "modified": 1493297489619,
+          "slug": "script-file--code",
+          "type": "Resource-Type"
+        },
+        "-KijSsSpmLDdSrpuHT1L": {
+          "image": "https://firebasestorage.googleapis.com/v0/b/ssd-resources-demo.appspot.com/o/images%2FrTypes%2Fdesktop_software.jpg?alt=media&token=e08b593d-0a8a-4e16-b3c6-46c634c32663",
+          "label": "Desktop Software",
+          "modified": 1493297498022,
+          "slug": "desktop-software",
+          "type": "Resource-Type"
+        },
+        "-KijSvHsIPBrtyQxI2GI": {
+          "image": "https://firebasestorage.googleapis.com/v0/b/ssd-resources-demo.appspot.com/o/images%2FrTypes%2Finteractive_presentation.jpg?alt=media&token=6babdfcb-9ba2-4e58-b367-6952b9dbdf95",
+          "label": "Interactive Presentation",
+          "modified": 1493297509609,
+          "slug": "interactive-presentation",
+          "type": "Resource-Type"
+        },
+        "-KijSwlTh3vBWJKyu8ur": {
+          "image": "https://firebasestorage.googleapis.com/v0/b/ssd-resources-demo.appspot.com/o/images%2FrTypes%2Fmobile_app.jpg?alt=media&token=b2b55fa1-1d1e-49cc-b1da-03031158e472",
+          "label": "Mobile App",
+          "modified": 1493297515662,
+          "slug": "mobile-app",
+          "type": "Resource-Type"
+        },
+        "-KijSyXK54z5mZB3dhlS": {
+          "image": "https://firebasestorage.googleapis.com/v0/b/ssd-resources-demo.appspot.com/o/images%2FrTypes%2Fshort_text.jpg?alt=media&token=68f9304a-81ea-40ae-8916-689914086b35",
+          "label": "Short Text",
+          "modified": 1493297522886,
+          "slug": "short-text",
+          "type": "Resource-Type"
+        },
+        "-KijT-2h3LK5p1z85D1x": {
+          "image": "https://firebasestorage.googleapis.com/v0/b/ssd-resources-demo.appspot.com/o/images%2FrTypes%2Fvideo.jpg?alt=media&token=fb6598ce-125e-4714-91c9-e946c34da8a9",
+          "label": "Video",
+          "modified": 1493297529118,
+          "slug": "video",
+          "type": "Resource-Type"
+        },
+        "-KijT0fOYm_dw83rNHV1": {
+          "image": "https://firebasestorage.googleapis.com/v0/b/ssd-resources-demo.appspot.com/o/images%2FrTypes%2Fwebsite.jpg?alt=media&token=ec6f0f84-3c39-4201-b7e4-f2ea4e43787b",
+          "label": "Website",
+          "modified": 1493297535754,
+          "slug": "website",
+          "type": "Resource-Type"
+        },
+        "-KijedgWoC8WkOxqnwRx": {
+          "label": "Presentation",
+          "modified": 1493300845374,
+          "slug": "presentation",
+          "type": "Resource-Type"
+        }
+      }
+
+      class stats4sdCategoryData extends Polymer.Element {
+
+        static get is() { return 'stats4sd-category-data'; }
+
+        static get properties() {
+          return {
+            slug: {
+              type: String,
+              observer: '_slugChanged'
+            },
+
+            resources: {
+              type: Array,
+              value: []
+            },
+            resourcesJson: {
+              type: Object,
+              computed: '_resourcesToJson(resources)',
+              notify: true
+            },
+
+            filteredResources: {
+              type: Array,
+              notify: true
+            },
+            searchDetails: {
+              type: Object,
+              value: {},
+              notify: true
+            },
+            searchResults: {
+              type: Array,
+              value: [],
+              notify: true
+            },
+
+            label: {
+              type: String,
+              notify: true
+            },
+
+            tags: {
+              type: Array
+            },
+            // populated meta data from tags
+            allCollections: {
+              type: Array,
+              notify: true
+            },
+            newestCollections: {
+              type: Array,
+              notify: true
+            },
+            allKeywords: {
+              type: Array,
+              notify: true
+            },
+            allResourceTypes: {
+              type: Array,
+              notify: true
+            }
+
+          }
+        }
+        static get observers() {
+          return [
+            '_resourcesChanged(resources)',
+            '_tagsChanged(tags)'
+          ]
+        }
+        _tagsChanged(tags) {
+          //when tags received filter array into seperate categories and populate corresponding property
+          //maintains a $key from nested json like in indexeddb
+          if (tags.length <= 0) { return }
+          let temp = {}
+          for (let el of tags) {
+            for (let key in el) {
+              if (el.hasOwnProperty(key)) {
+                let type = el[key].type
+                if (type != undefined) {
+                  if (!temp[type]) { temp[type] = [] }
+                  el[key].$key = key
+                  temp[type].push(el[key])
+                }
+              }
+            }
+          }
+          console.log('tags', temp)
+          this.allCollections = []
+          this.allCollections = temp.Collection.reverse()
+          this.newestCollections = []
+          this.newestCollections = this.allCollections.slice(0, 4)
+          this.allKeywords = []
+          this.allKeywords = temp.Keyword.reverse()
+          this.allResourceTypes = []
+          this.allResourceTypes = temp['Resource-Type'].reverse()
+        }
+
+
+        _resourcesChanged(res) {
+          // when resources are loaded, or method called from slug change populate filtered resources
+          // if no slug assumes /list selected and therefore should display all
+          // could change 'all resources' to pick specific slug if wanted
+          if (res.length > 0) {
+            let key = this._computeCategoryKey(this.slug)
+            this.filteredResources = []
+            if (this.slug == '' || this.slug == undefined) { console.log('showing all'); this.filteredResources = res }
+            else {
+              this.filteredResources = res.filter(function (r) {
+                if (r.hasOwnProperty('tags') && r.tags.hasOwnProperty('Resource-Types')) {
+                  return (r.tags["Resource-Types"] && r.tags["Resource-Types"].hasOwnProperty(key)
+                  )
+                }
+                else { return false }
+              })
+            }
+          }
+        }
+
+        _slugChanged(slug) {
+          this.key = this._computeCategoryKey()
+          this.set('label', categoryList[this.key])
+          if (this.resources.length == 0) {
+
+          }
+          else { this._resourcesChanged(this.resources) }
+        }
+
+        _computeCategoryKey(categoryName) {
+          // returns Resource-Type meta by key
+          for (let key in categoryList) {
+            let val = categoryList[key]
+            if (val.slug == categoryName) {
+              // set label and return key
+              this.set('label', val.label)
+              return key
+            }
+          }
+          return ""
+        }
+
+        _resourcesToJson(resources) {
+          // convert persisted resources back to json by key for quick lookup
+          if (resources.length > 0) {
+            let temp = {}
+            for (let r of resources) {
+              temp[r.$key] = r
+            }
+            console.log('resources json', temp)
+            return temp
+          }
+        }
+
+
+        search(detail) {
+          // detail of format {searchText:String; filters:{}}
+          console.log('detail', detail)
+          let searchText = detail.searchText.toLowerCase()
+          console.log('searching for text', searchText)
+          console.log('all resources', this.resources)
+          this.searchDetails.rankedJson = {}
+          // match by resource name
+          this.searchDetails.name = this.resources.filter((r) => {
+            if (r.name.toLowerCase().indexOf(searchText) > -1) {
+              this._addToSearchRank(r, 3)
+              return true
+            }
+          })
+          // match by description
+          this.searchDetails.description = this.resources.filter((r) => {
+            if (r.description.toLowerCase().indexOf(searchText) > -1) {
+              this._addToSearchRank(r, 1)
+              return true
+            }
+          })
+          // match by keyword (exact match, inefficient as currently iterates over every resource each time
+          // needs resource by keyword lookup or 2-way binding
+          console.log('all keywords', this.allKeywords)
+          this.searchDetails.keyword = {}
+          for (let k of this.allKeywords) {
+            if (k.label.toLowerCase() == searchText) {
+              this.searchDetails.keyword[k.label] = this.resources.filter((r) => {
+                if (r.tags.hasOwnProperty('Keywords') && r.tags.Keywords.hasOwnProperty(k.$key)) {
+                  this._addToSearchRank(r, 5)
+                  return true
+                }
+              })
+            }
+          }
+          // *********** match by collection (not currently implemented) ***********
+          console.log('testing collections', this.allCollections)
+          // *********** match by attachment names (not currently implemented) ***********
+
+          // sort overall ranking
+          this.searchDetails.rankedArray = []
+          let tempArray = []
+          for (let key in this.searchDetails.rankedJson) {
+            if (this.searchDetails.rankedJson.hasOwnProperty(key)) {
+              let val = this.searchDetails.rankedJson[key]
+              tempArray.push(
+                [val.resource, val.value]
+              )
+            }
+          }
+          tempArray.sort(function (a, b) {
+            return b[1] - a[1]
+          })
+          for (let r of tempArray) {
+            r[0].matchRating = r[1]
+            this.searchDetails.rankedArray.push(r[0])
+          }
+          this.searchResults = []
+          this.searchResults = this.searchDetails.rankedArray
+          console.log('results', this.searchDetails)
+        }
+        _addToSearchRank(resource, value) {
+          if (this.searchDetails.rankedJson.hasOwnProperty(resource.$key)) {
+            this.searchDetails.rankedJson[resource.$key].value = this.searchDetails.rankedJson[resource.$key].value + value
+          }
+          else {
+            this.searchDetails.rankedJson[resource.$key] = {
+              value: value,
+              resource: resource
+            }
+          }
+        }
+
+      }
+
+      customElements.define(stats4sdCategoryData.is, stats4sdCategoryData);
+
+    })();
+  </script>
+
+</dom-module>
