@@ -2,6 +2,7 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 
 <!-- <link rel="import" href="./ssd-elements/resource-featured.html"> -->
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
@@ -319,8 +320,8 @@
         this.addEventListener('search', (e) => this._search(e));
         // listen for online/offline
         Polymer.RenderStatus.afterNextRender(this, () => {
-          window.addEventListener('online', (e) => this._notifyNetworkStatus(e));
-          window.addEventListener('offline', (e) => this._notifyNetworkStatus(e));
+          // window.addEventListener('online', (e) => this._notifyNetworkStatus(e));
+          // window.addEventListener('offline', (e) => this._notifyNetworkStatus(e));
         });
       }
 
@@ -454,28 +455,28 @@
               if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('service-worker.js', { scope: '/' });
               }
-              this._notifyNetworkStatus();
+              // this._notifyNetworkStatus();
               this.loadComplete = true;
             });
           });
         }
       }
 
-      _notifyNetworkStatus() {
-        let oldOffline = this.offline;
-        this.offline = !navigator.onLine;
-        // Show the snackbar if the user is offline when starting a new session
-        // or if the network status changed.
-        if (this.offline || (!this.offline && oldOffline === true)) {
-          if (!this._networkSnackbar) {
-            this._networkSnackbar = document.createElement('stats4sd-snackbar');
-            this.root.appendChild(this._networkSnackbar);
-          }
-          this._networkSnackbar.innerHTML = this.offline ?
-            'You are offline' : 'You are online';
-          this._networkSnackbar.open();
-        }
-      }
+      // _notifyNetworkStatus() {
+      //   let oldOffline = this.offline;
+      //   this.offline = !navigator.onLine;
+      //   // Show the snackbar if the user is offline when starting a new session
+      //   // or if the network status changed.
+      //   if (this.offline || (!this.offline && oldOffline === true)) {
+      //     if (!this._networkSnackbar) {
+      //       this._networkSnackbar = document.createElement('stats4sd-snackbar');
+      //       this.root.appendChild(this._networkSnackbar);
+      //     }
+      //     this._networkSnackbar.innerHTML = this.offline ?
+      //       'You are offline' : 'You are online';
+      //     this._networkSnackbar.open();
+      //   }
+      // }
 
       _signInOpen() {
         this.$.login.open()
