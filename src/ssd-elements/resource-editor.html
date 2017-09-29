@@ -11,8 +11,8 @@
     </style>
 
     <!-- Firebase binding for live tag data -->
-    <firebase-document path="/tags" data="{{liveTags}}" app-name="SSD-Resources"></firebase-document>
-    <firebase-document id="currentTag" app-name="SSD-Resources" data="{{currentTag}}" path=""></firebase-document>
+    <firebase-document path="/tags" data="{{liveTags}}" app-name=stats4sd-resources></firebase-document>
+    <firebase-document id="currentTag" app-name=stats4sd-resources data="{{currentTag}}" path=""></firebase-document>
 
     <!-- Title and Description -->
     <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
@@ -247,7 +247,7 @@
 
         //create file upload task
         let file = event.detail.file;
-        let ssdResourcesApp = firebase.app("SSD-Resources")
+        let ssdResourcesApp = firebase.app(stats4sd-resources)
         let ref = firebase.storage(ssdResourcesApp).ref().child('/resources/' + this.resource.$key + "/" + file.name)
         let uploadTask = ref.put(file);
         //handle updates from snapshot

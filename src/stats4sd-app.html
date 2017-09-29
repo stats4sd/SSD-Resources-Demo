@@ -143,12 +143,12 @@
       calculates the total amount.
     -->
     <!-- <stats4sd-cart-data id="cart" cart="{{cart}}" num-items="{{numItems}}" total="{{total}}"></stats4sd-cart-data> -->
-    <firebase-app name="SSD-Resources" api-key=" AIzaSyBD5pjMlrhbmtkBU32-zvoJImF010wgFxY" storage-bucket="ssd-resources-demo.appspot.com"
-      auth-domain="ssd-resources-demo.firebaseapp.com" database-url="https://ssd-resources-demo.firebaseio.com">
+    <firebase-app name="stats4sd-resources" api-key="AIzaSyBD5pjMlrhbmtkBU32-zvoJImF010wgFxY" storage-bucket="stats4sd-resources.appspot.com"
+      auth-domain="stats4sd-resources.firebaseapp.com" database-url="https://stats4sd-resources.firebaseio.com">
     </firebase-app>
-    <firebase-query id="resQuery" app-name="SSD-Resources" path="/resources" data="{{resources}}"></firebase-query>
+    <firebase-query id="resQuery" app-name=stats4sd-resources path="/resources" data="{{resources}}"></firebase-query>
     <app-indexeddb-mirror key="persistedResources" data="{{resources}}" session="keepAlways" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
-    <firebase-query id="tagsQuery" app-name="SSD-Resources" path="/tags" data="{{tags}}"></firebase-query>
+    <firebase-query id="tagsQuery" app-name=stats4sd-resources path="/tags" data="{{tags}}"></firebase-query>
     <app-indexeddb-mirror key="persistedTags" data="{{tags}}" session="keepAlways" persisted-data="{{persistedTags}}"></app-indexeddb-mirror>
 
 
@@ -209,7 +209,7 @@
     <paper-dialog id="login" modal>
       <paper-dialog-scrollable>
         <!--<login-fire reverse email-password anonymous twitter github google facebook app-name="SSD-Resources "></login-fire>-->
-        <login-element id="stats4sdLogin" app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+        <login-element id="stats4sdLogin" app-name=stats4sd-resources user="{{user}}" signed-in="{{signedIn}}">
         </login-element>
       </paper-dialog-scrollable>
     </paper-dialog>
