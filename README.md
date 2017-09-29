@@ -1,14 +1,5 @@
 # stats4sd
 
-### Preparing SSD-Elements for publishing
-Currently ssd-elements exist in 2 formats, simple to import direct into projects and ready to publish and import via bower.
-In future if wish to publish need to 
-1. change each element polymer import:
-$<link rel="import" href="../../bower_components/polymer/polymer-element.html">-><link rel="import" href="../polymer/polymer-element.html">
-2. override copy in the existing ssd-elements (bower publish version) folder
-3. change app import to be via bower component versions of ssd-elements
-(note, if running polymer lint will show up as error as paths won't resolve, this is fine and build should still work)
-
 
 ### Setup
 
@@ -17,7 +8,6 @@ $<link rel="import" href="../../bower_components/polymer/polymer-element.html">-
 Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli):
 
     npm install -g polymer-cli
-
 
 ##### Setup
     # Using CLI
@@ -39,6 +29,11 @@ Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli
     polymer test
 
 ### Build
+
+**_Note_** 
+Build process currently has issue when minifying firebase components [see issue #132](https://github.com/stats4sd/Stats4SD-Resources-Site/issues/132)
+To build for live use an unbundled build and copy all firebase bowercomponents manually into build folder (polymerfire folder seems fine which is confusing...)
+
 
 Build presets provide an easy way to define common build configurations in your `polymer.json` file. There are 2 build presets we put in `polymer.json` file in stats4sd:
 
@@ -75,3 +70,13 @@ This command serves the `es5-bundled` build version of the app:
 This command serves the `es6-unbundled` build version of the app:
 
     polymer serve build/es6-unbundled
+
+### Preparing SSD-Elements for publishing
+Currently ssd-elements exist in 2 formats, simple to import direct into projects and ready to publish and import via bower.
+In future if wish to publish need to 
+1. change each element polymer import:
+$<link rel="import" href="../../bower_components/polymer/polymer-element.html">-><link rel="import" href="../polymer/polymer-element.html">
+2. override copy in the existing ssd-elements (bower publish version) folder
+3. change app import to be via bower component versions of ssd-elements
+(note, if running polymer lint will show up as error as paths won't resolve, this is fine and build should still work)
+

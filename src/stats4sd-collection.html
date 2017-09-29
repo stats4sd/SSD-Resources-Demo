@@ -29,6 +29,7 @@
     <!-- Template for individual collection set -->
     <div hidden$="[[_showIndividual(route.path,'true')]]">
       <h1 style="display: inline-block">{{activeCollection.label}}</h1>
+      <p>{{activeCollection.description}}</p>
       <template is="dom-if" if="{{user.email}}">
         <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
       </template>

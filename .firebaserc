@@ -1,6 +1,5 @@
 {
   "projects": {
-    "default": "ssd-resources-demo",
-    "live": "stats4sd-resources"
+    "default": "ssd-resources-demo"
   }
 }
