@@ -194,10 +194,6 @@
       </app-toolbar>
     </app-header>
 
-    <div class="bottom-bar" hidden$="[[signedIn]]" on-tap="_showCookiePolicy">
-      <div style="cursor:pointer; padding:5px">Cookie Policy</div>
-    </div>
-
     <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
       <stats4sd-home id="homePage" name="home" user="{{user}}" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]"></stats4sd-home>
       <stats4sd-list id="listPage" name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
@@ -212,15 +208,9 @@
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
 
-
-
-
     <!-- category data provides meta info -->
     <stats4sd-category-data id="categoryData" tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}"
       newest-collections="{{newestCollections}}" search-results="{{searchResults}}" resources-json="{{resourcesJson}}"></stats4sd-category-data>
-
-    <!-- a11y announcer -->
-    <!-- <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div> -->
 
     <!-- Login box (starts hidden) -->
     <paper-dialog id="login" modal>
@@ -230,7 +220,6 @@
         </login-element>
       </paper-dialog-scrollable>
     </paper-dialog>
-
 
     <template is="dom-if" if="{{signedIn}}">
       <footer class="footer">
@@ -277,13 +266,21 @@
               <iron-icon icon="save" aria-label="Add Resource"></iron-icon>Save Resource
             </a>
           </paper-button>
-
         </div>
-
       </footer>
     </template>
 
     <paper-toast id="toastMessage" text="{{toastMessage}}" duration="2500" class="toastMessage"></paper-toast>
+
+    <div class="bottom-bar" hidden$="[[signedIn]]" style="display:flex; justify-content:space-between; align-items:center; min-height:2em">
+      <div style="cursor:pointer; padding:5px; white-space:nowrap" on-tap="_showCookiePolicy">Cookie Policy</div>
+      <div style="flex-basis:100%; text-align:center; padding:5px">Site created by Stats4SD with code openly available on 
+        <a href="https://github.com/stats4sd/Stats4SD-Resources-Site" style="color:var(--paper-purple-200)" target="_blank">Github</a>
+        <iron-icon icon="stats4sd-github"></iron-icon>
+      </div>
+      <div style="padding-right:5px;white-space:nowrap; padding:5px">version 1.0-rc2</div>
+    </div>
+    
 
     <paper-toast id="cookiePolicy" duration="0" class="flex" style="margin:0">
       <div>Stats4SD uses cookies to collect information about how you use the site. We use this data to find ways to help improve
