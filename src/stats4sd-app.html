@@ -91,15 +91,13 @@
         line-height: 24px;
       }
 
-       :host([page=home]) .back-btn {
+      :host([page=home]) .hide-on-home{
         display: none
       }
-      /* :host(:not([page=test])) .back-btn {
-        display: none;
-      } */
-      /* :host(:not([page=resource])) .back-btn {
-        display: none;
-      } */
+      :host(:not([page=home])) .hide-not-on-home{
+        display: none
+      }
+
 
       #signedInHeader {
         position: absolute;
@@ -171,7 +169,7 @@
           <!-- <a href="/" hidden$="{{_showOnPaths(route.path,'/_/collection_/list_/list/*')}}">
             <paper-icon-button on-tap="goHome" class="home-btn" icon="home" aria-label="Home"></paper-icon-button>
           </a> -->
-          <paper-icon-button on-tap="goBack" class="back-btn" icon="arrow-back" aria-label="Go back"></paper-icon-button>
+          <paper-icon-button on-tap="goBack" class="back-btn hide-on-home" icon="arrow-back" aria-label="Go back"></paper-icon-button>
         </div>
         <div class="logo" main-title>
 
@@ -271,15 +269,17 @@
     </template>
 
     <paper-toast id="toastMessage" text="{{toastMessage}}" duration="2500" class="toastMessage"></paper-toast>
-
-    <div class="bottom-bar" hidden$="[[signedIn]]" style="display:flex; justify-content:space-between; align-items:center; min-height:2em">
-      <div style="cursor:pointer; padding:5px; white-space:nowrap" on-tap="_showCookiePolicy">Cookie Policy</div>
-      <div style="flex-basis:100%; text-align:center; padding:5px">Site created by Stats4SD with code openly available on 
-        <a href="https://github.com/stats4sd/Stats4SD-Resources-Site" style="color:var(--paper-purple-200)" target="_blank">Github</a>
-        <iron-icon icon="stats4sd-github"></iron-icon>
+    <div class="hide-not-on-home">
+      <div class="bottom-bar" hidden$="[[signedIn]]" style="display:flex; justify-content:space-between; align-items:center; min-height:2em">
+        <div style="cursor:pointer; padding:5px; white-space:nowrap" on-tap="_showCookiePolicy">Cookie Policy</div>
+        <div style="flex-basis:100%; text-align:center; padding:5px">Site created by Stats4SD with code openly available on
+          <a href="https://github.com/stats4sd/Stats4SD-Resources-Site" style="color:var(--paper-purple-200);" target="_blank">Github</a>
+          <iron-icon icon="stats4sd-github" style="padding-left:5px"></iron-icon>
+        </div>
+        <div style="padding-right:5px;white-space:nowrap; padding:5px">version 1.0-rc2</div>
       </div>
-      <div style="padding-right:5px;white-space:nowrap; padding:5px">version 1.0-rc2</div>
     </div>
+    
     
 
     <paper-toast id="cookiePolicy" duration="0" class="flex" style="margin:0">
