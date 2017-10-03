@@ -80,9 +80,19 @@
         width: 40px;
       }
 
+      .home-btn {
+        padding-right: 4px;
+        margin-bottom: 8px;
+      }
+
       .home-btn,
       .back-btn {
         color: white;
+        line-height: 24px;
+      }
+
+       :host([page=home]) .back-btn {
+        display: none
       }
       /* :host(:not([page=test])) .back-btn {
         display: none;
@@ -114,7 +124,7 @@
 
       iron-pages {
         max-width: 1440px;
-        min-height: 100vh;
+        min-height: calc(100vh - 66px);
         margin: 0 auto;
         height: 100%;
         @apply(--layout-flex);
@@ -138,11 +148,6 @@
 
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
-    <!--
-      stats4sd-cart-data maintains the state of the user's stats4sdping cart (in localstorage) and
-      calculates the total amount.
-    -->
-    <!-- <stats4sd-cart-data id="cart" cart="{{cart}}" num-items="{{numItems}}" total="{{total}}"></stats4sd-cart-data> -->
     <firebase-app name="SSD-Resources" api-key="AIzaSyCfl_Pe6Fb8KzIQRV1P2RIwwhN8Jl6BACo" storage-bucket="ssd-resources-demo.appspot.com"
       auth-domain="ssd-resources-demo.firebaseapp.com" database-url="https://ssd-resources-demo.firebaseio.com">
     </firebase-app>
@@ -155,19 +160,18 @@
     <app-header role="navigation" id="header" effects="waterfall" condenses reveals>
       <app-toolbar>
         <div class="left-bar-item">
-          <a href="/" hidden$="{{_showOnPaths(route.path,'/_/collection_/list_/list/*')}}">
+          <!-- <a href="/" hidden$="{{_showOnPaths(route.path,'/_/collection_/list_/list/*')}}">
             <paper-icon-button on-tap="goHome" class="home-btn" icon="home" aria-label="Home"></paper-icon-button>
-          </a>
-
-          <paper-icon-button on-tap="goBack" class="back-btn" hidden$="{{!_showOnPaths(route.path,'/_/collection_/list_/list/*')}}"
-            icon="arrow-back" aria-label="Go back"></paper-icon-button>
-
+          </a> -->
+          <paper-icon-button on-tap="goBack" class="back-btn" icon="arrow-back" aria-label="Go back"></paper-icon-button>
         </div>
         <div class="logo" main-title>
-          <a hidden$="[[!smallScreen]]" href="/" aria-label="stats4sd Home">Stats4SD</a>
-          <a hidden$="[[smallScreen]]" href="/" aria-label="stats4sd Home">Statistics for Sustainable Development</a>
+
+          <a hidden$="[[!smallScreen]]" href="/" aria-label="stats4sd Home" style="margin-top:8px">
+            <iron-icon class="home-btn" icon="home" aria-label="Home"></iron-icon>Stats4SD</a>
+          <a hidden$="[[smallScreen]]" href="/" aria-label="stats4sd Home" style="margin-top:8px">
+            <iron-icon class="home-btn" icon="home" aria-label="Home"></iron-icon>Statistics for Sustainable Development</a>
         </div>
-        <!-- <div>[[page]]</div> -->
         <div on-tap="_signInOpen" hidden$="[[signedIn]]">
           <a style="font-size: 16px; cursor:pointer">Sign In</a>
           <paper-icon-button icon="lock" style="color:white" aria-label$="Sign In"></paper-icon-button>
@@ -182,10 +186,12 @@
       </app-toolbar>
     </app-header>
 
-
+    <div class="bottom-bar" hidden$="[[signedIn]]" on-tap="_showCookiePolicy">
+      <div style="cursor:pointer; padding:5px">Cookie Policy</div>
+    </div>
 
     <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
-      <stats4sd-home id="homePage" name="home" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]"></stats4sd-home>
+      <stats4sd-home id="homePage" name="home" user="{{user}}" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]"></stats4sd-home>
       <stats4sd-list id="listPage" name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
       <stats4sd-admin id="adminPage" name="admin" route="[[subroute]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"
         page="{{page}}"></stats4sd-admin>
@@ -197,6 +203,9 @@
         active-collection="{{activeCollection}}" live-collection="{{liveCollection}}"></stats4sd-search>
       <stats4sd-404 name="404"></stats4sd-404>
     </iron-pages>
+
+
+
 
     <!-- category data provides meta info -->
     <stats4sd-category-data id="categoryData" tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}"
@@ -214,54 +223,68 @@
       </paper-dialog-scrollable>
     </paper-dialog>
 
-    <footer class="footer" hidden$="[[!signedIn]]">
-      <!-- buttons show/hide on various paths -->
-      <div id="rightButtons" style="float:right">
 
-        <paper-button hidden$="{{_hideOnPaths(route.path,'/collection')}}">
-          <a href="/collection" class="href-plain">
-            <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
-          </a>
-        </paper-button>
+    <template is="dom-if" if="{{signedIn}}">
+      <footer class="footer">
+        <!-- buttons show/hide on various paths -->
+        <div id="rightButtons" style="float:right">
 
-        <!-- <paper-button hidden$="{{_showOnPaths(route.path,'/collection/*')}}" on-tap="_editCollection">
+          <paper-button hidden$="{{_hideOnPaths(route.path,'/collection')}}">
+            <a href="/collection" class="href-plain">
+              <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
+            </a>
+          </paper-button>
+
+          <!-- <paper-button hidden$="{{_showOnPaths(route.path,'/collection/*')}}" on-tap="_editCollection">
           <a class="href-plain">
             <iron-icon icon="mode-edit" aria-label="Manage Collections"></iron-icon>Edit Collection
           </a>
         </paper-button> -->
 
-        <paper-button hidden$="{{_showOnPaths(route.path,'/collection')}}" on-tap="_addCollection">
-          <a href="/collection" class="href-plain">
-            <iron-icon icon="add" aria-label="Manage Collections"></iron-icon>Add Collection
-          </a>
-        </paper-button>
-        <paper-button hidden$="{{!collectionAddMode}}" on-tap="_saveCollection">
-          <a href="/collection" class="href-plain">
-            <iron-icon icon="save" aria-label="Save Collection"></iron-icon>Save Collection
-          </a>
-        </paper-button>
+          <paper-button hidden$="{{_showOnPaths(route.path,'/collection')}}" on-tap="_addCollection">
+            <a href="/collection" class="href-plain">
+              <iron-icon icon="add" aria-label="Manage Collections"></iron-icon>Add Collection
+            </a>
+          </paper-button>
+          <paper-button hidden$="{{!collectionAddMode}}" on-tap="_saveCollection">
+            <a href="/collection" class="href-plain">
+              <iron-icon icon="save" aria-label="Save Collection"></iron-icon>Save Collection
+            </a>
+          </paper-button>
 
-        <paper-button hidden$="{{_hideOnPaths(route.path,'/resource/*_/collection*')}}">
-          <a href="/resource/_/edit" class="href-plain">
-            <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource
-          </a>
-        </paper-button>
+          <paper-button hidden$="{{_hideOnPaths(route.path,'/resource/*_/collection*')}}">
+            <a href="/resource/_/edit" class="href-plain">
+              <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource
+            </a>
+          </paper-button>
 
-        <paper-button hidden$="{{_hideResourceEdit(route.path)}}" on-tap="_editResource">
-          <a class="href-plain">
-            <iron-icon icon="mode-edit" aria-label="Add Resource"></iron-icon>Edit Resource
-          </a>
-        </paper-button>
+          <paper-button hidden$="{{_hideResourceEdit(route.path)}}" on-tap="_editResource">
+            <a class="href-plain">
+              <iron-icon icon="mode-edit" aria-label="Add Resource"></iron-icon>Edit Resource
+            </a>
+          </paper-button>
 
-        <paper-button hidden$="{{_hideResourceSave(route.path)}}" on-tap="_saveResource">
-          <a class="href-plain">
-            <iron-icon icon="save" aria-label="Add Resource"></iron-icon>Save Resource
-          </a>
-        </paper-button>
+          <paper-button hidden$="{{_hideResourceSave(route.path)}}" on-tap="_saveResource">
+            <a class="href-plain">
+              <iron-icon icon="save" aria-label="Add Resource"></iron-icon>Save Resource
+            </a>
+          </paper-button>
 
+        </div>
+
+      </footer>
+    </template>
+
+
+
+    <paper-toast id="cookiePolicy" duration="0" class="flex" style="margin:0">
+      <div>Stats4SD uses cookies to collect information about how you use the site. We use this data to find ways to help improve
+        the site and user experience. We DO NOT share any personal or private information with any 3rd parties. You can click
+        here to find out more information about how to
+        <a href="http://www.aboutcookies.org/" style="color:var(--paper-blue-50)" target="_blank">manage cookies</a>
       </div>
-
-    </footer>
+      <paper-button on-tap="_hideCookiePolicy" style="margin:0;padding:5px;color:yellow">Got it!</paper-button>
+    </paper-toast>
 
   </template>
 
@@ -288,10 +311,10 @@
             type: Boolean,
             value: false
           },
-          resourcesjson:{
-            type:Object,
-            notify:true,
-            value:{test:123}
+          resourcesjson: {
+            type: Object,
+            notify: true,
+            value: { test: 123 }
           }
         }
       }
@@ -337,6 +360,7 @@
       }
 
       _pageChanged(page, oldPage) {
+        this.lastPage = oldPage
         window.scrollTo(0, 0);
         if (page != null) {
           // home route is eagerly loaded
@@ -368,7 +392,14 @@
         this.$.categoryData.search(e.detail)
       }
       goBack() {
-        window.history.back()
+        // go back in nav stack whilst browsing, if navigated direct and now history just go home
+        if (this.lastPage) {
+          window.history.back()
+        }
+        else {
+          this.set('route.path', '/')
+        }
+
       }
       goHome() {
         this.set('route.path', '/')
@@ -407,11 +438,11 @@
       _editCollection() { this.$.collectionPage._editCollection(); }
       _addCollection() { this.$.collectionPage._addCollection(); }
       _collectionResourcesAdd() {
-        console.log('adding resources to collection',this.activeCollection);
+        console.log('adding resources to collection', this.activeCollection);
         this.collectionAddMode = true
         this.set('route.path', '/search')
       }
-      _saveCollection(){this.$.collectionPage.saveCollection()}
+      _saveCollection() { this.$.collectionPage.saveCollection() }
 
       _hideResourceEdit(path) {
         //show on /resource/* but not on /resource/[slug]/edit
@@ -461,6 +492,8 @@
           });
         }
       }
+      _showCookiePolicy() { this.$.cookiePolicy.open() }
+      _hideCookiePolicy() { this.$.cookiePolicy.close() }
 
       // _notifyNetworkStatus() {
       //   let oldOffline = this.offline;

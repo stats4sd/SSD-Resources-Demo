@@ -9,7 +9,7 @@
     <style include="shared-styles"></style>
     <style>
        :host {
-        padding: 10px
+        /* padding: 10px */
       }
 
       h2 {
@@ -38,41 +38,38 @@
         }
       }
     </style>
+    <div class="padding">
+      <p class="padding">Welcome to the Stats4SD resource bank. You can browse all resources using the top or sidebar menus, or explore some the links
+        below
+      </p>
+      <div class="sub-section-heading">
+        <div style="float:left"> View Resources by Type</div>
+        <div style="float:right; cursor:pointer; font-weight:700">
+          <a href="/search" class="href-plain">
+            <iron-icon icon="search"></iron-icon>
+            <span>Search All Resources</span>
+          </a>
 
-    <p class="padding">Welcome to the Stats4SD resource bank. You can browse all resources using the top or sidebar menus, or explore some the
-      links below
-    </p>
-    <div class="sub-section-heading">
-      <div style="float:left"> View Resources by Type</div>
-      <div style="float:right; cursor:pointer; font-weight:700">
-        <a href="/search" class="href-plain">
-          <iron-icon icon="search"></iron-icon>
-          <span>Search All Resources</span>
+        </div>
+      </div>
+
+      <resource-types></resource-types>
+
+      <div class="sub-section-heading" style="margin-top:2em">
+        Latest Collections
+      </div>
+
+      <div class="flex wrap">
+        <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]">
+          <collection-element collection={{collection}}></collection-element>
+        </template>
+        <a href="/collection" class="href-plain">
+          <paper-button style="height:180px; width:180px; color:var(--paper-green-700)">
+            <iron-icon icon="view-module"></iron-icon>All Collections
+          </paper-button>
         </a>
-
       </div>
     </div>
-
-    <resource-types></resource-types>
-
-    <div class="sub-section-heading" style="margin-top:2em">
-      Latest Collections
-    </div>
-
-    <div class="flex wrap">
-      <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]">
-        <collection-element collection={{collection}}></collection-element>
-      </template>
-      <a href="/collection" class="href-plain">
-        <paper-button style="height:180px; width:180px; color:var(--paper-green-700)">
-          <iron-icon icon="view-module"></iron-icon>All Collections
-        </paper-button>
-      </a>
-
-    </div>
-
-
-
 
     <paper-toast id="toast1" duration="0" opened class="flex">
       <div>This platform is currently in development (release candidate 1). To feedback on specific issues or requests please contact:
@@ -81,6 +78,8 @@
       <paper-button on-tap="_toastClose" style="margin:0;padding:5px;color:yellow">Got it!</paper-button>
     </paper-toast>
     <!-- <button class="align-right"><a href="/admin">Admin</a></button> -->
+
+    
 
   </template>
 
@@ -125,6 +124,7 @@
       _toastClose() {
         this.$.toast1.close()
       }
+      
     }
 
     customElements.define(stats4sdHome.is, stats4sdHome);
