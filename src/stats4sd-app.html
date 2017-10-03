@@ -108,6 +108,13 @@
         font-size: x-small;
         padding: 5px;
       }
+      .toastMessage{
+        margin:0; 
+        width:100%; 
+        background-color:var(--paper-green-200); 
+        color:black;
+        font-size: x-large
+      }
 
       [hidden] {
         display: none !important;
@@ -124,7 +131,8 @@
 
       iron-pages {
         max-width: 1440px;
-        min-height: calc(100vh - 66px);
+        min-height: calc(100vh - 86px);
+        padding-bottom: 20px;
         margin: 0 auto;
         height: 100%;
         @apply(--layout-flex);
@@ -275,7 +283,7 @@
       </footer>
     </template>
 
-
+    <paper-toast id="toastMessage" text="{{toastMessage}}" duration="2500" class="toastMessage"></paper-toast>
 
     <paper-toast id="cookiePolicy" duration="0" class="flex" style="margin:0">
       <div>Stats4SD uses cookies to collect information about how you use the site. We use this data to find ways to help improve
@@ -285,6 +293,8 @@
       </div>
       <paper-button on-tap="_hideCookiePolicy" style="margin:0;padding:5px;color:yellow">Got it!</paper-button>
     </paper-toast>
+
+    
 
   </template>
 
@@ -411,8 +421,16 @@
         this.set('route.path', e.detail.url)
       }
       _resourceSaved(e) {
+        // display toast and go back page after resource edit
         console.log('resource saved', e)
-        this.set('route.path', '/resource/' + e.detail.resource.slug)
+        this._showMessage('Resource Saved :-)')
+        // this.set('route.path', '/resource/' + e.detail.resource.slug)
+        window.history.back();
+      }
+      _showMessage(message){
+        console.log('showing message',message)
+        this.toastMessage=message;
+        this.$.toastMessage.open()
       }
 
       _hideOnPaths(activePath, pathsString) {
@@ -554,20 +572,6 @@
         }
       }
 
-
-      // Elements in the app can notify a change to be a11y announced.
-      _onAnnounce(e) {
-        this._announce(e.detail);
-      }
-
-      // A11y announce the given message.
-      _announce(message) {
-        this._a11yLabel = '';
-        this._announceDebouncer = Polymer.Debouncer.debounce(this._announceDebouncer,
-          Polymer.Async.timeOut.after(100), () => {
-            this._a11yLabel = message;
-          });
-      }
 
       // This is for performance logging only.
       _domChange(e) {

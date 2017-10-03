@@ -90,7 +90,7 @@
       </div>
     </div>
     <div style="background-color: #DBDBDB">
-      <dom-repeat id="resourcesList" items="[[searchResults]]" as="res" initial-count="10" rendered-item-count="{{resourcesRendered}}">
+      <dom-repeat id="resourcesList" items="[[searchResults]]" as="res" initial-count="10" rendered-item-count="{{resourcesRendered}}" filter="_hideDraftDeleted">
         <template>
           <resource-search-result resource="[[res]]" style="padding:5px" collection-add-mode="[[collectionAddMode]]" active-collection="{{activeCollection}}"
             live-collection="{{liveCollection}}"></resource-search-result>
@@ -121,9 +121,7 @@
 
         }
       }
-      test() {
-        console.log('search results', this.searchResults)
-      }
+
       _sendSearch(e) {
         // dispatch to stats4sd-app element to search via category data component (if more than 2 characters typed)
         let searchText = e.target.value
@@ -146,6 +144,13 @@
         else {
           this.searchResults = []
         }
+      }
+      _hideDraftDeleted(res) {
+        // don't show resources marked as deleted or draft
+        if (res.deleted || res.draft) {
+          return false
+        }
+        else { return true }
       }
     }
 
