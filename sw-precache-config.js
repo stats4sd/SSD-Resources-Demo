@@ -5,6 +5,7 @@ module.exports = {
     '/bower_components/webcomponentsjs/webcomponents-loader.js',
     '/images/*'
   ],
+  maximumFileSizeToCacheInBytes: 20971520,
   runtimeCaching: [
     {
       urlPattern: /\/bower_components\/webcomponentsjs\/.*.js/,
@@ -32,6 +33,16 @@ module.exports = {
         cache: {
           maxEntries: 100,
           name: 'data-cache'
+        }
+      }
+    },
+    {
+      urlPattern: /^https:\/\/firebasestorage\.googleapis\.com/,
+      handler: 'cacheFirst',
+      options: {
+        cache: {
+          maxEntries: 100,
+          name: 'downloads-cache'
         }
       }
     }
