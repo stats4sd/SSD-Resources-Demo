@@ -1,4 +1,7 @@
-# stats4sd
+# Stats4sd Resources Sites
+For specific information about the site or development please contact c.clarke@stats4sd.org.
+general installation information can be found below. If you wish to make a clone then please ensure the site is linked to a new firebase app.
+
 
 
 ### Setup

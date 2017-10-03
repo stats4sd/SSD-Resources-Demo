@@ -77,7 +77,7 @@
     </header>
 
     <ul class="flex wrap" hidden$="[[!failure]]">
-      <dom-repeat id="resourcesList" items="[[filteredResources]]" as="resource" initial-count="10" filter="resourceFilter" rendered-item-count="{{resourcesRendered}}"
+      <dom-repeat id="resourcesList" items="[[filteredResources]]" as="resource" initial-count="10" filter="_hideDraftDeleted" rendered-item-count="{{resourcesRendered}}"
         sort="resourceSort">
         <template>
           <resource-search-result resource='[[resource]]'></resource-search-result>
@@ -132,7 +132,7 @@
         super.disconnectedCallback();
         this.isAttached = false;
       }
-      resourceFilter(res) {
+      _hideDraftDeleted(res) {
         // don't show resources marked as deleted or draft
         if (res.deleted || res.draft) {
           return false

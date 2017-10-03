@@ -37,11 +37,15 @@
       <template id="resourcesInCollection" is="dom-repeat" as="res" items="{{_getCollectionResources(activeCollection.resources,resourcesJson)}}">
         <resource-search-result resource='[[res]]'></resource-search-result>
       </template>
-      <a class="href-plain" on-tap="_collectionResourcesAdd">
-        <paper-button style="color:var(--paper-green-700)">
-          <iron-icon icon="add"></iron-icon>Add Resources
-        </paper-button>
-      </a>
+      <!-- admin only add resources -->
+      <template is="dom-if" if="{{user.email}}">
+        <a class="href-plain" on-tap="_collectionResourcesAdd">
+          <paper-button style="color:var(--paper-green-700)">
+            <iron-icon icon="add"></iron-icon>Add Resources
+          </paper-button>
+        </a>
+      </template>
+      
 
 
 
@@ -142,7 +146,6 @@
               temp.push(resourcesJson[key])
             }
           }
-          console.log('temp',temp)
         }
         return temp
       }
