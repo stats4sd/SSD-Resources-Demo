@@ -16,7 +16,7 @@ module.exports = {
       }
     },
     {
-      urlPattern: /\/data\/images\/.*/,
+      urlPattern: /\/images\/.*/,
       handler: 'cacheFirst',
       options: {
         cache: {
