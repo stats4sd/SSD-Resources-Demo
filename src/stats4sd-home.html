@@ -65,7 +65,7 @@
       </div>
 
       <div class="flex wrap">
-        <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]">
+        <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]" filter="_isPublic">
           <collection-element collection={{collection}}></collection-element>
         </template>
       </div>
@@ -124,6 +124,9 @@
       }
       _toastClose() {
         this.$.homeMessage.close()
+      }
+      _isPublic(c){
+        return(!(c.hasOwnProperty('draft') && c.draft===true))
       }
       
     }
