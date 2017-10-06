@@ -37,6 +37,7 @@ Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli
 Build process currently has issue when minifying firebase components [see issue #132](https://github.com/stats4sd/Stats4SD-Resources-Site/issues/132)
 Current workaround includes additional imports in polymer.json to maintain automatic process, however this should be reviewed at a later date to help minimise file sizes
 
+Note to self - ensure version number on stats4sd-home.html is updated accordingly to help identification
 
 Build presets provide an easy way to define common build configurations in your `polymer.json` file. There are 2 build presets we put in `polymer.json` file in stats4sd:
 
