@@ -14,7 +14,7 @@
     <!-- app-route provides the name of the category. -->
     <app-route route="{{route}}" pattern="/:collectionSlug" data="{{routeData}}"></app-route>
     <!-- live db binding for new resource -->
-    <firebase-document id="liveCollectionDocument" data="{{liveCollection}}" app-name=stats4sd-resources></firebase-document>
+    <firebase-document id="liveCollectionDocument" data="{{liveCollection}}" app-name="stats4sd-resources"></firebase-document>
 
     <!-- main page view for / or blank endpoint -->
     <div hidden$="[[_showIndividual(route.path,'false')]]">
