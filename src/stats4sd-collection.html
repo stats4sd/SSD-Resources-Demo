@@ -20,10 +20,21 @@
     <div hidden$="[[_showIndividual(route.path,'false')]]">
       <h1>All Collections</h1>
       <div class="flex wrap">
-        <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]">
+        <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPublic">
           <collection-element collection={{collection}}></collection-element>
         </template>
       </div>
+
+      <template is="dom-if" if="{{user.email}}">
+          <h1>Non-public Collections</h1>
+          <div class="flex wrap">
+            <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPrivate">
+              <collection-element collection={{collection}}></collection-element>
+            </template>
+          </div>
+      </template>
+      
+
     </div>
 
     <!-- Template for individual collection set -->
@@ -58,6 +69,17 @@
       <paper-dialog-scrollable>
         <paper-input always-float-label label="Collection Name" value="{{liveCollection.label}}"></paper-input>
         <paper-textarea always-float-label label="Description" value="{{liveCollection.description}}"></paper-textarea>
+        <div class="flex">
+          <paper-toggle-button checked="{{!liveCollection.draft}}"></paper-toggle-button>
+          <div hidden$="[[liveCollection.draft]]">
+            <span>Public</span>
+            <iron-icon icon="visibility"></iron-icon>
+          </div>
+          <div hidden$="[[!liveCollection.draft]]">
+            <span>Draft</span>
+            <iron-icon icon="visibility-off"></iron-icon>
+          </div>
+        </div>
       </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
@@ -105,6 +127,13 @@
       test(){
         console.log('res json',this.resourcesJson)
       }
+      _isPrivate(c){
+        return(c.hasOwnProperty('draft') && c.draft===true)
+      }
+      _isPublic(c){
+        return(!(c.hasOwnProperty('draft') && c.draft===true))
+      }
+
       _editCollection() {
         console.log('live collection', this.liveCollection)
         delete this.activeCollection.$key
