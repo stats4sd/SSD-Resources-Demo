@@ -35,7 +35,8 @@ Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli
 
 **_Note_** 
 Build process currently has issue when minifying firebase components [see issue #132](https://github.com/stats4sd/Stats4SD-Resources-Site/issues/132)
-Current workaround includes additional imports in polymer.json to maintain automatic process, however this should be reviewed at a later date to help minimise file sizes
+Current workaround includes additional imports in polymer.json to maintain automatic process, however this should be reviewed at a later date to help minimise file sizes.
+Build should be tested via $firebase serve command and if auth fails firebase-auth.js may still need to be copied from bower_components/firebase
 
 Note to self - ensure version number on stats4sd-home.html is updated accordingly to help identification
 
