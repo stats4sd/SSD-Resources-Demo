@@ -98,9 +98,7 @@
         }
       }
 
-      paper-chip.custom-background {
-        --paper-chip-background-color: #64b5f6;
-      }
+
     </style>
 
     <!--
@@ -134,11 +132,6 @@
                 <resource-file-download file="[[file]]"></resource-file-download>
               </template>
             </div>
-            <div class="keywords">
-              <!-- For each keyword, display a paper-chip --> 
-                <template is='dom-repeat' items='[[_tagsToArray(resource.tags,"Keywords")]]' as='keyword'>
-                  <paper-chip class='custom-background' label="[[keyword.label]]"></paper-chip>
-                </template>
           </div>
           <!-- Links and Videos -->
           <div class='bold' hidden$="[[!resource.externalLinks]]">External Links: </div>
@@ -153,6 +146,13 @@
               </google-youtube>
             </template>
           </template>
+          <div class="keywords" style="margin-top: 2em; min-width:300px; max-width: 700px">
+            <!-- For each keyword, display a paper-chip -->
+            <div class='bold' style="margin-bottom:1em;">Keywords</div>
+            <template is='dom-repeat' items='[[_tagsToArray(resource.tags,"Keywords")]]' as='keyword'>
+              <paper-chip class='custom-background' label="[[keyword.label]]"></paper-chip>
+            </template>
+          </div>
         </template>
       </div>
     </template>
