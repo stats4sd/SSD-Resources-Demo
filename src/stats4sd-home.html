@@ -38,12 +38,22 @@
           width: 100vw;
         }
       }
+
+
     </style>
     <div class="padding">
-      <p class="padding">Welcome to the Stats4SD resource bank. You can browse all resources using the top or sidebar menus, or explore some the links
-        below
+      <p class="padding">Welcome to the Stats4SD resource bank, an incomplete (but growing) collection of resources for statistical, data and research support. Below you will find different ways of browsing the contents.
       </p>
-
+      <div class="sub-section-heading" style="margin-top:3em">
+        <div style='float:left'>View Resources by Keyword</div>
+      </div>
+      <div class="flex-wrap">
+        <div class="padding">
+          <template is="dom-repeat" items='[[keywords]]' as="keyword">
+            <paper-chip class="custom-background" label="[[keyword.label]]"></paper-chip>
+          </template>
+        </div>
+      </div>
       <div class="sub-section-heading" style="margin-top:2em">
         <div style="float:left">Latest Collections</div>
         <div style="float:right; cursor:pointer; font-weight:700">
@@ -131,7 +141,7 @@
       _isPublic(c){
         return(!(c.hasOwnProperty('draft') && c.draft===true))
       }
-      
+
     }
 
     customElements.define(stats4sdHome.is, stats4sdHome);
