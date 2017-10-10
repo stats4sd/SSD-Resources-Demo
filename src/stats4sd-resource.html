@@ -1,6 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/paper-chip/paper-chip.html">
 <link rel="import" href="stats4sd-category-data.html">
 <link rel="import" href="./ssd-elements/resource-file-download.html">
 <link rel="import" href="./ssd-elements/resource-editor.html">
@@ -96,6 +97,10 @@
           max-width: 600px;
         }
       }
+
+      paper-chip.custom-background {
+        --paper-chip-background-color: #64b5f6;
+      }
     </style>
 
     <!--
@@ -129,6 +134,11 @@
                 <resource-file-download file="[[file]]"></resource-file-download>
               </template>
             </div>
+            <div class="keywords">
+              <!-- For each keyword, display a paper-chip --> 
+                <template is='dom-repeat' items='[[_tagsToArray(resource.tags,"Keywords")]]' as='keyword'>
+                  <paper-chip class='custom-background' label="[[keyword.label]]"></paper-chip>
+                </template>
           </div>
           <!-- Links and Videos -->
           <div class='bold' hidden$="[[!resource.externalLinks]]">External Links: </div>
@@ -401,6 +411,20 @@
         for (var i = 0; i < 4; i++)
           text += possible.charAt(Math.floor(Math.random() * possible.length));
         return text;
+      }
+
+      _tagsToArray(json, subProperty) {
+      //lookup full tag
+      if (!json) { return }
+      if (!json.hasOwnProperty(subProperty)) { return }
+      let tags = json[subProperty]
+      var tagsArray = []
+      for (var key in tags) {
+        if (tags.hasOwnProperty(key)) {
+          tagsArray.push(tags[key])
+        }
+      }
+      return tagsArray
       }
 
 

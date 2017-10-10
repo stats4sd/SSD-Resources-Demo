@@ -29,7 +29,8 @@
     "paper-toast": "PolymerElements/paper-toast#^2.0.0",
     "paper-toggle-button": "PolymerElements/paper-toggle-button#^2.0.0",
     "google-youtube": "GoogleWebComponents/google-youtube#^2.0.0",
-    "wysiwyg-e": "miztroh/wysiwyg-e#^2.0.5"
+    "wysiwyg-e": "miztroh/wysiwyg-e#^2.0.5",
+    "paper-chip": "ThomasCybulski/paper-chip#^2.0.17"
   },
   "devDependencies": {
     "web-component-tester": "^6.0.0"
