@@ -39,6 +39,23 @@
         }
       }
 
+      @media (max-width: 763px) {
+        .collection {
+          height: 384px;
+        }
+        .keywords {
+          height: 74px;
+        }
+      }
+
+      @media (min-width: 764px) {
+        .collection {
+          height: 192px;
+        }
+        .keywords {
+          height: 37px;
+        }
+      }
 
     </style>
     <div class="padding">
@@ -50,7 +67,7 @@
       <div class="sub-section-heading" style="margin-top:3em">
         <div style='float:left'>View Resources by Keyword</div>
       </div>
-      <div class="flex-wrap">
+      <div class="flex-wrap keywords">
         <div class="padding">
           <template is="dom-repeat" items='[[keywords]]' as="keyword">
             <paper-chip class="custom-background" label="[[keyword.label]]"></paper-chip>
@@ -67,7 +84,7 @@
         </div>
       </div>
 
-      <div class="flex wrap">
+      <div class="flex wrap collection">
         <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]" filter="_isPublic">
           <collection-element collection={{collection}}></collection-element>
         </template>
