@@ -67,6 +67,8 @@
       <div class="sub-section-heading" style="margin-top:3em">
         <div style='float:left'>View Resources by Keyword</div>
       </div>
+
+      <!-- Render a list of paper-chip elements for all the keywords -->
       <div class="flex-wrap keywords">
         <div class="padding">
           <template is="dom-repeat" items='[[keywords]]' as="keyword">
@@ -74,6 +76,8 @@
           </template>
         </div>
       </div>
+
+      <!-- Show 'latest' collections -->
       <div class="sub-section-heading" style="margin-top:2em">
         <div style="float:left">Latest Collections</div>
         <div style="float:right; cursor:pointer; font-weight:700">
@@ -85,10 +89,15 @@
       </div>
 
       <div class="flex wrap collection">
+        <!-- Repeating template for the collection. Runs through each item in '[[newestCollections]]' and renders a collection-element for each one. -->
         <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]" filter="_isPublic">
+          <!-- Use the custom 'collection-element' (ssd-elements/custom-element.html) to render each collection button -->
           <collection-element collection={{collection}}></collection-element>
         </template>
       </div>
+
+      <!-- Show resource types and buttons to view resources by type. -->
+      <!-- Honestly, I'm not convinced this is needed on the front page. I think it would be better placed to be able to set type as a filter when searching or browsing contents. -->
       <div class="sub-section-heading">
         <div style="float:left"> View Resources by Type</div>
         <div style="float:right; cursor:pointer; font-weight:700">
@@ -98,7 +107,8 @@
           </a>
         </div>
       </div>
-
+      
+      <!-- Use the custom 'resource-types' (ssd-elements/resource-types.html) to render each type as a clickable button -->
       <resource-types></resource-types>
 
 
@@ -121,11 +131,11 @@
     class stats4sdHome extends Polymer.Element {
 
       static get is() { return 'stats4sd-home'; }
-      static get observers() {
-        return [
-          // '_complexChange(page.*)'
-        ]
-      }
+      // static get observers() {
+      //   return [
+      //     // '_complexChange(page.*)'
+      //   ]
+      // }
       static get properties() {
         return {
 
@@ -133,10 +143,12 @@
             type: Array
           },
 
-          visible: {
-            type: Boolean,
-            observer: '_visibleChanged'
-          },
+          // visible: {
+          //   type: Boolean,
+          //   observer: '_visibleChanged'
+          // },
+          
+          // the page property is set when defining the element in the stats4sd-app.html. This is linked to the iron-pages element. Notify = true means that any changes to the page property of this element are propogated up and down.
           page: {
             type: String,
             notify: true
@@ -144,20 +156,25 @@
           newestCollections: Array
         }
       }
-      _complexChange(change) {
-        console.log('complex change', change)
-      }
+      // _complexChange(change) {
+      //   console.log('complex change', change)
+      // }
 
-      _visibleChanged(visible) {
-        if (visible) {
-          this.dispatchEvent(new CustomEvent('change-section', {
-            bubbles: true, composed: true, detail: { title: 'Home' }
-          }));
-        }
-      }
-      _toastClose() {
-        this.$.homeMessage.close()
-      }
+      // _visibleChanged(visible) {
+      //   if (visible) {
+      //     this.dispatchEvent(new CustomEvent('change-section', {
+      //       bubbles: true, composed: true, detail: { title: 'Home' }
+      //     }));
+      //   }
+      // }
+      // _toastClose() {
+      //   this.$.homeMessage.close()
+      // }
+      
+
+
+      //function to check if a collection (or other item) is a draft.
+      //Returns false if 'c' has the property draft, and it equals false. 
       _isPublic(c){
         return(!(c.hasOwnProperty('draft') && c.draft===true))
       }

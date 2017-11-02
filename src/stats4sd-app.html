@@ -28,6 +28,7 @@
   <!-- The "template" is the style and html part of the element. Below that are the properties and functions -->
   <template>
 
+    <!-- These are styles specific to this element. The 'include="shared-styles" means that the code in shared-styles.html is also used to render things in this element.' -->
     <style include="shared-styles">
        :host {
         display: block;
@@ -150,7 +151,12 @@
 
     <stats4sd-analytics key="UA-39334307-16"></stats4sd-analytics>
     <!--
-      app-location and app-route elements provide the state of the URL for the app.
+      app-location and app-route elements provide the state of the URL for the app. 
+      The app-location grabs the url and saves it to {{route}}. 
+      The app-route then looks at the {{route}} and splits it into 2 pieces: the main part, and the "tail". The main part determines what page is displayed, and the tail is given to the page as input.
+
+      The pattern="/:page" means that, for a url https://url/something, the "something" is saved to {{routeData.page}} (which is used to update the {{page}} and display the correct content).
+      Anything after the page is called the 'tail', and saved to {{subroute}}.  So, for https://url/something/else, the "else" is saved to {{subroute}}. This is then passed to the various page elements within the iron-pages (e.g. stats4sd-home, stats4sd-list, etc) as that page's new {{route}}.
     -->
     <app-location route="{{route}}"></app-location>
     <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>

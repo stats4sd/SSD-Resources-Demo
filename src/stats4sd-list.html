@@ -57,6 +57,7 @@
 
     <!--
       app-route provides the name of the category.
+      NOTE: {{route}} is provided by the {{subroute}} from the home page, so is equal to everything AFTER the "https://resources.stats4sd.org/list/" part of the url. 
     -->
     <app-route route="[[route]]" pattern="/:category" data="{{routeData}}"></app-route>
 
@@ -64,7 +65,7 @@
       stats4sd-category-data provides the category data for a given category name.
     -->
     <stats4sd-category-data id="categoryData" slug="[[routeData.category]]" label="{{label}}" filtered-resources="{{filteredResources}}"
-      resources="[[persistedResources]]"></stats4sd-category-data>
+      resources="[[persistedResources]]" subset="{{subset}}"></stats4sd-category-data>
 
     <header>
       <!-- add s onto end of label when loaded, could put into calcuation to check if already s exists of simply try to avoid when creating types -->
