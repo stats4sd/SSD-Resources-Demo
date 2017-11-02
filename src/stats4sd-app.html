@@ -32,6 +32,9 @@
     <!-- These are styles specific to this element. The 'include="shared-styles" means that the code in shared-styles.html is also used to render things in this element.' -->
     <style include="shared-styles">
        :host {
+        max-width: 1080px;
+        margin-left: auto;
+        margin-right: auto;
         display: block;
         position: relative;
         background-color: gray;
@@ -50,20 +53,27 @@
       }
 
       #header {
-       /* position: fixed;
+        /*position: fixed;
         top: 0;
         left: 0;*/
-        width: 100%;
+        position: relative;
+        left: calc( 0px - 50vw + 50% );
+        width: 100vw;
         z-index: 1;
         color: rgba(102,102,102,0.81);
         background-color: #ffffff;
-        --app-header-shadow: {
+ /*       --app-header-shadow: {
           box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
           height: 10px;
           bottom: -10px;
-        };
+        };*/
       }
 
+      app-toolbar {
+        max-width: 1080px;
+        margin-left: auto;
+        margin-right: auto;
+      }
 
       app-toolbar.small {
         height: 64px;
@@ -147,10 +157,8 @@
 
       iron-pages {
         max-width: 1440px;
-        min-height: calc(100vh - 86px);
         padding-bottom: 20px;
         margin: 0 auto;
-        height: 100%;
         @apply(--layout-flex);
         @apply(--layout-vertical);
       }
@@ -215,6 +223,10 @@
         }
       }
 
+      app-drawer-layout {
+        height: 100vh;
+      }
+
     </style>
 
     <stats4sd-analytics key="UA-39334307-16"></stats4sd-analytics>
@@ -274,155 +286,157 @@
         </template>
       </app-drawer>
 
-    <!-- The header bar uses the "app-layout" elements. (https://www.webcomponents.org/element/PolymerElements/app-layout)-->
-    <app-header id="header">
-      <app-toolbar class$="[[_headerStyle(smallScreen)]]">
+      <!-- The header bar uses the "app-layout" elements. (https://www.webcomponents.org/element/PolymerElements/app-layout)-->
+      <app-header id="header">
+        <app-toolbar class$="[[_headerStyle(smallScreen)]]">
 
-        <!-- The 'back' button on the top left extends the default "back" browser button functionality by sending the user to the home page if there is no browser history to trawl through. -->
-        <div class="left-bar-item">
-          <paper-icon-button icon="menu" drawer-toggle alt="Toogle navigation menu"></paper-icon-button>
-          <div class='logo-box'>
-            <img class$="[[_headerStyle(smallScreen)]]" src="../images/Stats4SD_red.png"/>
+          <!-- The 'back' button on the top left extends the default "back" browser button functionality by sending the user to the home page if there is no browser history to trawl through. -->
+          <div class="left-bar-item">
+            <paper-icon-button icon="menu" drawer-toggle alt="Toogle navigation menu"></paper-icon-button>
+            <div class='logo-box'>
+              <img class$="[[_headerStyle(smallScreen)]]" src="../images/Stats4SD_red.png"/>
+            </div>
+          </div>
+          <template is="dom-if" if="{{!smallScreen}}">
+            <ul id="top-menu" class="nav">
+                <li class="menu-item"><a href="/">HOME</a></li>
+                <li class="menu-item"><a href="/about">ABOUT</a></li>
+                <li class="menu-item"><a href="/list">BROWSE</a></li>
+                <li class="menu-item"><a href="/search">SEARCH</a></li>
+                <li class="menu-item"><a href="/contact">CONTACT</a></li>
+              <template is="dom-if" if="{{!signedIn}}">
+                <li class="menu-item"><a href="#" on-tap="_signInOpen">SIGN IN</a></li>
+                <paper-icon-button icon="lock"></paper-icon-button>
+              </template>
+              <template is="dom-if" if="{{signedIn}}">
+                <li class="menu-item" on-tap="_signOut" id="signOut_li">
+                  <a href="#" >SIGN OUT</a>
+                  <paper-icon-button icon="lock"></paper-icon-button>
+                </li>
+              </template>
+            </ul>
+            <template is="dom-if" if="{{signedIn}}">
+              <div id="signedInHeader" hidden$="[[!signedIn]]">Logged in as: {{user.email}}</div>
+            </template>
+          </template> <!-- end header section that appears if it's not a small screen --> 
+        </app-toolbar>
+      </app-header>
+
+      <!--
+        The main page elements are contained wihtin the iron-pages element.
+        iron-pages will display one of the child elements. The displayed element is determined by the "selected" property - in this case, this is bound to [[page]]. (So when [[page]] changes, iron-pages shows a new page element).
+        The attr-for-selected property tells you which property of the child elements to match to [[page]] - in this case, you need to match the name of the child element.
+       -->
+      <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
+        <stats4sd-home id="homePage" name="home" user="{{user}}" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]" keywords="[[allKeywords]]"></stats4sd-home>
+        <stats4sd-list id="listPage" name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
+        <stats4sd-admin id="adminPage" name="admin" route="[[subroute]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"
+          page="{{page}}"></stats4sd-admin>
+        <stats4sd-resource id="resourcePage" name="resource" route="{{subroute}}" persisted-resources="[[persistedResources]]" resource=[[resource]]
+          offline="[[offline]]" persisted-tags="[[persistedTags]]" user="{{user}}"></stats4sd-resource>
+        <stats4sd-collection id="collectionPage" name="collection" user="{{user}}" route="{{subroute}}" offline="[[offline]]" all-collections="{{allCollections}}"
+          active-collection="{{activeCollection}}" live-collection="{{liveCollection}}" resources-json="[[resourcesJson]]"></stats4sd-collection>
+        <stats4sd-search id="searchPage" name="search" route="{{route}}" page="{{page}}" search-results="[[searchResults]]" collection-add-mode="[[collectionAddMode]]"
+          active-collection="{{activeCollection}}" live-collection="{{liveCollection}}"></stats4sd-search>
+        <stats4sd-404 name="404"></stats4sd-404>
+      </iron-pages>
+
+      <!--
+        The category-data element does lots of behind-the-scenes work.
+          - It provides metadata (e.g. resource categories)
+          - It converts the data from [[persisted###]] (local storagae) back into JSON objects so we can treat it in the same way as the firebase data;
+          - It provides search results
+          ... etc?
+       -->
+      <stats4sd-category-data id="categoryData" tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}" all-keywords="{{allKeywords}}"
+        newest-collections="{{newestCollections}}" search-results="{{searchResults}}" resources-json="{{resourcesJson}}"></stats4sd-category-data>
+
+      <!-- Login box (starts hidden. This is opened when the user clicks on the sign-in button in the header. -->
+      <paper-dialog id="login" modal>
+        <paper-dialog-scrollable>
+          <!-- We use a slightly customised version of the firebase-login element.
+          This provides us with the {{user}} and {{signedIn}} properties, so we can hide or show things that require authentication -->
+          <login-element id="stats4sdLogin" app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+          </login-element>
+        </paper-dialog-scrollable>
+      </paper-dialog>
+
+      <!--
+        The footer contains links to manage collections and resources. It is only shown to users who are signed-in, which is handled via a dom-if template.
+       -->
+      <template is="dom-if" if="{{signedIn}}">
+        <footer class="footer">
+          <!-- buttons show/hide on various paths.  This is handled via the _hideOnPaths() function -->
+          <div id="rightButtons" style="float:right">
+
+            <paper-button hidden$="{{_hideOnPaths(route.path,'/collection')}}">
+              <a href="/collection" class="href-plain">
+                <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
+              </a>
+            </paper-button>
+
+            <!-- <paper-button hidden$="{{_showOnPaths(route.path,'/collection/*')}}" on-tap="_editCollection">
+            <a class="href-plain">
+              <iron-icon icon="mode-edit" aria-label="Manage Collections"></iron-icon>Edit Collection
+            </a>
+          </paper-button> -->
+
+            <paper-button hidden$="{{_showOnPaths(route.path,'/collection')}}" on-tap="_addCollection">
+              <a href="/collection" class="href-plain">
+                <iron-icon icon="add" aria-label="Manage Collections"></iron-icon>Add Collection
+              </a>
+            </paper-button>
+            <paper-button hidden$="{{!collectionAddMode}}" on-tap="_saveCollection">
+              <a href="/collection" class="href-plain">
+                <iron-icon icon="save" aria-label="Save Collection"></iron-icon>Save Collection
+              </a>
+            </paper-button>
+
+            <paper-button hidden$="{{_hideOnPaths(route.path,'/resource/*_/collection*')}}">
+              <a href="/resource/_/edit" class="href-plain">
+                <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource
+              </a>
+            </paper-button>
+
+            <paper-button hidden$="{{_hideResourceEdit(route.path)}}" on-tap="_editResource">
+              <a class="href-plain">
+                <iron-icon icon="mode-edit" aria-label="Add Resource"></iron-icon>Edit Resource
+              </a>
+            </paper-button>
+
+            <paper-button hidden$="{{_hideResourceSave(route.path)}}" on-tap="_saveResource">
+              <a class="href-plain">
+                <iron-icon icon="save" aria-label="Add Resource"></iron-icon>Save Resource
+              </a>
+            </paper-button>
+          </div>
+        </footer>
+      </template>
+
+      <paper-toast id="toastMessage" text="{{toastMessage}}" duration="2500" class="toastMessage"></paper-toast>
+      <div class="hide-not-on-home">
+        <div class="footer">
+          <div class="bottom-bar" hidden$="[[signedIn]]" style="display:flex; justify-content:space-between; align-items:center; min-height:2em">
+            <div style="cursor:pointer; padding:5px; white-space:nowrap" on-tap="_showCookiePolicy">Cookie Policy</div>
+            <div style="flex-basis:100%; text-align:center; padding:5px">Site created by Stats4SD with code openly available on
+              <a href="https://github.com/stats4sd/Stats4SD-Resources-Site" style="color:var(--paper-purple-200);" target="_blank">Github</a>
+              <iron-icon icon="stats4sd-github" style="padding-left:5px"></iron-icon>
+            </div>
+            <div style="padding-right:5px;white-space:nowrap; padding:5px">version 1.1</div>
           </div>
         </div>
-        <template is="dom-if" if="{{!smallScreen}}">
-          <ul id="top-menu" class="nav">
-              <li class="menu-item"><a href="/">HOME</a></li>
-              <li class="menu-item"><a href="/about">ABOUT</a></li>
-              <li class="menu-item"><a href="/list">BROWSE</a></li>
-              <li class="menu-item"><a href="/search">SEARCH</a></li>
-              <li class="menu-item"><a href="/contact">CONTACT</a></li>
-            <template is="dom-if" if="{{!signedIn}}">
-              <li class="menu-item"><a href="#" on-tap="_signInOpen">SIGN IN</a></li>
-              <paper-icon-button icon="lock"></paper-icon-button>
-            </template>
-            <template is="dom-if" if="{{signedIn}}">
-              <li class="menu-item" on-tap="_signOut" id="signOut_li">
-                <a href="#" >SIGN OUT</a>
-                <paper-icon-button icon="lock"></paper-icon-button>
-              </li>
-            </template>
-          </ul>
-          <template is="dom-if" if="{{signedIn}}">
-            <div id="signedInHeader" hidden$="[[!signedIn]]">Logged in as: {{user.email}}</div>
-          </template>
-        </template> <!-- end header section that appears if it's not a small screen --> 
-      </app-toolbar>
-    </app-header>
-
-    <!--
-      The main page elements are contained wihtin the iron-pages element.
-      iron-pages will display one of the child elements. The displayed element is determined by the "selected" property - in this case, this is bound to [[page]]. (So when [[page]] changes, iron-pages shows a new page element).
-      The attr-for-selected property tells you which property of the child elements to match to [[page]] - in this case, you need to match the name of the child element.
-     -->
-    <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
-      <stats4sd-home id="homePage" name="home" user="{{user}}" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]" keywords="[[allKeywords]]"></stats4sd-home>
-      <stats4sd-list id="listPage" name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
-      <stats4sd-admin id="adminPage" name="admin" route="[[subroute]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"
-        page="{{page}}"></stats4sd-admin>
-      <stats4sd-resource id="resourcePage" name="resource" route="{{subroute}}" persisted-resources="[[persistedResources]]" resource=[[resource]]
-        offline="[[offline]]" persisted-tags="[[persistedTags]]" user="{{user}}"></stats4sd-resource>
-      <stats4sd-collection id="collectionPage" name="collection" user="{{user}}" route="{{subroute}}" offline="[[offline]]" all-collections="{{allCollections}}"
-        active-collection="{{activeCollection}}" live-collection="{{liveCollection}}" resources-json="[[resourcesJson]]"></stats4sd-collection>
-      <stats4sd-search id="searchPage" name="search" route="{{route}}" page="{{page}}" search-results="[[searchResults]]" collection-add-mode="[[collectionAddMode]]"
-        active-collection="{{activeCollection}}" live-collection="{{liveCollection}}"></stats4sd-search>
-      <stats4sd-404 name="404"></stats4sd-404>
-    </iron-pages>
-
-    <!--
-      The category-data element does lots of behind-the-scenes work.
-        - It provides metadata (e.g. resource categories)
-        - It converts the data from [[persisted###]] (local storagae) back into JSON objects so we can treat it in the same way as the firebase data;
-        - It provides search results
-        ... etc?
-     -->
-    <stats4sd-category-data id="categoryData" tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}" all-keywords="{{allKeywords}}"
-      newest-collections="{{newestCollections}}" search-results="{{searchResults}}" resources-json="{{resourcesJson}}"></stats4sd-category-data>
-
-    <!-- Login box (starts hidden. This is opened when the user clicks on the sign-in button in the header. -->
-    <paper-dialog id="login" modal>
-      <paper-dialog-scrollable>
-        <!-- We use a slightly customised version of the firebase-login element.
-        This provides us with the {{user}} and {{signedIn}} properties, so we can hide or show things that require authentication -->
-        <login-element id="stats4sdLogin" app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
-        </login-element>
-      </paper-dialog-scrollable>
-    </paper-dialog>
-
-    <!--
-      The footer contains links to manage collections and resources. It is only shown to users who are signed-in, which is handled via a dom-if template.
-     -->
-    <template is="dom-if" if="{{signedIn}}">
-      <footer class="footer">
-        <!-- buttons show/hide on various paths.  This is handled via the _hideOnPaths() function -->
-        <div id="rightButtons" style="float:right">
-
-          <paper-button hidden$="{{_hideOnPaths(route.path,'/collection')}}">
-            <a href="/collection" class="href-plain">
-              <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
-            </a>
-          </paper-button>
-
-          <!-- <paper-button hidden$="{{_showOnPaths(route.path,'/collection/*')}}" on-tap="_editCollection">
-          <a class="href-plain">
-            <iron-icon icon="mode-edit" aria-label="Manage Collections"></iron-icon>Edit Collection
-          </a>
-        </paper-button> -->
-
-          <paper-button hidden$="{{_showOnPaths(route.path,'/collection')}}" on-tap="_addCollection">
-            <a href="/collection" class="href-plain">
-              <iron-icon icon="add" aria-label="Manage Collections"></iron-icon>Add Collection
-            </a>
-          </paper-button>
-          <paper-button hidden$="{{!collectionAddMode}}" on-tap="_saveCollection">
-            <a href="/collection" class="href-plain">
-              <iron-icon icon="save" aria-label="Save Collection"></iron-icon>Save Collection
-            </a>
-          </paper-button>
-
-          <paper-button hidden$="{{_hideOnPaths(route.path,'/resource/*_/collection*')}}">
-            <a href="/resource/_/edit" class="href-plain">
-              <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource
-            </a>
-          </paper-button>
-
-          <paper-button hidden$="{{_hideResourceEdit(route.path)}}" on-tap="_editResource">
-            <a class="href-plain">
-              <iron-icon icon="mode-edit" aria-label="Add Resource"></iron-icon>Edit Resource
-            </a>
-          </paper-button>
-
-          <paper-button hidden$="{{_hideResourceSave(route.path)}}" on-tap="_saveResource">
-            <a class="href-plain">
-              <iron-icon icon="save" aria-label="Add Resource"></iron-icon>Save Resource
-            </a>
-          </paper-button>
-        </div>
-      </footer>
-    </template>
-
-    <paper-toast id="toastMessage" text="{{toastMessage}}" duration="2500" class="toastMessage"></paper-toast>
-    <div class="hide-not-on-home">
-      <div class="bottom-bar" hidden$="[[signedIn]]" style="display:flex; justify-content:space-between; align-items:center; min-height:2em">
-        <div style="cursor:pointer; padding:5px; white-space:nowrap" on-tap="_showCookiePolicy">Cookie Policy</div>
-        <div style="flex-basis:100%; text-align:center; padding:5px">Site created by Stats4SD with code openly available on
-          <a href="https://github.com/stats4sd/Stats4SD-Resources-Site" style="color:var(--paper-purple-200);" target="_blank">Github</a>
-          <iron-icon icon="stats4sd-github" style="padding-left:5px"></iron-icon>
-        </div>
-        <div style="padding-right:5px;white-space:nowrap; padding:5px">version 1.1</div>
       </div>
-    </div>
 
-    <!-- A paper-toast element appears at the bottom of the page to inform the user of important info (e.g. legal cookie stuff). Toast is nicer than alerts or similar as it doesn't get in the way as much (and generally looks nicer).-->
-    <paper-toast id="cookiePolicy" duration="0" class="flex" style="margin:0">
-      <div>Stats4SD uses cookies to collect information about how you use the site. We use this data to find ways to help improve
-        the site and user experience. We DO NOT share any personal or private information with any 3rd parties. You can click
-        here to find out more information about how to
-        <a href="http://www.aboutcookies.org/" style="color:var(--paper-blue-50)" target="_blank">manage cookies</a>
-      </div>
-      <paper-button on-tap="_hideCookiePolicy" style="margin:0;padding:5px;color:yellow">Got it!</paper-button>
-    </paper-toast>
-
+      <!-- A paper-toast element appears at the bottom of the page to inform the user of important info (e.g. legal cookie stuff). Toast is nicer than alerts or similar as it doesn't get in the way as much (and generally looks nicer).-->
+      <paper-toast id="cookiePolicy" duration="0" class="flex" style="margin:0">
+        <div>Stats4SD uses cookies to collect information about how you use the site. We use this data to find ways to help improve
+          the site and user experience. We DO NOT share any personal or private information with any 3rd parties. You can click
+          here to find out more information about how to
+          <a href="http://www.aboutcookies.org/" style="color:var(--paper-blue-50)" target="_blank">manage cookies</a>
+        </div>
+        <paper-button on-tap="_hideCookiePolicy" style="margin:0;padding:5px;color:yellow">Got it!</paper-button>
+      </paper-toast>
+    </app-drawer-layout>
 
   </template>
 
