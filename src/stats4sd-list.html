@@ -57,14 +57,15 @@
 
     <!--
       app-route provides the name of the category.
+      NOTE: {{route}} is provided by the {{subroute}} from the home page, so is equal to everything AFTER the "https://resources.stats4sd.org/list/" part of the url. 
     -->
-    <app-route route="[[route]]" pattern="/:category" data="{{routeData}}"></app-route>
+    <app-route route="[[route]]" pattern="/:type/:category" data="{{routeData}}"></app-route>
 
     <!--
       stats4sd-category-data provides the category data for a given category name.
     -->
-    <stats4sd-category-data id="categoryData" slug="[[routeData.category]]" label="{{label}}" filtered-resources="{{filteredResources}}"
-      resources="[[persistedResources]]"></stats4sd-category-data>
+    <stats4sd-category-data id="categoryData" type="[[routeData.type]]" category="[[routeData.category]]" label="{{label}}" filtered-resources="{{filteredResources}}"
+      resources="[[persistedResources]]" subset="{{subset}}" tags="[[persistedTags]]"></stats4sd-category-data>
 
     <header>
       <!-- add s onto end of label when loaded, could put into calcuation to check if already s exists of simply try to avoid when creating types -->
@@ -97,7 +98,10 @@
 
           route: Object,
 
-          routeData: Object,
+          routeData: {
+            type: Object,
+            observer: '_routeDataChanged'
+          },
 
           visible: {
             type: Boolean,
@@ -120,7 +124,13 @@
       }
 
       static get observers() {
-        return []
+        return [
+        '_routeDataChanged(routeData)'
+        ]
+      }
+
+      _routeDataChanged(routeData){
+        console.log("list - routeData", routeData);
       }
 
       connectedCallback() {
@@ -154,6 +164,7 @@
 
       _getPluralizedQuantity(label, quantity) {
         if (!label) { return '' }
+        if (this.routeData.category != "type") { return label }
         if (!quantity) { return label + 's' }
         if (quantity == 1 || label.slice(-1) == 's') {
           return label

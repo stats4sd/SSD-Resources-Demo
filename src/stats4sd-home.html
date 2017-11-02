@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="./ssd-elements/resource-types.html">
+<link rel="import" href="../bower_components/paper-chip/paper-chip.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="stats4sd-home">
@@ -37,23 +38,48 @@
           width: 100vw;
         }
       }
+
+      @media (max-width: 763px) {
+        .collection {
+          height: 384px;
+        }
+        .keywords {
+          height: 74px;
+        }
+      }
+
+      @media (min-width: 764px) {
+        .collection {
+          height: 192px;
+        }
+        .keywords {
+          height: 37px;
+        }
+      }
+
     </style>
     <div class="padding">
-      <p class="padding">Welcome to the Stats4SD resource bank. You can browse all resources using the top or sidebar menus, or explore some the links
-        below
+      <p class="padding">Welcome to the Stats4SD resource bank, an incomplete (but growing) collection of resources for statistical, data and research support. Below you will find different ways of browsing the contents.
       </p>
-      <div class="sub-section-heading">
-        <div style="float:left"> View Resources by Type</div>
-        <div style="float:right; cursor:pointer; font-weight:700">
-          <a href="/search" class="href-plain">
-            <iron-icon icon="search"></iron-icon>
-            <span>Search All Resources</span>
-          </a>
+      <p class="padding">If you know what you are looking for, you can simply search the entire collection via the search page. Our search is smart - we're not quite at Google's level - but it does some cool things behind the scenes to try and give you the most relevant results.</p>
+      <p class="padding">If you're looking for resources on a particular topic, you can browse by keyword - simply select one or more of the keywords below and you'll see a list of the associated resources. You can also browse by type at the bottom of the page. We have many different types of resource - from written documents to videos to interactive presentations, so we will hopefully have something that interests you.</p>
+      <p class="padding">Finally, some resources come in pre-packaged collections. If you are familiar with our work, or the work of the <a href='http://reading.ac.uk/ssc/'>Statistical Services Centre</a> from Reading University, you may know about some of these collections. Some are sets of resources developed for particular clients or user groups. Others are simply sets of resources that we feel work well together.</p>
+      <div class="sub-section-heading" style="margin-top:3em">
+        <div style='float:left'>View Resources by Keyword</div>
+      </div>
+
+      <!-- Render a list of paper-chip elements for all the keywords -->
+      <div class="flex-wrap keywords">
+        <div class="padding">
+          <template is="dom-repeat" items='[[keywords]]' as="keyword">
+            <a href="{{_getLink(keyword)}}" style="text-decoration: none; color:inherit">
+              <paper-chip class="custom-background" label="[[keyword.label]]"></paper-chip>
+            </a>
+          </template>
         </div>
       </div>
 
-      <resource-types></resource-types>
-
+      <!-- Show 'latest' collections -->
       <div class="sub-section-heading" style="margin-top:2em">
         <div style="float:left">Latest Collections</div>
         <div style="float:right; cursor:pointer; font-weight:700">
@@ -64,11 +90,30 @@
         </div>
       </div>
 
-      <div class="flex wrap">
+      <div class="flex wrap collection">
+        <!-- Repeating template for the collection. Runs through each item in '[[newestCollections]]' and renders a collection-element for each one. -->
         <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]" filter="_isPublic">
+          <!-- Use the custom 'collection-element' (ssd-elements/custom-element.html) to render each collection button -->
           <collection-element collection={{collection}}></collection-element>
         </template>
       </div>
+
+      <!-- Show resource types and buttons to view resources by type. -->
+      <!-- Honestly, I'm not convinced this is needed on the front page. I think it would be better placed to be able to set type as a filter when searching or browsing contents. -->
+      <div class="sub-section-heading">
+        <div style="float:left"> View Resources by Type</div>
+        <div style="float:right; cursor:pointer; font-weight:700">
+          <a href="/search" class="href-plain">
+            <iron-icon icon="search"></iron-icon>
+            <span>Search All Resources</span>
+          </a>
+        </div>
+      </div>
+      
+      <!-- Use the custom 'resource-types' (ssd-elements/resource-types.html) to render each type as a clickable button -->
+      <resource-types></resource-types>
+
+
     </div>
 
     <!-- <paper-toast id="homeMessage" opened duration="0" class="flex">
@@ -88,11 +133,11 @@
     class stats4sdHome extends Polymer.Element {
 
       static get is() { return 'stats4sd-home'; }
-      static get observers() {
-        return [
-          // '_complexChange(page.*)'
-        ]
-      }
+      // static get observers() {
+      //   return [
+      //     // '_complexChange(page.*)'
+      //   ]
+      // }
       static get properties() {
         return {
 
@@ -100,10 +145,12 @@
             type: Array
           },
 
-          visible: {
-            type: Boolean,
-            observer: '_visibleChanged'
-          },
+          // visible: {
+          //   type: Boolean,
+          //   observer: '_visibleChanged'
+          // },
+          
+          // the page property is set when defining the element in the stats4sd-app.html. This is linked to the iron-pages element. Notify = true means that any changes to the page property of this element are propogated up and down.
           page: {
             type: String,
             notify: true
@@ -111,24 +158,32 @@
           newestCollections: Array
         }
       }
-      _complexChange(change) {
-        console.log('complex change', change)
+      // _complexChange(change) {
+      //   console.log('complex change', change)
+      // }
+
+      // _visibleChanged(visible) {
+      //   if (visible) {
+      //     this.dispatchEvent(new CustomEvent('change-section', {
+      //       bubbles: true, composed: true, detail: { title: 'Home' }
+      //     }));
+      //   }
+      // }
+      // _toastClose() {
+      //   this.$.homeMessage.close()
+      // }
+      
+      _getLink(tag) {
+        let link = "/list/keyword/" + tag.slug;
+        return link;
       }
 
-      _visibleChanged(visible) {
-        if (visible) {
-          this.dispatchEvent(new CustomEvent('change-section', {
-            bubbles: true, composed: true, detail: { title: 'Home' }
-          }));
-        }
-      }
-      _toastClose() {
-        this.$.homeMessage.close()
-      }
+      //function to check if a collection (or other item) is a draft.
+      //Returns false if 'c' has the property draft, and it equals false. 
       _isPublic(c){
         return(!(c.hasOwnProperty('draft') && c.draft===true))
       }
-      
+
     }
 
     customElements.define(stats4sdHome.is, stats4sdHome);

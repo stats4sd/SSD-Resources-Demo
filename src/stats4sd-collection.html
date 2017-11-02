@@ -1,4 +1,23 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/wysiwyg-e/wysiwyg-e.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/bold.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/italic.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/underline.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/strike.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/color.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/clear.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/code.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/link.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/image.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/audio.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/video.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/ordered.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/unordered.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/indent.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/outdent.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/justify.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/heading.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/blockquote.html">
 
 <dom-module id="stats4sd-collection">
 
@@ -8,6 +27,15 @@
        :host {
         display: block;
         padding: 10px
+      }
+    </style>
+    <style is="custom-style">
+      paper-button.toggle[active] {
+        background-color: var(--paper-grey-300);
+      }
+
+      paper-button.toggle {
+        background-color: var(--paper-green-300)
       }
     </style>
 
@@ -26,66 +54,93 @@
       </div>
 
       <template is="dom-if" if="{{user.email}}">
-          <h1>Non-public Collections</h1>
-          <div class="flex wrap">
-            <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPrivate">
-              <collection-element collection={{collection}}></collection-element>
-            </template>
-          </div>
+        <h1>Non-public Collections</h1>
+        <div class="flex wrap">
+          <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPrivate">
+            <collection-element collection={{collection}}></collection-element>
+          </template>
+        </div>
       </template>
-      
+
 
     </div>
 
     <!-- Template for individual collection set -->
     <div hidden$="[[_showIndividual(route.path,'true')]]">
-      <h1 style="display: inline-block">{{activeCollection.label}}</h1>
-      <p>{{activeCollection.description}}</p>
-      <template is="dom-if" if="{{user.email}}">
-        <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
-      </template>
-      <h2>Resources</h2>
-      <template id="resourcesInCollection" is="dom-repeat" as="res" items="{{_getCollectionResources(activeCollection.resources,resourcesJson)}}">
-        <resource-search-result resource='[[res]]'></resource-search-result>
-      </template>
-      <!-- admin only add resources -->
-      <template is="dom-if" if="{{user.email}}">
-        <a class="href-plain" on-tap="_collectionResourcesAdd">
-          <paper-button style="color:var(--paper-green-700)">
-            <iron-icon icon="add"></iron-icon>Add Resources
-          </paper-button>
-        </a>
-      </template>
-      
-
-
-
+      <div hidden$="[[editMode]]">
+        <h1 style="display: inline-block">{{activeCollection.label}}</h1>
+        <template is="dom-if" if="{{user.email}}">
+          <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
+        </template>
+        <div id="descriptionContainer"></div>
+        <h2>Resources</h2>
+        <template id="resourcesInCollection" is="dom-repeat" as="res" items="{{_getCollectionResources(activeCollection.resources,resourcesJson)}}">
+          <resource-search-result resource='[[res]]'></resource-search-result>
+        </template>
+        <!-- admin only add resources -->
+        <template is="dom-if" if="{{user.email}}">
+          <a class="href-plain" on-tap="_collectionResourcesAdd">
+            <paper-button style="color:var(--paper-green-700)">
+              <iron-icon icon="add"></iron-icon>Add Resources
+            </paper-button>
+          </a>
+        </template>
+      </div>
     </div>
+
 
     <!-- Template for add/edit collection -->
     <!-- *** add display none for when loading or similar (e.g. when resource updated) -->
-    <paper-dialog id="collectionDialog" modal style="padding:5px; max-width:100vw; width:500px; min-height:500px">
-      <h2>Add New Collection</h2>
-      <paper-dialog-scrollable>
-        <paper-input always-float-label label="Collection Name" value="{{liveCollection.label}}"></paper-input>
-        <paper-textarea always-float-label label="Description" value="{{liveCollection.description}}"></paper-textarea>
-        <div class="flex">
-          <paper-toggle-button checked="{{!liveCollection.draft}}"></paper-toggle-button>
-          <div hidden$="[[liveCollection.draft]]">
-            <span>Public</span>
-            <iron-icon icon="visibility"></iron-icon>
-          </div>
-          <div hidden$="[[!liveCollection.draft]]">
-            <span>Draft</span>
-            <iron-icon icon="visibility-off"></iron-icon>
-          </div>
-        </div>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm autofocus on-tap="saveCollection">Save</paper-button>
+
+    <template is="dom-if" if="{{editMode}}">
+      <paper-input always-float-label label="Collection Name" value="{{liveCollection.label}}" style="padding-bottom:10px"></paper-input>
+      <div>Description</div>
+      <div>
+        <paper-button class="toggle" active="{{!visualEditor}}">Editor</paper-button>
+        <paper-button class="toggle" active="{{visualEditor}}">Code</paper-button>
       </div>
-    </paper-dialog>
+      <paper-textarea id="descriptionCode" placeholder="Input html text here" value="{{editableDescription}}" hidden$="[[visualEditor]]"></paper-textarea>
+      <div hidden$="[[!visualEditor]]">
+        <wysiwyg-e style="width: 100%; height: 50vh;" value="{{editableDescription}}" target="{{wysiwygTarget}}">
+          <paper-icon-button icon="save" on-tap="_saveVisualDescription"></paper-icon-button>
+          <wysiwyg-tool-bold></wysiwyg-tool-bold>
+          <wysiwyg-tool-italic></wysiwyg-tool-italic>
+          <wysiwyg-tool-underline></wysiwyg-tool-underline>
+          <wysiwyg-tool-strike></wysiwyg-tool-strike>
+          <wysiwyg-tool-color></wysiwyg-tool-color>
+          <wysiwyg-tool-clear></wysiwyg-tool-clear>
+          <wysiwyg-tool-code></wysiwyg-tool-code>
+          <wysiwyg-tool-link></wysiwyg-tool-link>
+          <wysiwyg-tool-image></wysiwyg-tool-image>
+          <wysiwyg-tool-audio></wysiwyg-tool-audio>
+          <wysiwyg-tool-video></wysiwyg-tool-video>
+          <wysiwyg-tool-ordered></wysiwyg-tool-ordered>
+          <wysiwyg-tool-unordered></wysiwyg-tool-unordered>
+          <wysiwyg-tool-indent></wysiwyg-tool-indent>
+          <wysiwyg-tool-outdent></wysiwyg-tool-outdent>
+          <wysiwyg-tool-justify right center full></wysiwyg-tool-justify>
+          <wysiwyg-tool-heading h1 h2 h3 h4 h5 h6></wysiwyg-tool-heading>
+          <wysiwyg-tool-blockquote></wysiwyg-tool-blockquote>
+        </wysiwyg-e>
+      </div>
+
+      <div class="flex" style="padding:20px 0">
+        <paper-toggle-button checked="{{!liveCollection.draft}}"></paper-toggle-button>
+        <div hidden$="[[liveCollection.draft]]">
+          <span>Public</span>
+          <iron-icon icon="visibility"></iron-icon>
+        </div>
+        <div hidden$="[[!liveCollection.draft]]">
+          <span>Draft</span>
+          <iron-icon icon="visibility-off"></iron-icon>
+        </div>
+      </div>
+      <div class="buttons">
+        <paper-button on-tap="cancel">Cancel</paper-button>
+        <paper-button on-tap="saveCollection">Save</paper-button>
+      </div>
+    </template>
+
 
 
 
@@ -116,22 +171,37 @@
             type: Object,
             notify: true
           },
-          resourcesJson:Object,
+          resourcesJson: Object,
+          editMode: Boolean,
+          visualEditor: {
+            type: Boolean,
+            value: true
+          },
+          editableDescription:{
+            type:String,
+            notify:true
+          }
         }
       }
 
       static get observers() {
         return [
+          '_renderDescription(activeCollection.description)'
         ]
       }
-      test(){
-        console.log('res json',this.resourcesJson)
+
+      _isPrivate(c) { return (c.hasOwnProperty('draft') && c.draft === true) }
+      _isPublic(c) { return (!(c.hasOwnProperty('draft') && c.draft === true)) }
+
+      _renderDescription(description) {
+        if (description) {
+          this.$.descriptionContainer.innerHTML = description;
+          this.set('editableDescription',description)
+        }
       }
-      _isPrivate(c){
-        return(c.hasOwnProperty('draft') && c.draft===true)
-      }
-      _isPublic(c){
-        return(!(c.hasOwnProperty('draft') && c.draft===true))
+      _saveVisualDescription(){
+        // manual method to force update/binding of editable description for case where inbuilt methods fail (e.g. on keyboard enter press)
+        this.set('editableDescription',this.wysiwygTarget.innerHTML)
       }
 
       _editCollection() {
@@ -141,7 +211,7 @@
         this.set('liveCollection', {})
         this.set('liveCollection', this.activeCollection)
         console.log('editing collection', this.liveCollection)
-        this.$.collectionDialog.open()
+        this.editMode = true;
       }
       _showIndividual(path, hide) {
         // required for navigating back, collectionSlug change not detected. hide used to easily reverse condition
@@ -167,11 +237,11 @@
         }
       }
 
-      _getCollectionResources(resourceKeys,resourcesJson){
+      _getCollectionResources(resourceKeys, resourcesJson) {
         let temp = []
-        if(resourcesJson){
-          for(let key in resourceKeys){
-            if(resourcesJson.hasOwnProperty(key)){
+        if (resourcesJson) {
+          for (let key in resourceKeys) {
+            if (resourcesJson.hasOwnProperty(key)) {
               temp.push(resourcesJson[key])
             }
           }
@@ -202,8 +272,10 @@
       saveCollection() {
         // ****Need to decide what meta to track and bring in *********
         // ****Also need to ensure form completed, and possibly way to update current page
+        this.editMode = false
         this.liveCollection.type = "Collection";
         this.liveCollection.modified = Date.now();
+        this.liveCollection.description=this.wysiwygTarget.innerHTML
         this.liveCollection.slug = this._toSlug(this.liveCollection.label);
         if (!this.liveCollection.hasOwnProperty('key')) {
           this.liveCollection.key = this.generatePushID()
@@ -217,6 +289,7 @@
         console.log('creating collection', this.liveCollection)
         let redirectURL = window.location.origin + '/collection/' + this.liveCollection.slug
         this.$.liveCollectionDocument.saveValue('/tags/Collections', this.liveCollection.key)
+
           .then(() => {
             // force refresh/newslug redirect to update local cache
             // could probably be done without refresh by pushing/updating values and various callback, possibly improve later
@@ -224,6 +297,7 @@
           })
           .catch((err) => { console.log('err', err) })
       }
+      cancel() { this.editMode = false }
 
       _getLiveCollectionPath(key) {
         console.log('setting live collection path for key', key)

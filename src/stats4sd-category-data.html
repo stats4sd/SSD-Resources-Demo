@@ -89,7 +89,10 @@
 
         static get properties() {
           return {
-            slug: {
+            type: {
+              type: String,
+            },
+            category: {
               type: String,
               observer: '_slugChanged'
             },
@@ -150,12 +153,15 @@
         static get observers() {
           return [
             '_resourcesChanged(resources)',
-            '_tagsChanged(tags)'
+            '_tagsChanged(tags)',
+            '_slugChanged(category)'
           ]
         }
         _tagsChanged(tags) {
           //when tags received filter array into seperate categories and populate corresponding property
           //maintains a $key from nested json like in indexeddb
+          console.log(this.category);
+          console.log("tags found, tags = ",tags)
           if (tags.length <= 0) { return }
           let temp = {}
           for (let el of tags) {
@@ -176,9 +182,11 @@
           this.newestCollections = []
           this.newestCollections = this.allCollections.slice(0, 6)
           this.allKeywords = []
-          this.allKeywords = temp.Keyword.reverse()
+          this.allKeywords = temp.Keywords.reverse()
           this.allResourceTypes = []
           this.allResourceTypes = temp['Resource-Type'].reverse()
+          console.log("this.category = ",this.category);
+          this._slugChanged(this.category);
         }
 
 
@@ -186,36 +194,126 @@
           // when resources are loaded, or method called from slug change populate filtered resources
           // if no slug assumes /list selected and therefore should display all
           // could change 'all resources' to pick specific slug if wanted
+          
+          // res == this.resources.
+          console.log("category for filtering = ",this.category);
           if (res.length > 0) {
-            let key = this._computeCategoryKey(this.slug)
+            var key = "none"
+            if(this.type=="type"){
+              console.log("category = ",this.category);
+              key = this._computeCategoryKey(this.category)
+              console.log('keyword just defined as key = ',key);
+
+            }
+
+            else if(this.type=="keyword"){
+              console.log("category = ",this.category);
+              key = this._computeKeywordKey(this.category);
+              console.log('keyword just defined as key = ',key);
+            }
+
+            
+            console.log("key = ",key);
+            //reset filteredResources
             this.filteredResources = []
-            if (this.slug == '' || this.slug == undefined) { console.log('showing all'); this.filteredResources = res }
+
+            //if slug is undefined, show all.
+            if (this.category == '' || this.category == undefined) { console.log('showing all'); this.filteredResources = res }
+            
+            //otherwise...
             else {
-              this.filteredResources = res.filter(function (r) {
+              //...run a filter on the resources:
+              // NOTE - this needs optimising. Currently runs seperate filters based on what tag type is requested, because I'm too lazy to figure out the correct javascript scopes to put it all into one filter function.
+              if(this.type == "type") {
+                this.filteredResources = res.filter(function (r) {
+                //if the resource has the property 'tags' and the tags has the appropriate property
                 if (r.hasOwnProperty('tags') && r.tags.hasOwnProperty('Resource-Types')) {
+
                   return (r.tags["Resource-Types"] && r.tags["Resource-Types"].hasOwnProperty(key)
                   )
                 }
                 else { return false }
               })
+              }
+
+             if(this.type == "keyword") {
+              console.log("filtering by keyword key= ", key);
+              console.log("resources = ",res);
+                this.filteredResources = res.filter(function (r) {
+                //if the resource has the property 'tags' and the tags has the appropriate property
+                
+                if (r.hasOwnProperty('tags') && r.tags.hasOwnProperty('Keywords')) {
+
+                  return (r.tags["Keywords"] && r.tags["Keywords"].hasOwnProperty(key)
+                  )
+                }
+                else { return false }
+              })
+              }
+
             }
           }
         }
 
         _slugChanged(slug) {
-          this.key = this._computeCategoryKey()
-          this.set('label', categoryList[this.key])
-          if (this.resources.length == 0) {
 
+           // if the type == type, then use the hard-coded categories above.
+          if(this.type == "type") {
+            console.log('type is type');
+            this.key = this._computeCategoryKey()
+            this.set('label', categoryList[this.key])
+            if (this.resources.length == 0) {
+            }
+            else { this._resourcesChanged(this.resources) }
           }
-          else { this._resourcesChanged(this.resources) }
+
+          //else, if the type== keyword, then use the this.allKeywords generated from the persistedTags.
+          if(this.type == "keyword") {
+            console.log('type is keyword');
+            this.key = this._computeKeywordKey();
+            if(this.allKeywords) {
+              this.set('label', this.allKeywords[this.key])
+              if(this.resources.length == 0) {
+
+              }
+              else { this._resourcesChanged(this.resources)};
+            }
+            else {
+              console.log('keywords not loaded. Waiting to retry');
+            }
+          }
+            
+
+          
+        }
+
+        _computeKeywordKey(keywordName) {
+          if(this.allKeywords){
+            console.log("keywords exist, finding keyword key",this.allKeywords);
+            for (var i=0; i<this.allKeywords.length; i++) {
+              let val = this.allKeywords[i];
+              console.log("val.slug = ",val.slug);
+              console.log("keywordName = ",keywordName)
+              if(val.slug == keywordName) {
+                console.log("found one!",val);
+
+                this.set('label', val.label);
+                return val.key;
+              }
+           }
+           return "none";
+          }
+
+
         }
 
         _computeCategoryKey(categoryName) {
           // returns Resource-Type meta by key
+          console.log("categoryName",categoryName);
           for (let key in categoryList) {
             let val = categoryList[key]
             if (val.slug == categoryName) {
+              console.log("found one!",val);
               // set label and return key
               this.set('label', val.label)
               return key
