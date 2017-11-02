@@ -72,7 +72,9 @@
       <div class="flex-wrap keywords">
         <div class="padding">
           <template is="dom-repeat" items='[[keywords]]' as="keyword">
-            <paper-chip class="custom-background" label="[[keyword.label]]"></paper-chip>
+            <a href="{{_getLink(keyword)}}" style="text-decoration: none; color:inherit">
+              <paper-chip class="custom-background" label="[[keyword.label]]"></paper-chip>
+            </a>
           </template>
         </div>
       </div>
@@ -171,7 +173,10 @@
       //   this.$.homeMessage.close()
       // }
       
-
+      _getLink(tag) {
+        let link = "/list/keyword/" + tag.slug;
+        return link;
+      }
 
       //function to check if a collection (or other item) is a draft.
       //Returns false if 'c' has the property draft, and it equals false. 
