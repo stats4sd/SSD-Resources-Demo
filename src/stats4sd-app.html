@@ -164,11 +164,11 @@
       }
 
       .left-bar-item img.small {
-        width: 100px;
+        width: 40px;
       }
 
       .left-bar-item img.big {
-        width: 150px;
+        height: 58px;
       }
 
       ul.nav {
@@ -203,6 +203,21 @@
 
       .left-bar-item [icon=menu] {
           display: none;
+        }
+
+        .logo-box {
+          display: flex;
+          height: 83px;
+        }
+
+        .logo-box * {
+          display: inline-flex;
+        }
+
+        .logo-box img {
+          vertical-align: middle;
+          margin-top: auto;
+          margin-bottom: auto;
         }
 
       @media (max-width: 767px) {
@@ -294,8 +309,9 @@
           <div class="left-bar-item">
             <paper-icon-button icon="menu" drawer-toggle alt="Toogle navigation menu"></paper-icon-button>
             <div class='logo-box'>
-              <img class$="[[_headerStyle(smallScreen)]]" src="../images/Stats4SD_red.png"/>
-            </div>
+              <img class$="[[_headerStyle(smallScreen)]]" src="../images/test-logo.png"/>
+              <h4 style='color: #085eaa'>SRDE</h4>
+           </div>
           </div>
           <template is="dom-if" if="{{!smallScreen}}">
             <ul id="top-menu" class="nav">
