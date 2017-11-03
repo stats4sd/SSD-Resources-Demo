@@ -445,7 +445,15 @@
       </paper-toast>
     </app-drawer-layout>
 
-
+<!-- Login box (starts hidden. This is opened when the user clicks on the sign-in button in the header. -->
+      <paper-dialog id="login" modal>
+        <paper-dialog-scrollable>
+          <!-- We use a slightly customised version of the firebase-login element.
+          This provides us with the {{user}} and {{signedIn}} properties, so we can hide or show things that require authentication -->
+          <login-element id="stats4sdLogin" app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
+          </login-element>
+        </paper-dialog-scrollable>
+      </paper-dialog>
 
   </template>
 
