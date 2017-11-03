@@ -89,8 +89,10 @@
 
         static get properties() {
           return {
+
             type: {
               type: String,
+              observer: '_typeChanged'
             },
             category: {
               type: String,
@@ -157,6 +159,14 @@
             '_slugChanged(category)'
           ]
         }
+
+        _typeChanged(type) {
+          if("type"=="all"){
+            this.set('category', "")
+          }
+
+        }
+
         _tagsChanged(tags) {
           //when tags received filter array into seperate categories and populate corresponding property
           //maintains a $key from nested json like in indexeddb
@@ -211,6 +221,14 @@
               key = this._computeKeywordKey(this.category);
               console.log('keyword just defined as key = ',key);
             }
+
+            else if(this.type=="all"){
+              console.log("category = all");
+              key = "";
+              this.category = "";
+            }
+
+
 
             
             console.log("key = ",key);
@@ -268,7 +286,7 @@
           }
 
           //else, if the type== keyword, then use the this.allKeywords generated from the persistedTags.
-          if(this.type == "keyword") {
+          else if(this.type == "keyword") {
             console.log('type is keyword');
             this.key = this._computeKeywordKey();
             if(this.allKeywords) {
@@ -282,7 +300,14 @@
               console.log('keywords not loaded. Waiting to retry');
             }
           }
-            
+          //if the type isn't matched to anything (or doesn't exist), still run the resources update so it can reset the filters.
+          else if(this.type == "all"){
+            console.log("type = all");
+            this.key = "";
+            this.set('label',"");
+            this._resourcesChanged(this.resources);
+          }
+
 
           
         }
@@ -301,7 +326,7 @@
                 return val.key;
               }
            }
-           return "none";
+           return "";
           }
 
 

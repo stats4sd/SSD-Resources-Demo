@@ -99,8 +99,7 @@
           route: Object,
 
           routeData: {
-            type: Object,
-            observer: '_routeDataChanged'
+            type: Object
           },
 
           visible: {
@@ -125,13 +124,13 @@
 
       static get observers() {
         return [
-        '_routeDataChanged(routeData)'
+        // '_routeDataChanged(routeData)'
         ]
       }
 
-      _routeDataChanged(routeData){
-        console.log("list - routeData", routeData);
-      }
+      // _routeDataChanged(routeData){
+      //   console.log("list - routeData", routeData);
+      // }
 
       connectedCallback() {
         super.connectedCallback();
