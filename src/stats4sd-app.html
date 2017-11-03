@@ -292,7 +292,6 @@
             <li class="menu-item"><a href="/about">ABOUT</a></li>
             <li class="menu-item"><a href="/list">BROWSE</a></li>
             <li class="menu-item"><a href="/search">SEARCH</a></li>
-            <li class="menu-item"><a href="/contact">CONTACT</a></li>
             <li class="menu-item">
               <a href="#" >SIGN OUT</a>
               <paper-icon-button icon="lock"></paper-icon-button>
@@ -311,7 +310,7 @@
             <!-- temporarily removing logo until we choose whether to have Stats4SD logo or a different, project-specific one. -->
              <div class='logo-box'>
            <!--   <img class$="[[_headerStyle(smallScreen)]]" src="../images/test-logo.png"/> -->
-              <h4 style='color: #085eaa'>Stats4SD</h4>
+              <h4 style='color: #085eaa'>Stats4SD Resources</h4>
            </div>
           </div>
           <template is="dom-if" if="{{!smallScreen}}">
@@ -320,7 +319,6 @@
                 <li class="menu-item"><a href="/about">ABOUT</a></li>
                 <li class="menu-item"><a href="/list">BROWSE</a></li>
                 <li class="menu-item"><a href="/search">SEARCH</a></li>
-                <li class="menu-item"><a href="/contact">CONTACT</a></li>
               <template is="dom-if" if="{{!signedIn}}">
                 <li class="menu-item"><a href="#" on-tap="_signInOpen">SIGN IN</a></li>
                 <paper-icon-button icon="lock"></paper-icon-button>
@@ -346,6 +344,7 @@
        -->
       <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
         <stats4sd-home id="homePage" name="home" user="{{user}}" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]" keywords="[[allKeywords]]"></stats4sd-home>
+        <stats4sd-about id="aboutPage" name="about" ></stats4sd-about>
         <stats4sd-list id="listPage" name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
         <stats4sd-admin id="adminPage" name="admin" route="[[subroute]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"
           page="{{page}}"></stats4sd-admin>
