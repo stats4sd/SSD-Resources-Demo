@@ -308,9 +308,10 @@
           <!-- The 'back' button on the top left extends the default "back" browser button functionality by sending the user to the home page if there is no browser history to trawl through. -->
           <div class="left-bar-item">
             <paper-icon-button icon="menu" drawer-toggle alt="Toogle navigation menu"></paper-icon-button>
-            <div class='logo-box'>
-              <img class$="[[_headerStyle(smallScreen)]]" src="../images/test-logo.png"/>
-              <h4 style='color: #085eaa'>SRD&E</h4>
+            <!-- temporarily removing logo until we choose whether to have Stats4SD logo or a different, project-specific one. -->
+             <div class='logo-box'>
+           <!--   <img class$="[[_headerStyle(smallScreen)]]" src="../images/test-logo.png"/> -->
+              <h4 style='color: #085eaa'>Stats4SD</h4>
            </div>
           </div>
           <template is="dom-if" if="{{!smallScreen}}">
@@ -366,16 +367,6 @@
        -->
       <stats4sd-category-data id="categoryData" tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}" all-keywords="{{allKeywords}}"
         newest-collections="{{newestCollections}}" search-results="{{searchResults}}" resources-json="{{resourcesJson}}"></stats4sd-category-data>
-
-      <!-- Login box (starts hidden. This is opened when the user clicks on the sign-in button in the header. -->
-      <paper-dialog id="login" modal>
-        <paper-dialog-scrollable>
-          <!-- We use a slightly customised version of the firebase-login element.
-          This provides us with the {{user}} and {{signedIn}} properties, so we can hide or show things that require authentication -->
-          <login-element id="stats4sdLogin" app-name="SSD-Resources" user="{{user}}" signed-in="{{signedIn}}">
-          </login-element>
-        </paper-dialog-scrollable>
-      </paper-dialog>
 
       <!--
         The footer contains links to manage collections and resources. It is only shown to users who are signed-in, which is handled via a dom-if template.
@@ -453,6 +444,8 @@
         <paper-button on-tap="_hideCookiePolicy" style="margin:0;padding:5px;color:yellow">Got it!</paper-button>
       </paper-toast>
     </app-drawer-layout>
+
+
 
   </template>
 
