@@ -1,6 +1,7 @@
 bower_components/
 build/
 node_modules/
+src/environment/
 .DS_Store
 .vscode
 .github
