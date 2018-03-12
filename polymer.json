@@ -12,8 +12,7 @@
   ],
   "sources": [
     "src/**/*",
-    "images/**/*",
-    "bower.json"
+    "images/**/*"
   ],
   "extraDependencies": [
     "app.yaml",
@@ -32,18 +31,9 @@
     ]
   },
   "builds": [
+
     {
-      "preset": "es6-bundled"
-    },
-    {
-      "preset": "es5-bundled",
-      "js": {
-        "minify": {
-          "exclude": [
-            "*firebase-*"
-          ]
-        }
-      }
+      "preset": "es5-bundled"
     }
   ]
 }

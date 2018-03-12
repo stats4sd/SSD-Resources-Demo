@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "ssd-resources-demo"
+    "production": "ssd-resources-demo",
+    "staging":"ssd-resources-demo"
   }
 }
