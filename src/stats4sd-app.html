@@ -19,16 +19,18 @@
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="stats4sd-category-data.html">
+<link rel="import" href="redux-mixin.html">
 <!-- Since 'home' is the default route, eagerly load it. -->
 <link rel="import" href="stats4sd-home.html">
 <link rel="import" href="stats4sd-icons.html">
+<link rel="import" href="stats4sd-app-style.html">
 
 <!-- The dom-module actually contains the element -->
 <dom-module id="stats4sd-app">
 
   <!-- The "template" is the style and html part of the element. Below that are the properties and functions -->
   <template>
-
+    <style include="stats4sd-app-style"></style>
     <!-- These are styles specific to this element. The 'include="shared-styles" means that the code in shared-styles.html is also used to render things in this element.' -->
     <style include="shared-styles">
        :host {
@@ -38,9 +40,6 @@
         display: block;
         position: relative;
         background-color: gray;
-       
-       /*padding-top: 65px;*/
-        /* min-height: 100vh; */
         --app-primary-color: black;
         --app-secondary-color: #d2232a;
         background-color: var(--background-color, '#eeeeee');
@@ -52,195 +51,7 @@
         color: var(--app-primary-color);
       }
 
-      #header {
-        /*position: fixed;
-        top: 0;
-        left: 0;*/
-        position: relative;
-        left: calc( 0px - 50vw + 50% );
-        width: 100vw;
-        z-index: 1;
-        color: rgba(102,102,102,0.81);
-        background-color: #ffffff;
- /*       --app-header-shadow: {
-          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
-          height: 10px;
-          bottom: -10px;
-        };*/
-      }
-
-      app-toolbar {
-        max-width: 1080px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      app-toolbar.small {
-        height: 64px;
-      }
-
-      app-toolbar.big {
-        height: 114px;
-      }
-
-
-      paper-icon-button {
-        color: var(--app-primary-color);
-      }
-
-      .logo {
-        text-align: center;
-      }
-
-      .logo a {
-        font-size: 16px;
-        font-weight: 600;
-        letter-spacing: 0.3em;
-        color: rgba(102,102,102,0.81);
-        text-decoration: none;
-        /* required for IE 11, so this <a> can receive pointer events */
-        display: inline-block;
-        pointer-events: auto;
-      }
-
-      .home-btn {
-        padding-right: 4px;
-        margin-bottom: 8px;
-      }
-
-      .home-btn,
-      .back-btn {
-        color: rgba(102,102,102,0.81);
-        line-height: 24px;
-      }
-
-      :host([page=home]) .hide-on-home{
-        display: none
-      }
-      :host(:not([page=home])) .hide-not-on-home{
-        display: none
-      }
-
-
-      #signedInHeader {
-        position: absolute;
-        top: 0;
-        right: 20px;
-        font-size: x-small;
-        padding: 5px;
-      }
-
-      .user-email {
-        font-size: small;
-        padding: 5px;
-      }
-      .toastMessage{
-        margin:0; 
-        width:100%; 
-        background-color:var(--paper-green-200); 
-        color:black;
-        font-size: x-large
-      }
-
-      [hidden] {
-        display: none !important;
-      }
-
-
-      stats4sd-tabs,
-      stats4sd-tab {
-        --stats4sd-tab-overlay: {
-          border-bottom: 2px solid var(--app-accent-color);
-        }
-        ;
-      }
-
-      iron-pages {
-        max-width: 1440px;
-        padding-bottom: 20px;
-        margin: 0 auto;
-        @apply(--layout-flex);
-        @apply(--layout-vertical);
-      }
-
-      .left-bar-item img.small {
-        width: 40px;
-      }
-
-      .left-bar-item img.big {
-        height: 58px;
-      }
-
-      ul.nav {
-        float: left;
-        list-style: none;
-
-      }
-
-      ul.nav li {
-        display: inline-block;
-        padding-right: 22px;
-      }
-
-      .nav li a {
-        text-decoration: none;
-        color: rgba(102,102,102,0.81);
-        font-size: 14px;
-      }
-
-      div.nav {
-        list-style: none;
-      }
-
-      div.nav li {
-        padding-left: 22px;
-        padding-bottom: 1em;
-      }
-
-      #signOut_li, #signOut_li a, #signOut_li paper-icon-button {
-        cursor: pointer;
-      }
-
-      .left-bar-item [icon=menu] {
-          display: none;
-        }
-
-        .logo-box {
-          display: flex;
-          height: 83px;
-        }
-
-        .logo-box * {
-          display: inline-flex;
-        }
-
-        .logo-box img {
-          vertical-align: middle;
-          margin-top: auto;
-          margin-bottom: auto;
-        }
-
-      @media (max-width: 767px) {
-        .left-bar-item [icon=menu] {
-          display: inline-block;
-          margin-right: 50px;
-          height: 54px;
-        }
-        .logo-box {
-          height: 54px;
-          display: inline-block;
-        }
-        .logo-box img {
-          width: 100px;
-          margin-top: auto;
-          margin-bottom: auto;
-          vertical-align: middle;
-        }
-      }
-
-      app-drawer-layout {
-        height: 100vh;
-      }
+      
 
     </style>
 
@@ -253,8 +64,11 @@
       The pattern="/:page" means that, for a url https://url/something, the "something" is saved to {{routeData.page}} (which is used to update the {{page}} and display the correct content).
       Anything after the page is called the 'tail', and saved to {{subroute}}.  So, for https://url/something/else, the "else" is saved to {{subroute}}. This is then passed to the various page elements within the iron-pages (e.g. stats4sd-home, stats4sd-list, etc) as that page's new {{route}}.
     -->
-    <app-location route="{{route}}"></app-location>
-    <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
+    </app-location>
+
+    <app-route route="{{route}}" pattern="[[rootPath]]:page" data="{{routeData}}" tail="{{subroute}}">
+    </app-route>
 
     <!--
       iron-media-query element runs a media-style query. The result is put into the "query-matches" property
@@ -461,9 +275,9 @@
   <!-- Properties and functions attached to the main app element -->
   <script>
     // performance logging
-    // window.performance && performance.mark && performance.mark('stats4sd-app - before register');
+    window.performance && performance.mark && performance.mark('stats4sd-app - before register');
 
-    class stats4sdApp extends Polymer.Element {
+    class stats4sdApp extends ReduxMixin(Polymer.Element){
 
       static get is() { return 'stats4sd-app'; }
 
@@ -489,7 +303,8 @@
           },
           smallScreen: {
             type: Boolean,
-            notify: true
+            notify: true,
+            statePath:'smallScreen'
           },
           firebaseConfig:{
             type:Object

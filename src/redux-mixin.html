@@ -1,0 +1,30 @@
+<link rel="import" href="../bower_components/polymer-redux/polymer-redux.html">
+<script>
+    const initialState = {
+        smallScreen: false
+    }
+    console.log('redux', Redux)
+
+    const reducer = (state, action) => {
+        console.log('action',action.type)
+        switch (action.type) {
+            case 'SET_SCREENSIZE':
+                const size = action.payload
+                return object.assign({}, state, { screenSize: size })
+
+            default: return state;
+        }
+    }
+    console.log('creating store')
+    const store = Redux.createStore(
+        reducer, 
+        initialState,
+        Redux.compose(
+            window.devToolsExtension
+                ? window.devToolsExtension()
+                : v => v
+        )
+
+    );
+    ReduxMixin = PolymerRedux(store);
+</script>
