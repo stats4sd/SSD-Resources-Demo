@@ -7,21 +7,21 @@
 
 var configurations = {
     production: {
-        apiKey: "",
-        authDomain: "",
-        databaseURL: "",
-        projectId: "",
-        storageBucket: "",
-        messagingSenderId: "",
-        analyticsKey: ""
+        apiKey: "AIzaSyBD5pjMlrhbmtkBU32-zvoJImF010wgFxY",
+        authDomain: "stats4sd-resources.firebaseapp.com",
+        databaseURL: "https://stats4sd-resources.firebaseio.com",
+        projectId: "stats4sd-resources",
+        storageBucket: "stats4sd-resources.appspot.com",
+        messagingSenderId: "899832942905",
+        analyticsKey: "UA-84922436-4"
     },
     staging: {
-        apiKey: "",
-        authDomain: "",
-        databaseURL: "",
-        projectId: "",
-        storageBucket: "m",
-        messagingSenderId: "",
-        analyticsKey: ""
+        apiKey: "AIzaSyCfl_Pe6Fb8KzIQRV1P2RIwwhN8Jl6BACo",
+        authDomain: "ssd-resources-demo.firebaseapp.com",
+        databaseURL: "https://ssd-resources-demo.firebaseio.com",
+        projectId: "ssd-resources-demo",
+        storageBucket: "ssd-resources-demo.appspot.com",
+        messagingSenderId: "498441480577",
+        analyticsKey: "UA-39334307-16"
     }
 }
