@@ -33,12 +33,16 @@
   },
   "builds": [
     {
+      "preset": "es6-bundled"
+    },
+    {
       "preset": "es5-bundled",
       "js": {
-       "minify": {
-    "exclude": ["*firebase-*"]
-  }
-
+        "minify": {
+          "exclude": [
+            "*firebase-*"
+          ]
+        }
       }
     }
   ]
