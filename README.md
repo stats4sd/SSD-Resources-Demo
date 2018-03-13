@@ -86,3 +86,9 @@ $<link rel="import" href="../../bower_components/polymer/polymer-element.html">-
 3. change app import to be via bower component versions of ssd-elements
 (note, if running polymer lint will show up as error as paths won't resolve, this is fine and build should still work)
 
+
+### Dev links
+Redux used to store global data:
+https://tur-nr.github.io/polymer-redux/docs
+
+

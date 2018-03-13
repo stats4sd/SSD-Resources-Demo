@@ -1,4 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="redux-mixin.html">
+
 <link rel="import" href="./ssd-elements/resource-types.html">
 <link rel="import" href="../bower_components/paper-chip/paper-chip.html">
 <link rel="import" href="shared-styles.html">
@@ -9,7 +11,7 @@
 
     <style include="shared-styles"></style>
     <style>
-       :host {
+      :host {
         /* padding: 10px */
       }
 
@@ -56,61 +58,64 @@
           height: 37px;
         }
       }
-
     </style>
     <div>
       <h2>Statistics for Sustainable Development - Resources Repository</h2>
-      <p>Welcome to the Stats4SD resource bank, an incomplete (but growing) collection of resources for statistical, data and research support. Below you will find different ways of browsing the contents.</p>
-      <p>Please take a look around and explore the resources currently available. We will be updating the site and adding new resources over the next few months, so check back regularly to see our progress! You can also follow us on <a href="https://twitter.com/stats4sd">Twitter</a> to get the latest news and updates about us and this site.</p>
-      <p>If you have comments about the site, or resources you really want to see added, please let us know by emailing us at <a href="mailto:support@stats4sd.org">support@stats4sd.org</a>.
-      <div class="sub-section-heading" style="margin-top:3em">
-        <div style='float:left'>View Resources by Keyword</div>
-      </div>
+      <p>Welcome to the Stats4SD resource bank, an incomplete (but growing) collection of resources for statistical, data and
+        research support. Below you will find different ways of browsing the contents.</p>
+      <p>Please take a look around and explore the resources currently available. We will be updating the site and adding new
+        resources over the next few months, so check back regularly to see our progress! You can also follow us on
+        <a href="https://twitter.com/stats4sd">Twitter</a> to get the latest news and updates about us and this site.</p>
+      <p>If you have comments about the site, or resources you really want to see added, please let us know by emailing us at
+        <a href="mailto:support@stats4sd.org">support@stats4sd.org</a>.
+        <div class="sub-section-heading" style="margin-top:3em">
+          <div style='float:left'>View Resources by Keyword</div>
+        </div>
 
-      <!-- Render a list of paper-chip elements for all the keywords -->
-      <div class="flex-wrap keywords">
-        <div>
-          <template is="dom-repeat" items='[[keywords]]' as="keyword">
-            <a href="{{_getLink(keyword)}}" style="text-decoration: none; color:inherit">
-              <paper-chip class="custom-background" label="[[keyword.label]]"></paper-chip>
+        <!-- Render a list of paper-chip elements for all the keywords -->
+        <div class="flex-wrap keywords">
+          <div>
+            <template is="dom-repeat" items='[[keywords]]' as="keyword">
+              <a href="{{_getLink(keyword)}}" style="text-decoration: none; color:inherit">
+                <paper-chip class="custom-background" label="[[keyword.label]]"></paper-chip>
+              </a>
+            </template>
+          </div>
+        </div>
+
+        <!-- Show 'latest' collections -->
+        <div class="sub-section-heading" style="margin-top:2em">
+          <div style="float:left">Latest Collections</div>
+          <div style="float:right; cursor:pointer; font-weight:700">
+            <a href="/collection" class="href-plain">
+              <iron-icon icon="view-module"></iron-icon>
+              <span>View All Collections</span>
             </a>
+          </div>
+        </div>
+
+        <div class="flex wrap collection">
+          <!-- Repeating template for the collection. Runs through each item in '[[newestCollections]]' and renders a collection-element for each one. -->
+          <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]">
+            <!-- Use the custom 'collection-element' (ssd-elements/custom-element.html) to render each collection button -->
+            <collection-element collection={{collection}}></collection-element>
           </template>
         </div>
-      </div>
 
-      <!-- Show 'latest' collections -->
-      <div class="sub-section-heading" style="margin-top:2em">
-        <div style="float:left">Latest Collections</div>
-        <div style="float:right; cursor:pointer; font-weight:700">
-          <a href="/collection" class="href-plain">
-            <iron-icon icon="view-module"></iron-icon>
-            <span>View All Collections</span>
-          </a>
+        <!-- Show resource types and buttons to view resources by type. -->
+        <!-- Honestly, I'm not convinced this is needed on the front page. I think it would be better placed to be able to set type as a filter when searching or browsing contents. -->
+        <div class="sub-section-heading">
+          <div style="float:left"> View Resources by Type</div>
+          <div style="float:right; cursor:pointer; font-weight:700">
+            <a href="/search" class="href-plain">
+              <iron-icon icon="search"></iron-icon>
+              <span>Search All Resources</span>
+            </a>
+          </div>
         </div>
-      </div>
 
-      <div class="flex wrap collection">
-        <!-- Repeating template for the collection. Runs through each item in '[[newestCollections]]' and renders a collection-element for each one. -->
-        <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]" filter="_isPublic">
-          <!-- Use the custom 'collection-element' (ssd-elements/custom-element.html) to render each collection button -->
-          <collection-element collection={{collection}}></collection-element>
-        </template>
-      </div>
-
-      <!-- Show resource types and buttons to view resources by type. -->
-      <!-- Honestly, I'm not convinced this is needed on the front page. I think it would be better placed to be able to set type as a filter when searching or browsing contents. -->
-      <div class="sub-section-heading">
-        <div style="float:left"> View Resources by Type</div>
-        <div style="float:right; cursor:pointer; font-weight:700">
-          <a href="/search" class="href-plain">
-            <iron-icon icon="search"></iron-icon>
-            <span>Search All Resources</span>
-          </a>
-        </div>
-      </div>
-      
-      <!-- Use the custom 'resource-types' (ssd-elements/resource-types.html) to render each type as a clickable button -->
-      <resource-types></resource-types>
+        <!-- Use the custom 'resource-types' (ssd-elements/resource-types.html) to render each type as a clickable button -->
+        <resource-types></resource-types>
 
 
     </div>
@@ -122,65 +127,45 @@
       <paper-button on-tap="_toastClose" style="margin:0;padding:5px;color:yellow">Got it!</paper-button>
     </paper-toast> -->
 
-    
-
-    
-
   </template>
 
   <script>
-    class stats4sdHome extends Polymer.Element {
+    class stats4sdHome extends ReduxMixin(Polymer.Element) {
 
       static get is() { return 'stats4sd-home'; }
-      // static get observers() {
-      //   return [
-      //     // '_complexChange(page.*)'
-      //   ]
-      // }
+
       static get properties() {
         return {
-
-          categories: {
-            type: Array
+          keywords: {
+            type: Array,
+            statePath: 'persistedTags.keywords'
           },
-
-          // visible: {
-          //   type: Boolean,
-          //   observer: '_visibleChanged'
-          // },
-          
-          // the page property is set when defining the element in the stats4sd-app.html. This is linked to the iron-pages element. Notify = true means that any changes to the page property of this element are propogated up and down.
-          page: {
-            type: String,
-            notify: true
+          collections: {
+            type: Array,
+            statePath: 'persistedTags.collections'
           },
-          newestCollections: Array
+          newestCollections: {
+            type:Array,
+            computed: '_getNewestCollections(collections)'
+          }
         }
       }
-      // _complexChange(change) {
-      //   console.log('complex change', change)
-      // }
 
-      // _visibleChanged(visible) {
-      //   if (visible) {
-      //     this.dispatchEvent(new CustomEvent('change-section', {
-      //       bubbles: true, composed: true, detail: { title: 'Home' }
-      //     }));
-      //   }
-      // }
-      // _toastClose() {
-      //   this.$.homeMessage.close()
-      // }
-      
-      _getLink(tag) {
-        let link = "/list/keyword/" + tag.slug;
+
+      _getLink(keyword) {
+        let link = "/list/keyword/" + keyword.slug;
         return link;
       }
 
-      //function to check if a collection (or other item) is a draft.
-      //Returns false if 'c' has the property draft, and it equals false. 
-      _isPublic(c){
-        return(!(c.hasOwnProperty('draft') && c.draft===true))
+      _getNewestCollections(collections){
+        // filter collections list down to only those public and max length 6
+        let newest = []
+        collections.forEach(function(c){
+          if(!c.draft){newest.push(c)}
+        })
+        if(newest.length>6){newest = newest.slice(0,5)}
+        console.log('newest',newest)
+        return newest
       }
 
     }

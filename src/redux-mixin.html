@@ -3,21 +3,36 @@
     // initial state defines the value of default variables when the app is first loaded
     const initialState = {
         smallScreen: false,
-        page:null,
-        user:{
-            email:'test email'
+        page: null,
+        persistedResources: [],
+        persistedTags: {
+            collections: [], keywords: [], resourceTypes: []
+        },
+        user: {
+            email: 'test email'
         }
     }
 
-    // reducers receive the store update dispatched action (e.g. UPDATE_SMALLSCREEN), and update the global store accordingly 
+    // reducers receive the store update dispatched action (e.g. SET_SMALLSCREEN), and update the global store accordingly 
     const reducer = (state, action) => {
         switch (action.type) {
             // specific way to handle small screen update
-            case 'UPDATE_SMALLSCREEN':
+            case 'SET_SMALLSCREEN':
                 return Object.assign({}, state, { smallScreen: action.payload })
 
             case 'UPDATE_PAGE':
                 return Object.assign({}, state, { page: action.payload })
+
+            case 'UPDATE_RESOURCES':
+                return Object.assign({}, state, { persistedResources: action.payload })
+
+            case 'UPDATE_TAGS':
+                // updates come with a payload containing {type:[tag type], tags:[values array]} (just to save having 3 seperate functions and entries)
+                // update state accordingly
+                console.log('updating tags',action.payload)
+                let tags = state.persistedTags
+                tags[action.payload.type]=action.payload.tags
+                return Object.assign({}, state, { persistedTags: tags })
 
             // generic way to handle any update (not great practice as less information to track, but here for now)
             case 'UPDATE_ANY':
