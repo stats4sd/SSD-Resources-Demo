@@ -9,7 +9,9 @@
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
-
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="ssd-elements/stats4sd-loader.html">
 <link rel="import" href="stats4sd-icons.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="stats4sd-app-style.html">
@@ -105,6 +107,7 @@
               iron-pages will display one of the child elements. The displayed element is determined by the "selected" property - in this case, this is bound to [[page]]. (So when [[page]] changes, iron-pages shows a new page element).
               The attr-for-selected property tells you which property of the child elements to match to [[page]] - in this case, you need to match the name of the child element.
              -->
+             <stats4sd-loader></stats4sd-loader>
             <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
                 <stats4sd-home id="homePage" name="home" user="{{user}}" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]"
                     keywords="[[allKeywords]]"></stats4sd-home>

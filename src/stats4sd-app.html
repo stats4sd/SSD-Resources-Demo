@@ -14,7 +14,7 @@
 <link rel="import" href="stats4sd-category-data.html">
 <link rel="import" href="redux-mixin.html">
 <!-- Since 'home' is the default route, eagerly load it. -->
-<link rel="import" href="stats4sd-home.html">
+<link rel="import" href="pages/stats4sd-home.html">
 
 <link rel="import" href="stats4sd-app-style.html">
 
@@ -52,15 +52,17 @@
     <!--
       app-location and app-route elements provide the state of the URL for the app. 
       The app-location grabs the url and saves it to {{route}}. 
-      The app-route then looks at the {{route}} and splits it into 2 pieces: the main part, and the "tail". The main part determines what page is displayed, and the tail is given to the page as input.
+      The app-route then looks at the {{route}} and splits it into 2 pieces: the main part, and the "tail". 
+      The main part determines what page is displayed, and the tail can be passed on to a variable as input or anything else.
 
       The pattern="/:page" means that, for a url https://url/something, the "something" is saved to {{routeData.page}} (which is used to update the {{page}} and display the correct content).
-      Anything after the page is called the 'tail', and saved to {{subroute}}.  So, for https://url/something/else, the "else" is saved to {{subroute}}. 
+      Anything after the page is called the 'tail', and could be saved, for example to {{subroute}} (although here we don't need any extra as each page handles it's own data).  
+      So, for https://url/something/else, the "else" is saved to {{subroute}}. 
       This is then passed to the various page elements within the iron-pages (e.g. stats4sd-home, stats4sd-list, etc) as that page's new {{route}}.
     -->
     <app-location route="{{route}}"></app-location>
 
-    <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <app-route route="{{route}}" pattern="/:page" data="{{routeData}}"></app-route>
 
     <!--
       iron-media-query element runs a media-style query. The result is put into the "query-matches" property
@@ -82,13 +84,12 @@
 
     <firebase-query id="collectionsQuery" app-name="stats4sd-resources" path="/tags/Collections" data="{{collections}}"></firebase-query>
     <app-indexeddb-mirror key="persistedCollections" data="{{collections}}" session="keepAlways" persisted-data="{{persistedCollections}}"></app-indexeddb-mirror>
-    
+
     <firebase-query id="keywordsQuery" app-name="stats4sd-resources" path="/tags/Keywords" data="{{keywords}}"></firebase-query>
     <app-indexeddb-mirror key="persistedKeywords" data="{{keywords}}" session="keepAlways" persisted-data="{{persistedKeywords}}"></app-indexeddb-mirror>
-    
+
     <firebase-query id="resourceTypesQuery" app-name="stats4sd-resources" path="/tags/Resource-Types" data="{{resourceTypes}}"></firebase-query>
     <app-indexeddb-mirror key="persistedResourceTypes" data="{{resourceTypes}}" session="keepAlways" persisted-data="{{persistedResourceTypes}}"></app-indexeddb-mirror>
-    
 
     <!-- This is the main layout, it contains the sidebars, headers, lists of pages etc. -->
     <stats4sd-app-layout></stats4sd-app-layout>
@@ -148,6 +149,11 @@
             type: Boolean,
             // observe changes to small screen value given by media query, and dispatch to the global store
             observer: function (newVal) {
+              // also use this as an opportunity to remove initial loading screen if not already
+              // fade away loading screen
+              setTimeout(() => {
+                document.body.classList.add('loaded')
+              }, 500);
               return this.dispatch('setSmallscreen', newVal)
             }
           },
@@ -161,19 +167,19 @@
           persistedCollections: {
             type: Array,
             observer: function (tags) {
-              return this.dispatch('updateTags', {type:'collections',tags:tags})
+              return this.dispatch('updateTags', { type: 'collections', tags: tags })
             }
           },
           persistedKeywords: {
             type: Array,
             observer: function (tags) {
-              return this.dispatch('updateTags', {type:'keywords',tags:tags})
+              return this.dispatch('updateTags', { type: 'keywords', tags: tags })
             }
           },
           persistedResourceTypes: {
             type: Array,
             observer: function (tags) {
-              return this.dispatch('updateTags', {type:'resourceTypes',tags:tags})
+              return this.dispatch('updateTags', { type: 'resourceTypes', tags: tags })
             }
           },
           // firebase and analytics config
@@ -298,7 +304,7 @@
             // eagerly load the 404 page definition
             let cb = this._pageLoaded.bind(this, Boolean(oldPage));
             Polymer.importHref(
-              this.resolveUrl('stats4sd-' + page + '.html'),
+              this.resolveUrl('pages/stats4sd-' + page + '.html'),
               cb, cb, true);
           }
         }

@@ -1,9 +1,9 @@
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="redux-mixin.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../redux-mixin.html">
 
-<link rel="import" href="./ssd-elements/resource-types.html">
-<link rel="import" href="../bower_components/paper-chip/paper-chip.html">
-<link rel="import" href="shared-styles.html">
+<link rel="import" href="../ssd-elements/resource-types.html">
+<link rel="import" href="../../bower_components/paper-chip/paper-chip.html">
+<link rel="import" href="../shared-styles.html">
 
 <dom-module id="stats4sd-home">
 
@@ -11,21 +11,17 @@
 
     <style include="shared-styles"></style>
     <style>
-      :host {
-        /* padding: 10px */
-      }
+      /* :host {
+      } */
 
-      h2 {
-        font-size: 1.3em;
-        font-weight: 500;
-        margin: 32px 0;
-      }
+      
 
       paper-toast {
         margin: 0;
         padding: 5px;
         /* max-width: 510px; */
       }
+    
 
       @media (max-width: 767px) {
         h2 {
@@ -46,7 +42,7 @@
           height: 384px;
         }
         .keywords {
-          height: 74px;
+          max-height: 110px;
         }
       }
 
@@ -55,7 +51,7 @@
           height: 192px;
         }
         .keywords {
-          height: 37px;
+          max-height: 37px;
         }
       }
     </style>
@@ -68,20 +64,7 @@
         <a href="https://twitter.com/stats4sd">Twitter</a> to get the latest news and updates about us and this site.</p>
       <p>If you have comments about the site, or resources you really want to see added, please let us know by emailing us at
         <a href="mailto:support@stats4sd.org">support@stats4sd.org</a>.
-        <div class="sub-section-heading" style="margin-top:3em">
-          <div style='float:left'>View Resources by Keyword</div>
-        </div>
 
-        <!-- Render a list of paper-chip elements for all the keywords -->
-        <div class="flex-wrap keywords">
-          <div>
-            <template is="dom-repeat" items='[[keywords]]' as="keyword">
-              <a href="{{_getLink(keyword)}}" style="text-decoration: none; color:inherit">
-                <paper-chip class="custom-background" label="[[keyword.label]]"></paper-chip>
-              </a>
-            </template>
-          </div>
-        </div>
 
         <!-- Show 'latest' collections -->
         <div class="sub-section-heading" style="margin-top:2em">
@@ -93,7 +76,6 @@
             </a>
           </div>
         </div>
-
         <div class="flex wrap collection">
           <!-- Repeating template for the collection. Runs through each item in '[[newestCollections]]' and renders a collection-element for each one. -->
           <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]">
@@ -102,9 +84,25 @@
           </template>
         </div>
 
+        <!-- Render a list of paper-chip elements for all the keywords -->
+        <div class="sub-section-heading" style="margin-top:3em">
+          <div style='float:left'>View Resources by Keyword</div>
+        </div>
+        <div class="flex-wrap keywords">
+          <div>
+            <template is="dom-repeat" items='[[keywords]]' as="keyword">
+              <a href="{{_getLink(keyword)}}" style="text-decoration: none; color:inherit">
+                <paper-chip class="custom-background" label="[[keyword.label]]"></paper-chip>
+              </a>
+            </template>
+          </div>
+        </div>
+
+
+
         <!-- Show resource types and buttons to view resources by type. -->
         <!-- Honestly, I'm not convinced this is needed on the front page. I think it would be better placed to be able to set type as a filter when searching or browsing contents. -->
-        <div class="sub-section-heading">
+        <!-- <div class="sub-section-heading">
           <div style="float:left"> View Resources by Type</div>
           <div style="float:right; cursor:pointer; font-weight:700">
             <a href="/search" class="href-plain">
@@ -112,10 +110,10 @@
               <span>Search All Resources</span>
             </a>
           </div>
-        </div>
+        </div> -->
 
         <!-- Use the custom 'resource-types' (ssd-elements/resource-types.html) to render each type as a clickable button -->
-        <resource-types></resource-types>
+        <!-- <resource-types></resource-types> -->
 
 
     </div>
@@ -138,14 +136,14 @@
         return {
           keywords: {
             type: Array,
-            statePath: 'persistedTags.keywords'
+            statePath: 'persistedTags.array.keywords'
           },
           collections: {
             type: Array,
-            statePath: 'persistedTags.collections'
+            statePath: 'persistedTags.array.collections'
           },
           newestCollections: {
-            type:Array,
+            type: Array,
             computed: '_getNewestCollections(collections)'
           }
         }
@@ -157,14 +155,14 @@
         return link;
       }
 
-      _getNewestCollections(collections){
+      _getNewestCollections(collections) {
         // filter collections list down to only those public and max length 6
         let newest = []
-        collections.forEach(function(c){
-          if(!c.draft){newest.push(c)}
+        collections.forEach(function (c) {
+          if (!c.draft) { newest.push(c) }
         })
-        if(newest.length>6){newest = newest.slice(0,5)}
-        console.log('newest',newest)
+        if (newest.length > 6) { newest = newest.slice(0, 5) }
+        console.log('newest collections', newest)
         return newest
       }
 

@@ -2,6 +2,7 @@
 
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <base href="/">
@@ -15,18 +16,17 @@
   <link rel="manifest" href="manifest.json">
 
   <style>
-
     body {
       margin: 0;
-      font-family: 'Open Sans','Roboto', 'Noto', sans-serif;
+      font-family: 'Open Sans', 'Roboto', 'Noto', sans-serif;
       font-size: 14px;
       line-height: 1.5;
       min-height: 100vh;
       background-color: #eeeeee;
-      
     }
 
     /* styling for render while resources are loading */
+
     stats4sd-app[unresolved] {
       display: block;
       min-height: 101vh;
@@ -40,13 +40,56 @@
       overflow: visible;
     }
 
+    #preloader {
+      width: 100%;
+      height: 100%;
+      /* background-color: #d2232a; */
+      background-color: white;
+      color: #d2232a;
+      text-align: center;
+      position: absolute;
+      transition: 0.5s;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #preloader>h1 {
+      max-width: 350px;
+      margin: auto;
+      padding-bottom: 200px;
+    }
+
+    .loaded > #preloader {
+        opacity: 0.5;
+        transform: translateY(-100%);
+        -webkit-transition: all 0.3s 0.6s ease-out;
+        transition: all 0.3s 0.6s ease-out;
+    }
+    
+    #mainApp {
+      transform: translateY(100%);
+      position: fixed;
+      overflow: scroll;
+    }     
+
+    .loaded > #mainApp {
+      transform: translateY(0);
+      -webkit-transition: all 0.3s 0.6s ease-out;
+      transition: all 0.3s 0.6s ease-out;
+    }
   </style>
 
 </head>
-<body>
 
+<body>
+  <div id="preloader">
+    <h1>Statistics for Sustainable Development</h1>
+  </div>
   <!-- The main app element. Everything else is in here (src/stats4sd-app) -->
-  <stats4sd-app unresolved>Loading...</stats4sd-app>
+  <stats4sd-app id="mainApp" unresolved></stats4sd-app>
+
 
   <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
   <script src="node_modules/redux/dist/redux.js"></script>
@@ -57,4 +100,15 @@
   </script> -->
 
 </body>
+
+<script>
+  // automatically remove loading screen after 1s more if not called from other methods 
+  // (currently also calls when tags updated in stats4sd-app.html)
+  setTimeout(() => {
+    console.log('timeout called')
+    document.body.classList.add('loaded')
+    //document.body.style.overflow='auto'
+  }, 2000);
+</script>
+
 </html>

@@ -4,13 +4,17 @@
     const initialState = {
         smallScreen: false,
         page: null,
-        persistedResources: [],
+        persistedResources: {
+            array: [], bySlug: {}, byKey: {}
+        },
         persistedTags: {
-            collections: [], keywords: [], resourceTypes: []
+            array: {collections: [], keywords: [], resourceTypes: []},
+            bySlug: {collections: {}, keywords: {}, resourceTypes: {}}
         },
         user: {
             email: 'test email'
-        }
+        },
+        hideLoader:true
     }
 
     // reducers receive the store update dispatched action (e.g. SET_SMALLSCREEN), and update the global store accordingly 
@@ -18,21 +22,28 @@
         switch (action.type) {
             // specific way to handle small screen update
             case 'SET_SMALLSCREEN':
+                // as state should not be modified directly use Object.assign to create new object {} which is then merged with state and update
                 return Object.assign({}, state, { smallScreen: action.payload })
 
             case 'UPDATE_PAGE':
                 return Object.assign({}, state, { page: action.payload })
 
+            // resources and tags have extra steps to build both array and json objects for use throughout the app
             case 'UPDATE_RESOURCES':
-                return Object.assign({}, state, { persistedResources: action.payload })
-
+                let arr = action.payload
+                let bySlug =  _arrayToJson(action.payload,'slug') 
+                let byKey = _arrayToJson(action.payload,'$key')
+                return Object.assign({}, state, { persistedResources: {array:arr,bySlug:bySlug,byKey:byKey} })
+            
+            // tag updates are similar to resources but also come with a payload containing an additional tag type field
+            // i.e. payload: {type:'collections', tags:[...]} 
+            // each of the 3 types then get put into seperate elements
             case 'UPDATE_TAGS':
-                // updates come with a payload containing {type:[tag type], tags:[values array]} (just to save having 3 seperate functions and entries)
-                // update state accordingly
-                console.log('updating tags',action.payload)
-                let tags = state.persistedTags
-                tags[action.payload.type]=action.payload.tags
-                return Object.assign({}, state, { persistedTags: tags })
+                let tagsArr = state.persistedTags.array
+                let tagsBySlug = state.persistedTags.bySlug
+                tagsArr[action.payload.type] = action.payload.tags
+                tagsBySlug[action.payload.type] = _arrayToJson(action.payload.tags,'slug')
+                return Object.assign({}, state, { persistedTags: {array:tagsArr,bySlug:tagsBySlug} })
 
             // generic way to handle any update (not great practice as less information to track, but here for now)
             case 'UPDATE_ANY':
@@ -46,7 +57,7 @@
         }
     }
 
-    // store initialisation. Includes the main reducer, intitial state, and enhancement that checks
+    // store initialisation. Includes the main reducer, intitial state, and enhancement that checks for the redux devTools extension 
     const store = Redux.createStore(
         reducer,
         initialState,
@@ -58,4 +69,16 @@
 
     );
     ReduxMixin = PolymerRedux(store);
+
+
+    function _arrayToJson(array,key){
+        // takes an array of objects and converts into a json object specified by key
+        let json = {}
+        array.forEach(function(el){
+            if(el.hasOwnProperty(key)){
+                json[el[key]]=el
+            }
+        })
+        return json
+    }
 </script>
