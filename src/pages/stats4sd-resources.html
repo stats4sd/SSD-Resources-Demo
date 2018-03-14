@@ -4,10 +4,11 @@
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/paper-chip/paper-chip.html">
 <link rel="import" href="../stats4sd-category-data.html">
+<link rel="import" href="../ssd-elements/resource-search-result.html">
 <link rel="import" href="../ssd-elements/resource-file-download.html">
 <link rel="import" href="../ssd-elements/resource-editor.html">
 
-<dom-module id="stats4sd-resource">
+<dom-module id="stats4sd-resources">
 
   <template>
 
@@ -106,7 +107,19 @@
       }
     </style>
 
-    <!-- Main Resource View -->
+    <!-- All Resources View -->
+    <!-- use conditional dom-if to decide whether to show. Note the dom-if has to bind to a boolean variable or a function which returns one -->
+    <template is="dom-if" if="{{_shouldShowAllResources(path)}}">
+      <div class="sub-section-heading" style="margin-top: 1em">All Resources ([[filteredResourcesArray.length]])</div>
+      <!-- some filtering options will come here at some point using paper-dropdown / vaadin combo or similar -->
+      <template is='dom-repeat' items="[[filteredResourcesArray]]" as="resource">
+        <resource-search-result resource="[[resource]]" hidden$="[[resource.deleted || resource.draft]]"></resource-search-result>
+      </template>
+
+    </template>
+
+
+    <!-- Active Resource View -->
     <template is="dom-if" if="{{!editMode}}">
       <!-- Deleted resource notification -->
       <template is="dom-if" if="[[resource.deleted]]" class="deleted">
@@ -181,32 +194,34 @@
     </footer> -->
 
     <!-- Resource editor view (could be put into seperate component) -->
-    <template is="dom-if" if="{{editMode}}">
+    <!-- <template is="dom-if" if="{{editMode}}">
       <resource-editor resource="{{resource}}" tags="{{persistedTags}}"></resource-editor>
     </template>
     <firebase-document id="firebaseResourceDoc" app-name="stats4sd-resources" data="{{editableResource}}">
     </firebase-document>
     <firebase-document id="firebaseSlugDoc" app-name="stats4sd-resources" data="{{editableSlug}}">
-    </firebase-document>
-
-
-
-
-
-
+    </firebase-document> -->
   </template>
 
   <script>
-    class stats4sdResource extends ReduxMixin(Polymer.Element) {
+    class Stats4sdResources extends ReduxMixin(Polymer.Element) {
 
-      static get is() { return 'stats4sd-resource'; }
+      static get is() { return 'stats4sd-resources'; }
 
       static get properties() {
         return {
           // properties updated by the redux global store
           allResourcesBySlug: {
-            type: Array,
+            type: Object,
             statePath: 'persistedResources.bySlug'
+          },
+          allResourcesArray: {
+            type: Array,
+            statePath: 'persistedResources.array'
+          },
+          filteredResourcesArray:{
+            type:Array,
+            computed:'_filterResources(allResourcesArray)'
           },
           path: {
             type: String,
@@ -273,6 +288,24 @@
         }
       }
 
+      _filterResources(resources){
+        // filter to remove draft and deleted
+        resources = resources.filter(r=>{
+          if(r.draft==true){return false}
+          if(r.deleted==true){return false}
+          return true
+        })
+        // sort by date
+        
+        return resources
+      }
+      
+      // function to determine whether to show all resources or not, depending on path
+      // we only want this to happen when no specific resource has been given
+      _shouldShowAllResources(path){
+        return (path=='/resources' || path=='/resources/')
+      }
+
       // static get observers() {
       //   return [
       //     '_persistedResourcesChanged(persistedResources)',
@@ -288,189 +321,189 @@
       //   super.disconnectedCallback();
       //   this.isAttached = false;
       // }
-      _subrouteChange() {
-        //track when new resource created or edit mode enabled
-        if (this.subrouteData && this.subrouteData.edit == "edit") {
-          if (this.routeData.slug == "_") {
+      // _subrouteChange() {
+      //   //track when new resource created or edit mode enabled
+      //   if (this.subrouteData && this.subrouteData.edit == "edit") {
+      //     if (this.routeData.slug == "_") {
 
-            this._createNewResource()
-          }
-          console.log('editing resource', this.resource)
-          this.set('editMode', true)
-        }
-      }
-      _editResource() {
-        this.set('route.path', this.route.path + '/edit')
-      }
-      _editEnabled(path) {
-        // enable editing if /edit appears on resource subroute
-        return path == "/edit"
-      }
+      //       this._createNewResource()
+      //     }
+      //     console.log('editing resource', this.resource)
+      //     this.set('editMode', true)
+      //   }
+      // }
+      // _editResource() {
+      //   this.set('route.path', this.route.path + '/edit')
+      // }
+      // _editEnabled(path) {
+      //   // enable editing if /edit appears on resource subroute
+      //   return path == "/edit"
+      // }
 
-      _createNewResource() {
-        let id = this.generatePushID();
-        console.log('creating new resource', id)
-        var d = Date.now()
-        var shortcode = this.generateShortCode()
-        let newResource = {
-          $key: id,
-          shortcode: shortcode,
-          description: '',
-          name: '',
-          tags: {},
-          uploadedFiles: [],
-          externalLinks: [],
-          created: d,
-          modified: '',
-          editedBy: {},
-          featureImage: '',
-          deleted: false,
-          draft: false
-        }
-        this.set('resource', newResource)
-      }
-
-
-      _persistedResourcesChanged(resources) {
-        // if page loaded directly then wait for persisted to populate and then filter for result
-        if (resources.length > 0 && this.resource == undefined) {
-          let resource = this._getResourceFromSlug(resources, this.routeData.slug)
-          this.set('resource', resource)
-        }
-      }
-
-      _getResourceFromSlug(resources, slug) {
-        // use route to get resource slug and lookup from resources array
-        // could be made more efficient from populated slug lookup db endpoint, or simply 
-        // letting slug be the resource id (although then will need to ensure all names unique)
-        for (let r of resources) {
-          if (r.slug == slug) {
-            return r
-          }
-        }
-      }
-      _getResourceUrl(resource) {
-
-        return (window.location.origin + "/resource/" + this.resource.slug)
-      }
-
-      _saveResource() {
-        //prompt validation
-        if (this.resource.name == "" || this.resource.description == "") {
-          this.emptyReourceNoteOpen = true;
-          return;
-        }
-        else {
-          // $key automatically populated by persisted resources, or created on new resource generated
-          let key = this.resource.$key
-          delete this.resource.$key
-          this.resource.modified = Date.now()
-          if (!this.resource.editedBy) { this.resource.editedBy = {} }
-          this.resource.editedBy[Date.now()] = this.user.email
-          this.set('editableResource', this.resource)
-          this.$.firebaseResourceDoc.saveValue('/resources', key).then(function () {
-            //save revision 
-            this.$.firebaseResourceDoc.saveValue('/revisions/' + key, Date.now())
-            this.$.firebaseResourceDoc.reset();
-            this.$.firebaseSlugDoc.saveValue('/slugs', this.resource.slug).then(function () {
-              this.$.firebaseSlugDoc.reset();
-            }.bind(this))
-            //notify app to present toast, add back $key in case resource edited again before persisted sync
-            this.resource.$key = key
-            this.dispatchEvent(new CustomEvent('resource-saved', {
-              bubbles: true, composed: true, detail: {
-                resource: this.resource
-              }
-            }))
-          }.bind(this)).catch(function (err) {
-            console.log('err', err)
-          })
-        }
-      }
-      _deleteResource() {
-        this.set('resource.deleted', true)
-        this._saveResource()
-      }
-      _restoreResource() {
-        this.set('resource.deleted', false)
-        this._saveResource()
-      }
-
-      _isYoutube(link) {
-        if (link.url.indexOf('https://youtu.be') > -1 || link.url.indexOf('https://www.youtube.com') > -1) {
-          return true
-        }
-      }
-      _getYoutubeID(link) {
-        let youtubeID = ''
-        if (link.url.indexOf('https://youtu.be') > -1) {
-          var temp = link.url.split('/')
-          youtubeID = temp[temp.length - 1]
-        }
-        if (link.url.indexOf('https://www.youtube.com') > -1) {
-          var temp = link.url.split('/')
-          youtubeID = temp[temp.length - 1].replace('watch?v=', '')
-        }
-        return youtubeID
-      }
+      // _createNewResource() {
+      //   let id = this.generatePushID();
+      //   console.log('creating new resource', id)
+      //   var d = Date.now()
+      //   var shortcode = this.generateShortCode()
+      //   let newResource = {
+      //     $key: id,
+      //     shortcode: shortcode,
+      //     description: '',
+      //     name: '',
+      //     tags: {},
+      //     uploadedFiles: [],
+      //     externalLinks: [],
+      //     created: d,
+      //     modified: '',
+      //     editedBy: {},
+      //     featureImage: '',
+      //     deleted: false,
+      //     draft: false
+      //   }
+      //   this.set('resource', newResource)
+      // }
 
 
-      generatePushID() {
-        var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
-        var lastPushTime = 0;
-        var lastRandChars = [];
-        var now = new Date().getTime();
-        var duplicateTime = (now === lastPushTime);
-        lastPushTime = now;
-        var timeStampChars = new Array(8);
-        for (var i = 7; i >= 0; i--) {
-          timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
-          now = Math.floor(now / 64);
-        }
-        if (now !== 0) throw new Error('We should have converted the entire timestamp.');
-        var id = timeStampChars.join('');
-        if (!duplicateTime) {
-          for (i = 0; i < 12; i++) {
-            lastRandChars[i] = Math.floor(Math.random() * 64);
-          }
-        } else {
-          for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
-            lastRandChars[i] = 0;
-          }
-          lastRandChars[i]++;
-        }
-        for (i = 0; i < 12; i++) {
-          id += PUSH_CHARS.charAt(lastRandChars[i]);
-        }
-        if (id.length != 20) throw new Error('Length should be 20.');
-        return id;
-      }
-      generateShortCode() {
-        var text = "";
-        var possible = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwyz123456789";
-        for (var i = 0; i < 4; i++)
-          text += possible.charAt(Math.floor(Math.random() * possible.length));
-        return text;
-      }
+      // _persistedResourcesChanged(resources) {
+      //   // if page loaded directly then wait for persisted to populate and then filter for result
+      //   if (resources.length > 0 && this.resource == undefined) {
+      //     let resource = this._getResourceFromSlug(resources, this.routeData.slug)
+      //     this.set('resource', resource)
+      //   }
+      // }
 
-      _tagsToArray(json, subProperty) {
-        //lookup full tag
-        if (!json) { return }
-        if (!json.hasOwnProperty(subProperty)) { return }
-        let tags = json[subProperty]
-        var tagsArray = []
-        for (var key in tags) {
-          if (tags.hasOwnProperty(key)) {
-            tagsArray.push(tags[key])
-          }
-        }
-        return tagsArray
-      }
+      // _getResourceFromSlug(resources, slug) {
+      //   // use route to get resource slug and lookup from resources array
+      //   // could be made more efficient from populated slug lookup db endpoint, or simply 
+      //   // letting slug be the resource id (although then will need to ensure all names unique)
+      //   for (let r of resources) {
+      //     if (r.slug == slug) {
+      //       return r
+      //     }
+      //   }
+      // }
+      // _getResourceUrl(resource) {
+
+      //   return (window.location.origin + "/resource/" + this.resource.slug)
+      // }
+
+      // _saveResource() {
+      //   //prompt validation
+      //   if (this.resource.name == "" || this.resource.description == "") {
+      //     this.emptyReourceNoteOpen = true;
+      //     return;
+      //   }
+      //   else {
+      //     // $key automatically populated by persisted resources, or created on new resource generated
+      //     let key = this.resource.$key
+      //     delete this.resource.$key
+      //     this.resource.modified = Date.now()
+      //     if (!this.resource.editedBy) { this.resource.editedBy = {} }
+      //     this.resource.editedBy[Date.now()] = this.user.email
+      //     this.set('editableResource', this.resource)
+      //     this.$.firebaseResourceDoc.saveValue('/resources', key).then(function () {
+      //       //save revision 
+      //       this.$.firebaseResourceDoc.saveValue('/revisions/' + key, Date.now())
+      //       this.$.firebaseResourceDoc.reset();
+      //       this.$.firebaseSlugDoc.saveValue('/slugs', this.resource.slug).then(function () {
+      //         this.$.firebaseSlugDoc.reset();
+      //       }.bind(this))
+      //       //notify app to present toast, add back $key in case resource edited again before persisted sync
+      //       this.resource.$key = key
+      //       this.dispatchEvent(new CustomEvent('resource-saved', {
+      //         bubbles: true, composed: true, detail: {
+      //           resource: this.resource
+      //         }
+      //       }))
+      //     }.bind(this)).catch(function (err) {
+      //       console.log('err', err)
+      //     })
+      //   }
+      // }
+      // _deleteResource() {
+      //   this.set('resource.deleted', true)
+      //   this._saveResource()
+      // }
+      // _restoreResource() {
+      //   this.set('resource.deleted', false)
+      //   this._saveResource()
+      // }
+
+      // _isYoutube(link) {
+      //   if (link.url.indexOf('https://youtu.be') > -1 || link.url.indexOf('https://www.youtube.com') > -1) {
+      //     return true
+      //   }
+      // }
+      // _getYoutubeID(link) {
+      //   let youtubeID = ''
+      //   if (link.url.indexOf('https://youtu.be') > -1) {
+      //     var temp = link.url.split('/')
+      //     youtubeID = temp[temp.length - 1]
+      //   }
+      //   if (link.url.indexOf('https://www.youtube.com') > -1) {
+      //     var temp = link.url.split('/')
+      //     youtubeID = temp[temp.length - 1].replace('watch?v=', '')
+      //   }
+      //   return youtubeID
+      // }
+
+
+      // generatePushID() {
+      //   var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+      //   var lastPushTime = 0;
+      //   var lastRandChars = [];
+      //   var now = new Date().getTime();
+      //   var duplicateTime = (now === lastPushTime);
+      //   lastPushTime = now;
+      //   var timeStampChars = new Array(8);
+      //   for (var i = 7; i >= 0; i--) {
+      //     timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+      //     now = Math.floor(now / 64);
+      //   }
+      //   if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+      //   var id = timeStampChars.join('');
+      //   if (!duplicateTime) {
+      //     for (i = 0; i < 12; i++) {
+      //       lastRandChars[i] = Math.floor(Math.random() * 64);
+      //     }
+      //   } else {
+      //     for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
+      //       lastRandChars[i] = 0;
+      //     }
+      //     lastRandChars[i]++;
+      //   }
+      //   for (i = 0; i < 12; i++) {
+      //     id += PUSH_CHARS.charAt(lastRandChars[i]);
+      //   }
+      //   if (id.length != 20) throw new Error('Length should be 20.');
+      //   return id;
+      // }
+      // generateShortCode() {
+      //   var text = "";
+      //   var possible = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwyz123456789";
+      //   for (var i = 0; i < 4; i++)
+      //     text += possible.charAt(Math.floor(Math.random() * possible.length));
+      //   return text;
+      // }
+
+      // _tagsToArray(json, subProperty) {
+      //   //lookup full tag
+      //   if (!json) { return }
+      //   if (!json.hasOwnProperty(subProperty)) { return }
+      //   let tags = json[subProperty]
+      //   var tagsArray = []
+      //   for (var key in tags) {
+      //     if (tags.hasOwnProperty(key)) {
+      //       tagsArray.push(tags[key])
+      //     }
+      //   }
+      //   return tagsArray
+      // }
 
 
     }
 
-    customElements.define(stats4sdResource.is, stats4sdResource);
+    customElements.define(Stats4sdResources.is, Stats4sdResources);
   </script>
 
 </dom-module>

@@ -4,8 +4,8 @@
   "fragments": [
     "src/stats4sd-list.html",
     "src/stats4sd-home.html",
-    "src/stats4sd-resource.html",
-    "src/stats4sd-collection.html",
+    "src/stats4sd-resources.html",
+    "src/stats4sd-collections.html",
     "src/stats4sd-search.html",
     "src/stats4sd-admin.html",
     "src/lazy-resources.html"

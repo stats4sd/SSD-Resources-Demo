@@ -142,7 +142,7 @@
       }
       // easier to use ahref than propagated
       _getHref(res) {
-        let href = "/resource/" + res.slug
+        let href = "/resources/" + res.slug
         return href
       }
       _resourceClicked() {
@@ -150,7 +150,7 @@
         // could also send the full resource but method would fail if navigating directly so no point
         this.dispatchEvent(new CustomEvent('resource-change', {
           bubbles: true, composed: true, detail: {
-            url: "/resource/" + this.resource.slug,
+            url: "/resources/" + this.resource.slug,
             resource: this.resource
           }
         }));

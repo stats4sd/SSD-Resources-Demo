@@ -189,6 +189,10 @@
           analyticsKey: {
             type: String
           },
+          route:{
+            type:Object,
+            observer:function(route){console.log('route changed',route)}
+          }
         }
       }
      
@@ -271,7 +275,7 @@
         // e = the resource object that has just been saved to the database.
         this.addEventListener('resource-saved', (e) => this._resourceSaved(e));
 
-        // collection-resources-add sent from 'stats4sd-collection' element.
+        // collection-resources-add sent from 'stats4sd-collections' element.
         // e = the collection being edited
         this.addEventListener('collection-resources-add', (e) => this._collectionResourcesAdd(e));
 

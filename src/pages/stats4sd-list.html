@@ -55,26 +55,17 @@
       }
     </style>
 
-    <!--
-      app-route provides the name of the category.
-      NOTE: {{route}} is provided by the {{subroute}} from the home page, so is equal to everything AFTER the "https://resources.stats4sd.org/list/" part of the url. 
-    -->
-    <app-route route="[[route]]" pattern="/:type/:category" data="{{routeData}}"></app-route>
 
     <!--
       stats4sd-category-data provides the category data for a given category name.
     -->
-    <stats4sd-category-data id="categoryData" type="[[routeData.type]]" category="[[routeData.category]]" label="{{label}}" filtered-resources="{{filteredResources}}"
-      resources="[[persistedResources]]" subset="{{subset}}" tags="[[persistedTags]]"></stats4sd-category-data>
+    <!-- <stats4sd-category-data id="categoryData" type="[[routeData.type]]" category="[[routeData.category]]" label="{{label}}" filtered-resources="{{filteredResources}}"
+      resources="[[persistedResources]]" subset="{{subset}}" tags="[[persistedTags]]"></stats4sd-category-data> -->
 
     <header>
       <!-- add s onto end of label when loaded, could put into calcuation to check if already s exists of simply try to avoid when creating types -->
       <h1>[[_getPluralizedQuantity(label,2)]]</h1>
       <div class="counter" style="margin-bottom:0">[[resourcesRendered]] [[_getPluralizedQuantity('Resource',resourcesRendered)]]</div>
-      <!-- <div class="searchBox" style="max-width: 500px;align-self:center;margin:auto;padding-bottom:24px;">
-        <paper-input id="searchBox" value="{{searchText}}" name="search" label="search" no-label-float on-input="_search"></paper-input>
-      </div> -->
-
     </header>
 
     <ul class="flex wrap" hidden$="[[!failure]]">

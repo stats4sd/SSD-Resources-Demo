@@ -1,7 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../redux-mixin.html">
 
-
 <link rel="import" href="../../bower_components/wysiwyg-e/wysiwyg-e.html">
 <link rel="import" href="../../bower_components/wysiwyg-e/tools/bold.html">
 <link rel="import" href="../../bower_components/wysiwyg-e/tools/italic.html">
@@ -22,7 +21,7 @@
 <link rel="import" href="../../bower_components/wysiwyg-e/tools/heading.html">
 <link rel="import" href="../../bower_components/wysiwyg-e/tools/blockquote.html">
 
-<dom-module id="stats4sd-collection">
+<dom-module id="stats4sd-collections">
 
   <template>
 
@@ -47,10 +46,10 @@
     <app-route route="{{route}}" pattern="/collection/:collectionSlug" data="{{routeData}}"></app-route>-->
 
     <!-- live db binding for new resource -->
-    <firebase-document id="liveCollectionDocument" data="{{liveCollection}}" app-name="stats4sd-resources"></firebase-document>
+    <!-- <firebase-document id="liveCollectionDocument" data="{{liveCollection}}" app-name="stats4sd-resources"></firebase-document> -->
 
     <!-- Template for individual collection set -->
-    <div hidden$="[[!activeCollection]]">
+    <div hidden$="[[!activeCollection]]" style="margin-bottom:3em">
       <div hidden$="[[editMode]]">
         <div hidden$="!activeCollection.label">
           <h1 style="display: inline-block">{{activeCollection.label}}</h1>
@@ -77,7 +76,7 @@
 
     <!-- show all collections for / or blank endpoint -->
     <div>
-      <div class="sub-section-heading">All Collections</div>
+      <div class="sub-section-heading" style="margin-top:1em">All Collections</div>
       <div class="flex wrap">
         <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPublic">
           <collection-element collection={{collection}}></collection-element>
@@ -97,7 +96,7 @@
     <!-- Template for add/edit collection -->
     <!-- *** add display none for when loading or similar (e.g. when resource updated) -->
 
-    <template is="dom-if" if="{{editMode}}">
+    <!-- <template is="dom-if" if="{{editMode}}">
       <paper-input always-float-label label="Collection Name" value="{{liveCollection.label}}" style="padding-bottom:10px"></paper-input>
       <div>Description</div>
       <div>
@@ -127,9 +126,9 @@
           <wysiwyg-tool-heading h1 h2 h3 h4 h5 h6></wysiwyg-tool-heading>
           <wysiwyg-tool-blockquote></wysiwyg-tool-blockquote>
         </wysiwyg-e>
-      </div>
+      </div> -->
 
-      <div class="flex" style="padding:20px 0">
+      <!-- <div class="flex" style="padding:20px 0">
         <paper-toggle-button checked="{{!liveCollection.draft}}"></paper-toggle-button>
         <div hidden$="[[liveCollection.draft]]">
           <span>Public</span>
@@ -143,18 +142,15 @@
       <div class="buttons">
         <paper-button on-tap="cancel">Cancel</paper-button>
         <paper-button on-tap="saveCollection">Save</paper-button>
-      </div>
-    </template>
-
-
-
+      </div> 
+    </template>-->
 
   </template>
 
   <script>
-    class stats4sdCollection extends ReduxMixin(Polymer.Element) {
+    class Stats4sdCollections extends ReduxMixin(Polymer.Element) {
 
-      static get is() { return 'stats4sd-collection'; }
+      static get is() { return 'stats4sd-collections'; }
 
       static get properties() {
         return {
@@ -214,7 +210,7 @@
       _setActiveCollection(path, allCollectionsBySlug) {
         // method runs when slug changed or persisted collections updated (e.g. first load)
         // loads all collections on empty or / route, otherwise loads individual
-        if (!path || path == '/collection' || path == '/collection/') {
+        if (!path || path == '/collections' || path == '/collections/') {
           return null
         }
         else {
@@ -223,10 +219,10 @@
           if (!this.allCollectionsBySlug || this.allCollectionsBySlug.length == 0) { return {} }
           else {
             console.log('collection', allCollectionsBySlug[slug])
-            // scroll to top
+            // scroll to top (former method for reference, now all handled in app-layout element on any path change)
             // dispatches an event titled 'scrollToTop', and a listener has been placed on the stats4sd-app-layout element to handle
             // the bubbles:true, composed:true are required so it passes all the way up the dom tree (otherwise blocked at each shadow level)
-            this.dispatchEvent(new CustomEvent('scrollToTop', { bubbles: true, composed: true, detail: 'hello' }));
+            // this.dispatchEvent(new CustomEvent('scrollToTop', { bubbles: true, composed: true, detail: 'hello' }));
             return allCollectionsBySlug[slug]
           }
         }
@@ -326,7 +322,7 @@
           this.liveCollection.resources = [];
         }
         console.log('creating collection', this.liveCollection)
-        let redirectURL = window.location.origin + '/collection/' + this.liveCollection.slug
+        let redirectURL = window.location.origin + '/collections/' + this.liveCollection.slug
         this.$.liveCollectionDocument.saveValue('/tags/Collections', this.liveCollection.key)
 
           .then(() => {
@@ -403,7 +399,7 @@
     }
 
 
-    customElements.define(stats4sdCollection.is, stats4sdCollection);
+    customElements.define(Stats4sdCollections.is, Stats4sdCollections);
   </script>
 
 </dom-module>
