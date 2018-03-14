@@ -53,6 +53,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+      
     }
 
     #preloader>h1 {
@@ -60,24 +61,25 @@
       margin: auto;
       padding-bottom: 200px;
     }
-
-    .loaded > #preloader {
-        opacity: 0.5;
-        transform: translateY(-100%);
-        -webkit-transition: all 0.3s 0.6s ease-out;
-        transition: all 0.3s 0.6s ease-out;
-    }
     
-    #mainApp {
-      transform: translateY(100%);
-      position: fixed;
-      overflow: scroll;
-    }     
+    /* when the loaded class is added we fade the preloader away, and once faded shift it off the screen */
+    .loaded>#preloader {
+      opacity: 0;
+      transform: translateY(-100%);
+      -webkit-transition: opacity 0.3s ease-out 0.6s, -webkit-transform 0s ease-out 1s; 
+      transition: opacity 0.3s ease-out 0.6s, transform 0s ease-out 1s ;
 
-    .loaded > #mainApp {
-      transform: translateY(0);
-      -webkit-transition: all 0.3s 0.6s ease-out;
-      transition: all 0.3s 0.6s ease-out;
+    }
+
+    #mainApp {
+      /* transform: translateY(100%); */
+
+    }
+
+    .loaded>#mainApp {
+      /* transform: translateY(0); */
+      /* -webkit-transition: all 0.3s 0.6s ease-out;
+      transition: all 0.3s 0.6s ease-out; */
     }
   </style>
 
@@ -105,7 +107,6 @@
   // automatically remove loading screen after 1s more if not called from other methods 
   // (currently also calls when tags updated in stats4sd-app.html)
   setTimeout(() => {
-    console.log('timeout called')
     document.body.classList.add('loaded')
     //document.body.style.overflow='auto'
   }, 2000);

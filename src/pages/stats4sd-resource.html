@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="../redux-mixin.html">
+
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/paper-chip/paper-chip.html">
 <link rel="import" href="../stats4sd-category-data.html">
@@ -11,12 +12,9 @@
   <template>
 
     <style include="shared-styles">
-       :host {
+      :host {
         display: block;
-
-        background-color: #DBDBDB;
-        @apply(--layout-flex);
-        @apply(--layout-vertical);
+        padding: 10px;
       }
 
       #content {
@@ -30,6 +28,11 @@
         max-width: 400px;
         transition: opacity 0.4s;
         opacity: 0;
+      }
+
+      .resource-meta-heading {
+        font-weight: bold;
+        margin: 2em 0 1em 0;
       }
 
       .resource[has-content] {
@@ -55,6 +58,10 @@
       .meta-data {
         display: flex;
         flex-wrap: wrap;
+      }
+
+      .video-container {
+        margin-bottom: 5px;
       }
 
       .deleted {
@@ -97,15 +104,7 @@
           max-width: 600px;
         }
       }
-
-
     </style>
-
-    <!--
-      app-route provides the name of the category and the item.
-    -->
-    <app-route route="{{route}}" pattern="/:slug" data="{{routeData}}" tail="{{subroute}}"></app-route>
-    <app-route route="[[subroute]]" pattern="/:edit" data="{{subrouteData}}"></app-route>
 
     <!-- Main Resource View -->
     <template is="dom-if" if="{{!editMode}}">
@@ -122,33 +121,33 @@
           </div>
           <div class="meta-data">
             <div style="min-width: 300px; max-width:700px">
-              <div class='bold'>Description: </div>
-              <p style="margin-top:5px; ">[[resource.description]]</p>
+              <div class="resource-meta-heading">Description</div>
+              <p>[[resource.description]]</p>
             </div>
             <!--  -->
             <div class="files-container" hidden$="[[!resource.uploadedFiles]]">
-              <div class='bold'>Files: </div>
+              <div class="resource-meta-heading">Files: </div>
               <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
                 <resource-file-download file="[[file]]"></resource-file-download>
               </template>
             </div>
           </div>
           <!-- Links and Videos -->
-          <div class='bold' hidden$="[[!resource.externalLinks]]">External Links: </div>
+          <div class="resource-meta-heading" hidden$="[[!resource.externalLinks]]">External Links </div>
           <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
+            <template is="dom-if" if="{{_isYoutube(link)}}">
+              <google-youtube class="video-container" video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0"
+                autoplay="0">
+              </google-youtube>
+            </template>
             <a href="[[link.url]]" target="_blank">
               <iron-icon icon="language" prefix></iron-icon>
               <span>[[link.url]]</span>
             </a>
-            <template is="dom-if" if="{{_isYoutube(link)}}">
-              <div>Youtube Link</div>
-              <google-youtube video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0" autoplay="0">
-              </google-youtube>
-            </template>
           </template>
-          <div class="keywords" style="margin-top: 2em; min-width:300px; max-width: 700px">
+          <div hidden$="[[!resource.keywords]]" class="keywords" style="margin-top: 2em; min-width:300px; max-width: 700px">
             <!-- For each keyword, display a paper-chip -->
-            <div class='bold' style="margin-bottom:1em;">Keywords</div>
+            <div class="resource-meta-heading" style="margin-bottom:1em;">Keywords</div>
             <template is='dom-repeat' items='[[_tagsToArray(resource.tags,"Keywords")]]' as='keyword'>
               <paper-chip class='custom-background' label="[[keyword.label]]"></paper-chip>
             </template>
@@ -198,56 +197,97 @@
   </template>
 
   <script>
-    class stats4sdResource extends Polymer.Element {
+    class stats4sdResource extends ReduxMixin(Polymer.Element) {
 
       static get is() { return 'stats4sd-resource'; }
 
       static get properties() {
         return {
-          item: Object,
-          route: Object,
-          routeData: Object,
-          subrouteData: Object,
-          visible: {
-            type: Boolean,
-            value: false
-          },
-          offline: {
-            type: Boolean,
-            // observer: '_offlineChanged'
-          },
-          failure: Boolean,
-          persistedResources: {
+          // properties updated by the redux global store
+          allResourcesBySlug: {
             type: Array,
-
+            statePath: 'persistedResources.bySlug'
           },
+          path: {
+            type: String,
+            statePath: 'path'
+          },
+          // properties computed automatically on changes
           resource: {
-            type: Object
+            type: Object,
+            computed: '_setActiveResource(path,allResourcesBySlug)',
           },
+
           editMode: {
             type: Boolean,
-            computed: '_editEnabled(subroute.path)'
-          },
-          persistedTags: Object
+            value: false
+          }
 
+          //   item: Object,
+          //   route: Object,
+          //   routeData: Object,
+          //   subrouteData: Object,
+          //   visible: {
+          //     type: Boolean,
+          //     value: false
+          //   },
+          //   offline: {
+          //     type: Boolean,
+          //     // observer: '_offlineChanged'
+          //   },
+          //   failure: Boolean,
+          //   persistedResources: {
+          //     type: Array,
+
+          //   },
+          //   resource: {
+          //     type: Object
+          //   },
+          //   editMode: {
+          //     type: Boolean,
+          //     computed: '_editEnabled(subroute.path)'
+          //   },
+          //   persistedTags: Object
+
+        }
+
+      }
+      _setActiveResource(path, allResourcesBySlug) {
+        // method runs when slug changed or persisted collections updated (e.g. first load)
+        // loads all collections on empty or / route, otherwise loads individual
+        if (!path || path == '/resource' || path == '/resource/') {
+          return null
+        }
+        else {
+          // want to get slug as first part after collection, could use app-route element with routeData however seems inconsistent
+          let slug = this.path.split('/')[2]
+          if (!this.allResourcesBySlug || this.allResourcesBySlug.length == 0) { return {} }
+          else {
+            console.log('resource', allResourcesBySlug[slug])
+            // scroll to top
+            // dispatches an event titled 'scrollToTop', and a listener has been placed on the stats4sd-app-layout element to handle
+            // the bubbles:true, composed:true are required so it passes all the way up the dom tree (otherwise blocked at each shadow level)
+            this.dispatchEvent(new CustomEvent('scrollToTop', { bubbles: true, composed: true, detail: 'hello' }));
+            return allResourcesBySlug[slug]
+          }
         }
       }
 
-      static get observers() {
-        return [
-          '_persistedResourcesChanged(persistedResources)',
-          '_subrouteChange(subrouteData.slug)'
-        ]
-      }
-      connectedCallback() {
-        super.connectedCallback();
-        this.isAttached = true;
-      }
+      // static get observers() {
+      //   return [
+      //     '_persistedResourcesChanged(persistedResources)',
+      //     '_subrouteChange(subrouteData.slug)'
+      //   ]
+      // }
+      // connectedCallback() {
+      //   super.connectedCallback();
+      //   this.isAttached = true;
+      // }
 
-      disconnectedCallback() {
-        super.disconnectedCallback();
-        this.isAttached = false;
-      }
+      // disconnectedCallback() {
+      //   super.disconnectedCallback();
+      //   this.isAttached = false;
+      // }
       _subrouteChange() {
         //track when new resource created or edit mode enabled
         if (this.subrouteData && this.subrouteData.edit == "edit") {
@@ -414,17 +454,17 @@
       }
 
       _tagsToArray(json, subProperty) {
-      //lookup full tag
-      if (!json) { return }
-      if (!json.hasOwnProperty(subProperty)) { return }
-      let tags = json[subProperty]
-      var tagsArray = []
-      for (var key in tags) {
-        if (tags.hasOwnProperty(key)) {
-          tagsArray.push(tags[key])
+        //lookup full tag
+        if (!json) { return }
+        if (!json.hasOwnProperty(subProperty)) { return }
+        let tags = json[subProperty]
+        var tagsArray = []
+        for (var key in tags) {
+          if (tags.hasOwnProperty(key)) {
+            tagsArray.push(tags[key])
+          }
         }
-      }
-      return tagsArray
+        return tagsArray
       }
 
 

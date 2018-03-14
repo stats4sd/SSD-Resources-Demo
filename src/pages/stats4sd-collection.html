@@ -42,57 +42,55 @@
       }
     </style>
 
-    <!-- app-route provides the name of the category. -->
-    <app-location route="{{route}}"></app-location>
-    <app-route route="{{route}}" pattern="/collection/:collectionSlug" data="{{routeData}}"></app-route>
-
-
+    <!-- app-route provides the name of the category (not used as location can be inconsistent when empty, using global store). -->
+    <!-- <app-location route="{{route}}"></app-location> 
+    <app-route route="{{route}}" pattern="/collection/:collectionSlug" data="{{routeData}}"></app-route>-->
 
     <!-- live db binding for new resource -->
     <firebase-document id="liveCollectionDocument" data="{{liveCollection}}" app-name="stats4sd-resources"></firebase-document>
 
-    <!-- main page view for / or blank endpoint -->
-    <div hidden$="[[_showIndividual(route.path,'false')]]">
-      <h1>All Collections</h1>
+    <!-- Template for individual collection set -->
+    <div hidden$="[[!activeCollection]]">
+      <div hidden$="[[editMode]]">
+        <div hidden$="!activeCollection.label">
+          <h1 style="display: inline-block">{{activeCollection.label}}</h1>
+          <template is="dom-if" if="{{user.email}}">
+            <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
+          </template>
+          <div id="descriptionContainer" hidden$="[[!activeCollection.description]]"></div>
+          <h2>Resources</h2>
+          <template id="resourcesInCollection" is="dom-repeat" as="res" items="[[activeCollectionResources]]">
+            <resource-search-result resource='[[res]]'></resource-search-result>
+          </template>
+          <!-- admin only add resources -->
+          <!-- <template is="dom-if" if="{{user.email}}">
+            <a class="href-plain" on-tap="_collectionResourcesAdd">
+              <paper-button style="color:var(--paper-green-700)">
+                <iron-icon icon="add"></iron-icon>Add Resources
+              </paper-button>
+            </a>
+          </template> -->
+        </div>
+
+      </div>
+    </div>
+
+    <!-- show all collections for / or blank endpoint -->
+    <div>
+      <div class="sub-section-heading">All Collections</div>
       <div class="flex wrap">
         <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPublic">
           <collection-element collection={{collection}}></collection-element>
         </template>
       </div>
-
       <template is="dom-if" if="{{user.email}}">
-        <h1>Non-public Collections</h1>
+        <div class="sub-section-heading">Non-public Collections</div>
         <div class="flex wrap">
           <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPrivate">
             <collection-element collection={{collection}}></collection-element>
           </template>
         </div>
       </template>
-
-
-    </div>
-
-    <!-- Template for individual collection set -->
-    <div hidden$="[[_showIndividual(route.path,'true')]]">
-      <div hidden$="[[editMode]]">
-        <h1 style="display: inline-block">{{activeCollection.label}}</h1>
-        <template is="dom-if" if="{{user.email}}">
-          <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
-        </template>
-        <div id="descriptionContainer"></div>
-        <h2>Resources</h2>
-        <template id="resourcesInCollection" is="dom-repeat" as="res" items="[[activeCollectionResources]]">
-          <resource-search-result resource='[[res]]'></resource-search-result>
-        </template>
-        <!-- admin only add resources -->
-        <template is="dom-if" if="{{user.email}}">
-          <a class="href-plain" on-tap="_collectionResourcesAdd">
-            <paper-button style="color:var(--paper-green-700)">
-              <iron-icon icon="add"></iron-icon>Add Resources
-            </paper-button>
-          </a>
-        </template>
-      </div>
     </div>
 
 
@@ -161,7 +159,7 @@
       static get properties() {
         return {
 
-
+          // properties updated by the redux global store
           allCollections: {
             type: Array,
             statePath: 'persistedTags.array.collections',
@@ -170,40 +168,40 @@
             type: Array,
             statePath: 'persistedTags.bySlug.collections',
           },
-          // active collection will automatically compute when there are changes to url slug or allCollections
+          allResourcesByKey: {
+            type: Array,
+            statePath: 'persistedResources.byKey'
+          },
+          path: {
+            type: String,
+            statePath: 'path'
+          },
+
+          // properties computed automatically on changes
           activeCollection: {
             type: Object,
-            computed: '_setActiveCollection(routeData.collectionSlug,allCollectionsBySlug)',
+            computed: '_setActiveCollection(path,allCollectionsBySlug)',
           },
-          activeCollectionResources:{
-            type:Array,
+          activeCollectionResources: {
+            type: Array,
             computed: '_setActiveCollectionResources(activeCollection.resources,allResourcesByKey)'
           },
-          allResourcesByKey: {
-           type:Array,
-           statePath:'persistedResources.byKey' 
-          },
 
-          showAll: {
-            type: Boolean,
-            value: false
-          },
+          // user: Object,
+          // liveCollection: {
+          //   type: Object,
+          //   notify: true
+          // },
 
-          user: Object,
-          liveCollection: {
-            type: Object,
-            notify: true
-          },
-          
-          editMode: Boolean,
-          visualEditor: {
-            type: Boolean,
-            value: true
-          },
-          editableDescription: {
-            type: String,
-            notify: true
-          }
+          // editMode: Boolean,
+          // visualEditor: {
+          //   type: Boolean,
+          //   value: true
+          // },
+          // editableDescription: {
+          //   type: String,
+          //   notify: true
+          // }
         }
       }
 
@@ -213,17 +211,24 @@
         ]
       }
 
-      _setActiveCollection(slug, allCollectionsBySlug) {
+      _setActiveCollection(path, allCollectionsBySlug) {
         // method runs when slug changed or persisted collections updated (e.g. first load)
-        // loads all collections on empty or / slug, otherwise loads individual
-        if (!slug || slug == "/") {
-          this.set('showAll', true)
-          return {}
+        // loads all collections on empty or / route, otherwise loads individual
+        if (!path || path == '/collection' || path == '/collection/') {
+          return null
         }
-        if (!this.allCollectionsBySlug || this.allCollectionsBySlug.length == 0) { return {} }
         else {
-          console.log('active collection',allCollectionsBySlug[slug])
-          return allCollectionsBySlug[slug]
+          // want to get slug as first part after collection, could use app-route element with routeData however seems inconsistent
+          let slug = this.path.split('/')[2]
+          if (!this.allCollectionsBySlug || this.allCollectionsBySlug.length == 0) { return {} }
+          else {
+            console.log('collection', allCollectionsBySlug[slug])
+            // scroll to top
+            // dispatches an event titled 'scrollToTop', and a listener has been placed on the stats4sd-app-layout element to handle
+            // the bubbles:true, composed:true are required so it passes all the way up the dom tree (otherwise blocked at each shadow level)
+            this.dispatchEvent(new CustomEvent('scrollToTop', { bubbles: true, composed: true, detail: 'hello' }));
+            return allCollectionsBySlug[slug]
+          }
         }
       }
 
@@ -237,22 +242,27 @@
         }
       }
 
-       _setActiveCollectionResources(resourceKeys, allResourcesByKey) {
+      _setActiveCollectionResources(resourceKeys, allResourcesByKey) {
         // method to filter resources for those that match current collection
         // in future would be better to just keep track of the resource ids in the collection object
         let resources = []
         if (resourceKeys && allResourcesByKey) {
-          console.log('setting active collection resources', resourceKeys,allResourcesByKey)
+          console.log('setting active collection resources', resourceKeys, allResourcesByKey)
           for (let key in resourceKeys) {
             if (allResourcesByKey.hasOwnProperty(key)) {
               resources.push(allResourcesByKey[key])
             }
           }
-          console.log('active collection resources',resources)
+          console.log('active collection resources', resources)
         }
-        
+
         return resources
       }
+
+
+      /********************************************************************
+                        Chris - codechecking checkpoint 
+      *********************************************************************/
 
 
 
@@ -276,7 +286,7 @@
         else { return hide != 'true' }
       }
 
-     
+
 
       _addCollection() {
         console.log('adding collection')

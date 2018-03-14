@@ -64,7 +64,7 @@
                         <!-- temporarily removing logo until we choose whether to have Stats4SD logo or a different, project-specific one. -->
                         <div class='logo-box'>
                             <!--   <img class$="[[_headerStyle(smallScreen)]]" src="../images/test-logo.png"/> -->
-                            <h4 style='color: #085eaa'>Stats4SD Resources</h4>
+                            <a href="/" style="text-decoration: unset"><h4 style='color: #085eaa'>Stats4SD Resources</h4></a>
                         </div>
                     </div>
                     <template is="dom-if" if="{{!smallScreen}}">
@@ -107,8 +107,8 @@
               iron-pages will display one of the child elements. The displayed element is determined by the "selected" property - in this case, this is bound to [[page]]. (So when [[page]] changes, iron-pages shows a new page element).
               The attr-for-selected property tells you which property of the child elements to match to [[page]] - in this case, you need to match the name of the child element.
              -->
-             <stats4sd-loader></stats4sd-loader>
-            <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
+            <stats4sd-loader></stats4sd-loader>
+            <iron-pages id="ironPages" class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
                 <stats4sd-home id="homePage" name="home" user="{{user}}" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]"
                     keywords="[[allKeywords]]"></stats4sd-home>
                 <stats4sd-about id="aboutPage" name="about"></stats4sd-about>
@@ -230,7 +230,7 @@
                         type: Boolean,
                         statePath: 'smallScreen',
                         // update header style on screen size change
-                        observer: function(isSmall){
+                        observer: function (isSmall) {
                             return this.headerClass = isSmall ? 'small' : 'big'
                         }
                     },
@@ -242,8 +242,21 @@
                             return this.$.drawer.close();
                         }
                     },
-                    headerClass:String,                    
+                    headerClass: String,
                 }
+            }
+            // when ready add a listener for the custom 'scrollToTop' event
+            // when fired by a child component this automatically scrolls the page up to the header component
+            // see an example on the stats4sd-collection page during '_setActiveCollection()'
+            ready() {
+                super.ready();
+                const childElement = this.$.ironPages
+                childElement.addEventListener('scrollToTop', event => {
+                    let header = this.$.header
+                    header.scrollIntoView(
+                        {behavior:'smooth'}
+                    )
+                });
             }
         }
 

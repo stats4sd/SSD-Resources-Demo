@@ -191,6 +191,7 @@
           },
         }
       }
+     
 
       // actions update the global data store of particular variables (defined in the redux-mixin html doc)
       // they are called from this.dispatch(function,value). You can inspect these through the 'Redux dev tools' browser plugin
@@ -219,20 +220,28 @@
               type: 'UPDATE_TAGS',
               payload: payload
             }
+          },
+          updatePath(path){
+            return{
+              type:'UPDATE_PATH',
+              payload:path
+            }
           }
 
 
 
         }
       }
-
+      // use a complex observer to detect path subproperty changes
       static get observers() {
         return [
           '_routePageChanged(routeData.page)',
-        ]
-
+          '_pathChanged(route.path)'
+        ]   
         // note, could use persistedFeatured.length to simply track number of items
       }
+       
+       
 
       constructor() {
         super();
@@ -275,6 +284,11 @@
           // window.addEventListener('online', (e) => this._notifyNetworkStatus(e));
           // window.addEventListener('offline', (e) => this._notifyNetworkStatus(e));
         });
+      }
+      
+      // path change observer updates the global store of the current path
+      _pathChanged(path){
+        return this.dispatch('updatePath', path)
       }
 
       // *Observer Function** for {{routeData.page}}
