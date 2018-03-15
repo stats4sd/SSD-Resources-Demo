@@ -3,12 +3,14 @@
 <dom-module id="resource-search-result">
   <template>
     <style>
-       :host {
+      :host {
         display: block;
         width: 100%;
         margin-bottom: 1em;
         cursor: pointer;
       }
+
+      a{text-decoration: unset}
 
       img {
         /*max-width: 20vw;*/
@@ -70,24 +72,24 @@
         }
       }
     </style>
-    <!-- <a href="[[_getHref(resource)]]" on-tap="_resourceClicked"> -->
-    <div style="display:flex">
-      <div on-click="_resourceClicked">
-        <img src="[[_getImage(resource)]]">
-      </div>
-      <div class="resource-info" style="flex-basis: 100%" on-click="_resourceClicked">
-        <div class="resource-title">[[resource.name]]</div>
-        <div class="resource-description">[[resource.description]]</div>
-      </div>
-      <template is="dom-if" if="{{collectionAddMode}}">
-        <div style="padding:5px">
-          <paper-icon-button icon="library-add" style="vertical-align:middle" active="{{ _resourceInCollection(resource,liveCollection)}}"
-            toggles on-tap="_collectionToggle"></paper-icon-button>
+    <a href="[[_getHref(resource)]]">
+      <div style="display:flex">
+        <div>
+          <img src="[[_getImage(resource)]]">
         </div>
-      </template>
+        <div class="resource-info" style="flex-basis: 100%">
+          <div class="resource-title">[[resource.name]]</div>
+          <div class="resource-description">[[resource.description]]</div>
+        </div>
+        <template is="dom-if" if="{{collectionAddMode}}">
+          <div style="padding:5px">
+            <paper-icon-button icon="library-add" style="vertical-align:middle" active="{{ _resourceInCollection(resource,liveCollection)}}"
+              toggles on-tap="_collectionToggle"></paper-icon-button>
+          </div>
+        </template>
 
-    </div>
-    <!-- </a> -->
+      </div>
+    </a>
   </template>
 
   <script>
@@ -116,16 +118,16 @@
       _collectionToggle(e) {
         //add or remove toggled resource from live collection
         let key = this.resource.$key
-        if(this.liveCollection.resources.hasOwnProperty(key)){
+        if (this.liveCollection.resources.hasOwnProperty(key)) {
           delete this.liveCollection.resources[key]
         }
-        else{
-          this.liveCollection.resources[key]=Date.now()
+        else {
+          this.liveCollection.resources[key] = Date.now()
         }
-        console.log('resource added',this.liveCollection)
+        console.log('resource added', this.liveCollection)
       }
-      _resourceInCollection(resource,liveCollection){
-        let key=resource.$key
+      _resourceInCollection(resource, liveCollection) {
+        let key = resource.$key
         return (liveCollection.resources.hasOwnProperty(key))
       }
       _getImage(res) {
@@ -145,16 +147,16 @@
         let href = "/resources/" + res.slug
         return href
       }
-      _resourceClicked() {
-        // dispatch event up to app so that it can bind the resource to the resource view page and navigate
-        // could also send the full resource but method would fail if navigating directly so no point
-        this.dispatchEvent(new CustomEvent('resource-change', {
-          bubbles: true, composed: true, detail: {
-            url: "/resources/" + this.resource.slug,
-            resource: this.resource
-          }
-        }));
-      }
+      // _resourceClicked() {
+      //   // dispatch event up to app so that it can bind the resource to the resource view page and navigate
+      //   // could also send the full resource but method would fail if navigating directly so no point
+      //   this.dispatchEvent(new CustomEvent('resource-change', {
+      //     bubbles: true, composed: true, detail: {
+      //       url: "/resources/" + this.resource.slug,
+      //       resource: this.resource
+      //     }
+      //   }));
+      // }
     }
 
     window.customElements.define(ResourceSearchResult.is, ResourceSearchResult);

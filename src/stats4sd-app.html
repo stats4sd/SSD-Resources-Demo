@@ -189,13 +189,13 @@
           analyticsKey: {
             type: String
           },
-          route:{
-            type:Object,
-            observer:function(route){console.log('route changed',route)}
+          route: {
+            type: Object,
+            observer: function (route) { console.log('route changed', route) }
           }
         }
       }
-     
+
 
       // actions update the global data store of particular variables (defined in the redux-mixin html doc)
       // they are called from this.dispatch(function,value). You can inspect these through the 'Redux dev tools' browser plugin
@@ -225,10 +225,10 @@
               payload: payload
             }
           },
-          updatePath(path){
-            return{
-              type:'UPDATE_PATH',
-              payload:path
+          updatePath(path) {
+            return {
+              type: 'UPDATE_PATH',
+              payload: path
             }
           }
 
@@ -241,11 +241,11 @@
         return [
           '_routePageChanged(routeData.page)',
           '_pathChanged(route.path)'
-        ]   
+        ]
         // note, could use persistedFeatured.length to simply track number of items
       }
-       
-       
+
+
 
       constructor() {
         super();
@@ -289,9 +289,9 @@
         //   // window.addEventListener('offline', (e) => this._notifyNetworkStatus(e));
         // });
       }
-      
+
       // path change observer updates the global store of the current path
-      _pathChanged(path){
+      _pathChanged(path) {
         return this.dispatch('updatePath', path)
       }
 
@@ -310,17 +310,18 @@
         // tell global store of new page
         this.dispatch('updatePage', page)
         this.lastPage = oldPage
-        window.scrollTo(0, 0);
+        //window.scrollTo(0, 0);
         //Assuming a {{page}} value exists:
         if (page != null) {
-          // home route is eagerly loaded
+          // home route doesn't need import
           if (page == 'home') {
-            this._pageLoaded(Boolean(oldPage));
+            //this._pageLoaded(Boolean(oldPage));
             // other routes are lazy loaded
           } else {
             // When a load failed, it triggered a 404 which means we need to
             // eagerly load the 404 page definition
             let cb = this._pageLoaded.bind(this, Boolean(oldPage));
+            
             Polymer.importHref(
               this.resolveUrl('pages/stats4sd-' + page + '.html'),
               cb, cb, true);
@@ -527,75 +528,75 @@
       // }
 
 
-    //   // Function bound to the 'sign-in' button.
-    //   // Opens the login dialog. 
-    //   _signInOpen() {
-    //     this.$.login.open()
-    //   }
+      //   // Function bound to the 'sign-in' button.
+      //   // Opens the login dialog. 
+      //   _signInOpen() {
+      //     this.$.login.open()
+      //   }
 
-    //   // Function bound to the sign-out button. 
-    //   // Triggers the signOut() function in the custom 'login-element' element.
-    //   _signOut() {
-    //     this.$.stats4sdLogin.signOut();
-    //     this.signedIn = false;
-    //   }
+      //   // Function bound to the sign-out button. 
+      //   // Triggers the signOut() function in the custom 'login-element' element.
+      //   _signOut() {
+      //     this.$.stats4sdLogin.signOut();
+      //     this.signedIn = false;
+      //   }
 
-    //   // **Observer Function** for {{signedIn}}
-    //   // When the user signedIn status changes, ensure that the login dialog is closed.
-    //   _signedInChange() {
-    //     this.$.login.close()
-    //   }
-
-
-    //   // ************deprecated functions?? - to review ***************
-
-    //   // Elements in the app can notify section changes.
-    //   // Response by a11y announcing the section and syncronizing the category.
-    //   _onChangeSection(event) {
-    //     let detail = event.detail;
-
-    //     // Scroll to the top of the page when navigating to a non-list page. For list view,
-    //     // scroll to the last saved position only if the category has not changed.
-    //     let scrollTop = 0;
-    //     if (this.page === 'list') {
-    //       if (this.categoryName === detail.category) {
-    //         scrollTop = this._listScrollTop;
-    //       } else {
-    //         // Reset the list view scrollTop if the category changed.
-    //         this._listScrollTop = 0;
-    //       }
-    //     }
-    //     // Use `Polymer.AppLayout.scroll` with `behavior: 'silent'` to disable header scroll
-    //     // effects during the scroll.
-    //     Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });
-
-    //     this.categoryName = detail.category || '';
-
-    //     // Announce the page's title
-    //     if (detail.title) {
-    //       document.title = detail.title + ' - stats4sd';
-    //       this._announce(detail.title + ', loaded');
-    //     }
-    //   }
+      //   // **Observer Function** for {{signedIn}}
+      //   // When the user signedIn status changes, ensure that the login dialog is closed.
+      //   _signedInChange() {
+      //     this.$.login.close()
+      //   }
 
 
-    //   // This is for performance logging only.
-    //   _domChange(e) {
-    //     if (window.performance && performance.mark && !this.__loggedDomChange) {
-    //       let target = e.composedPath()[0];
-    //       let host = target.getRootNode().host;
-    //       if (host && host.localName.match(this.page)) {
-    //         this.__loggedDomChange = true;
-    //         performance.mark(host.localName + '.domChange');
-    //       }
-    //     }
-    //   }
+      //   // ************deprecated functions?? - to review ***************
 
-    //   // Function not in use
-    //   // Sends the user to the 404 (not found) page.
-    //   _onFallbackSelectionTriggered() {
-    //     this.page = '404';
-    //   }
+      //   // Elements in the app can notify section changes.
+      //   // Response by a11y announcing the section and syncronizing the category.
+      //   _onChangeSection(event) {
+      //     let detail = event.detail;
+
+      //     // Scroll to the top of the page when navigating to a non-list page. For list view,
+      //     // scroll to the last saved position only if the category has not changed.
+      //     let scrollTop = 0;
+      //     if (this.page === 'list') {
+      //       if (this.categoryName === detail.category) {
+      //         scrollTop = this._listScrollTop;
+      //       } else {
+      //         // Reset the list view scrollTop if the category changed.
+      //         this._listScrollTop = 0;
+      //       }
+      //     }
+      //     // Use `Polymer.AppLayout.scroll` with `behavior: 'silent'` to disable header scroll
+      //     // effects during the scroll.
+      //     Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });
+
+      //     this.categoryName = detail.category || '';
+
+      //     // Announce the page's title
+      //     if (detail.title) {
+      //       document.title = detail.title + ' - stats4sd';
+      //       this._announce(detail.title + ', loaded');
+      //     }
+      //   }
+
+
+      //   // This is for performance logging only.
+      //   _domChange(e) {
+      //     if (window.performance && performance.mark && !this.__loggedDomChange) {
+      //       let target = e.composedPath()[0];
+      //       let host = target.getRootNode().host;
+      //       if (host && host.localName.match(this.page)) {
+      //         this.__loggedDomChange = true;
+      //         performance.mark(host.localName + '.domChange');
+      //       }
+      //     }
+      //   }
+
+      //   // Function not in use
+      //   // Sends the user to the 404 (not found) page.
+      //   _onFallbackSelectionTriggered() {
+      //     this.page = '404';
+      //   }
 
     }
 

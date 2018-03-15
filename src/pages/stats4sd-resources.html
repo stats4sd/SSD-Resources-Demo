@@ -382,10 +382,10 @@
       //     }
       //   }
       // }
-      // _getResourceUrl(resource) {
+      _getResourceUrl(resource) {
 
-      //   return (window.location.origin + "/resource/" + this.resource.slug)
-      // }
+        return (window.location.origin + "/resource/" + this.resource.slug)
+      }
 
       // _saveResource() {
       //   //prompt validation
@@ -429,23 +429,23 @@
       //   this._saveResource()
       // }
 
-      // _isYoutube(link) {
-      //   if (link.url.indexOf('https://youtu.be') > -1 || link.url.indexOf('https://www.youtube.com') > -1) {
-      //     return true
-      //   }
-      // }
-      // _getYoutubeID(link) {
-      //   let youtubeID = ''
-      //   if (link.url.indexOf('https://youtu.be') > -1) {
-      //     var temp = link.url.split('/')
-      //     youtubeID = temp[temp.length - 1]
-      //   }
-      //   if (link.url.indexOf('https://www.youtube.com') > -1) {
-      //     var temp = link.url.split('/')
-      //     youtubeID = temp[temp.length - 1].replace('watch?v=', '')
-      //   }
-      //   return youtubeID
-      // }
+      _isYoutube(link) {
+        if (link.url.indexOf('https://youtu.be') > -1 || link.url.indexOf('https://www.youtube.com') > -1) {
+          return true
+        }
+      }
+      _getYoutubeID(link) {
+        let youtubeID = ''
+        if (link.url.indexOf('https://youtu.be') > -1) {
+          var temp = link.url.split('/')
+          youtubeID = temp[temp.length - 1]
+        }
+        if (link.url.indexOf('https://www.youtube.com') > -1) {
+          var temp = link.url.split('/')
+          youtubeID = temp[temp.length - 1].replace('watch?v=', '')
+        }
+        return youtubeID
+      }
 
 
       // generatePushID() {
