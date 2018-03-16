@@ -1,0 +1,275 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../redux-mixin.html">
+
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-buton.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../stats4sd-icons.html">
+
+<dom-module id="stats4sd-login-element">
+  <template>
+    <style>
+      :host {
+        display: block;
+        margin: 0 auto;
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: small;
+        color: rgba(102, 102, 102, 0.81);
+        z-index: 2;
+      }
+
+      firebase-auth {
+        display: none;
+      }
+
+      #reset {
+        text-decoration: none;
+      }
+
+      #reset:hover {
+        color: grey;
+        text-decoration: underline;
+      }
+
+      .emailPWError {
+        color: var(--error-color);
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 24px;
+        margin: 0;
+        padding: 0;
+      }
+
+      .emailPWMessage {
+        color: var(--primary-color);
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 24px;
+        margin: 0;
+        padding: 0;
+      }
+
+      form {
+        min-width: 200px;
+        margin: 0 auto;
+      }
+
+      .error-msg {
+        color: var(--paper-red-500)
+      }
+
+      paper-button.reset {
+        color: var(--paper-red-500);
+        --paper-button-ink-color: var(--paper-red-500);
+        padding: 5px 0;
+        margin: 0
+      }
+
+      /* The Modal (background) */
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 2;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+
+      /* Modal Content */
+
+      .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 300px;
+      }
+    </style>
+
+    <!-- this is the main auth element that handles authorisation status. 
+        Status-known is used to identify when the element has been fully initiatlised -->
+    <firebase-auth app-name="stats4sd-firebase" id="auth" user="{{user}}" signed-in="{{signedIn}}" status-known="{{statusKnown}}">
+    </firebase-auth>
+
+    <!-- this is the button that's shown on the main screen -->
+    <!-- first we want to keep buttons hidden until the status is known, this is the firebase-auth element saying it has tried auto login already -->
+    <div hidden$="statusKnown">
+      <paper-button hidden$="[[signedIn]]" style="padding-right:38px; margin:0; text-decoration:underline" on-tap="_signInOpen">
+        <iron-icon icon="lock-outline"></iron-icon>
+        Register or log in
+      </paper-button>
+      <paper-button hidden$="[[!signedIn]]" style="padding-right:38px; margin:0; text-transform:unset" on-tap="_signOut">
+        <iron-icon icon="lock-open"></iron-icon>
+        [[user.email]]
+      </paper-button>
+    </div>
+
+    <!-- Here is the login box (starts hidden. This is opened when the user clicks on the sign-in button in the header. -->
+    <!-- We've created a custom modal popup as the polymer paper-dialog element only works if sitting on the main app.html page (known limitation) -->
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <span class="close" on-tap="_signInClose" style="float:right; cursor:pointer">&times;</span>
+        <!-- We use a slightly customised version of the firebase-login element.
+            This provides us with the {{user}} and {{signedIn}} properties, so we can hide or show things that require authentication -->
+        <form id="loginForm" on-submit="_signInEmailPW">
+          <paper-input id="emailInput" type="email" label="Email" value="{{email}}" validator="email-validator" error-message="Invalid email address"
+            required auto-validate></paper-input>
+          <paper-input id="pwInput" type="password" label="Password" value="{{pw}}" required></paper-input>
+          <!--<paper-button id="emailSignUp" type="submit" on-tap="_signUpEmailPW">Sign Up</paper-button>-->
+          <!-- <paper-button id="emailSignIn" type="submit" on-tap="_signInEmailPW" dialog-confirm autofocus>Sign In</paper-button> -->
+          <paper-button id="emailSignIn" type="submit" on-tap="_signInEmailPW" autofocus disabled$="[[signInPending]]">
+            <span hidden$="[[signInPending]]">Sign In</span>
+            <span hidden$="[[!signInPending]]">Signing In...</span>
+          </paper-button>
+          <paper-button on-tap="_signInClose">Cancel</paper-button>
+          <paper-spinner-lite id="spinner" alt="Signing In" active></paper-spinner-lite>
+          <!-- error messages and password reset -->
+          <div hidden="[[!showErrorMsg]]">
+            <div class="error-msg">[[errorMsg]]</div>
+            <!-- <paper-button class="reset" on-click="_resetPW">
+              Reset password
+            </paper-button> -->
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- the a11y keys provides binding to capture the 'enter' key press and automatically sign in -->
+    <iron-a11y-keys id="a11y" target="[[target]]" keys="enter" on-keys-pressed="_signInEmailPW"></iron-a11y-keys>
+  </template>
+
+  <script>
+    /**
+     * `stats4sd-login-element`
+     * small adaptation of email-login-fire element
+     */
+    class Stats4sdLoginElement extends ReduxMixin(Polymer.Element) {
+      static get is() { return 'stats4sd-login-element'; }
+      static get properties() {
+        return {
+          showLogin: {
+            type: Boolean,
+            value: false
+          },
+          email: String,
+          pw: String,
+          signInPending: {
+            type: Boolean,
+            value: false
+          },
+          showErrorMsg: {
+            type: Boolean,
+            value: false
+          },
+          // update redux store on sign in change
+          signedIn: {
+            type: Boolean,
+            observer: function (signedIn) {
+              return this.dispatch('updateSignedIn', signedIn)
+            }
+          },
+          user: {
+            type: Object,
+            observer: function (user) {
+              return this.dispatch('updateUser', user)
+            }
+          },
+        };
+      }
+      static get actions() {
+        return {
+          updateUser(user) {
+            return {
+              type: 'UPDATE_USER',
+              payload: user
+            }
+          },
+          updateSignedIn(signedIn) {
+            return {
+              type: 'UPDATE_SIGNED_IN',
+              payload: signedIn
+            }
+          }
+        }
+      }
+
+      // when element created and template ready bind the password input field as target
+      // for the a11y keys 'enter' key interception (i.e. while focused in the password field, enter will submit)
+      connectedCallback() {
+        super.connectedCallback();
+        this.target = this.$.pwInput
+      }
+
+      // sign in triggered by changing display format of the overlay and modal.
+      _signInOpen() {
+        this.$.loginModal.style.display = "block";
+      }
+      _signInClose() {
+        this.$.loginModal.style.display = "none";
+      }
+
+      _signInEmailPW(e) {
+        this.errorMsg = null
+        this.showErrorMsg = false
+        //this.spinnerActive = true
+        //this.$.loginForm.querySelector('paper-spinner-lite, paper-spinner').active = true
+        if (this.email && this.pw) {
+          this.signInPending = true
+          this.$.auth.signInWithEmailAndPassword(this.email, this.pw)
+            .then(success => {
+              this._signInClose()
+              this.signInPending = false
+              console.log('sign in success', success)
+            })
+            .catch(error => {
+              console.log('sign in error', error)
+              this.errorMsg = error.message
+              this.showErrorMsg = true
+              this.signInPending = false
+
+            })
+        }
+        else {
+          this.errorMsg = "Please provide a valid email and password"
+        }
+      }
+
+      //   // _signUpEmailPW(e){
+      //   //   this._cleanMessages();
+      //   //   this.$.auth.createUserWithEmailAndPassword(this.email, this.pw);
+      //   // }
+
+      //   // _resetPW() {
+      //   //   var that = this;
+      //   //   this._cleanMessages();
+      //   //   if(this.email){
+      //   //     this.$.auth.sendPasswordResetEmail(this.email).then(function () {
+      //   //       that.$$(".emailPWMessage").textContent = that.passwordResetMessage;
+      //   //     }, function (err) {
+      //   //       that.$$(".emailPWError").textContent = err.message;
+      //   //     });
+      //   //   } else {
+      //   //     this.$.emailPWError.textContent = "Please enter a valid email address.";
+      //   //   }
+      //   // }
+
+      _signOut() {
+        this.$.auth.signOut();
+      }
+    }
+
+    window.customElements.define(Stats4sdLoginElement.is, Stats4sdLoginElement);
+  </script>
+</dom-module>

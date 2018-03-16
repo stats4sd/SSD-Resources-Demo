@@ -12,6 +12,7 @@
             bySlug: { collections: {}, keywords: {}, resourceTypes: {} }
         },
         user: null,
+        signedIn: false,
         path: null,
         hideLoader: true
     }
@@ -29,6 +30,12 @@
 
             case 'UPDATE_PATH':
                 return Object.assign({}, state, { path: action.payload })
+
+            case 'UPDATE_USER':
+                return Object.assign({}, state, { user: action.payload })
+
+            case 'UPDATE_SIGNED_IN':
+                return Object.assign({}, state, { signedIn: action.payload })
 
             // resources and tags have extra steps to build both array and json objects for use throughout the app
             case 'UPDATE_RESOURCES':

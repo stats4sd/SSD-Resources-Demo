@@ -11,11 +11,11 @@
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="stats4sd-app-layout.html">
+
 <link rel="import" href="stats4sd-category-data.html">
 <link rel="import" href="redux-mixin.html">
 <!-- Since 'home' is the default route, eagerly load it. -->
 <link rel="import" href="pages/stats4sd-home.html">
-
 <link rel="import" href="stats4sd-app-style.html">
 
 <!-- The dom-module actually contains the element, it defines the tags another element can use to call it, e.g. <stats4sd-app> -->
@@ -71,38 +71,29 @@
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
     <!-- This is the link to the firebase database. All firebase queries and documents throughout all pages refer to this app by its name. -->
-    <firebase-app name="stats4sd-resources" api-key="{{firebaseConfig.apiKey}}" storage-bucket="{{firebaseConfig.storageBucket}}"
+    <firebase-app name="stats4sd-firebase" api-key="{{firebaseConfig.apiKey}}" storage-bucket="{{firebaseConfig.storageBucket}}"
       auth-domain="{{firebaseConfig.authDomain}}" database-url="{{firebaseConfig.databaseURL}}">
     </firebase-app>
-
+    
     <!--
       Query the database to return a set of all resources and a set of all tags.
       Then, use the app-indexeddb-mirror elements to put it all into local storage bound to the {{persisted###}} properties.
      -->
-    <firebase-query id="resQuery" app-name="stats4sd-resources" path="/resources" data="{{resources}}"></firebase-query>
+    <firebase-query id="resQuery" app-name="stats4sd-firebase" path="/resources" data="{{resources}}"></firebase-query>
     <app-indexeddb-mirror key="persistedResources" data="{{resources}}" session="keepAlways" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
 
-    <firebase-query id="collectionsQuery" app-name="stats4sd-resources" path="/tags/Collections" data="{{collections}}"></firebase-query>
+    <firebase-query id="collectionsQuery" app-name="stats4sd-firebase" path="/tags/Collections" data="{{collections}}"></firebase-query>
     <app-indexeddb-mirror key="persistedCollections" data="{{collections}}" session="keepAlways" persisted-data="{{persistedCollections}}"></app-indexeddb-mirror>
 
-    <firebase-query id="keywordsQuery" app-name="stats4sd-resources" path="/tags/Keywords" data="{{keywords}}"></firebase-query>
+    <firebase-query id="keywordsQuery" app-name="stats4sd-firebase" path="/tags/Keywords" data="{{keywords}}"></firebase-query>
     <app-indexeddb-mirror key="persistedKeywords" data="{{keywords}}" session="keepAlways" persisted-data="{{persistedKeywords}}"></app-indexeddb-mirror>
 
-    <firebase-query id="resourceTypesQuery" app-name="stats4sd-resources" path="/tags/Resource-Types" data="{{resourceTypes}}"></firebase-query>
+    <firebase-query id="resourceTypesQuery" app-name="stats4sd-firebase" path="/tags/Resource-Types" data="{{resourceTypes}}"></firebase-query>
     <app-indexeddb-mirror key="persistedResourceTypes" data="{{resourceTypes}}" session="keepAlways" persisted-data="{{persistedResourceTypes}}"></app-indexeddb-mirror>
 
     <!-- This is the main layout, it contains the sidebars, headers, lists of pages etc. -->
     <stats4sd-app-layout></stats4sd-app-layout>
 
-    <!-- Login box (starts hidden. This is opened when the user clicks on the sign-in button in the header. -->
-    <paper-dialog id="login" modal>
-      <paper-dialog-scrollable>
-        <!-- We use a slightly customised version of the firebase-login element.
-          This provides us with the {{user}} and {{signedIn}} properties, so we can hide or show things that require authentication -->
-        <login-element id="stats4sdLogin" app-name="stats4sd-resources" user="{{user}}" signed-in="{{signedIn}}">
-        </login-element>
-      </paper-dialog-scrollable>
-    </paper-dialog>
 
   </template>
 
@@ -189,10 +180,6 @@
           analyticsKey: {
             type: String
           },
-          route: {
-            type: Object,
-            observer: function (route) { console.log('route changed', route) }
-          }
         }
       }
 
@@ -321,7 +308,7 @@
             // When a load failed, it triggered a 404 which means we need to
             // eagerly load the 404 page definition
             let cb = this._pageLoaded.bind(this, Boolean(oldPage));
-            
+
             Polymer.importHref(
               this.resolveUrl('pages/stats4sd-' + page + '.html'),
               cb, cb, true);

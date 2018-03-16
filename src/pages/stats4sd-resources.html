@@ -197,9 +197,9 @@
     <!-- <template is="dom-if" if="{{editMode}}">
       <resource-editor resource="{{resource}}" tags="{{persistedTags}}"></resource-editor>
     </template>
-    <firebase-document id="firebaseResourceDoc" app-name="stats4sd-resources" data="{{editableResource}}">
+    <firebase-document id="firebaseResourceDoc" app-name="stats4sd-firebase" data="{{editableResource}}">
     </firebase-document>
-    <firebase-document id="firebaseSlugDoc" app-name="stats4sd-resources" data="{{editableSlug}}">
+    <firebase-document id="firebaseSlugDoc" app-name="stats4sd-firebase" data="{{editableSlug}}">
     </firebase-document> -->
   </template>
 
@@ -278,7 +278,7 @@
           let slug = this.path.split('/')[2]
           if (!this.allResourcesBySlug || this.allResourcesBySlug.length == 0) { return {} }
           else {
-            console.log('resource', allResourcesBySlug[slug])
+            console.log('active resource', allResourcesBySlug[slug])
             // scroll to top
             // dispatches an event titled 'scrollToTop', and a listener has been placed on the stats4sd-app-layout element to handle
             // the bubbles:true, composed:true are required so it passes all the way up the dom tree (otherwise blocked at each shadow level)

@@ -10,8 +10,8 @@
     </style>
 
     <!-- Firebase binding for live tag data -->
-    <firebase-document path="/tags" data="{{liveTags}}" app-name="stats4sd-resources"></firebase-document>
-    <firebase-document id="currentTag" app-name="stats4sd-resources" data="{{currentTag}}" path=""></firebase-document>
+    <firebase-document path="/tags" data="{{liveTags}}" app-name="stats4sd-firebase"></firebase-document>
+    <firebase-document id="currentTag" app-name="stats4sd-firebase" data="{{currentTag}}" path=""></firebase-document>
 
     <!-- Title and Description -->
     <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>

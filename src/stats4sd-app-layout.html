@@ -13,6 +13,7 @@
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="ssd-elements/stats4sd-loader.html">
+<link rel="import" href="ssd-elements/stats4sd-login-element.html">
 <link rel="import" href="stats4sd-icons.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="stats4sd-app-style.html">
@@ -23,6 +24,9 @@
 
         <style include="shared-styles"></style>
         <style include="stats4sd-app-style"></style>
+
+        <!-- the login element has its own host styling to ensure it sits at the top of the page -->
+        <stats4sd-login-element></stats4sd-login-element>
 
         <!-- Add an app drawer for small screens. This will include the items from the top menu. -->
         <app-drawer-layout drawer-width="288px" force-narrow>
@@ -60,6 +64,8 @@
                     </div>
                 </template>
             </app-drawer>
+
+
 
             <!-- The header bar uses the "app-layout" elements. (https://www.webcomponents.org/element/PolymerElements/app-layout)-->
             <app-header id="header">
@@ -117,6 +123,7 @@
                 </app-toolbar>
             </app-header>
 
+
             <!--
               The main page elements are contained wihtin the iron-pages element.
               iron-pages will display one of the child elements. The displayed element is determined by the "selected" property - in this case, this is bound to [[page]]. (So when [[page]] changes, iron-pages shows a new page element).
@@ -129,7 +136,7 @@
                     keywords="[[allKeywords]]"></stats4sd-home>
                 <stats4sd-about id="aboutPage" name="about"></stats4sd-about>
                 <stats4sd-list id="listPage" name="list"></stats4sd-list>
-                <stats4sd-admin id="adminPage" name="admin" ></stats4sd-admin>
+                <stats4sd-admin id="adminPage" name="admin"></stats4sd-admin>
                 <stats4sd-resources id="resourcePage" name="resources"></stats4sd-resources>
                 <stats4sd-collections id="collectionPage" name="collections"></stats4sd-collections>
                 <stats4sd-search id="searchPage" name="search"></stats4sd-search>
