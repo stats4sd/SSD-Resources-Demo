@@ -3,7 +3,7 @@
 <dom-module id="collection-element">
   <template>
     <style>
-       :host {
+      :host {
         display: inline-block;
         width: 180px;
         height: 180px;
@@ -14,9 +14,14 @@
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
       }
 
+      :host([draft]) {
+        display: none
+        /* opacity: 0.5; */
+      }
+
       .background-image {
         width: 100%;
-        height:180px;
+        height: 180px;
         filter: blur(0px);
         object-fit: cover;
       }
@@ -61,31 +66,47 @@
         z-index: 3;
       }
     </style>
-    <a href="[[_getHref(collection)]]">
-      <div class="container">
-        <image id="img" class="background-image" src="[[_getFeatureImage(collection)]]" on-error="_onImgError"></image>
-        <div class="title">[[collection.label]]</div>
-        <div class="overlay"></div>
-        <div class="bottom-bar">[[collection.resources.length]] Resources</div>
-      </div>
-    </a>
+    <!-- standard collections -->
+    <!--  we're binding to a dom-if so that when the collection is draft (and hence display:none), there isn't still 
+          remnants of the values available in the element inspector on the page.
+          Instead of using the 'draft' boolean value we're reinterpreting the isDraft function as dom-ifs aren't good with 'falsy'
+          logic (they render before evaluation and don't update unless restamp specified) -->
+    <template is="dom-if" if="[[!_isDraft(collection)]]">
+      <a href="[[_getHref(collection)]]">
+        <div class="container">
+          <image id="img" class="background-image" src="[[_getFeatureImage(collection)]]" on-error="_onImgError"></image>
+          <div class="title">[[collection.label]]</div>
+          <div class="overlay"></div>
+          <div class="bottom-bar">[[collection.resources.length]] Resources</div>
+        </div>
+      </a>
+    </template>
+
+    <!-- draft or deleted collections (to be built) -->
+
+
   </template>
 
   <script>
-    /**
-     * `collection-element`
-     * 
-     *
-     * @customElement
-     * @polymer
-     * @demo demo/index.html
-     */
-    class CollectionElement extends Polymer.Element {
+    class CollectionElement extends ReduxMixin(Polymer.Element) {
       static get is() { return 'collection-element'; }
       static get properties() {
         return {
           collection: {
-            type: Object
+            type: Object,
+          },
+          signedIn: {
+            type: Boolean,
+            statePath: 'signedIn'
+          },
+          // compute whether the collection is in draft status. This value if reflected onto an attribute on the element
+          // (e.g. <collection-element draft></collection-element) and styled on the host
+          // currently draft collections are just hidden, later this should be replaced with something that takes into
+          // account if a user is signed in / has permission to see
+          draft: {
+            type: Boolean,
+            reflectToAttribute: true,
+            computed: '_isDraft(collection)',
           }
         };
       }
@@ -95,8 +116,12 @@
       _getFeatureImage(collection) {
         return collection.featureImage
       }
-      _getHref(collection){
-        return window.location.origin+'/collections/'+collection.slug
+      _getHref(collection) {
+        return window.location.origin + '/collections/' + collection.slug
+      }
+      // currently treats draft and deleted the same way (hides) - to be improved
+      _isDraft(collection) {
+        return (collection.draft || collection.deleted)
       }
     }
 

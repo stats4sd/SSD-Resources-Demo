@@ -1,19 +1,15 @@
 <!-- Initial imports. These are declared here during development, and compiled to be more efficient during build -->
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="redux-mixin.html">
+
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
-
-<!-- <link rel="import" href="./ssd-elements/resource-featured.html"> -->
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="stats4sd-app-layout.html">
 
-<link rel="import" href="stats4sd-category-data.html">
-<link rel="import" href="redux-mixin.html">
 <!-- Since 'home' is the default route, eagerly load it. -->
 <link rel="import" href="pages/stats4sd-home.html">
 <link rel="import" href="stats4sd-app-style.html">
@@ -39,7 +35,7 @@
         --app-primary-color: black;
         --app-secondary-color: #d2232a;
         background-color: var(--background-color, '#eeeeee');
-        --app-accent-color: #172C50;
+        --app-accent-color: #085eaa;
         --paper-button-ink-color: var(--app-accent-color);
         --paper-icon-button-ink-color: var(--app-accent-color);
         --paper-spinner-color: var(--app-accent-color);
@@ -74,7 +70,7 @@
     <firebase-app name="stats4sd-firebase" api-key="{{firebaseConfig.apiKey}}" storage-bucket="{{firebaseConfig.storageBucket}}"
       auth-domain="{{firebaseConfig.authDomain}}" database-url="{{firebaseConfig.databaseURL}}">
     </firebase-app>
-    
+
     <!--
       Query the database to return a set of all resources and a set of all tags.
       Then, use the app-indexeddb-mirror elements to put it all into local storage bound to the {{persisted###}} properties.
@@ -217,6 +213,12 @@
               type: 'UPDATE_PATH',
               payload: path
             }
+          },
+          updateQueryParams(queryParams) {
+            return {
+              type: 'UPDATE_QUERY_PARAMS',
+              payload: queryParams
+            }
           }
 
 
@@ -227,7 +229,8 @@
       static get observers() {
         return [
           '_routePageChanged(routeData.page)',
-          '_pathChanged(route.path)'
+          '_pathChanged(route.path)',
+          '_queryParamsChanged(route.__queryParams)'
         ]
         // note, could use persistedFeatured.length to simply track number of items
       }
@@ -250,25 +253,6 @@
         // listen for custom events
         //// This is one of the main ways of communicating between elements.
         //// Child elemenets send custom events, and these event listeners hear them, take whatever data is passed up (e) and passes the 'e' to the listed function.
-        ///
-        /////resource-change sent from 'resource-search-result' element.
-        // e = specific resource object and url to that resource.
-        // this.addEventListener('resource-change', (e) => this._resourceChange(e));
-
-        // // this event is never sent
-        // this.addEventListener('show-invalid-url-warning', (e) => this._onFallbackSelectionTriggered(e));
-
-        // //resource-saved sent from 'stats4sd-resource' element. 
-        // // e = the resource object that has just been saved to the database.
-        // this.addEventListener('resource-saved', (e) => this._resourceSaved(e));
-
-        // // collection-resources-add sent from 'stats4sd-collections' element.
-        // // e = the collection being edited
-        // this.addEventListener('collection-resources-add', (e) => this._collectionResourcesAdd(e));
-
-        // // search sent from 'stats4sd-search' element.
-        // // e = the search text and any active filters.
-        // this.addEventListener('search', (e) => this._search(e));
 
         // // listen for online/offline
         // Polymer.RenderStatus.afterNextRender(this, () => {
@@ -280,6 +264,11 @@
       // path change observer updates the global store of the current path
       _pathChanged(path) {
         return this.dispatch('updatePath', path)
+      }
+
+      // query params observer updates the global store of the current path
+      _queryParamsChanged(params) {
+        return this.dispatch('updateQueryParams', params)
       }
 
       // *Observer Function** for {{routeData.page}}
@@ -302,7 +291,7 @@
         if (page != null) {
           // home route doesn't need import
           if (page == 'home') {
-            //this._pageLoaded(Boolean(oldPage));
+            this._pageLoaded(Boolean(oldPage));
             // other routes are lazy loaded
           } else {
             // When a load failed, it triggered a 404 which means we need to
@@ -320,159 +309,8 @@
       _pageLoaded(shouldResetLayout) {
         this._ensureLazyLoaded();
         if (shouldResetLayout) {
-          // The size of the header depends on the page (e.g. on some pages the tabs
-          // do not appear), so reset the header's layout only when switching pages.
-          // Polymer.Async.timeOut.run(() => {
-          //   this.$.header.resetLayout();
-          // }, 1);
         }
       }
-
-      // // **Event Function** 
-      // // Called when someone searches on the search page. 
-      // _search(e) {
-      //   //All this does is pass the search data to the categoryData element. That element actually runs the search function.
-      //   this.$.categoryData.search(e.detail)
-      // }
-
-      // //Function bound to the "back" button in the top-left. Uses the built-in 'back' function in the browser.
-      // goBack() {
-      //   // go back in nav stack whilst browsing, if navigated direct and now history just go home
-      //   if (this.lastPage) {
-      //     window.history.back()
-      //   }
-      //   else {
-      //     this.set('route.path', '/')
-      //   }
-
-      // }
-
-      // //Function bound to the home button in the top-left. Sends the user home by setting the {{route.path}} property.
-      // //Degm- currently not in use
-      // goHome() {
-      //   this.set('route.path', '/')
-      // }
-
-      // // **Event Function**
-      // // Receives info about a specific resource (e.g. resource clicked on by user).
-      // // Sets the current resource and the route.path so the user is directed to that resource.
-      // _resourceChange(e) {
-      //   this.set('resource', e.detail.resource)
-      //   console.log('resource', this.resource)
-      //   this.set('route.path', e.detail.url)
-      // }
-
-      // // **Event Function**
-      // // Receives info about a specific resource when it is saved to the database
-      // // Sets the {{route.path}} to the saved resource, so it's automatically updated in current session.
-      // _resourceSaved(e) {
-      //   // display toast and go back page after resource edit
-      //   console.log('resource saved', e)
-      //   this._showMessage('Resource Saved :-)')
-      //   // this.set('route.path', '/resource/' + e.detail.resource.slug)
-      //   window.history.back();
-      // }
-
-      // // Function used in various contexts to show a message via a 'toast' Element appearing. 
-      // // Useful for giving user feedback after saving, updating, deleting etc.
-      // _showMessage(message) {
-      //   console.log('showing message', message)
-      //   this.toastMessage = message;
-      //   this.$.toastMessage.open()
-      // }
-
-      // // Function used to define whether many elements are hidden or not.
-      // // Compares the active path with a _ seperated list of paths. If there is a match, return true (and hide the element)
-      // _hideOnPaths(activePath, pathsString) {
-      //   // uses _ to seperate paths to hide on
-      //   let paths = pathsString.split('_')
-      //   // state whether to hide or show when active page matches test page
-      //   for (let path of paths) {
-      //     // identify wildcard, if yes allow fuzzy match
-      //     if (path.indexOf('*') > -1) {
-      //       path = path.slice(0, -1)
-      //       if (activePath.indexOf(path) > -1) {
-      //         return true
-      //       }
-      //     }
-      //     else {
-      //       if (activePath == path) {
-      //         return true
-      //       }
-      //     }
-      //   }
-      //   return false
-      // }
-
-      // // Function bound to the "Edit Collection" button in the footer.
-      // // Degm- not currently in use (button commented out in favour of "manage collections" page).
-      // _editCollection() { this.$.collectionPage._editCollection(); }
-
-      // // Function bound to the "Add collection" button in the footer.
-      // // Triggers the _addCollection() function within the 'collectionPage' element
-      // _addCollection() { this.$.collectionPage._addCollection(); }
-
-      // // **Event Function** 
-      // // When clicking 'add resources' to a collection, this event is triggered.
-      // _collectionResourcesAdd() {
-      //   console.log('adding resources to collection', this.activeCollection);
-      //   //set the "collectionAddMode" boolean to true. This presents the "add" button next to resources in the search view, so they can be added to the collection currently active. 
-      //   this.collectionAddMode = true
-      //   //Automatically take the user to the search page so they can start adding resources without delay!
-      //   this.set('route.path', '/search')
-      // }
-
-      // // Function bound to the "Save collection" button in the footer.
-      // // Triggers the saveCollection() function in the 'collectionPage' element.
-      // _saveCollection() { this.$.collectionPage.saveCollection() }
-
-      // // Function to determine whether the "edit resource" button should display within the footer.
-      // _hideResourceEdit(path) {
-      //   //show on /resource/* but not on /resource/[slug]/edit
-      //   if (path.indexOf('/resource/') > -1 && path.split('/').indexOf('edit') == -1) {
-      //     return false
-      //   }
-      //   return true
-      // }
-
-      // // Function to determine whether the "save resource" button should display within the footer.
-      // _hideResourceSave(path) {
-      //   //only show on /resource/[slug]/edit
-      //   let split = path.split('/')
-      //   if (split.length > 3 && split[3] == 'edit') {
-      //     return false
-      //   }
-      //   return true
-      // }
-
-      // // Function to determine whether the home button should be shown.
-      // // Degm- currently not used?
-      // _hideHomeButton(path) {
-      //   if (path == "/") {
-      //     return false
-      //   }
-      //   if (path.indexOf('/list/') > -1) { return false }
-      //   else {
-      //     return true
-      //   }
-      // }
-
-      // // Function bound to the "save resource" button in the footer.
-      // // Triggers the _saveResource() function from the resource Page.
-      // _saveResource() { this.$.resourcePage._saveResource() }
-
-      // // Function bound to the "edit resource" button in the footer.
-      // // Sends the user to the "/edit" screen for the currently displaying resource (by setting the {{route.path}});
-      // _editResource() {
-      //   this.set('route.path', this.route.path + '/edit')
-      // }
-
-      // // Function that calls the _hideOnPaths() function, but then returns the opposite response.
-      // // (Appropriately named...)
-      // _showOnPaths(activePath, pathsString) {
-      //   let hide = this._hideOnPaths(activePath, pathsString)
-      //   return !hide
-      // }
 
       // Function involved in the loading of pages / elements.
       // (Degm- I have no idea what this does, but it works!)
@@ -513,78 +351,6 @@
       //     this._networkSnackbar.open();
       //   }
       // }
-
-
-      //   // Function bound to the 'sign-in' button.
-      //   // Opens the login dialog. 
-      //   _signInOpen() {
-      //     this.$.login.open()
-      //   }
-
-      //   // Function bound to the sign-out button. 
-      //   // Triggers the signOut() function in the custom 'login-element' element.
-      //   _signOut() {
-      //     this.$.stats4sdLogin.signOut();
-      //     this.signedIn = false;
-      //   }
-
-      //   // **Observer Function** for {{signedIn}}
-      //   // When the user signedIn status changes, ensure that the login dialog is closed.
-      //   _signedInChange() {
-      //     this.$.login.close()
-      //   }
-
-
-      //   // ************deprecated functions?? - to review ***************
-
-      //   // Elements in the app can notify section changes.
-      //   // Response by a11y announcing the section and syncronizing the category.
-      //   _onChangeSection(event) {
-      //     let detail = event.detail;
-
-      //     // Scroll to the top of the page when navigating to a non-list page. For list view,
-      //     // scroll to the last saved position only if the category has not changed.
-      //     let scrollTop = 0;
-      //     if (this.page === 'list') {
-      //       if (this.categoryName === detail.category) {
-      //         scrollTop = this._listScrollTop;
-      //       } else {
-      //         // Reset the list view scrollTop if the category changed.
-      //         this._listScrollTop = 0;
-      //       }
-      //     }
-      //     // Use `Polymer.AppLayout.scroll` with `behavior: 'silent'` to disable header scroll
-      //     // effects during the scroll.
-      //     Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });
-
-      //     this.categoryName = detail.category || '';
-
-      //     // Announce the page's title
-      //     if (detail.title) {
-      //       document.title = detail.title + ' - stats4sd';
-      //       this._announce(detail.title + ', loaded');
-      //     }
-      //   }
-
-
-      //   // This is for performance logging only.
-      //   _domChange(e) {
-      //     if (window.performance && performance.mark && !this.__loggedDomChange) {
-      //       let target = e.composedPath()[0];
-      //       let host = target.getRootNode().host;
-      //       if (host && host.localName.match(this.page)) {
-      //         this.__loggedDomChange = true;
-      //         performance.mark(host.localName + '.domChange');
-      //       }
-      //     }
-      //   }
-
-      //   // Function not in use
-      //   // Sends the user to the 404 (not found) page.
-      //   _onFallbackSelectionTriggered() {
-      //     this.page = '404';
-      //   }
-
     }
 
 

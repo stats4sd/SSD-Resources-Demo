@@ -1,0 +1,225 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../redux-mixin.html">
+
+<link rel="import" href="../ssd-elements/resource-file-download.html">
+<link rel="import" href="../ssd-elements/collection-element.html">
+<link rel="import" href="../../bower_components/google-youtube/google-youtube.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="resource-element">
+
+    <template>
+        <style include="shared-styles">
+            .resource {
+                margin: 64px 32px;
+                width: 50%;
+                max-width: 400px;
+                transition: opacity 0.4s;
+                opacity: 0;
+            }
+
+            .resource-meta-heading {
+                font-weight: bold;
+                margin: 2em 0 1em 0;
+            }
+
+            .resource[has-content] {
+                opacity: 1;
+            }
+
+            .resource-title {
+                font-size: 20px;
+                line-height: 24px;
+                margin-bottom: 0;
+                text-align: center
+            }
+
+            .meta-data {
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .video-container {
+                margin-bottom: 5px;
+            }
+
+            .deleted {
+                font-weight: 700;
+                font-size: large;
+                margin-top: 10px;
+                height: 2em;
+                line-height: 2em;
+                text-align: center;
+                color: var(--paper-indigo-50);
+                background-color: var(--paper-indigo-500);
+                padding: 5px;
+            }
+
+            @media(min-width:1048px) {
+                .meta-data {
+                    flex-wrap: nowrap;
+                    justify-content: space-between;
+                }
+                .files-container {
+                    margin-left: 50px;
+                    width: 100%;
+                    max-width: 500px;
+                }
+            }
+
+            @media (max-width: 767px) {
+
+                #content {
+                    @apply --layout-vertical;
+                    @apply --layout-center;
+                }
+
+                .resource {
+                    box-sizing: border-box;
+                    margin: 32px 0;
+                    padding: 0 24px;
+                    width: 100%;
+                    max-width: 600px;
+                }
+            }
+        </style>
+
+        <template is="dom-if" if="[[resource]]">
+            <template is="dom-if" if="[[resource.deleted]]" class="deleted">
+                <div>This resource has been deleted</div>
+            </template>
+            <div style="padding: 10px">
+                <!-- Title and Description -->
+                <h1 class="resource-title">[[resource.name]]</h1>
+                <div class="url">
+                    <a href="[[_getResourceUrl(resource)]]">[[_getResourceUrl(resource)]]</a>
+                </div>
+                <div class="meta-data">
+                    <div style="min-width: 300px; max-width:700px">
+                        <div class="resource-meta-heading">Description</div>
+                        <p>[[resource.description]]</p>
+                    </div>
+                    <!--  -->
+                    <div class="files-container" hidden$="[[!resource.uploadedFiles]]">
+                        <div class="resource-meta-heading">Files: </div>
+                        <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
+                            <resource-file-download file="[[file]]"></resource-file-download>
+                        </template>
+                    </div>
+                </div>
+                <!-- Links and Videos -->
+                <div class="resource-meta-heading" hidden$="[[!resource.externalLinks]]">External Links </div>
+                <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
+                    <template is="dom-if" if="{{_isYoutube(link)}}">
+                        <google-youtube class="video-container" video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0"
+                            autoplay="0">
+                        </google-youtube>
+                    </template>
+                    <a href="[[link.url]]" target="_blank">
+                        <iron-icon icon="language" prefix></iron-icon>
+                        <span>[[link.url]]</span>
+                    </a>
+                </template>
+                <!-- keywords -->
+                <div hidden$="[[!resourceKeywords]]" class="keywords" style="margin-top: 2em; min-width:300px; max-width: 700px">
+                    <!-- For each keyword, display a button linking to the keyword query -->
+                    <div class="resource-meta-heading" style="margin-bottom:1em;">Keywords</div>
+                    <template is='dom-repeat' items='[[resourceKeywords]]' as='keyword'>
+                        <a href="{{_getLink(keyword)}}" style="text-decoration: unset">
+                            <paper-button class="keyword-button sub-section-heading-button">
+                                <span>[[keyword.label]]</span>
+                            </paper-button>
+                        </a>
+                    </template>
+                </div>
+                <!-- collections -->
+                <div hidden$="[[!resourceCollections]]" style="margin-top: 2em; min-width:300px; max-width: 700px">
+                    <div class="resource-meta-heading" style="margin-bottom:1em;">This resource appears in the following collections:</div>
+                    <template is='dom-repeat' items='[[resourceCollections]]' as='collection'>
+                        <collection-element collection={{collection}}></collection-element>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+    </template>
+
+    <script>
+        class ResourceElement extends ReduxMixin(Polymer.Element) {
+
+            static get is() { return 'resource-element'; }
+
+            static get properties() {
+                return {
+                    resource: {
+                        type: Object
+                    },
+                    resourceKeywords: {
+                        type: Array,
+                        computed: '_getResourceTags(resource.tags.Keywords,allKeywordsByKey)'
+                    },
+                    resourceCollections: {
+                        type: Array,
+                        computed: '_getResourceTags(resource.tags.Collections,allCollectionsByKey)'
+                    },
+                    allKeywordsByKey: {
+                        type: Object,
+                        statePath: 'persistedTags.byKey.keywords'
+                    },
+                    allCollectionsByKey: {
+                        type: Object,
+                        statePath: 'persistedTags.byKey.collections'
+                    },
+                }
+            }
+
+            _getResourceUrl(resource) {
+                return (window.location.origin + "/resource/" + this.resource.slug)
+            }
+
+            // resources have their tags stored as a json object with with keys corresponding to a tag id
+            // e.g. resource.tags.Collections = { collectionID1 : ... } or resource.tags.Keywords = {keywordID1:...}
+            // This function takes the json object and the associated set of tag values from the store, and 
+            // populates an array replacing the json key with the correct store lookup. A 'false' value is returned if there is no data
+            _getResourceTags(tagsJson, allTagsByKey) {
+                if (tagsJson && allTagsByKey) {
+                    let arr = []
+                    Object.keys(tagsJson).forEach(key => {
+                        if (allTagsByKey[key]) {
+                            arr.push(allTagsByKey[key])
+                        }
+                    })
+                    console.log('arr', arr)
+                    if (arr.length > 0) { return arr }
+                }
+                return false
+            }
+
+            _getLink(keyword) {
+                return "/resources?keyword=" + keyword.slug;
+            }
+
+            _isYoutube(link) {
+                return (link.url.indexOf('youtu.be') > -1 || link.url.indexOf('youtube.com') > -1)
+            }
+            
+            _getYoutubeID(link) {
+                console.log('getting youtube id', link)
+                let youtubeID = ''
+                if (link.url.indexOf('youtu.be') > -1) {
+                    var temp = link.url.split('/')
+                    youtubeID = temp[temp.length - 1]
+                }
+                else if (link.url.indexOf('youtube.com') > -1) {
+                    var temp = link.url.split('/')
+                    youtubeID = temp[temp.length - 1].replace('watch?v=', '')
+                }
+                console.log('id', youtubeID)
+                return youtubeID
+            }
+        }
+
+        customElements.define(ResourceElement.is, ResourceElement);
+    </script>
+
+</dom-module>

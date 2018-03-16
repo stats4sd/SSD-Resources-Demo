@@ -1,11 +1,8 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../redux-mixin.html">
 
-<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../../bower_components/paper-chip/paper-chip.html">
-<link rel="import" href="../stats4sd-category-data.html">
+<link rel="import" href="../ssd-elements/resource-element.html">
 <link rel="import" href="../ssd-elements/resource-search-result.html">
-<link rel="import" href="../ssd-elements/resource-file-download.html">
 <link rel="import" href="../ssd-elements/resource-editor.html">
 
 <dom-module id="stats4sd-resources">
@@ -23,22 +20,7 @@
         @apply --layout-center-justified;
       }
 
-      .resource {
-        margin: 64px 32px;
-        width: 50%;
-        max-width: 400px;
-        transition: opacity 0.4s;
-        opacity: 0;
-      }
-
-      .resource-meta-heading {
-        font-weight: bold;
-        margin: 2em 0 1em 0;
-      }
-
-      .resource[has-content] {
-        opacity: 1;
-      }
+      
 
       h1 {
         font-size: 24px;
@@ -49,125 +31,57 @@
         text-align: center
       }
 
-      .resource-title {
-        font-size: 20px;
-        line-height: 24px;
-        margin-bottom: 0;
-        text-align: center
+     
+
+      
+
+      paper-button.sub-section-heading-button {
+        padding: 2px;
+        margin: 5;
+        font-size: 0.7em;
+        height: 90%;
+        bottom: 2px;
+        left: 10px;
       }
 
-      .meta-data {
-        display: flex;
-        flex-wrap: wrap;
-      }
-
-      .video-container {
-        margin-bottom: 5px;
-      }
-
-      .deleted {
-        font-weight: 700;
-        font-size: large;
-        margin-top: 10px;
-        height: 2em;
-        line-height: 2em;
-        text-align: center;
-        color: var(--paper-indigo-50);
-        background-color: var(--paper-indigo-500);
-        padding: 5px;
-      }
-
-      @media(min-width:1048px) {
-        .meta-data {
-          flex-wrap: nowrap;
-          justify-content: space-between;
-        }
-        .files-container {
-          margin-left: 50px;
-          width: 100%;
-          max-width: 500px;
-        }
-      }
+     
 
 
-      @media (max-width: 767px) {
-
-        #content {
-          @apply --layout-vertical;
-          @apply --layout-center;
-        }
-
-        .resource {
-          box-sizing: border-box;
-          margin: 32px 0;
-          padding: 0 24px;
-          width: 100%;
-          max-width: 600px;
-        }
-      }
+      
     </style>
 
     <!-- All Resources View -->
     <!-- use conditional dom-if to decide whether to show. Note the dom-if has to bind to a boolean variable or a function which returns one -->
     <template is="dom-if" if="{{_shouldShowAllResources(path)}}">
-      <div class="sub-section-heading" style="margin-top: 1em">All Resources ([[filteredResourcesArray.length]])</div>
+      <div>
+        <div class="sub-section-heading" style="margin-top: 1em">
+          <span>All Resources ([[filteredResourcesArray.length]])</span>
+          <!-- show keyword query params, inlcudes link to remove  -->
+          <div hidden$="[[!showKeyword]]" style="display: inline">
+            <a href="{{_removeQueryUrl(keyword)}}" style="text-decoration: unset">
+              <paper-button class="keyword-button sub-section-heading-button">
+                <span>[[keyword.label]]</span>
+                <span style="margin-left:5px">&times;</span>
+              </paper-button>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+
       <!-- some filtering options will come here at some point using paper-dropdown / vaadin combo or similar -->
       <template is='dom-repeat' items="[[filteredResourcesArray]]" as="resource">
         <resource-search-result resource="[[resource]]" hidden$="[[resource.deleted || resource.draft]]"></resource-search-result>
       </template>
 
+
     </template>
 
 
     <!-- Active Resource View -->
-    <template is="dom-if" if="{{!editMode}}">
-      <!-- Deleted resource notification -->
-      <template is="dom-if" if="[[resource.deleted]]" class="deleted">
-        <div>This resource has been deleted</div>
-      </template>
-      <div style="padding: 10px">
-        <!-- Title and Description -->
-        <template is="dom-if" if="[[resource.$key]]">
-          <h1 class="resource-title">[[resource.name]]</h1>
-          <div class="url">
-            <a href="[[_getResourceUrl(resource)]]">[[_getResourceUrl(resource)]]</a>
-          </div>
-          <div class="meta-data">
-            <div style="min-width: 300px; max-width:700px">
-              <div class="resource-meta-heading">Description</div>
-              <p>[[resource.description]]</p>
-            </div>
-            <!--  -->
-            <div class="files-container" hidden$="[[!resource.uploadedFiles]]">
-              <div class="resource-meta-heading">Files: </div>
-              <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
-                <resource-file-download file="[[file]]"></resource-file-download>
-              </template>
-            </div>
-          </div>
-          <!-- Links and Videos -->
-          <div class="resource-meta-heading" hidden$="[[!resource.externalLinks]]">External Links </div>
-          <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
-            <template is="dom-if" if="{{_isYoutube(link)}}">
-              <google-youtube class="video-container" video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0"
-                autoplay="0">
-              </google-youtube>
-            </template>
-            <a href="[[link.url]]" target="_blank">
-              <iron-icon icon="language" prefix></iron-icon>
-              <span>[[link.url]]</span>
-            </a>
-          </template>
-          <div hidden$="[[!resource.keywords]]" class="keywords" style="margin-top: 2em; min-width:300px; max-width: 700px">
-            <!-- For each keyword, display a paper-chip -->
-            <div class="resource-meta-heading" style="margin-bottom:1em;">Keywords</div>
-            <template is='dom-repeat' items='[[_tagsToArray(resource.tags,"Keywords")]]' as='keyword'>
-              <paper-chip class='custom-background' label="[[keyword.label]]"></paper-chip>
-            </template>
-          </div>
-        </template>
-      </div>
-    </template>
+    <resource-element resource="[[resource]]"></resource-element>
+
 
 
 
@@ -219,13 +133,22 @@
             type: Array,
             statePath: 'persistedResources.array'
           },
-          filteredResourcesArray:{
-            type:Array,
-            computed:'_filterResources(allResourcesArray)'
+          filteredResourcesArray: {
+            type: Array,
+            computed: '_filterResources(allResourcesArray,queryParams,allKeywordsBySlug)'
           },
           path: {
             type: String,
             statePath: 'path'
+          },
+          queryParams: {
+            type: Object,
+            statePath: 'queryParams'
+          },
+          showKeyword: Boolean,
+          allKeywordsBySlug: {
+            type: Object,
+            statePath: 'persistedTags.bySlug.keywords'
           },
           // properties computed automatically on changes
           resource: {
@@ -237,33 +160,6 @@
             type: Boolean,
             value: false
           }
-
-          //   item: Object,
-          //   route: Object,
-          //   routeData: Object,
-          //   subrouteData: Object,
-          //   visible: {
-          //     type: Boolean,
-          //     value: false
-          //   },
-          //   offline: {
-          //     type: Boolean,
-          //     // observer: '_offlineChanged'
-          //   },
-          //   failure: Boolean,
-          //   persistedResources: {
-          //     type: Array,
-
-          //   },
-          //   resource: {
-          //     type: Object
-          //   },
-          //   editMode: {
-          //     type: Boolean,
-          //     computed: '_editEnabled(subroute.path)'
-          //   },
-          //   persistedTags: Object
-
         }
 
       }
@@ -278,32 +174,59 @@
           let slug = this.path.split('/')[2]
           if (!this.allResourcesBySlug || this.allResourcesBySlug.length == 0) { return {} }
           else {
-            console.log('active resource', allResourcesBySlug[slug])
-            // scroll to top
+            let activeResource = allResourcesBySlug[slug]
+            if (activeResource) { console.log('active resource', activeResource) }
+            // scroll to top (old method)
             // dispatches an event titled 'scrollToTop', and a listener has been placed on the stats4sd-app-layout element to handle
             // the bubbles:true, composed:true are required so it passes all the way up the dom tree (otherwise blocked at each shadow level)
-            this.dispatchEvent(new CustomEvent('scrollToTop', { bubbles: true, composed: true, detail: 'hello' }));
-            return allResourcesBySlug[slug]
+            // this.dispatchEvent(new CustomEvent('scrollToTop', { bubbles: true, composed: true, detail: 'hello' }));
+            return activeResource
           }
         }
       }
 
-      _filterResources(resources){
+      _filterResources(resources, queryParams = {}, allKeywordsBySlug) {
         // filter to remove draft and deleted
-        resources = resources.filter(r=>{
-          if(r.draft==true){return false}
-          if(r.deleted==true){return false}
+        resources = resources.filter(r => {
+          if (r.draft == true) { return false }
+          if (r.deleted == true) { return false }
           return true
         })
+        // filter by keyword params 
+        // (second pass, could be included above to be slightly more efficient but not very taxing and later will swap to collection query anyway)
+        let keyword = queryParams.keyword
+        if (keyword && allKeywordsBySlug[keyword]) {
+          this.keyword = allKeywordsBySlug[keyword]
+          this.showKeyword = true
+          console.log('this.keyword', this.keyword)
+          let keywordKey = allKeywordsBySlug[keyword]['$key']
+          resources = resources.filter(r => {
+            return (r.tags && r.tags.Keywords && r.tags.Keywords.hasOwnProperty(keywordKey))
+          })
+        }
+        else { this.showKeyword = false }
         // sort by date
-        
+
         return resources
       }
-      
+
       // function to determine whether to show all resources or not, depending on path
       // we only want this to happen when no specific resource has been given
-      _shouldShowAllResources(path){
-        return (path=='/resources' || path=='/resources/')
+      _shouldShowAllResources(path) {
+        return (path == '/resources' || path == '/resources/')
+      }
+
+      // remove the keyword url from the path
+      _removeQueryUrl(keyword) {
+        return this.path
+      }
+      _removeKeyword(e) {
+        console.log('removing keyword', e)
+        this.showKeyword = false
+      }
+
+      _getLink(keyword) {
+        return "/resources?keyword=" + keyword.slug;
       }
 
       // static get observers() {
@@ -382,10 +305,7 @@
       //     }
       //   }
       // }
-      _getResourceUrl(resource) {
-
-        return (window.location.origin + "/resource/" + this.resource.slug)
-      }
+      
 
       // _saveResource() {
       //   //prompt validation
@@ -429,23 +349,7 @@
       //   this._saveResource()
       // }
 
-      _isYoutube(link) {
-        if (link.url.indexOf('https://youtu.be') > -1 || link.url.indexOf('https://www.youtube.com') > -1) {
-          return true
-        }
-      }
-      _getYoutubeID(link) {
-        let youtubeID = ''
-        if (link.url.indexOf('https://youtu.be') > -1) {
-          var temp = link.url.split('/')
-          youtubeID = temp[temp.length - 1]
-        }
-        if (link.url.indexOf('https://www.youtube.com') > -1) {
-          var temp = link.url.split('/')
-          youtubeID = temp[temp.length - 1].replace('watch?v=', '')
-        }
-        return youtubeID
-      }
+      
 
 
       // generatePushID() {
@@ -486,19 +390,19 @@
       //   return text;
       // }
 
-      // _tagsToArray(json, subProperty) {
-      //   //lookup full tag
-      //   if (!json) { return }
-      //   if (!json.hasOwnProperty(subProperty)) { return }
-      //   let tags = json[subProperty]
-      //   var tagsArray = []
-      //   for (var key in tags) {
-      //     if (tags.hasOwnProperty(key)) {
-      //       tagsArray.push(tags[key])
-      //     }
-      //   }
-      //   return tagsArray
-      // }
+      _tagsToArray(json, subProperty) {
+        //lookup full tag
+        if (!json) { return }
+        if (!json.hasOwnProperty(subProperty)) { return }
+        let tags = json[subProperty]
+        var tagsArray = []
+        for (var key in tags) {
+          if (tags.hasOwnProperty(key)) {
+            tagsArray.push(tags[key])
+          }
+        }
+        return tagsArray
+      }
 
 
     }

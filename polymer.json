@@ -2,12 +2,12 @@
   "entrypoint": "index.html",
   "shell": "src/stats4sd-app.html",
   "fragments": [
-    "src/stats4sd-list.html",
-    "src/stats4sd-home.html",
-    "src/stats4sd-resources.html",
-    "src/stats4sd-collections.html",
-    "src/stats4sd-search.html",
-    "src/stats4sd-admin.html",
+    "src/pages/stats4sd-404.html",
+    "src/pages/stats4sd-about.html",
+    "src/pages/stats4sd-admin.html",
+    "src/pages/stats4sd-collections.html",
+    "src/pages/stats4sd-resources.html",
+    "src/pages/stats4sd-search.html",
     "src/lazy-resources.html"
   ],
   "sources": [
@@ -17,13 +17,15 @@
   "extraDependencies": [
     "app.yaml",
     "manifest.json",
-    "bower_components/webcomponentsjs/*",
     "bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror-worker.js",
     "bower_components/app-storage/app-indexeddb-mirror/common-worker-scope.js",
     "bower_components/firebase/firebase-app.js.map",
     "bower_components/firebase/firebase-storage.js.map",
     "bower_components/firebase/firebase-database.js.map",
-    "bower_components/firebase/firebase-messaging.js.map"
+    "bower_components/firebase/firebase-messaging.js.map",
+    "bower_components/web-animations-js/*",
+    "bower_components/webcomponentsjs/*",
+    "node_modules/redux/dist/redux.js"
   ],
   "lint": {
     "rules": [
@@ -31,9 +33,14 @@
     ]
   },
   "builds": [
-
     {
-      "preset": "es5-bundled"
+      "preset": "es5-bundled",
+      "bundle": {
+        "excludes": [
+          "bower_components/webcomponentsjs/*",
+          "bower_components/web-animations-js/*"
+        ]
+      }
     }
   ]
 }

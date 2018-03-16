@@ -1,4 +1,5 @@
 <link rel="import" href="../bower_components/polymer-redux/polymer-redux.html">
+
 <script>
     // initial state defines the value of default variables when the app is first loaded
     const initialState = {
@@ -9,11 +10,13 @@
         },
         persistedTags: {
             array: { collections: [], keywords: [], resourceTypes: [] },
-            bySlug: { collections: {}, keywords: {}, resourceTypes: {} }
+            bySlug: { collections: {}, keywords: {}, resourceTypes: {} },
+            byKey: { collections: {}, keywords: {}, resourceTypes: {} }
         },
         user: null,
         signedIn: false,
         path: null,
+        queryParams: null,
         hideLoader: true
     }
 
@@ -30,6 +33,9 @@
 
             case 'UPDATE_PATH':
                 return Object.assign({}, state, { path: action.payload })
+
+            case 'UPDATE_QUERY_PARAMS':
+                return Object.assign({}, state, { queryParams: action.payload })
 
             case 'UPDATE_USER':
                 return Object.assign({}, state, { user: action.payload })
@@ -50,9 +56,11 @@
             case 'UPDATE_TAGS':
                 let tagsArr = state.persistedTags.array
                 let tagsBySlug = state.persistedTags.bySlug
+                let tagsByKey = state.persistedTags.byKey
                 tagsArr[action.payload.type] = action.payload.tags
                 tagsBySlug[action.payload.type] = _arrayToJson(action.payload.tags, 'slug')
-                return Object.assign({}, state, { persistedTags: { array: tagsArr, bySlug: tagsBySlug } })
+                tagsByKey[action.payload.type] = _arrayToJson(action.payload.tags, '$key')
+                return Object.assign({}, state, { persistedTags: { array: tagsArr, bySlug: tagsBySlug, byKey: tagsByKey } })
 
             // generic way to handle any update (not great practice as less information to track, but here for now)
             case 'UPDATE_ANY':

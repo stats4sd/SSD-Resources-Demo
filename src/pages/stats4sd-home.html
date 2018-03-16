@@ -15,14 +15,12 @@
       /* :host {
       } */
 
-      
-
       paper-toast {
         margin: 0;
         padding: 5px;
         /* max-width: 510px; */
       }
-    
+
 
       @media (max-width: 767px) {
         h2 {
@@ -91,9 +89,11 @@
         </div>
         <div class="flex-wrap keywords">
           <div>
-            <template is="dom-repeat" items='[[keywords]]' as="keyword">
-              <a href="{{_getLink(keyword)}}" style="text-decoration: none; color:inherit">
-                <paper-chip class="custom-background" label="[[keyword.label]]"></paper-chip>
+            <template is="dom-repeat" items='[[keywords]]' as="keyword" sort="{{_sortByLabel}}">
+              <!--  could rewrite this to be a small stats4sd-keyword element or repeat group keywords element
+                    style currently in shared as likely to be reused -->
+              <a style="text-decoration: unset" href="{{_getLink(keyword)}}">
+                <paper-button class="keyword-button">[[keyword.label]]</paper-button>
               </a>
             </template>
           </div>
@@ -152,8 +152,7 @@
 
 
       _getLink(keyword) {
-        let link = "/list/keyword/" + keyword.slug;
-        return link;
+        return "/resources?keyword=" + keyword.slug;
       }
 
       _getNewestCollections(collections) {
@@ -163,8 +162,11 @@
           if (!c.draft) { newest.push(c) }
         })
         if (newest.length > 6) { newest = newest.slice(0, 5) }
-        console.log('newest collections', newest)
         return newest
+      }
+
+      _sortByLabel(a,b){
+        return(a.label>b.label)
       }
 
     }
