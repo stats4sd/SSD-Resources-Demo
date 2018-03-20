@@ -1,0 +1,211 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<!-- main app styles have been moved here as were quite extensive -->
+<dom-module id="stats4sd-app-style">
+    <template>
+        <style>
+            #header {
+                /*position: fixed;
+    top: 0;
+    left: 0;*/
+                position: relative;
+                left: calc( 0px - 50vw + 50%);
+                width: 100vw;
+                z-index: 1;
+                color: rgba(102, 102, 102, 0.81);
+                background-color: #ffffff;
+                /*       --app-header-shadow: {
+      box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
+      height: 10px;
+      bottom: -10px;
+    };*/
+            }
+
+            app-toolbar {
+                max-width: 1080px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            app-toolbar.small {
+                height: 64px;
+            }
+
+            app-toolbar.big {
+                height: 114px;
+            }
+
+
+            paper-icon-button {
+                color: var(--app-primary-color);
+            }
+            iron-pages{
+                padding:16px;
+            }
+
+            .logo {
+                text-align: center;
+            }
+
+            .logo a {
+                font-size: 16px;
+                font-weight: 600;
+                letter-spacing: 0.3em;
+                color: rgba(102, 102, 102, 0.81);
+                text-decoration: none;
+                /* required for IE 11, so this <a> can receive pointer events */
+                display: inline-block;
+                pointer-events: auto;
+            }
+
+            .home-btn {
+                padding-right: 4px;
+                margin-bottom: 8px;
+            }
+
+            .home-btn,
+            .back-btn {
+                color: rgba(102, 102, 102, 0.81);
+                line-height: 24px;
+            }
+
+            :host([page=home]) .hide-on-home {
+                display: none
+            }
+
+            :host(:not([page=home])) .hide-not-on-home {
+                display: none
+            }
+
+
+            #signedInHeader {
+                position: absolute;
+                top: 0;
+                right: 20px;
+                font-size: x-small;
+                padding: 5px;
+            }
+
+            .user-email {
+                font-size: small;
+                padding: 5px;
+            }
+
+            .toastMessage {
+                margin: 0;
+                width: 100%;
+                background-color: var(--paper-green-200);
+                color: black;
+                font-size: x-large
+            }
+
+            [hidden] {
+                display: none !important;
+            }
+
+
+            stats4sd-tabs,
+            stats4sd-tab {
+                --stats4sd-tab-overlay: {
+                    border-bottom: 2px solid var(--app-accent-color);
+                }
+                ;
+            }
+
+            iron-pages {
+                max-width: 1440px;
+                padding-bottom: 20px;
+                margin: 0 auto;
+                @apply(--layout-flex);
+                @apply(--layout-vertical);
+            }
+
+            .left-bar-item img.small {
+                width: 40px;
+            }
+
+            .left-bar-item img.big {
+                height: 58px;
+            }
+
+            ul.nav {
+                float: left;
+                list-style: none;
+                flex:1;
+                display:flex;
+            }
+
+            ul.nav li {
+                display: inline-block;
+                padding-right: 22px;
+            }
+
+            ul.nav li.last{
+                flex:1;
+                text-align: right;
+            }
+
+            .nav li a {
+                text-decoration: none;
+                color: rgba(102, 102, 102, 0.81);
+                font-size: 14px;
+            }
+
+            div.nav {
+                list-style: none;
+            }
+
+            div.nav li {
+                padding-left: 22px;
+                padding-bottom: 1em;
+            }
+
+            #signOut_li,
+            #signOut_li a,
+            #signOut_li paper-icon-button {
+                cursor: pointer;
+            }
+
+            .left-bar-item [icon=menu] {
+                display: none;
+            }
+
+            .logo-box {
+                display: flex;
+                height: 83px;
+            }
+
+            .logo-box * {
+                display: inline-flex;
+            }
+
+            .logo-box img {
+                vertical-align: middle;
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+
+            @media (max-width: 767px) {
+                .left-bar-item [icon=menu] {
+                    display: inline-block;
+                    margin-right: 50px;
+                    height: 54px;
+                }
+                .logo-box {
+                    height: 54px;
+                    display: inline-block;
+                }
+                .logo-box img {
+                    width: 100px;
+                    margin-top: auto;
+                    margin-bottom: auto;
+                    vertical-align: middle;
+                }
+            }
+
+            app-drawer-layout {
+                height: 100vh;
+            }
+        </style>
+    </template>
+</dom-module>

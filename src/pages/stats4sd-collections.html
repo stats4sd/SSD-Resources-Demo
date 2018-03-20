@@ -1,30 +1,34 @@
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../bower_components/wysiwyg-e/wysiwyg-e.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/bold.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/italic.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/underline.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/strike.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/color.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/clear.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/code.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/link.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/image.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/audio.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/video.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/ordered.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/unordered.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/indent.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/outdent.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/justify.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/heading.html">
-<link rel="import" href="../bower_components/wysiwyg-e/tools/blockquote.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../redux-mixin.html">
 
-<dom-module id="stats4sd-collection">
+<link rel="import" href="../ssd-elements/resource-search-result.html">
+
+<link rel="import" href="../../bower_components/wysiwyg-e/wysiwyg-e.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/bold.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/italic.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/underline.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/strike.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/color.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/clear.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/code.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/link.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/image.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/audio.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/video.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/ordered.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/unordered.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/indent.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/outdent.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/justify.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/heading.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/blockquote.html">
+
+<dom-module id="stats4sd-collections">
 
   <template>
 
     <style include="shared-styles">
-       :host {
+      :host {
         display: block;
         padding: 10px
       }
@@ -39,60 +43,62 @@
       }
     </style>
 
-    <!-- app-route provides the name of the category. -->
-    <app-route route="{{route}}" pattern="/:collectionSlug" data="{{routeData}}"></app-route>
-    <!-- live db binding for new resource -->
-    <firebase-document id="liveCollectionDocument" data="{{liveCollection}}" app-name="stats4sd-resources"></firebase-document>
+    <!-- app-route provides the name of the category (not used as location can be inconsistent when empty, using global store). -->
+    <!-- <app-location route="{{route}}"></app-location> 
+    <app-route route="{{route}}" pattern="/collection/:collectionSlug" data="{{routeData}}"></app-route>-->
 
-    <!-- main page view for / or blank endpoint -->
-    <div hidden$="[[_showIndividual(route.path,'false')]]">
-      <h1>All Collections</h1>
+    <!-- live db binding for new resource -->
+    <!-- <firebase-document id="liveCollectionDocument" data="{{liveCollection}}" app-name="stats4sd-firebase"></firebase-document> -->
+
+    <!-- Template for individual collection set -->
+    <div hidden$="[[!activeCollection]]" style="margin-bottom:3em">
+      <div hidden$="[[editMode]]">
+        <div hidden$="!activeCollection.label">
+          <h1 style="display: inline-block">{{activeCollection.label}}</h1>
+          <template is="dom-if" if="{{user.email}}">
+            <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
+          </template>
+          <div id="descriptionContainer" hidden$="[[!activeCollection.description]]"></div>
+          <h2>Resources</h2>
+          <template id="resourcesInCollection" is="dom-repeat" as="res" items="[[activeCollectionResources]]">
+            <resource-search-result resource='[[res]]'></resource-search-result>
+          </template>
+          <!-- admin only add resources -->
+          <!-- <template is="dom-if" if="{{user.email}}">
+            <a class="href-plain" on-tap="_collectionResourcesAdd">
+              <paper-button style="color:var(--paper-green-700)">
+                <iron-icon icon="add"></iron-icon>Add Resources
+              </paper-button>
+            </a>
+          </template> -->
+        </div>
+
+      </div>
+    </div>
+
+    <!-- show all collections for / or blank endpoint -->
+    <div>
+      <div class="sub-section-heading" style="margin-top:1em">All Collections</div>
       <div class="flex wrap">
         <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPublic">
           <collection-element collection={{collection}}></collection-element>
         </template>
       </div>
-
       <template is="dom-if" if="{{user.email}}">
-        <h1>Non-public Collections</h1>
+        <div class="sub-section-heading">Non-public Collections</div>
         <div class="flex wrap">
           <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPrivate">
             <collection-element collection={{collection}}></collection-element>
           </template>
         </div>
       </template>
-
-
-    </div>
-
-    <!-- Template for individual collection set -->
-    <div hidden$="[[_showIndividual(route.path,'true')]]">
-      <div hidden$="[[editMode]]">
-        <h1 style="display: inline-block">{{activeCollection.label}}</h1>
-        <template is="dom-if" if="{{user.email}}">
-          <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
-        </template>
-        <div id="descriptionContainer"></div>
-        <h2>Resources</h2>
-        <template id="resourcesInCollection" is="dom-repeat" as="res" items="{{_getCollectionResources(activeCollection.resources,resourcesJson)}}">
-          <resource-search-result resource='[[res]]'></resource-search-result>
-        </template>
-        <!-- admin only add resources -->
-        <template is="dom-if" if="{{user.email}}">
-          <a class="href-plain" on-tap="_collectionResourcesAdd">
-            <paper-button style="color:var(--paper-green-700)">
-              <iron-icon icon="add"></iron-icon>Add Resources
-            </paper-button>
-          </a>
-        </template>
-      </div>
     </div>
 
 
     <!-- Template for add/edit collection -->
     <!-- *** add display none for when loading or similar (e.g. when resource updated) -->
 
-    <template is="dom-if" if="{{editMode}}">
+    <!-- <template is="dom-if" if="{{editMode}}">
       <paper-input always-float-label label="Collection Name" value="{{liveCollection.label}}" style="padding-bottom:10px"></paper-input>
       <div>Description</div>
       <div>
@@ -122,9 +128,9 @@
           <wysiwyg-tool-heading h1 h2 h3 h4 h5 h6></wysiwyg-tool-heading>
           <wysiwyg-tool-blockquote></wysiwyg-tool-blockquote>
         </wysiwyg-e>
-      </div>
+      </div> -->
 
-      <div class="flex" style="padding:20px 0">
+      <!-- <div class="flex" style="padding:20px 0">
         <paper-toggle-button checked="{{!liveCollection.draft}}"></paper-toggle-button>
         <div hidden$="[[liveCollection.draft]]">
           <span>Public</span>
@@ -138,49 +144,62 @@
       <div class="buttons">
         <paper-button on-tap="cancel">Cancel</paper-button>
         <paper-button on-tap="saveCollection">Save</paper-button>
-      </div>
-    </template>
-
-
-
+      </div> 
+    </template>-->
 
   </template>
 
   <script>
-    class stats4sdCollection extends Polymer.Element {
+    class Stats4sdCollections extends ReduxMixin(Polymer.Element) {
 
-      static get is() { return 'stats4sd-collection'; }
+      static get is() { return 'stats4sd-collections'; }
 
       static get properties() {
         return {
 
-          route: Object,
-          routeData: Object,
-          showAll: {
-            type: Boolean,
-            value: false
+          // properties updated by the redux global store
+          allCollections: {
+            type: Array,
+            statePath: 'persistedTags.array.collections',
           },
-          allCollections: Array,
+          allCollectionsBySlug: {
+            type: Array,
+            statePath: 'persistedTags.bySlug.collections',
+          },
+          allResourcesByKey: {
+            type: Array,
+            statePath: 'persistedResources.byKey'
+          },
+          path: {
+            type: String,
+            statePath: 'path'
+          },
+
+          // properties computed automatically on changes
           activeCollection: {
             type: Object,
-            computed: '_getActiveCollection(routeData.collectionSlug,allCollections)',
-            notify: true
+            computed: '_setActiveCollection(path,allCollectionsBySlug)',
           },
-          user: Object,
-          liveCollection: {
-            type: Object,
-            notify: true
+          activeCollectionResources: {
+            type: Array,
+            computed: '_setActiveCollectionResources(activeCollection.resources,allResourcesByKey)'
           },
-          resourcesJson: Object,
-          editMode: Boolean,
-          visualEditor: {
-            type: Boolean,
-            value: true
-          },
-          editableDescription:{
-            type:String,
-            notify:true
-          }
+
+          // user: Object,
+          // liveCollection: {
+          //   type: Object,
+          //   notify: true
+          // },
+
+          // editMode: Boolean,
+          // visualEditor: {
+          //   type: Boolean,
+          //   value: true
+          // },
+          // editableDescription: {
+          //   type: String,
+          //   notify: true
+          // }
         }
       }
 
@@ -190,18 +209,64 @@
         ]
       }
 
+      _setActiveCollection(path, allCollectionsBySlug) {
+        // method runs when slug changed or persisted collections updated (e.g. first load)
+        // loads all collections on empty or / route, otherwise loads individual
+        if (!path || path == '/collections' || path == '/collections/') {
+          return null
+        }
+        else {
+          // want to get slug as first part after collection, could use app-route element with routeData however seems inconsistent
+          let slug = this.path.split('/')[2]
+          if (!this.allCollectionsBySlug || this.allCollectionsBySlug.length == 0) { return {} }
+          else {
+            console.log('collection', allCollectionsBySlug[slug])
+            // scroll to top (former method for reference, now all handled in app-layout element on any path change)
+            // dispatches an event titled 'scrollToTop', and a listener has been placed on the stats4sd-app-layout element to handle
+            // the bubbles:true, composed:true are required so it passes all the way up the dom tree (otherwise blocked at each shadow level)
+            // this.dispatchEvent(new CustomEvent('scrollToTop', { bubbles: true, composed: true, detail: 'hello' }));
+            return allCollectionsBySlug[slug]
+          }
+        }
+      }
+
       _isPrivate(c) { return (c.hasOwnProperty('draft') && c.draft === true) }
       _isPublic(c) { return (!(c.hasOwnProperty('draft') && c.draft === true)) }
 
       _renderDescription(description) {
         if (description) {
           this.$.descriptionContainer.innerHTML = description;
-          this.set('editableDescription',description)
+          this.set('editableDescription', description)
         }
       }
-      _saveVisualDescription(){
+
+      _setActiveCollectionResources(resourceKeys, allResourcesByKey) {
+        // method to filter resources for those that match current collection
+        // in future would be better to just keep track of the resource ids in the collection object
+        let resources = []
+        if (resourceKeys && allResourcesByKey) {
+          console.log('setting active collection resources', resourceKeys, allResourcesByKey)
+          for (let key in resourceKeys) {
+            if (allResourcesByKey.hasOwnProperty(key)) {
+              resources.push(allResourcesByKey[key])
+            }
+          }
+          console.log('active collection resources', resources)
+        }
+
+        return resources
+      }
+
+
+      /********************************************************************
+                        Chris - codechecking checkpoint 
+      *********************************************************************/
+
+
+
+      _saveVisualDescription() {
         // manual method to force update/binding of editable description for case where inbuilt methods fail (e.g. on keyboard enter press)
-        this.set('editableDescription',this.wysiwygTarget.innerHTML)
+        this.set('editableDescription', this.wysiwygTarget.innerHTML)
       }
 
       _editCollection() {
@@ -218,36 +283,8 @@
         if (path == "" || path == "/") { return hide == 'true' }
         else { return hide != 'true' }
       }
-      _getActiveCollection(slug, allCollections) {
-        // method runs when slug changed or persisted collections updated (e.g. first load)
-        // loads all collections on empty or / slug, otherwise loads individual
-        if (!slug || slug == "/") {
-          this.set('showAll', true)
-          return {}
-        }
-        if (!this.allCollections || this.allCollections.length == 0) { return {} }
-        else {
-          for (let collection of this.allCollections) {
-            if (collection.hasOwnProperty('slug') && collection.slug == slug) {
-              if (!collection.resources) { collection.resources = {} }
-              console.log('active collection', collection)
-              return collection
-            }
-          }
-        }
-      }
 
-      _getCollectionResources(resourceKeys, resourcesJson) {
-        let temp = []
-        if (resourcesJson) {
-          for (let key in resourceKeys) {
-            if (resourcesJson.hasOwnProperty(key)) {
-              temp.push(resourcesJson[key])
-            }
-          }
-        }
-        return temp
-      }
+
 
       _addCollection() {
         console.log('adding collection')
@@ -275,7 +312,7 @@
         this.editMode = false
         this.liveCollection.type = "Collection";
         this.liveCollection.modified = Date.now();
-        this.liveCollection.description=this.wysiwygTarget.innerHTML
+        this.liveCollection.description = this.wysiwygTarget.innerHTML
         this.liveCollection.slug = this._toSlug(this.liveCollection.label);
         if (!this.liveCollection.hasOwnProperty('key')) {
           this.liveCollection.key = this.generatePushID()
@@ -287,7 +324,7 @@
           this.liveCollection.resources = [];
         }
         console.log('creating collection', this.liveCollection)
-        let redirectURL = window.location.origin + '/collection/' + this.liveCollection.slug
+        let redirectURL = window.location.origin + '/collections/' + this.liveCollection.slug
         this.$.liveCollectionDocument.saveValue('/tags/Collections', this.liveCollection.key)
 
           .then(() => {
@@ -364,7 +401,7 @@
     }
 
 
-    customElements.define(stats4sdCollection.is, stats4sdCollection);
+    customElements.define(Stats4sdCollections.is, Stats4sdCollections);
   </script>
 
 </dom-module>

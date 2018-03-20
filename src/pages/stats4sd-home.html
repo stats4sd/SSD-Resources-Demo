@@ -1,0 +1,177 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../redux-mixin.html">
+
+<link rel="import" href="../ssd-elements/resource-types.html">
+<link rel="import" href="../ssd-elements/collection-element.html">
+<link rel="import" href="../../bower_components/paper-chip/paper-chip.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="stats4sd-home">
+
+  <template>
+
+    <style include="shared-styles"></style>
+    <style>
+      /* :host {
+      } */
+
+      paper-toast {
+        margin: 0;
+        padding: 5px;
+        /* max-width: 510px; */
+      }
+
+
+      @media (max-width: 767px) {
+        h2 {
+          margin: 24px 0;
+          padding: 8px 24px;
+        }
+      }
+
+      @media (max-width: 320px) {
+        .resource-type>img,
+        .resource-type {
+          width: 100vw;
+        }
+      }
+
+      @media (max-width: 763px) {
+        .collection {
+          height: 384px;
+        }
+        .keywords {
+          max-height: 110px;
+        }
+      }
+
+      @media (min-width: 764px) {
+        .collection {
+          height: 192px;
+        }
+        .keywords {
+          max-height: 37px;
+        }
+      }
+    </style>
+    <div>
+      <h2>Statistics for Sustainable Development - Resources Repository</h2>
+      <p>Welcome to the Stats4SD resource bank, an incomplete (but growing) collection of resources for statistical, data and
+        research support. Below you will find different ways of browsing the contents.</p>
+      <p>Please take a look around and explore the resources currently available. We will be updating the site and adding new
+        resources over the next few months, so check back regularly to see our progress! You can also follow us on
+        <a href="https://twitter.com/stats4sd">Twitter</a> to get the latest news and updates about us and this site.</p>
+      <p>If you have comments about the site, or resources you really want to see added, please let us know by emailing us at
+        <a href="mailto:support@stats4sd.org">support@stats4sd.org</a>.
+
+
+        <!-- Show 'latest' collections -->
+        <div class="sub-section-heading" style="margin-top:2em">
+          <div style="float:left">Latest Collections</div>
+          <div style="float:right; cursor:pointer; font-weight:700">
+            <a href="/collections" class="href-plain">
+              <iron-icon icon="view-module"></iron-icon>
+              <span style="font-size: 0.8em; font-weight:normal">View All Collections</span>
+            </a>
+          </div>
+        </div>
+        <div class="flex wrap collection">
+          <!-- Repeating template for the collection. Runs through each item in '[[newestCollections]]' and renders a collection-element for each one. -->
+          <template id="collectionsList" is="dom-repeat" as="collection" items="[[newestCollections]]">
+            <!-- Use the custom 'collection-element' (ssd-elements/custom-element.html) to render each collection button -->
+            <collection-element collection={{collection}}></collection-element>
+          </template>
+        </div>
+
+        <!-- Render a list of paper-chip elements for all the keywords -->
+        <div class="sub-section-heading" style="margin-top:3em">
+          <div style='float:left'>View Resources by Keyword</div>
+        </div>
+        <div class="flex-wrap keywords">
+          <div>
+            <template is="dom-repeat" items='[[keywords]]' as="keyword" sort="{{_sortByLabel}}">
+              <!--  could rewrite this to be a small stats4sd-keyword element or repeat group keywords element
+                    style currently in shared as likely to be reused -->
+              <a style="text-decoration: unset" href="{{_getLink(keyword)}}">
+                <paper-button class="keyword-button">[[keyword.label]]</paper-button>
+              </a>
+            </template>
+          </div>
+        </div>
+
+
+
+        <!-- Show resource types and buttons to view resources by type. -->
+        <!-- Honestly, I'm not convinced this is needed on the front page. I think it would be better placed to be able to set type as a filter when searching or browsing contents. -->
+        <!-- <div class="sub-section-heading">
+          <div style="float:left"> View Resources by Type</div>
+          <div style="float:right; cursor:pointer; font-weight:700">
+            <a href="/search" class="href-plain">
+              <iron-icon icon="search"></iron-icon>
+              <span>Search All Resources</span>
+            </a>
+          </div>
+        </div> -->
+
+        <!-- Use the custom 'resource-types' (ssd-elements/resource-types.html) to render each type as a clickable button -->
+        <!-- <resource-types></resource-types> -->
+
+
+    </div>
+
+    <!-- <paper-toast id="homeMessage" opened duration="0" class="flex">
+      <div>This platform is currently in development (release candidate 1). To feedback on specific issues or requests please contact:
+        <a style="color:wheat" href="mailto:c.clarke@stats4sd.org?Subject=Resources%20Site%20Feedback" target="_top">c.clarke@stats4sd.org</a>
+      </div>
+      <paper-button on-tap="_toastClose" style="margin:0;padding:5px;color:yellow">Got it!</paper-button>
+    </paper-toast> -->
+
+  </template>
+
+  <script>
+    class stats4sdHome extends ReduxMixin(Polymer.Element) {
+
+      static get is() { return 'stats4sd-home'; }
+
+      static get properties() {
+        return {
+          keywords: {
+            type: Array,
+            statePath: 'persistedTags.array.keywords'
+          },
+          collections: {
+            type: Array,
+            statePath: 'persistedTags.array.collections'
+          },
+          newestCollections: {
+            type: Array,
+            computed: '_getNewestCollections(collections)'
+          }
+        }
+      }
+
+
+      _getLink(keyword) {
+        return "/resources?keyword=" + keyword.slug;
+      }
+
+      _getNewestCollections(collections) {
+        // filter collections list down to only those public and max length 6
+        let newest = []
+        collections.forEach(function (c) {
+          if (!c.draft) { newest.push(c) }
+        })
+        if (newest.length > 6) { newest = newest.slice(0, 5) }
+        return newest
+      }
+
+      _sortByLabel(a,b){
+        return(a.label>b.label)
+      }
+
+    }
+
+    customElements.define(stats4sdHome.is, stats4sdHome);
+  </script>
+
+</dom-module>

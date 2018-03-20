@@ -1,0 +1,229 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../redux-mixin.html">
+
+<link rel="import" href="../shared-styles.html">
+<link rel="import" href="../ssd-elements/resource-search-result.html">
+
+<dom-module id="stats4sd-search">
+
+  <template>
+
+    <style include="shared-styles"></style>
+    <style>
+      :host {
+        padding: 0 10px 0 10px;
+        display: block;
+        background-color: #eeeeee;
+        color: black;
+        margin-top: -2px;
+        height: 100%;
+        min-height: 100vh;
+      }
+
+      .search-box {
+        display: flex;
+        /*justify-content: center;*/
+        margin: 1em 0 1em 0;
+      }
+
+      .search-input {
+        align-self: center;
+        width: 50vw;
+      }
+
+      paper-input,
+      paper-dropdown-menu {
+        --paper-input-container-color: #0f5ea8;
+        --paper-input-container-underline: #0f5ea8;
+        --paper-input-container-underline-focus: yellow;
+        --paper-input-container-invalid-color: yellow;
+        --paper-input-container-focus-color: #0f5ea8;
+        --paper-input-container-input: {
+          color: #727272;
+          font-size: 2em;
+        }
+        paper-badge {}
+      }
+
+      paper-dropdown-menu,
+      paper-tags-dropdown {
+        --paper-input-container-label: {
+          color: #0f5ea8;
+          font-style: italic
+        }
+        --paper-input-container-input: {
+          color: yellow;
+        }
+        --paper-input-container-underline: {
+          /*display: none;*/
+          opacity: 0.3
+        }
+        ;
+      }
+    </style>
+    <style is="custom-style">
+      .big {
+        --iron-icon-height: 6em;
+        --iron-icon-width: 6em;
+        --iron-icon-fill-color: #0f5ea8;
+      }
+    </style>
+    <app-route route="[[route]]" pattern="/:slug" data="{{routeData}}"></app-route>
+
+    <div class="search-box">
+      <iron-icon class="big" icon="search"></iron-icon>
+      <div class=search-input>
+        <paper-input id="searchBox" value="{{searchText}}" name="search" label="search" auto-validate pattern="[a-zA-Z0-9 ']*" error-message="no special characters!"></paper-input>
+      </div>
+    </div>
+    <div >
+      <dom-repeat id="resourcesList" items="[[searchResults]]" as="res" initial-count="10" rendered-item-count="{{resourcesRendered}}"
+        filter="_hideDraftDeleted">
+        <template>
+          <resource-search-result resource="[[res]]" style="padding:5px" collection-add-mode="[[collectionAddMode]]" active-collection="{{activeCollection}}"
+            live-collection="{{liveCollection}}"></resource-search-result>
+          <hr>
+        </template>
+      </dom-repeat>
+    </div>
+  </template>
+
+  <script>
+    class stats4sdSearch extends ReduxMixin(Polymer.Element) {
+
+      static get is() { return 'stats4sd-search'; }
+      static get observers() {
+        return [
+          // '_complexChange(page.*)'
+        ]
+      }
+      static get properties() {
+        return {
+          // persistedTags: {
+          //   type: Array,
+          // },
+          // persistedResources: {
+          //   type: Array,
+          // },
+          // collectionAddMode: Boolean
+          allResourcesArray:{
+            type:Array,
+            statePath: 'persistedResources.array',
+          },
+          allKeywordsArray:{
+            type:Array,
+            statePath: 'persistedTags.array.keywords',
+          },
+          path: {
+            type: String,
+            statePath: 'path',
+            observer: '_focusSearchbox'
+          },
+          searchResults: {
+            type: Array,
+            computed: '_sendSearch(searchText)'
+          }
+
+        }
+      }
+
+      // automatically focus the searchbox. Called when path changed
+      _focusSearchbox() {
+        if (this.$.searchBox) { this.$.searchBox.focus() }
+      }
+
+      // triggered function on change of searchText. sends search to main search function below
+      _sendSearch(searchText) {
+        if (searchText.length > 2) {
+          this.search(searchText)
+          return this.searchDetails.rankedArray
+        }
+
+        else {
+          return []
+        }
+      }
+      _hideDraftDeleted(res) {
+        // don't show resources marked as deleted or draft
+        if (res.deleted || res.draft) {
+          return false
+        }
+        else { return true }
+      }
+
+      // main search function
+      search(searchText,detail={}) {
+        // detail of format {searchText:String; filters:{}}
+        //let searchText = detail.searchText.toLowerCase()
+        this.searchDetails={}
+        this.searchDetails.rankedJson = {}
+        // match by resource name
+        this.searchDetails.name = this.allResourcesArray.filter((r) => {
+          if (r.name.toLowerCase().indexOf(searchText) > -1) {
+            this._addToSearchRank(r, 3)
+            return true
+          }
+        })
+        // match by description
+        this.searchDetails.description = this.allResourcesArray.filter((r) => {
+          if (r.description.toLowerCase().indexOf(searchText) > -1) {
+            this._addToSearchRank(r, 1)
+            return true
+          }
+        })
+        // match by keyword (exact match, inefficient as currently iterates over every resource each time
+        // needs resource by keyword lookup or 2-way binding
+        this.searchDetails.keyword = {}
+        for (let k of this.allKeywordsArray) {
+          if (k.label.toLowerCase() == searchText) {
+            this.searchDetails.keyword[k.label] = this.allResourcesArray.filter((r) => {
+              if (r.tags.hasOwnProperty('Keywords') && r.tags.Keywords.hasOwnProperty(k.$key)) {
+                this._addToSearchRank(r, 5)
+                return true
+              }
+            })
+          }
+        }
+        // *********** match by collection (not currently implemented) ***********
+
+        // *********** match by attachment names (not currently implemented) ***********
+
+        // sort overall ranking
+        this.searchDetails.rankedArray = []
+        let tempArray = []
+        for (let key in this.searchDetails.rankedJson) {
+          if (this.searchDetails.rankedJson.hasOwnProperty(key)) {
+            let val = this.searchDetails.rankedJson[key]
+            tempArray.push(
+              [val.resource, val.value]
+            )
+          }
+        }
+        tempArray.sort(function (a, b) {
+          return b[1] - a[1]
+        })
+        for (let r of tempArray) {
+          r[0].matchRating = r[1]
+          this.searchDetails.rankedArray.push(r[0])
+        }
+        this.searchResults = []
+        this.searchResults = this.searchDetails.rankedArray
+        return this.searchDetails
+      }
+      _addToSearchRank(resource, value) {
+        if (this.searchDetails.rankedJson.hasOwnProperty(resource.$key)) {
+          this.searchDetails.rankedJson[resource.$key].value = this.searchDetails.rankedJson[resource.$key].value + value
+        }
+        else {
+          this.searchDetails.rankedJson[resource.$key] = {
+            value: value,
+            resource: resource
+          }
+        }
+      }
+    }
+
+    customElements.define(stats4sdSearch.is, stats4sdSearch);
+  </script>
+
+</dom-module>

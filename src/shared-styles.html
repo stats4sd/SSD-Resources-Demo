@@ -28,6 +28,11 @@
         color: #212121;
         font-size: 22px;
       }
+      h2 {
+        font-size: 1.3em;
+        font-weight: 500;
+        margin: 16px 0;
+      }
 
       paper-dialog.inline-dialog {
         position: static;
@@ -43,12 +48,14 @@
       .sub-section-heading {
         border-top: 1px solid #e0d9d9;
         border-bottom: 1px solid #e0d9d9;
+        background: white;
         margin-bottom: 5px;
         padding-left: 10px;
         padding-right:10px;
         margin-top: 3em;
         height: 1.5em;
-        font-size: 1.2em;
+        font-size: 1.3em;
+        font-weight:500;
       }
       .padding{
         padding-left: 10px;
@@ -92,8 +99,52 @@
         margin-right: auto;
       }
       
-      paper-chip.custom-background {
+      /* paper-chip.custom-background {
         --paper-chip-background-color: #64b5f6;
+      }
+      paper-chip{
+        cursor: pointer;
+      } */
+      paper-button.keyword-button {
+        background-color: var(--app-accent-color);
+        color: white;
+        margin: 0 2px 2px 0;
+        text-transform: unset;
+        --paper-button-ink-color: var(--paper-red-500);
+        padding: 5px;
+      }
+
+
+      /* formerly in stats4sd-common-style, should be merged properly */
+      [hidden] {
+        display: none !important;
+      }
+
+      header {
+        text-align: center;
+      }
+
+      header > h1 {
+        margin: 0 0 4px 0;
+        font-size: 1.3em;
+        font-weight: 500;
+      }
+
+      header > span {
+        color: var(--app-secondary-color);
+        font-size: 12px;
+      }
+
+      header > stats4sd-button[responsive] {
+        margin-top: 20px;
+      }
+
+      @media (max-width: 767px) {
+
+        header > h1 {
+          font-size: 1.1em;
+        }
+
       }
     </style>
   </template>

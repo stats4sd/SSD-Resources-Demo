@@ -1,5 +1,5 @@
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="shared-styles.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../shared-styles.html">
 
 <dom-module id="stats4sd-admin">
 
@@ -30,8 +30,8 @@
         </template>
 
         
-    <firebase-document path="/tags" data="{{liveTags}}" app-name="stats4sd-resources"></firebase-document>
-    <firebase-document path="/resources" data="{{liveResources}}" app-name="stats4sd-resources"></firebase-document>
+    <firebase-document path="/tags" data="{{liveTags}}" app-name="stats4sd-firebase"></firebase-document>
+    <firebase-document path="/resources" data="{{liveResources}}" app-name="stats4sd-firebase"></firebase-document>
 
     <div class="padding">
       <h1>Admin</h1>

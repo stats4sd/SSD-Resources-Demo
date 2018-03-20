@@ -1,262 +1,64 @@
-<link rel="import" href="./environment/environment.html">
-
 <!-- Initial imports. These are declared here during development, and compiled to be more efficient during build -->
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="redux-mixin.html">
+
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
-
-<!-- <link rel="import" href="./ssd-elements/resource-featured.html"> -->
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
-<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
-<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../bower_components/app-layout/helpers/helpers.html">
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
-<link rel="import" href="../bower_components/app-layout/app-layout.html">
-<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
-<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
-<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="stats4sd-category-data.html">
-<!-- Since 'home' is the default route, eagerly load it. -->
-<link rel="import" href="stats4sd-home.html">
-<link rel="import" href="stats4sd-icons.html">
+<link rel="import" href="stats4sd-app-layout.html">
 
-<!-- The dom-module actually contains the element -->
+<!-- Since 'home' is the default route, eagerly load it. -->
+<link rel="import" href="pages/stats4sd-home.html">
+<link rel="import" href="stats4sd-app-style.html">
+
+<!-- The dom-module actually contains the element, it defines the tags another element can use to call it, e.g. <stats4sd-app> -->
 <dom-module id="stats4sd-app">
 
   <!-- The "template" is the style and html part of the element. Below that are the properties and functions -->
   <template>
-
-    <!-- These are styles specific to this element. The 'include="shared-styles" means that the code in shared-styles.html is also used to render things in this element.' -->
+    <!-- These are styles specific to this element. The 'include="..." imports additional styles found in other files 
+        (most of the elemenet styles for this element have been moved out as they're quite extensive.' -->
+    <style include="stats4sd-app-style"></style>
     <style include="shared-styles">
-       :host {
+      /* host styles apply to the overall  */
+
+      :host {
         max-width: 1080px;
         margin-left: auto;
         margin-right: auto;
         display: block;
         position: relative;
         background-color: gray;
-       
-       /*padding-top: 65px;*/
-        /* min-height: 100vh; */
         --app-primary-color: black;
         --app-secondary-color: #d2232a;
         background-color: var(--background-color, '#eeeeee');
-        --app-accent-color: #172C50;
+        --app-accent-color: #085eaa;
         --paper-button-ink-color: var(--app-accent-color);
         --paper-icon-button-ink-color: var(--app-accent-color);
         --paper-spinner-color: var(--app-accent-color);
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         color: var(--app-primary-color);
       }
-
-      #header {
-        /*position: fixed;
-        top: 0;
-        left: 0;*/
-        position: relative;
-        left: calc( 0px - 50vw + 50% );
-        width: 100vw;
-        z-index: 1;
-        color: rgba(102,102,102,0.81);
-        background-color: #ffffff;
- /*       --app-header-shadow: {
-          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
-          height: 10px;
-          bottom: -10px;
-        };*/
-      }
-
-      app-toolbar {
-        max-width: 1080px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      app-toolbar.small {
-        height: 64px;
-      }
-
-      app-toolbar.big {
-        height: 114px;
-      }
-
-
-      paper-icon-button {
-        color: var(--app-primary-color);
-      }
-
-      .logo {
-        text-align: center;
-      }
-
-      .logo a {
-        font-size: 16px;
-        font-weight: 600;
-        letter-spacing: 0.3em;
-        color: rgba(102,102,102,0.81);
-        text-decoration: none;
-        /* required for IE 11, so this <a> can receive pointer events */
-        display: inline-block;
-        pointer-events: auto;
-      }
-
-      .home-btn {
-        padding-right: 4px;
-        margin-bottom: 8px;
-      }
-
-      .home-btn,
-      .back-btn {
-        color: rgba(102,102,102,0.81);
-        line-height: 24px;
-      }
-
-      :host([page=home]) .hide-on-home{
-        display: none
-      }
-      :host(:not([page=home])) .hide-not-on-home{
-        display: none
-      }
-
-
-      #signedInHeader {
-        position: absolute;
-        top: 0;
-        right: 20px;
-        font-size: x-small;
-        padding: 5px;
-      }
-
-      .user-email {
-        font-size: small;
-        padding: 5px;
-      }
-      .toastMessage{
-        margin:0; 
-        width:100%; 
-        background-color:var(--paper-green-200); 
-        color:black;
-        font-size: x-large
-      }
-
-      [hidden] {
-        display: none !important;
-      }
-
-
-      stats4sd-tabs,
-      stats4sd-tab {
-        --stats4sd-tab-overlay: {
-          border-bottom: 2px solid var(--app-accent-color);
-        }
-        ;
-      }
-
-      iron-pages {
-        max-width: 1440px;
-        padding-bottom: 20px;
-        margin: 0 auto;
-        @apply(--layout-flex);
-        @apply(--layout-vertical);
-      }
-
-      .left-bar-item img.small {
-        width: 40px;
-      }
-
-      .left-bar-item img.big {
-        height: 58px;
-      }
-
-      ul.nav {
-        float: left;
-        list-style: none;
-
-      }
-
-      ul.nav li {
-        display: inline-block;
-        padding-right: 22px;
-      }
-
-      .nav li a {
-        text-decoration: none;
-        color: rgba(102,102,102,0.81);
-        font-size: 14px;
-      }
-
-      div.nav {
-        list-style: none;
-      }
-
-      div.nav li {
-        padding-left: 22px;
-        padding-bottom: 1em;
-      }
-
-      #signOut_li, #signOut_li a, #signOut_li paper-icon-button {
-        cursor: pointer;
-      }
-
-      .left-bar-item [icon=menu] {
-          display: none;
-        }
-
-        .logo-box {
-          display: flex;
-          height: 83px;
-        }
-
-        .logo-box * {
-          display: inline-flex;
-        }
-
-        .logo-box img {
-          vertical-align: middle;
-          margin-top: auto;
-          margin-bottom: auto;
-        }
-
-      @media (max-width: 767px) {
-        .left-bar-item [icon=menu] {
-          display: inline-block;
-          margin-right: 50px;
-          height: 54px;
-        }
-        .logo-box {
-          height: 54px;
-          display: inline-block;
-        }
-        .logo-box img {
-          width: 100px;
-          margin-top: auto;
-          margin-bottom: auto;
-          vertical-align: middle;
-        }
-      }
-
-      app-drawer-layout {
-        height: 100vh;
-      }
-
     </style>
 
     <stats4sd-analytics key="{{analyticsKey}}"></stats4sd-analytics>
     <!--
       app-location and app-route elements provide the state of the URL for the app. 
       The app-location grabs the url and saves it to {{route}}. 
-      The app-route then looks at the {{route}} and splits it into 2 pieces: the main part, and the "tail". The main part determines what page is displayed, and the tail is given to the page as input.
+      The app-route then looks at the {{route}} and splits it into 2 pieces: the main part, and the "tail". 
+      The main part determines what page is displayed, and the tail can be passed on to a variable as input or anything else.
 
       The pattern="/:page" means that, for a url https://url/something, the "something" is saved to {{routeData.page}} (which is used to update the {{page}} and display the correct content).
-      Anything after the page is called the 'tail', and saved to {{subroute}}.  So, for https://url/something/else, the "else" is saved to {{subroute}}. This is then passed to the various page elements within the iron-pages (e.g. stats4sd-home, stats4sd-list, etc) as that page's new {{route}}.
+      Anything after the page is called the 'tail', and could be saved, for example to {{subroute}} (although here we don't need any extra as each page handles it's own data).  
+      So, for https://url/something/else, the "else" is saved to {{subroute}}. 
+      This is then passed to the various page elements within the iron-pages (e.g. stats4sd-home, stats4sd-list, etc) as that page's new {{route}}.
     -->
     <app-location route="{{route}}"></app-location>
-    <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+
+    <app-route route="{{route}}" pattern="/:page" data="{{routeData}}"></app-route>
 
     <!--
       iron-media-query element runs a media-style query. The result is put into the "query-matches" property
@@ -265,195 +67,29 @@
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
     <!-- This is the link to the firebase database. All firebase queries and documents throughout all pages refer to this app by its name. -->
-    <firebase-app name="stats4sd-resources" api-key="{{firebaseConfig.apiKey}}" storage-bucket="{{firebaseConfig.storageBucket}}" auth-domain="{{firebaseConfig.authDomain}}" database-url="{{firebaseConfig.databaseURL}}">
+    <firebase-app name="stats4sd-firebase" api-key="{{firebaseConfig.apiKey}}" storage-bucket="{{firebaseConfig.storageBucket}}"
+      auth-domain="{{firebaseConfig.authDomain}}" database-url="{{firebaseConfig.databaseURL}}">
     </firebase-app>
 
     <!--
       Query the database to return a set of all resources and a set of all tags.
       Then, use the app-indexeddb-mirror elements to put it all into local storage bound to the {{persisted###}} properties.
      -->
-    <firebase-query id="resQuery" app-name="stats4sd-resources" path="/resources" data="{{resources}}"></firebase-query>
+    <firebase-query id="resQuery" app-name="stats4sd-firebase" path="/resources" data="{{resources}}"></firebase-query>
     <app-indexeddb-mirror key="persistedResources" data="{{resources}}" session="keepAlways" persisted-data="{{persistedResources}}"></app-indexeddb-mirror>
-    <firebase-query id="tagsQuery" app-name="stats4sd-resources" path="/tags" data="{{tags}}"></firebase-query>
-    <app-indexeddb-mirror key="persistedTags" data="{{tags}}" session="keepAlways" persisted-data="{{persistedTags}}"></app-indexeddb-mirror>
 
+    <firebase-query id="collectionsQuery" app-name="stats4sd-firebase" path="/tags/Collections" data="{{collections}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedCollections" data="{{collections}}" session="keepAlways" persisted-data="{{persistedCollections}}"></app-indexeddb-mirror>
 
-    <!-- Add an app drawer for small screens. This will include the items from the top menu. -->
-    <app-drawer-layout drawer-width="288px" force-narrow>
-      <!-- navigation drawer for small screen sizes -->
-      <app-drawer slot="drawer" id="drawer" swipe-open="[[smallScreen]]">
-        <template is="dom-if" if="[[smallScreen]]">
-            <h3 style="margin-bottom: 2px">Menu</h3>
-            <template is="dom-if" if="[[signedIn]]">
-              <div class="user-email" style="margin-bottom: 20px">logged in as: {{user.email}}</div>
-            </template>
-          <div class="nav">
-            <!-- AT some point, this could become a repeating template, and we can throw these items into a [[sections]] property. -->
-            <li class="menu-item"><a href="/">HOME</a></li>
-            <li class="menu-item"><a href="/about">ABOUT</a></li>
-            <li class="menu-item"><a href="/list/all/all">BROWSE</a></li>
-            <li class="menu-item"><a href="/search">SEARCH</a></li>
-            <li class="menu-item">
-              <a href="#" >SIGN OUT</a>
-              <paper-icon-button icon="lock"></paper-icon-button>
-            </li>
-          </div>
-        </template>
-      </app-drawer>
+    <firebase-query id="keywordsQuery" app-name="stats4sd-firebase" path="/tags/Keywords" data="{{keywords}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedKeywords" data="{{keywords}}" session="keepAlways" persisted-data="{{persistedKeywords}}"></app-indexeddb-mirror>
 
-      <!-- The header bar uses the "app-layout" elements. (https://www.webcomponents.org/element/PolymerElements/app-layout)-->
-      <app-header id="header">
-        <app-toolbar class$="[[_headerStyle(smallScreen)]]">
+    <firebase-query id="resourceTypesQuery" app-name="stats4sd-firebase" path="/tags/Resource-Types" data="{{resourceTypes}}"></firebase-query>
+    <app-indexeddb-mirror key="persistedResourceTypes" data="{{resourceTypes}}" session="keepAlways" persisted-data="{{persistedResourceTypes}}"></app-indexeddb-mirror>
 
-          <!-- The 'back' button on the top left extends the default "back" browser button functionality by sending the user to the home page if there is no browser history to trawl through. -->
-          <div class="left-bar-item">
-            <paper-icon-button icon="menu" drawer-toggle alt="Toogle navigation menu"></paper-icon-button>
-            <!-- temporarily removing logo until we choose whether to have Stats4SD logo or a different, project-specific one. -->
-             <div class='logo-box'>
-           <!--   <img class$="[[_headerStyle(smallScreen)]]" src="../images/test-logo.png"/> -->
-              <h4 style='color: #085eaa'>Stats4SD Resources</h4>
-           </div>
-          </div>
-          <template is="dom-if" if="{{!smallScreen}}">
-            <ul id="top-menu" class="nav">
-                <li class="menu-item"><a href="/">HOME</a></li>
-                <li class="menu-item"><a href="/about">ABOUT</a></li>
-                <li class="menu-item"><a href="/list/all/all">BROWSE</a></li>
-                <li class="menu-item"><a href="/search">SEARCH</a></li>
-              <template is="dom-if" if="{{!signedIn}}">
-                <li class="menu-item"><a href="#" on-tap="_signInOpen">SIGN IN</a></li>
-                <paper-icon-button icon="lock"></paper-icon-button>
-              </template>
-              <template is="dom-if" if="{{signedIn}}">
-                <li class="menu-item" on-tap="_signOut" id="signOut_li">
-                  <a href="#" >SIGN OUT</a>
-                  <paper-icon-button icon="lock"></paper-icon-button>
-                </li>
-              </template>
-            </ul>
-            <template is="dom-if" if="{{signedIn}}">
-              <div id="signedInHeader" hidden$="[[!signedIn]]">Logged in as: {{user.email}}</div>
-            </template>
-          </template> <!-- end header section that appears if it's not a small screen --> 
-        </app-toolbar>
-      </app-header>
+    <!-- This is the main layout, it contains the sidebars, headers, lists of pages etc. -->
+    <stats4sd-app-layout></stats4sd-app-layout>
 
-      <!--
-        The main page elements are contained wihtin the iron-pages element.
-        iron-pages will display one of the child elements. The displayed element is determined by the "selected" property - in this case, this is bound to [[page]]. (So when [[page]] changes, iron-pages shows a new page element).
-        The attr-for-selected property tells you which property of the child elements to match to [[page]] - in this case, you need to match the name of the child element.
-       -->
-      <iron-pages class="inner" role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
-        <stats4sd-home id="homePage" name="home" user="{{user}}" persisted-tags="[[persistedTags]]" page="{{page}}" newest-collections="[[newestCollections]]" keywords="[[allKeywords]]"></stats4sd-home>
-        <stats4sd-about id="aboutPage" name="about" ></stats4sd-about>
-        <stats4sd-list id="listPage" name="list" route="[[subroute]]" offline="[[offline]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"></stats4sd-list>
-        <stats4sd-admin id="adminPage" name="admin" route="[[subroute]]" persisted-tags="[[persistedTags]]" persisted-resources="[[persistedResources]]"
-          page="{{page}}"></stats4sd-admin>
-        <stats4sd-resource id="resourcePage" name="resource" route="{{subroute}}" persisted-resources="[[persistedResources]]" resource=[[resource]]
-          offline="[[offline]]" persisted-tags="[[persistedTags]]" user="{{user}}"></stats4sd-resource>
-        <stats4sd-collection id="collectionPage" name="collection" user="{{user}}" route="{{subroute}}" offline="[[offline]]" all-collections="{{allCollections}}"
-          active-collection="{{activeCollection}}" live-collection="{{liveCollection}}" resources-json="[[resourcesJson]]"></stats4sd-collection>
-        <stats4sd-search id="searchPage" name="search" route="{{route}}" page="{{page}}" search-results="[[searchResults]]" collection-add-mode="[[collectionAddMode]]"
-          active-collection="{{activeCollection}}" live-collection="{{liveCollection}}"></stats4sd-search>
-        <stats4sd-404 name="404"></stats4sd-404>
-      </iron-pages>
-
-      <!--
-        The category-data element does lots of behind-the-scenes work.
-          - It provides metadata (e.g. resource categories)
-          - It converts the data from [[persisted###]] (local storagae) back into JSON objects so we can treat it in the same way as the firebase data;
-          - It provides search results
-          ... etc?
-       -->
-      <stats4sd-category-data id="categoryData" tags="[[persistedTags]]" resources="[[persistedResources]]" all-collections="{{allCollections}}" all-keywords="{{allKeywords}}"
-        newest-collections="{{newestCollections}}" search-results="{{searchResults}}" resources-json="{{resourcesJson}}"></stats4sd-category-data>
-
-      <!--
-        The footer contains links to manage collections and resources. It is only shown to users who are signed-in, which is handled via a dom-if template.
-       -->
-      <template is="dom-if" if="{{signedIn}}">
-        <footer class="footer">
-          <!-- buttons show/hide on various paths.  This is handled via the _hideOnPaths() function -->
-          <div id="rightButtons" style="float:right">
-
-            <paper-button hidden$="{{_hideOnPaths(route.path,'/collection')}}">
-              <a href="/collection" class="href-plain">
-                <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
-              </a>
-            </paper-button>
-
-            <!-- <paper-button hidden$="{{_showOnPaths(route.path,'/collection/*')}}" on-tap="_editCollection">
-            <a class="href-plain">
-              <iron-icon icon="mode-edit" aria-label="Manage Collections"></iron-icon>Edit Collection
-            </a>
-          </paper-button> -->
-
-            <paper-button hidden$="{{_showOnPaths(route.path,'/collection')}}" on-tap="_addCollection">
-              <a href="/collection" class="href-plain">
-                <iron-icon icon="add" aria-label="Manage Collections"></iron-icon>Add Collection
-              </a>
-            </paper-button>
-            <paper-button hidden$="{{!collectionAddMode}}" on-tap="_saveCollection">
-              <a href="/collection" class="href-plain">
-                <iron-icon icon="save" aria-label="Save Collection"></iron-icon>Save Collection
-              </a>
-            </paper-button>
-
-            <paper-button hidden$="{{_hideOnPaths(route.path,'/resource/*_/collection*')}}">
-              <a href="/resource/_/edit" class="href-plain">
-                <iron-icon icon="add" aria-label="Add Resource"></iron-icon>Add Resource
-              </a>
-            </paper-button>
-
-            <paper-button hidden$="{{_hideResourceEdit(route.path)}}" on-tap="_editResource">
-              <a class="href-plain">
-                <iron-icon icon="mode-edit" aria-label="Add Resource"></iron-icon>Edit Resource
-              </a>
-            </paper-button>
-
-            <paper-button hidden$="{{_hideResourceSave(route.path)}}" on-tap="_saveResource">
-              <a class="href-plain">
-                <iron-icon icon="save" aria-label="Add Resource"></iron-icon>Save Resource
-              </a>
-            </paper-button>
-          </div>
-        </footer>
-      </template>
-
-      <paper-toast id="toastMessage" text="{{toastMessage}}" duration="2500" class="toastMessage"></paper-toast>
-      <div class="hide-not-on-home">
-        <div class="footer">
-          <div class="bottom-bar" hidden$="[[signedIn]]" style="display:flex; justify-content:space-between; align-items:center; min-height:2em">
-            <div style="cursor:pointer; padding:5px; white-space:nowrap" on-tap="_showCookiePolicy">Cookie Policy</div>
-            <div style="flex-basis:100%; text-align:center; padding:5px">Site created by Stats4SD with code openly available on
-              <a href="https://github.com/stats4sd/Stats4SD-Resources-Site" style="color:var(--paper-purple-200);" target="_blank">Github</a>
-              <iron-icon icon="stats4sd-github" style="padding-left:5px"></iron-icon>
-            </div>
-            <div style="padding-right:5px;white-space:nowrap; padding:5px">version 1.2.2</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- A paper-toast element appears at the bottom of the page to inform the user of important info (e.g. legal cookie stuff). Toast is nicer than alerts or similar as it doesn't get in the way as much (and generally looks nicer).-->
-      <paper-toast id="cookiePolicy" duration="0" class="flex" style="margin:0">
-        <div>Stats4SD uses cookies to collect information about how you use the site. We use this data to find ways to help improve
-          the site and user experience. We DO NOT share any personal or private information with any 3rd parties. You can click
-          here to find out more information about how to
-          <a href="http://www.aboutcookies.org/" style="color:var(--paper-blue-50)" target="_blank">manage cookies</a>
-        </div>
-        <paper-button on-tap="_hideCookiePolicy" style="margin:0;padding:5px;color:yellow">Got it!</paper-button>
-      </paper-toast>
-    </app-drawer-layout>
-
-<!-- Login box (starts hidden. This is opened when the user clicks on the sign-in button in the header. -->
-      <paper-dialog id="login" modal>
-        <paper-dialog-scrollable>
-          <!-- We use a slightly customised version of the firebase-login element.
-          This provides us with the {{user}} and {{signedIn}} properties, so we can hide or show things that require authentication -->
-          <login-element id="stats4sdLogin" app-name="stats4sd-resources" user="{{user}}" signed-in="{{signedIn}}">
-          </login-element>
-        </paper-dialog-scrollable>
-      </paper-dialog>
 
   </template>
 
@@ -465,7 +101,15 @@
     // performance logging
     window.performance && performance.mark && performance.mark('stats4sd-app - before register');
 
-    class stats4sdApp extends Polymer.Element {
+    // Define the overall class (defines properties, functions etc that will be available to the element)
+    // This first of all extends the standard polymer (extends...(Polymer.Element)) element imported in every custom element, 
+    // but also has a second extension 'ReduxMixin' which provides access to the redux store and additional behaviours defined
+    // in the redux-mixin.html file
+
+    // of note is an additional 'statePath' subproperty (not used here but see stats4sd-app-layout) which provides an automatic
+    // binding to the value of a given path in the global data store. Additionally we have an optional 'actions' decorator
+    // which is used to define specific functions called via this.dispatch(function,value). These update the global data store
+    class Stats4sdApp extends ReduxMixin(Polymer.Element) {
 
       static get is() { return 'stats4sd-app'; }
 
@@ -473,7 +117,6 @@
         return {
           page: {
             type: String,
-            reflectToAttribute: true,
             observer: '_pageChanged'
           },
           signedIn: {
@@ -486,42 +129,120 @@
           },
           resourcesjson: {
             type: Object,
-            notify: true,
             value: { test: 123 }
           },
+          // properties which will be reflected up to global data store
           smallScreen: {
             type: Boolean,
-            notify: true
+            // observe changes to small screen value given by media query, and dispatch to the global store
+            observer: function (newVal) {
+              // also use this as an opportunity to remove initial loading screen if not already
+              // fade away loading screen
+              setTimeout(() => {
+                document.body.classList.add('loaded')
+              }, 500);
+              return this.dispatch('setSmallscreen', newVal)
+            }
           },
-          firebaseConfig:{
-            type:Object
+          // data from firebase queries
+          persistedResources: {
+            type: Array,
+            observer: function (resources) {
+              return this.dispatch('updateResources', resources)
+            }
           },
-          analyticsKey:{
-            type:String
-          }
+          persistedCollections: {
+            type: Array,
+            observer: function (tags) {
+              return this.dispatch('updateTags', { type: 'collections', tags: tags })
+            }
+          },
+          persistedKeywords: {
+            type: Array,
+            observer: function (tags) {
+              return this.dispatch('updateTags', { type: 'keywords', tags: tags })
+            }
+          },
+          persistedResourceTypes: {
+            type: Array,
+            observer: function (tags) {
+              return this.dispatch('updateTags', { type: 'resourceTypes', tags: tags })
+            }
+          },
+          // firebase and analytics config
+          firebaseConfig: {
+            type: Object
+          },
+          analyticsKey: {
+            type: String
+          },
         }
       }
 
+
+      // actions update the global data store of particular variables (defined in the redux-mixin html doc)
+      // they are called from this.dispatch(function,value). You can inspect these through the 'Redux dev tools' browser plugin
+      static get actions() {
+        return {
+          setSmallscreen(isSmall) {
+            return {
+              type: 'SET_SMALLSCREEN',
+              payload: isSmall
+            }
+          },
+          updatePage(page) {
+            return {
+              type: 'UPDATE_PAGE',
+              payload: page
+            }
+          },
+          updateResources(resources) {
+            return {
+              type: 'UPDATE_RESOURCES',
+              payload: resources
+            }
+          },
+          updateTags(payload) {
+            return {
+              type: 'UPDATE_TAGS',
+              payload: payload
+            }
+          },
+          updatePath(path) {
+            return {
+              type: 'UPDATE_PATH',
+              payload: path
+            }
+          },
+          updateQueryParams(queryParams) {
+            return {
+              type: 'UPDATE_QUERY_PARAMS',
+              payload: queryParams
+            }
+          }
+
+
+
+        }
+      }
+      // use a complex observer to detect path subproperty changes
       static get observers() {
         return [
           '_routePageChanged(routeData.page)',
+          '_pathChanged(route.path)',
+          '_queryParamsChanged(route.__queryParams)'
         ]
         // note, could use persistedFeatured.length to simply track number of items
       }
 
-      //function to set the header class based on screen dimensions
-      _headerStyle(smallScreen) {
-        if(smallScreen) {
-          return "small"
-        }
-        return "big"
-      }
 
 
       constructor() {
         super();
+        // set firebase config from window object (populated in earlier script calls)
         this.firebaseConfig = window.firebaseConfig
         this.analyticsKey = window.analyticsKey
+        // performance (?)
         window.performance && performance.mark && performance.mark('stats4sd-app.created');
       }
 
@@ -532,56 +253,43 @@
         // listen for custom events
         //// This is one of the main ways of communicating between elements.
         //// Child elemenets send custom events, and these event listeners hear them, take whatever data is passed up (e) and passes the 'e' to the listed function.
-        ///
-        /////resource-change sent from 'resource-search-result' element.
-        // e = specific resource object and url to that resource.
-        this.addEventListener('resource-change', (e) => this._resourceChange(e));
 
-        // this event is never sent
-        this.addEventListener('show-invalid-url-warning', (e) => this._onFallbackSelectionTriggered(e));
+        // // listen for online/offline
+        // Polymer.RenderStatus.afterNextRender(this, () => {
+        //   // window.addEventListener('online', (e) => this._notifyNetworkStatus(e));
+        //   // window.addEventListener('offline', (e) => this._notifyNetworkStatus(e));
+        // });
+      }
 
-        //resource-saved sent from 'stats4sd-resource' element. 
-        // e = the resource object that has just been saved to the database.
-        this.addEventListener('resource-saved', (e) => this._resourceSaved(e));
+      // path change observer updates the global store of the current path
+      _pathChanged(path) {
+        return this.dispatch('updatePath', path)
+      }
 
-        // collection-resources-add sent from 'stats4sd-collection' element.
-        // e = the collection being edited
-        this.addEventListener('collection-resources-add', (e) => this._collectionResourcesAdd(e));
-
-        // search sent from 'stats4sd-search' element.
-        // e = the search text and any active filters.
-        this.addEventListener('search', (e) => this._search(e));
-
-        // listen for online/offline
-        Polymer.RenderStatus.afterNextRender(this, () => {
-          // window.addEventListener('online', (e) => this._notifyNetworkStatus(e));
-          // window.addEventListener('offline', (e) => this._notifyNetworkStatus(e));
-        });
+      // query params observer updates the global store of the current path
+      _queryParamsChanged(params) {
+        return this.dispatch('updateQueryParams', params)
       }
 
       // *Observer Function** for {{routeData.page}}
       _routePageChanged(page) {
-
         //Degm- If page equals 'list', set scroll to top of page
         if (this.page === 'list') {
           this._listScrollTop = window.pageYOffset;
         }
-
         //set {{page}} to {{routeData.page}} - or 'home' as a default.
         this.page = page || 'home';
-
-        // Close the drawer - in case the *route* change came from a link in the drawer.
-        this.$.drawer.close();
       }
 
       // **Observer Function** for {{page}}
       _pageChanged(page, oldPage) {
+        // tell global store of new page
+        this.dispatch('updatePage', page)
         this.lastPage = oldPage
-        window.scrollTo(0, 0);
-
+        //window.scrollTo(0, 0);
         //Assuming a {{page}} value exists:
         if (page != null) {
-          // home route is eagerly loaded
+          // home route doesn't need import
           if (page == 'home') {
             this._pageLoaded(Boolean(oldPage));
             // other routes are lazy loaded
@@ -589,8 +297,9 @@
             // When a load failed, it triggered a 404 which means we need to
             // eagerly load the 404 page definition
             let cb = this._pageLoaded.bind(this, Boolean(oldPage));
+
             Polymer.importHref(
-              this.resolveUrl('stats4sd-' + page + '.html'),
+              this.resolveUrl('pages/stats4sd-' + page + '.html'),
               cb, cb, true);
           }
         }
@@ -600,158 +309,7 @@
       _pageLoaded(shouldResetLayout) {
         this._ensureLazyLoaded();
         if (shouldResetLayout) {
-          // The size of the header depends on the page (e.g. on some pages the tabs
-          // do not appear), so reset the header's layout only when switching pages.
-          Polymer.Async.timeOut.run(() => {
-            this.$.header.resetLayout();
-          }, 1);
         }
-      }
-
-      // **Event Function** 
-      // Called when someone searches on the search page. 
-      _search(e) {
-        //All this does is pass the search data to the categoryData element. That element actually runs the search function.
-        this.$.categoryData.search(e.detail)
-      }
-
-      //Function bound to the "back" button in the top-left. Uses the built-in 'back' function in the browser.
-      goBack() {
-        // go back in nav stack whilst browsing, if navigated direct and now history just go home
-        if (this.lastPage) {
-          window.history.back()
-        }
-        else {
-          this.set('route.path', '/')
-        }
-
-      }
-
-      //Function bound to the home button in the top-left. Sends the user home by setting the {{route.path}} property.
-      //Degm- currently not in use
-      goHome() {
-        this.set('route.path', '/')
-      }
-
-      // **Event Function**
-      // Receives info about a specific resource (e.g. resource clicked on by user).
-      // Sets the current resource and the route.path so the user is directed to that resource.
-      _resourceChange(e) {
-        this.set('resource', e.detail.resource)
-        console.log('resource', this.resource)
-        this.set('route.path', e.detail.url)
-      }
-
-      // **Event Function**
-      // Receives info about a specific resource when it is saved to the database
-      // Sets the {{route.path}} to the saved resource, so it's automatically updated in current session.
-      _resourceSaved(e) {
-        // display toast and go back page after resource edit
-        console.log('resource saved', e)
-        this._showMessage('Resource Saved :-)')
-        // this.set('route.path', '/resource/' + e.detail.resource.slug)
-        window.history.back();
-      }
-
-      // Function used in various contexts to show a message via a 'toast' Element appearing. 
-      // Useful for giving user feedback after saving, updating, deleting etc.
-      _showMessage(message){
-        console.log('showing message',message)
-        this.toastMessage=message;
-        this.$.toastMessage.open()
-      }
-
-      // Function used to define whether many elements are hidden or not.
-      // Compares the active path with a _ seperated list of paths. If there is a match, return true (and hide the element)
-      _hideOnPaths(activePath, pathsString) {
-        // uses _ to seperate paths to hide on
-        let paths = pathsString.split('_')
-        // state whether to hide or show when active page matches test page
-        for (let path of paths) {
-          // identify wildcard, if yes allow fuzzy match
-          if (path.indexOf('*') > -1) {
-            path = path.slice(0, -1)
-            if (activePath.indexOf(path) > -1) {
-              return true
-            }
-          }
-          else {
-            if (activePath == path) {
-              return true
-            }
-          }
-        }
-        return false
-      }
-
-      // Function bound to the "Edit Collection" button in the footer.
-      // Degm- not currently in use (button commented out in favour of "manage collections" page).
-      _editCollection() { this.$.collectionPage._editCollection(); }
-
-      // Function bound to the "Add collection" button in the footer.
-      // Triggers the _addCollection() function within the 'collectionPage' element
-      _addCollection() { this.$.collectionPage._addCollection(); }
-
-      // **Event Function** 
-      // When clicking 'add resources' to a collection, this event is triggered.
-      _collectionResourcesAdd() {
-        console.log('adding resources to collection', this.activeCollection);
-        //set the "collectionAddMode" boolean to true. This presents the "add" button next to resources in the search view, so they can be added to the collection currently active. 
-        this.collectionAddMode = true
-        //Automatically take the user to the search page so they can start adding resources without delay!
-        this.set('route.path', '/search')
-      }
-
-      // Function bound to the "Save collection" button in the footer.
-      // Triggers the saveCollection() function in the 'collectionPage' element.
-      _saveCollection() { this.$.collectionPage.saveCollection() }
-
-      // Function to determine whether the "edit resource" button should display within the footer.
-      _hideResourceEdit(path) {
-        //show on /resource/* but not on /resource/[slug]/edit
-        if (path.indexOf('/resource/') > -1 && path.split('/').indexOf('edit') == -1) {
-          return false
-        }
-        return true
-      }
-
-      // Function to determine whether the "save resource" button should display within the footer.
-      _hideResourceSave(path) {
-        //only show on /resource/[slug]/edit
-        let split = path.split('/')
-        if (split.length > 3 && split[3] == 'edit') {
-          return false
-        }
-        return true
-      }
-
-      // Function to determine whether the home button should be shown.
-      // Degm- currently not used?
-      _hideHomeButton(path) {
-        if (path == "/") {
-          return false
-        }
-        if (path.indexOf('/list/') > -1) { return false }
-        else {
-          return true
-        }
-      }
-
-      // Function bound to the "save resource" button in the footer.
-      // Triggers the _saveResource() function from the resource Page.
-      _saveResource() { this.$.resourcePage._saveResource() }
-
-      // Function bound to the "edit resource" button in the footer.
-      // Sends the user to the "/edit" screen for the currently displaying resource (by setting the {{route.path}});
-      _editResource() {
-        this.set('route.path', this.route.path + '/edit')
-      }
-
-      // Function that calls the _hideOnPaths() function, but then returns the opposite response.
-      // (Appropriately named...)
-      _showOnPaths(activePath, pathsString) {
-        let hide = this._hideOnPaths(activePath, pathsString)
-        return !hide
       }
 
       // Function involved in the loading of pages / elements.
@@ -793,83 +351,18 @@
       //     this._networkSnackbar.open();
       //   }
       // }
-
-
-      // Function bound to the 'sign-in' button.
-      // Opens the login dialog. 
-      _signInOpen() {
-        this.$.login.open()
-      }
-
-      // Function bound to the sign-out button. 
-      // Triggers the signOut() function in the custom 'login-element' element.
-      _signOut() {
-        this.$.stats4sdLogin.signOut();
-        this.signedIn = false;
-      }
-
-      // **Observer Function** for {{signedIn}}
-      // When the user signedIn status changes, ensure that the login dialog is closed.
-      _signedInChange() {
-        this.$.login.close()
-      }
-
-
-      // ************deprecated functions?? - to review ***************
-
-      // Elements in the app can notify section changes.
-      // Response by a11y announcing the section and syncronizing the category.
-      _onChangeSection(event) {
-        let detail = event.detail;
-
-        // Scroll to the top of the page when navigating to a non-list page. For list view,
-        // scroll to the last saved position only if the category has not changed.
-        let scrollTop = 0;
-        if (this.page === 'list') {
-          if (this.categoryName === detail.category) {
-            scrollTop = this._listScrollTop;
-          } else {
-            // Reset the list view scrollTop if the category changed.
-            this._listScrollTop = 0;
-          }
-        }
-        // Use `Polymer.AppLayout.scroll` with `behavior: 'silent'` to disable header scroll
-        // effects during the scroll.
-        Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });
-
-        this.categoryName = detail.category || '';
-
-        // Announce the page's title
-        if (detail.title) {
-          document.title = detail.title + ' - stats4sd';
-          this._announce(detail.title + ', loaded');
-        }
-      }
-
-
-      // This is for performance logging only.
-      _domChange(e) {
-        if (window.performance && performance.mark && !this.__loggedDomChange) {
-          let target = e.composedPath()[0];
-          let host = target.getRootNode().host;
-          if (host && host.localName.match(this.page)) {
-            this.__loggedDomChange = true;
-            performance.mark(host.localName + '.domChange');
-          }
-        }
-      }
-
-      // Function not in use
-      // Sends the user to the 404 (not found) page.
-      _onFallbackSelectionTriggered() {
-        this.page = '404';
-      }
-
     }
 
 
-    //Each polymer element requires this 'define()' function.
-    customElements.define(stats4sdApp.is, stats4sdApp);
+    /*  Each polymer element requires this 'define()' function.
+        the first variable calls the '.is' property on the class, which is defined above:
+            static get is() { return 'stats4sd-app'; }
+        This just returns the same id as the dom module and hence component tag, <stats4sd-app>
+        
+        The second variable returns back the entire class that has been defined in this script (all functions, logic etc)
+        which is made available to the component
+    */
+    customElements.define(Stats4sdApp.is, Stats4sdApp);
   </script>
 
 </dom-module>

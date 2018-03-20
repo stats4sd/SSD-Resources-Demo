@@ -1,5 +1,5 @@
 {
-  "name": "stats4sd",
+  "name": "stats4sd-resources",
   "version": "2.1.0",
   "authors": [
     "Chris Clarke",
@@ -7,7 +7,7 @@
   ],
   "private": true,
   "dependencies": {
-    "polymer": "polymer/polymer#2.5.0",
+    "polymer": "polymer/polymer#2.4.0",
     "polymerfire": "firebase/polymerfire#2.2.1",
     "app-layout": "polymerelements/app-layout#2.0.5",
     "app-route": "polymerelements/app-route#2.1.0",
@@ -29,11 +29,14 @@
     "paper-toggle-button": "PolymerElements/paper-toggle-button#2.1.0",
     "google-youtube": "GoogleWebComponents/google-youtube#2.0.0",
     "paper-chip": "ThomasCybulski/paper-chip#2.0.17",
-    "vaadin-combo-box": "vaadin/vaadin-combo-box#3.0.4",
-    "vaadin-upload": "vaadin/vaadin-upload#3.0.1",
-    "wysiwyg-e": "miztroh/wysiwyg-e#2.0.5"
+    "wysiwyg-e": "miztroh/wysiwyg-e#2.0.5",
+    "web-animations-js": "^2.3.1",
+    "vaadin-combo-box": "vaadin/vaadin-combo-box#^3.0.4",
+    "vaadin-upload": "vaadin/vaadin-upload#^3.0.2",
+    "polymer-redux": "tur-nr/polymer-redux#^1.0.5",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.3"
   },
   "devDependencies": {
-    "web-component-tester": "6.5.0"
+    "web-component-tester": "Polymer/web-component-tester#^6.0.0"
   }
 }
