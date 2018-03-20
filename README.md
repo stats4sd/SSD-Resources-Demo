@@ -32,6 +32,17 @@ Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli
     polymer test
 
 ### Build
+1. Create the build  
+    $`polymer build`
+2. (optional) Ensure correct firebase version in use  
+    $`firebase use`
+3. (optional) Test deploy environment  
+    $`firebase serve`
+4.  Deploy  
+    $`firebase deploy`        
+
+
+
 
 **_Note_** 
 Build process currently has issue when minifying firebase components [see issue #132](https://github.com/stats4sd/Stats4SD-Resources-Site/issues/132)
