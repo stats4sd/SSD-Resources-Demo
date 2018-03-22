@@ -30,6 +30,9 @@
         align-self: center;
         width: 50vw;
       }
+      .no-results{
+        font-weight: bold
+      }
 
       paper-input,
       paper-dropdown-menu {
@@ -74,9 +77,12 @@
       <iron-icon class="big" icon="search"></iron-icon>
       <div class=search-input>
         <paper-input id="searchBox" value="{{searchText}}" name="search" label="search" auto-validate pattern="[a-zA-Z0-9 ']*" error-message="no special characters!"></paper-input>
+        <div style="opacity: 0.7" hidden$="[[!_showSearchPlaceholder(searchText)]]">Input at least 3 characters</div>
       </div>
+      
     </div>
-    <div >
+    
+    <div>
       <dom-repeat id="resourcesList" items="[[searchResults]]" as="res" initial-count="10" rendered-item-count="{{resourcesRendered}}"
         filter="_hideDraftDeleted">
         <template>
@@ -85,6 +91,7 @@
           <hr>
         </template>
       </dom-repeat>
+      <div class="no-results" hidden="[[!_showNoResources(searchText,resourcesRendered)]]">There are no results</div>
     </div>
   </template>
 
@@ -106,12 +113,12 @@
           //   type: Array,
           // },
           // collectionAddMode: Boolean
-          allResourcesArray:{
-            type:Array,
+          allResourcesArray: {
+            type: Array,
             statePath: 'persistedResources.array',
           },
-          allKeywordsArray:{
-            type:Array,
+          allKeywordsArray: {
+            type: Array,
             statePath: 'persistedTags.array.keywords',
           },
           path: {
@@ -122,8 +129,11 @@
           searchResults: {
             type: Array,
             computed: '_sendSearch(searchText)'
+          },
+          searchText: {
+            type: String,
+            value: ''
           }
-
         }
       }
 
@@ -138,10 +148,15 @@
           this.search(searchText)
           return this.searchDetails.rankedArray
         }
-
         else {
           return []
         }
+      }
+      _showSearchPlaceholder(searchText) {
+        return searchText.length > 2 ? false : true
+      }
+      _showNoResources(searchText, resourcesRendered){
+        return searchText.length>2 && resourcesRendered==0
       }
       _hideDraftDeleted(res) {
         // don't show resources marked as deleted or draft
@@ -152,10 +167,10 @@
       }
 
       // main search function
-      search(searchText,detail={}) {
+      search(searchText, detail = {}) {
         // detail of format {searchText:String; filters:{}}
         //let searchText = detail.searchText.toLowerCase()
-        this.searchDetails={}
+        this.searchDetails = {}
         this.searchDetails.rankedJson = {}
         // match by resource name
         this.searchDetails.name = this.allResourcesArray.filter((r) => {

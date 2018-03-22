@@ -25,7 +25,10 @@ Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli
 
 ### Start the development server
 
-    polymer serve
+    `polymer serve`
+
+    (of if you wish to use live-reload)  
+    `npm run start`
 
 ### Run web-component-tester tests
 
