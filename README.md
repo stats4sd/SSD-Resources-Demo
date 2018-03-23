@@ -37,11 +37,13 @@ Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli
 ### Build
 1. Create the build  
     $`polymer build`
-2. (optional) Ensure correct firebase version in use  
+2. (recommended) Ensure correct firebase version in use  
     $`firebase use`
-3. (optional) Test deploy environment  
+3. (recommended) Ensure correct environment defined in setConfig.js 
+    $`firebase use`
+4. (recommended) Test deploy environment  
     $`firebase serve`
-4.  Deploy  
+5.  Deploy  
     $`firebase deploy`        
 
 

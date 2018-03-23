@@ -20,7 +20,7 @@
         @apply --layout-center-justified;
       }
 
-      
+
 
       h1 {
         font-size: 24px;
@@ -31,11 +31,8 @@
         text-align: center
       }
 
-     
-
-      
-
-      paper-button.sub-section-heading-button {
+      paper-button.sub-section-heading-button,
+      paper-button.add-resource-button {
         padding: 2px;
         margin: 5;
         font-size: 0.7em;
@@ -44,16 +41,23 @@
         left: 10px;
       }
 
-     
+      paper-button.add-resource-button {
+        background-color: var(--paper-green-500);
+        color: white;
+        margin: 3px 2px 2px 0;
+        text-transform: unset;
+        padding: 5px;
+        float: right;
 
-
-      
+      }
     </style>
 
     <!-- All Resources View -->
-    <!-- use conditional dom-if to decide whether to show. Note the dom-if has to bind to a boolean variable or a function which returns one -->
-    <template is="dom-if" if="{{_shouldShowAllResources(path)}}">
-      <div>
+    <div hidden="[[editMode]]">
+      <!-- use conditional dom-if to decide whether to show. Note the dom-if has to bind to a boolean variable or a function which returns one -->
+      <template is="dom-if" if="{{_shouldShowAllResources(path)}}">
+        <!-- All Resources heading -->
+        edit mode: [[editMode]]
         <div class="sub-section-heading" style="margin-top: 1em">
           <span>All Resources ([[filteredResourcesArray.length]])</span>
           <!-- show keyword query params, inlcudes link to remove  -->
@@ -65,22 +69,33 @@
               </paper-button>
             </a>
           </div>
+          <!-- add resource button -->
+          <template is="dom-if" if="[[signedIn]]">
+            <a href="[[_getAddResourceLink()]]">
+              <paper-button class="add-resource-button">
+                <iron-icon icon="add"></iron-icon>
+                <span>Add Resource</span>
+              </paper-button>
+            </a>
+          </template>
         </div>
 
-      </div>
+        <!-- some filtering options will come here at some point using paper-dropdown / vaadin combo or similar -->
 
-
-      <!-- some filtering options will come here at some point using paper-dropdown / vaadin combo or similar -->
-      <template is='dom-repeat' items="[[filteredResourcesArray]]" as="resource">
-        <resource-search-result resource="[[resource]]" hidden$="[[resource.deleted || resource.draft]]"></resource-search-result>
+        <template is='dom-repeat' items="[[filteredResourcesArray]]" as="resource">
+          <resource-search-result resource="[[resource]]" hidden$="[[resource.deleted || resource.draft]]"></resource-search-result>
+        </template>
       </template>
-
-
-    </template>
+    </div>
 
 
     <!-- Active Resource View -->
-    <resource-element resource="[[resource]]"></resource-element>
+    <resource-element resource="[[resource]]" hidden$="[[editMode]]"></resource-element>
+
+    <!-- resource editor -->
+    <template is="dom-if" if="{{editMode}}">
+      <resource-editor></resource-editor>
+    </template>
 
 
 
@@ -150,15 +165,18 @@
             type: Object,
             statePath: 'persistedTags.bySlug.keywords'
           },
+          signedIn: {
+            type: Boolean,
+            statePath: 'signedIn'
+          },
           // properties computed automatically on changes
           resource: {
             type: Object,
             computed: '_setActiveResource(path,allResourcesBySlug)',
           },
-
           editMode: {
             type: Boolean,
-            value: false
+            computed: "_enableEditMode(signedIn,queryParams)"
           }
         }
 
@@ -228,6 +246,13 @@
       _getLink(keyword) {
         return "/resources?keyword=" + keyword.slug;
       }
+      _getAddResourceLink() {
+        return "/resources?edit=true";
+      }
+      _enableEditMode(signedIn, queryParams) {
+        return (signedIn && queryParams.edit == 'true')
+      }
+
 
       // static get observers() {
       //   return [
@@ -263,28 +288,7 @@
       //   return path == "/edit"
       // }
 
-      // _createNewResource() {
-      //   let id = this.generatePushID();
-      //   console.log('creating new resource', id)
-      //   var d = Date.now()
-      //   var shortcode = this.generateShortCode()
-      //   let newResource = {
-      //     $key: id,
-      //     shortcode: shortcode,
-      //     description: '',
-      //     name: '',
-      //     tags: {},
-      //     uploadedFiles: [],
-      //     externalLinks: [],
-      //     created: d,
-      //     modified: '',
-      //     editedBy: {},
-      //     featureImage: '',
-      //     deleted: false,
-      //     draft: false
-      //   }
-      //   this.set('resource', newResource)
-      // }
+    
 
 
       // _persistedResourcesChanged(resources) {
@@ -305,7 +309,7 @@
       //     }
       //   }
       // }
-      
+
 
       // _saveResource() {
       //   //prompt validation
@@ -349,46 +353,10 @@
       //   this._saveResource()
       // }
 
+
+
+
       
-
-
-      // generatePushID() {
-      //   var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
-      //   var lastPushTime = 0;
-      //   var lastRandChars = [];
-      //   var now = new Date().getTime();
-      //   var duplicateTime = (now === lastPushTime);
-      //   lastPushTime = now;
-      //   var timeStampChars = new Array(8);
-      //   for (var i = 7; i >= 0; i--) {
-      //     timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
-      //     now = Math.floor(now / 64);
-      //   }
-      //   if (now !== 0) throw new Error('We should have converted the entire timestamp.');
-      //   var id = timeStampChars.join('');
-      //   if (!duplicateTime) {
-      //     for (i = 0; i < 12; i++) {
-      //       lastRandChars[i] = Math.floor(Math.random() * 64);
-      //     }
-      //   } else {
-      //     for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
-      //       lastRandChars[i] = 0;
-      //     }
-      //     lastRandChars[i]++;
-      //   }
-      //   for (i = 0; i < 12; i++) {
-      //     id += PUSH_CHARS.charAt(lastRandChars[i]);
-      //   }
-      //   if (id.length != 20) throw new Error('Length should be 20.');
-      //   return id;
-      // }
-      // generateShortCode() {
-      //   var text = "";
-      //   var possible = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwyz123456789";
-      //   for (var i = 0; i < 4; i++)
-      //     text += possible.charAt(Math.floor(Math.random() * possible.length));
-      //   return text;
-      // }
 
       _tagsToArray(json, subProperty) {
         //lookup full tag
