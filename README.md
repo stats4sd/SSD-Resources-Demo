@@ -27,7 +27,7 @@ Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli
 
     `polymer serve`
 
-    (of if you wish to use live-reload)  
+    (of if you wish to use live-reload, install browser-sync globally and run custom start function)
     `npm run start`
 
 ### Run web-component-tester tests

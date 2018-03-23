@@ -6,103 +6,131 @@
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
+<link rel="import" href="../../bower_components/iron-icons/social-icons.html">
 
-
+<link rel="import" href="../ssd-elements/resource-element.html">
 <link rel="import" href="../shared-styles.html">
+<link rel="import" href="../stats4sd-icons.html">
 
 
 <dom-module id="resource-editor">
   <template>
-    <style include="vaadin-styles"></style>
     <style include="shared-styles">
       :host {
         display: block;
         padding: 10px;
+      }
+
+      .resource-preview {
+        border: 1px solid black;
+        flex: 1;
+        margin-left: 20px;
+      }
+
+      paper-toggle-button.preview-toggle {
+        float: right;
+        cursor: pointer;
+        --paper-toggle-button-checked-bar-color: var(--paper-green-500);
+        --paper-toggle-button-checked-button-color: var(--paper-green-500);
+        --paper-toggle-button-checked-ink-color: var(--paper-green-500);
+      }
+
+      .preview-toggle-label {
+        float: right;
+        font-size: small;
+        padding-right: 5px;
+        cursor: pointer;
       }
     </style>
 
     <!-- Firebase binding for live tag data -->
     <!-- <firebase-document path="/tags" data="{{liveTags}}" app-name="stats4sd-firebase"></firebase-document>
     <firebase-document id="currentTag" app-name="stats4sd-firebase" data="{{currentTag}}" path=""></firebase-document> -->
+    <div style="display: flex;flex-wrap:wrap">
+      <paper-card style="padding:10px; width: 350px;">
+        <paper-toggle-button checked="{{previewMode}}" class="preview-toggle"></paper-toggle-button>
+        <div class="preview-toggle-label" on-tap="_togglePreview">Preview</div>
+        <!-- Title and Description -->
+        <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
+        <span class="url">[[origin]]/[[slug]]</span>
+        <p>
+          <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required
+            always-float-label></paper-textarea>
+        </p>
 
-    <!-- Title and Description -->
-    <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
-    <span class="url">[[origin]]/[[slug]]</span>
-    <p>
-      <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required
-        always-float-label></paper-textarea>
-    </p>
+        <!-- *** Need save function to track tags saved, possibly linked to combo change event to populate resource tags -->
 
-    <!-- *** Need save function to track tags saved, possibly linked to combo change event to populate resource tags -->
-
-    <!-- Tags -->
-    <vaadin-combo-box label="Keywords" id="Keywords_Combo" items="[[allKeywordsArray]]" item-value-path="$key" allow-custom-value
-      on-custom-value-set="_addNewTag" on-change="_comboChange">
-    </vaadin-combo-box>
-    <template id="keywordsList" is="dom-repeat" as="tag" items="[[resource.tags.keywords]]">
-      <paper-button class="tag-button">{{tag.label}}
-        <iron-icon icon="close" on-tap="removeTag"></iron-icon>
-      </paper-button>
-    </template>
-    <vaadin-combo-box label="Resource Type" id="Resource-Types_Combo" items="[[allResourceTypesArray]]" item-label-path="label"
-      item-value-path="$key" value="{{resource.type}}">
-    </vaadin-combo-box>
+        <!-- Tags -->
+        <vaadin-combo-box label="Keywords" id="Keywords_Combo" items="[[allKeywordsArray]]" item-value-path="$key" allow-custom-value
+          on-custom-value-set="_addNewTag" on-change="_comboChange">
+        </vaadin-combo-box>
+        <template id="keywordsList" is="dom-repeat" as="tag" items="[[resource.tags.keywords]]">
+          <paper-button class="tag-button">{{tag.label}}
+            <iron-icon icon="close" on-tap="removeTag"></iron-icon>
+          </paper-button>
+        </template>
+        <vaadin-combo-box label="Resource Type" id="Resource-Types_Combo" items="[[allResourceTypesArray]]" item-label-path="label"
+          item-value-path="$key" value="{{resource.type}}">
+        </vaadin-combo-box>
 
 
-    <!-- **************************** possibly manage collections elsewhere? ************************ -->
-    <!-- External Links -->
-    <h4>External Links</h4>
-    <template id="externalLinks" is="dom-repeat" items="[[resource.externalLinks]]" as="link">
-      <div class='flex-container'>
-        <a href="{{link.url}}" target="_blank">
-          <span>[[link.url]]</span>
-        </a>
-        <paper-icon-button suffix on-tap="editLink" class="green" icon="mode-edit" alt="edit" title="edit">
-        </paper-icon-button>
-        <paper-icon-button on-tap="removeLink" class="red" icon="clear" alt="clear" title="clear">
-        </paper-icon-button>
-      </div>
-    </template>
-    <div class="flex">
-      <iron-icon icon="public" prefix></iron-icon>
-      <paper-input style="flex-basis:100%" label="add external links here" no-label-float value="{{externalLinkUrl}}"></paper-input>
-      <paper-icon-button suffix on-tap="_addExternalLink" style="color:green" icon="add" alt="add" title="add"></paper-icon-button>
-    </div>
-    </paper-input>
+        <!-- **************************** possibly manage collections elsewhere? ************************ -->
+        <!-- External Links -->
+        <div style="margin-bottom:1em">
+          <h4 style="margin-bottom: 0">External Links</h4>
+          <template id="externalLinks" is="dom-repeat" items="[[resource.externalLinks]]" as="link">
+            <div class='flex-container'>
+              <a href="{{link.url}}" target="_blank">
+                <span>[[link.url]]</span>
+              </a>
+              <paper-icon-button suffix on-tap="editLink" class="green" icon="mode-edit" alt="edit" title="edit">
+              </paper-icon-button>
+              <paper-icon-button on-tap="removeLink" class="red" icon="clear" alt="clear" title="clear">
+              </paper-icon-button>
+            </div>
+          </template>
+          <div style="display:flex; align-items:center">
+            <iron-icon icon="social:public" prefix style="margin-right:5px"></iron-icon>
+            <paper-input style="flex-basis:100%" label="add external links here" no-label-float value="{{externalLinkUrl}}"></paper-input>
+            <paper-icon-button suffix on-tap="_addExternalLink" style="color:green" icon="add" alt="add" title="add"></paper-icon-button>
+          </div>
+        </div>
 
-    <!-- Draft/Published Checkbox -->
-    <div class="flex">
-      <paper-toggle-button checked="{{!resource.draft}}"></paper-toggle-button>
-      <div hidden$="[[resource.draft]]">
-        <span>Public</span>
-        <iron-icon icon="visibility"></iron-icon>
-      </div>
-      <div hidden$="[[!resource.draft]]">
-        <span>Draft</span>
-        <iron-icon icon="visibility-off"></iron-icon>
-      </div>
-    </div>
+        <!-- Draft/Published Checkbox -->
+        <div class="flex">
+          <paper-toggle-button checked="{{!resource.draft}}"></paper-toggle-button>
+          <div hidden$="[[resource.draft]]">
+            <span>Public</span>
+            <iron-icon icon="visibility"></iron-icon>
+          </div>
+          <div hidden$="[[!resource.draft]]">
+            <span>Draft</span>
+            <iron-icon icon="visibility-off"></iron-icon>
+          </div>
+        </div>
 
-    <h4>Uploaded Files</h4>
-    <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
-    <iron-icon slot="drop-label-icon" icon="description"></iron-icon>
-    <span slot="drop-label"></span>
+        <h4>Uploaded Files</h4>
+        <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
+        <iron-icon slot="drop-label-icon" icon="description"></iron-icon>
+        <span slot="drop-label"></span>
 
-    <!-- default and custom images -->
-    <div style="display: flex">
-      <div>
-        <h4>Default Image</h4>
-        <img src="[[resource.featureImage]]" style="max-width:200px">
-      </div>
-      <div style="margin-left:20px">
-        <h4>Custom Image</h4>
-        <img src="[[resource.customImage]]" style="max-width:200px">
-        <!-- <vaadin-upload max-files="1" id="featureImageUpload" on-upload-before="featureImageUpload">
-        </vaadin-upload> -->
-        <paper-input type="file" id "customImageFile" on-change="_onFileInputChange"></paper-input>
+        <!-- default and custom images -->
+        <div style="display: flex">
+          <div>
+            <h4>Default Image</h4>
+            <img src="[[resource.featureImage]]" style="max-width:200px">
+          </div>
+          <div style="margin-left:20px">
+            <h4>Custom Image</h4>
+            <img src="[[resource.customImage]]" style="max-width:200px">
+            <vaadin-upload class="image-drop" max-files="1" id="featureImageUpload" on-upload-before="featureImageUpload" nodrop>
+            </vaadin-upload>
+            <!-- <paper-input type="file" id "customImageFile" on-change="_onFileInputChange"></paper-input>
         <firebase-storage-multiupload path="/test" files="[[fileArray]]" upload-tasks="{{uploadTasks}}">
         </firebase-storage-multiupload>
         <template is="dom-repeat" items="[[uploadTasks]]">
@@ -110,8 +138,14 @@
             state="{{item.state}}" download-url="{{item.downloadUrl}}" metadata="{{item.metadata}}" path="{{item.path}}">
           </firebase-storage-upload-task>
           <div>task:[[item]], transferred:[[item.bytesTransferred]]</div>
-        </template>
-      </div>
+        </template> -->
+          </div>
+        </div>
+
+      </paper-card>
+
+      <!-- resource preview -->
+      <resource-element resource="[[resource]]" hidden$="[[!previewMode]]" class="resource-preview"></resource-element>
     </div>
 
   </template>
@@ -145,6 +179,10 @@
             type: Object,
             statePath: 'persistedTags.byKey.resourceTypes',
           },
+          previewMode: {
+            type: Boolean,
+            value: true
+          }
 
 
           // slug: {
@@ -171,8 +209,8 @@
       _onFileInputChange(e) {
         let files = e.target.inputElement.inputElement.files
         console.log('file input change', files)
-        this.set('fileArray',files)
-        console.log('file array',this.fileArray)
+        this.set('fileArray', files)
+        console.log('file array', this.fileArray)
       }
 
       _setActiveResource(path, allResourcesBySlug) {
@@ -285,6 +323,8 @@
           return ''
         }
       }
+
+      _togglePreview() { this.previewMode = !this.previewMode }
 
 
       // }
