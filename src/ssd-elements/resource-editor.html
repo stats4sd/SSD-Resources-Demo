@@ -1,8 +1,9 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../redux-mixin.html">
 
-<link rel="import" href="../../bower_components/polymerfire/firebase-storage-multiupload.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-storage-upload-task.html">
+<!-- <link rel="import" href="../../bower_components/polymerfire/firebase-storage-multiupload.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-storage-upload-task.html"> -->
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
@@ -40,6 +41,16 @@
         --paper-toggle-button-checked-ink-color: var(--paper-green-500);
       }
 
+      vaadin-combo-box.tag-box {
+        display: block;
+        width: 200px;
+      }
+
+      .keywords-list {
+        margin: 10px 0;
+        font-size: small;
+      }
+
       .preview-toggle-label {
         float: right;
         font-size: small;
@@ -63,10 +74,11 @@
     </style>
 
     <!-- Firebase binding for live tag data -->
-    <!-- <firebase-document path="/tags" data="{{liveTags}}" app-name="stats4sd-firebase"></firebase-document>
-    <firebase-document id="currentTag" app-name="stats4sd-firebase" data="{{currentTag}}" path=""></firebase-document> -->
+    <firebase-document id="firebaseDoc" path="[[firebaseDocPath]]" data="{{firebaseDocData}}" app-name="stats4sd-firebase"></firebase-document>
+
+    <!-- <firebase-document id="currentTag" app-name="stats4sd-firebase" data="{{currentTag}}" path=""></firebase-document> -->
     <div style="display: flex;flex-wrap:wrap">
-      <paper-card style="padding:10px; width: 350px;">
+      <paper-card style="padding:10px; width: 400px;">
         <paper-toggle-button checked="{{previewMode}}" class="preview-toggle"></paper-toggle-button>
         <div class="preview-toggle-label" on-tap="_togglePreview">Preview</div>
         <!-- Title and Description -->
@@ -77,19 +89,24 @@
             always-float-label></paper-textarea>
         </p>
 
-        <!-- *** Need save function to track tags saved, possibly linked to combo change event to populate resource tags -->
-
-        <!-- Tags -->
-        <vaadin-combo-box label="Keywords" id="keywordsCombo" items="[[allKeywordsArray]]" item-value-path="$key" allow-custom-value
-          on-custom-value-set="_addNewTag" on-change="_addKeyword" value="{{selectedKeyword}}">
+        <!-- Keywords -->
+        <vaadin-combo-box class="tag-box" label="Keywords" id="keywordsCombo" items="[[allKeywordsArray]]" item-value-path="$key"
+          filter="{{keywordFilterText}}" filtered-items="{{filteredKeywords}}" selected-item-changed="selectedKeywordChanged"
+          allow-custom-value on-custom-value-set="_addNewKeyword" on-change="_addKeyword" value="{{selectedKeyword}}">
         </vaadin-combo-box>
-        <template id="keywordsList" is="dom-repeat" as="tag" items="[[resourceKeywordsArray]]">
-          <paper-button class="tag-button">{{tag.label}}
-            <iron-icon icon="close" on-tap="removeTag"></iron-icon>
-          </paper-button>
-        </template>
-        <!-- bind resource type to resource.type -->
-        <vaadin-combo-box label="Resource Type" id="Resource-Types_Combo" items="[[allResourceTypesArray]]" item-label-path="label"
+        <div hidden$="[[!showAddKeywordText]]" style="margin-top:5px">Press Enter To Add Keyword:
+          <strong>[[keywordFilterText]]</strong>
+        </div>
+        <div class="keywords-list">
+          <template id="keywordsList" is="dom-repeat" as="keyword" items="[[resourceKeywordsArray]]">
+            <paper-button class="keyword-button">{{keyword.label}}
+              <iron-icon icon="close" on-tap="_removeKeyword" data-keyword$="[[keyword]]"></iron-icon>
+            </paper-button>
+          </template>
+        </div>
+
+        <!-- Resource Type-->
+        <vaadin-combo-box class="tag-box" label="Resource Type" id="Resource-Types_Combo" items="[[allResourceTypesArray]]" item-label-path="label"
           item-value-path="$key" value="{{resource.type}}">
         </vaadin-combo-box>
 
@@ -109,30 +126,35 @@
               </paper-icon-button>
             </div>
           </template>
-          <div style="display:flex; align-items:center">
+          <form style="display:flex; align-items:center">
             <iron-icon icon="social:public" prefix style="margin-right:5px"></iron-icon>
-            <paper-input style="flex-basis:100%" label="add external links here" no-label-float value="{{externalLinkUrl}}"></paper-input>
+            <paper-input id="externalLinkInput" style="flex-basis:100%" label="add external links here" no-label-float value="{{externalLinkUrl}}"></paper-input>
             <paper-icon-button suffix on-tap="_addExternalLink" style="color:green" icon="add" alt="add" title="add"></paper-icon-button>
-          </div>
+          </form>
         </div>
+        <iron-a11y-keys id="a11y" target="[[externalInputTarget]]" keys="enter" on-keys-pressed="_addExternalLink"></iron-a11y-keys>
 
-        <!-- Draft/Published Checkbox -->
+        <!-- public/hidden Checkbox -->
         <div class="flex">
-          <paper-toggle-button checked="{{!resource.draft}}"></paper-toggle-button>
-          <div hidden$="[[resource.draft]]">
+          <paper-toggle-button checked="{{resource.public}}" style="cursor: pointer"></paper-toggle-button>
+          <div hidden$="[[!resource.public]]">
             <span>Public</span>
             <iron-icon icon="visibility"></iron-icon>
           </div>
-          <div hidden$="[[!resource.draft]]">
-            <span>Draft</span>
+          <div hidden$="[[resource.public]]">
+            <span>Hidden</span>
             <iron-icon icon="visibility-off"></iron-icon>
           </div>
         </div>
 
-        <h4>Uploaded Files</h4>
-        <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
-        <iron-icon slot="drop-label-icon" icon="description"></iron-icon>
-        <span slot="drop-label"></span>
+        <!-- Uploaded files -->
+        <div>
+          <h4>Uploaded Files</h4>
+          <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
+          <!-- <iron-icon slot="drop-label-icon" icon="description"></iron-icon> -->
+          <span slot="drop-label"></span>
+
+        </div>
 
         <!-- default and custom images -->
         <div style="display: flex">
@@ -196,6 +218,10 @@
           previewMode: {
             type: Boolean,
             value: true
+          },
+          keywordFilterText: {
+            type: String,
+            observer: '_showAddKeywordText'
           }
 
 
@@ -218,9 +244,28 @@
           '_setResourceSlug(resource.name)',
           '_setFeatureImage(resource.type,allResourceTypesByKey)',
           '_listKeywords(resource.keywords,allKeywordsByKey)',
-          '_resourceChanged(resource)'
+          '_resourceChanged(resource)',
+
+
         ]
       }
+      static get actions() {
+        return {
+          updateTags(payload) {
+            return {
+              type: 'UPDATE_TAGS',
+              payload: payload
+            }
+          }
+        }
+      }
+
+      connectedCallback() {
+        // binding enter key for external link input
+        super.connectedCallback();
+        this.target = this.$.externalLinkInput
+      }
+
       _resourceChanged(resource) { console.log('resource changed', this.resource) }
 
       _listKeywords(resourceKeywords, allKeywordsByKey) {
@@ -231,11 +276,9 @@
               resourceKeywordsArray.push(this.allKeywordsByKey[k])
             }
           )
-          console.log('keywords array', resourceKeywordsArray)
-          this.set('resourceKeywordsArray',resourceKeywordsArray)
+          this.set('resourceKeywordsArray', resourceKeywordsArray)
         }
       }
-
 
       _onFileInputChange(e) {
         let files = e.target.inputElement.inputElement.files
@@ -263,7 +306,6 @@
 
       _createNewResource() {
         let id = this.generatePushID();
-        console.log('creating new resource', id)
         var d = Date.now()
         var shortcode = this.generateShortCode()
         let newResource = {
@@ -280,10 +322,94 @@
           featureImage: null,
           type: null,
           deleted: false,
-          draft: false
+          public: true,
+          draft: true
         }
-        console.log('new resource', newResource)
         return newResource
+      }
+
+      _setResourceSlug(name) {
+        if (!name) {
+          //new resource
+          // this.resource.slug = ""
+          // this.slug = ''
+        }
+        else {
+          this.origin = window.origin
+          //could definitely be combined into one expression but I suck at regex :( 
+          //make lower case, replace all spaces with '-' and remove special
+          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
+          this.resource.slug = slug
+          this.slug = slug
+        }
+
+      }
+
+      _setFeatureImage(resourceType) {
+        if (resourceType) {
+          let type = this.allResourceTypesByKey[resourceType]
+          //setting it as local image, could also set it to hosted image url
+          this.set('resource.featureImage', 'images/resourceTypes/' + type.slug + '.jpg')
+        }
+        // else {
+        //   // default image - currently null with placeholder
+        //   return ''
+        // }
+      }
+
+      _addKeyword(e, keywordID = null) {
+        if (!keywordID) { keywordID = e.target.value }
+        this.set('resource.keywords.' + keywordID, true)
+        this._listKeywords(this.resource.keywords, this.allKeywordsByKey)
+        this.selectedKeyword = null
+      }
+
+      _addNewKeyword(e) {
+        e.preventDefault()
+        // only run if text specified
+        if (e.detail) {
+          // convert to Title Case (capital each word)
+          let label = this._toTitleCase(e.detail)
+          let keyword = {
+            type: 'Keyword',
+            label: label,
+            modified: Date.now(),
+            slug: this._toSlug(label),
+            key: this.generatePushID()
+          }
+          // set the firebase payload doc to the desired data
+          this.set('firebaseDocData', keyword)
+          // set the path and id for the data and update data at the same time
+          this.$.firebaseDoc.saveValue('/tags/Keywords', keyword.key).then(
+            () => {
+              // the change in keywords is automatically caugh by a deep observer on the main stats4sd-app element and 
+              // should refelct the state through. That way we can just add the keyword the same way as if in the dropdown menu originally
+              this._addKeyword(null, keyword.key)
+            }
+          )
+        }
+      }
+
+      _removeKeyword(e) {
+        try {
+          let keywordID = JSON.parse(e.target.dataset.keyword).$key
+          if (this.resource.keywords.hasOwnProperty(keywordID)) {
+            delete this.resource.keywords[keywordID]
+          }
+          this.notifyPath('resource.keywords')
+        } catch (error) {
+        }
+      }
+
+      _toSlug(name) {
+        if (!name) { return "" }
+        else {
+          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
+          return slug
+        }
+      }
+      _toTitleCase(str) {
+        return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
       }
 
       generatePushID() {
@@ -325,172 +451,45 @@
         return text;
       }
 
-      _setResourceSlug(name) {
-        if (!name) {
-          //new resource
-          // this.resource.slug = ""
-          // this.slug = ''
-        }
-        else {
-          console.log('setting resource slug', this.resource, name)
-          this.origin = window.origin
-          //could definitely be combined into one expression but I suck at regex :( 
-          //make lower case, replace all spaces with '-' and remove special
-          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
-          this.resource.slug = slug
-          this.slug = slug
-        }
-
-      }
-
-      _setFeatureImage(resourceType) {
-        if (resourceType) {
-          console.log('setting feature image', resourceType)
-          let type = this.allResourceTypesByKey[resourceType]
-          //setting it as local image, could also set it to hosted image url
-          this.set('resource.featureImage', 'images/resourceTypes/' + type.slug + '.jpg')
-          // this.set('resource.featureImage',type.image)
-          console.log('resource', this.resource)
-        }
-        // else {
-        //   // default image - currently null with placeholder
-        //   return ''
-        // }
-      }
-      _addKeyword(e) {
-        let keywordID = e.target.value
-        
-        console.log('adding keyword', keywordID)
-        this.set('resource.keywords.'+keywordID,true)
-        console.log('resource keywords',this.resource.keywords)
-        this._listKeywords(this.resource.keywords,this.allKeywordsByKey)
-        console.log('keywordsCombo',this.$.keywordsCombo)
-        this.selectedKeyword=null
-      }
-
-
-      // _comboChange(e) {
-      //   // Use combo box change event to populate resource tag. Tracks which field to populate by taking all before '_' in id name
-      //   // If no item available then used to create new
-      //   console.log('combo changed',e)
-      //   console.log('this.resource',this.resource)
-      //   // let item = e.target.selectedItem
-      //   // let type = e.target.id.split('_')[0]
-      //   // if (type == "Keywords") { e.target.value = "" }
-      //   // // if no item tag will be added through add new tag function called on combo custom value set
-      //   // if (!item) { return }
-      //   // let key = item.key
-      //   // this.updateResourceTags(key, item, type)
-      // }
-
-      // updateResourceTags(key, value, type) {
-      //   console.log('updating resource tags', this.resource)
-      //   if (!this.resource.hasOwnProperty('tags')) { this.resource.tags = {} }
-      //   if (!this.resource.tags.hasOwnProperty(type)) { this.resource.tags[type] = {} }
-      //   // override previous resource types if exist (tag unique only for resource types)
-      //   if (type == "Resource-Types") { this.resource.tags['Resource-Types'] = {} }
-      //   this.resource.tags[type][key] = value
-      //   // attempts to get keywords list to update and resource type image to render
-      //   let tags = this.resource.tags
-      //   this.set('resource.tags', {})
-      //   this.set('resource.tags', tags)
-      // }
-
       _togglePreview() { this.previewMode = !this.previewMode }
 
+      _showAddKeywordText(filterText) {
+        // quick method that checks the number of available filtered keywords when text input is changed
+        // prompting the user to press enter to add a new keyword if none are available, displaying as title case
+        if (filterText.length > 0 && this.$.keywordsCombo.filteredItems.length == 0) {
+          this.showAddKeywordText = true
+          this.keywordFilterText = this._toTitleCase(this.keywordFilterText)
+        }
+        else { this.showAddKeywordText = false }
+      }
+
+      selectedKeywordChanged(k) {
+        console.log('k', k)
+      }
 
 
-      // }
-      // _computeItems(tags, key) {
-      //   // take liveTags, select subset and put into correct format (un-nest json)
-      //   let items = tags[key]
-      //   let temp = []
-      //   for (let key in items) {
-      //     let t = items[key]
-      //     t.key = key
-      //     temp.push(t)
-      //   }
-      //   return temp
-      // }
+      _addExternalLink(e) {
+        if (!this.resource.externalLinks) {
+          this.set('resource.externalLinks', [])
+        }
+        if (this.externalLinkUrl != '') {
+          this.push('resource.externalLinks', {
+            displayName: "",
+            url: this.externalLinkUrl
+          })
+        }
+        this.set('externalLinkUrl', "")
+        console.log('resource', this.resource)
+      }
+      removeLink(e) {
+        var index = e.model.index;
+        this.splice('resource.externalLinks', index, 1)
+      }
+      editLink(e) {
+        this.set('externalLinkUrl', e.model.link.url)
+        this.removeLink(e)
+      }
 
-      // _addNewTag(e) {
-      //   let type = e.target.id.split('_')[0]
-      //   let label = e.target.filter
-      //   let tag = {
-      //     type: type,
-      //     label: label,
-      //     modified: Date.now(),
-      //     slug: this._toSlug(label),
-      //     key: this.generatePushID()
-      //   }
-      //   console.log('saving tag', tag)
-      //   let path = "/tags/" + type
-      //   this.set('currentTag', tag)
-      //   this.$.currentTag.saveValue(path, tag.key).then(function () {
-      //     //populate element
-      //     this.updateResourceTags(tag.key, this.currentTag, type)
-      //     this.$.currentTag.reset()
-      //   }.bind(this));
-      // }
-
-      // removeTag(e) {
-      //   // remove keyword tag bound to resource
-      //   // to generalise see older versions, or look at binding to e.target for info
-      //   var key = e.model.tag.key
-      //   delete this.resource.tags.Keywords[key]
-      //   //dirty override as doesn't detect when all tags removed
-      //   let tags = this.resource.tags
-      //   this.set('resource.tags', {})
-      //   this.set('resource.tags', tags)
-      // }
-
-
-      // _addExternalLink(e) {
-      //   if (!this.resource.externalLinks) {
-      //     this.set('resource.externalLinks', [])
-      //   }
-      //   if (this.externalLinkUrl != '') {
-      //     this.push('resource.externalLinks', {
-      //       displayName: "",
-      //       url: this.externalLinkUrl
-      //     })
-      //   }
-      //   this.set('externalLinkUrl', "")
-      //   console.log('resource', this.resource)
-      // }
-      // removeLink(e) {
-      //   var index = e.model.index;
-      //   this.splice('resource.externalLinks', index, 1)
-      // }
-      // editLink(e) {
-      //   this.set('externalLinkUrl', e.model.link.url)
-      //   this.removeLink(e)
-      // }
-      // _getFeatureImage(tags) {
-      //   if (this.resource.featureImageUrl) { return this.resource.featureImageUrl }
-      //   console.log('getting feature image', tags)
-      //   if (tags && tags.hasOwnProperty('Resource-Types')) {
-      //     let key = Object.keys(tags['Resource-Types'])[0]
-      //     let url = '/images/resourceTypes/' + tags['Resource-Types'][key].slug + '.jpg'
-      //     return url
-      //   }
-      //   else {
-      //     return "/images/resourceTypes/fallback-image.jpg"
-      //   }
-      // }
-      // _tagsToArray(json, subProperty) {
-      //   //lookup full tag
-      //   if (!json) { return }
-      //   if (!json.hasOwnProperty(subProperty)) { return }
-      //   let tags = json[subProperty]
-      //   var tagsArray = []
-      //   for (var key in tags) {
-      //     if (tags.hasOwnProperty(key)) {
-      //       tagsArray.push(tags[key])
-      //     }
-      //   }
-      //   return tagsArray
-      // }
 
       // fileupload(event) {
       //   event.preventDefault();
