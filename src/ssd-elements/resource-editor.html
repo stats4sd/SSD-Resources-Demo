@@ -14,7 +14,8 @@
 <link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
 <link rel="import" href="../../bower_components/iron-icons/social-icons.html">
 
-<link rel="import" href="../ssd-elements/resource-element.html">
+<link rel="import" href="./resource-element.html">
+<link rel="import" href="./stats4sd-upload.html">
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../stats4sd-icons.html">
 
@@ -148,27 +149,23 @@
         </div>
 
         <!-- Uploaded files -->
-        <div>
-          <h4>Uploaded Files</h4>
-          <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
-          <!-- <iron-icon slot="drop-label-icon" icon="description"></iron-icon> -->
-          <span slot="drop-label"></span>
-
-        </div>
+        <h4>Uploaded Files</h4>
+        <!-- the stats4sd uploader takes a main directory and subdirectory (key) and uploads files via its interface -->
+        <stats4sd-upload directory="resources" key="[[resource.$key]]" files="{{resource.uploadedFiles}}"></stats4sd-upload>
 
         <!-- default and custom images -->
         <div style="display: flex">
           <div>
             <h4>Default Image</h4>
-            <img src="[[resource.featureImage]]" class="feature-image placeholder" hidden$=[[!resource.featureImage]]>
-            <div class="feature-image placeholder" hidden$=[[resource.featureImage]]>Specify a resource type</div>
+            <img src="[[resource.defaultImage]]" class="feature-image placeholder" hidden$=[[!resource.defaultImage]]>
+            <div class="feature-image placeholder" hidden$=[[resource.defaultImage]]>Specify a resource type</div>
           </div>
           <div style="margin-left:20px">
             <h4>Custom Image</h4>
-            <img src="[[resource.customImage]]" class="feature-image" hidden$=[[!resource.customImage]]>
-            <div class="feature-image placeholder" hidden$=[[resource.customImage]]>
-              <vaadin-upload class="image-drop" max-files="1" id="featureImageUpload" on-upload-before="featureImageUpload" nodrop>
-              </vaadin-upload>
+            <img src="[[resource.featureImage]]" class="feature-image" hidden$=[[!resource.featureImage]]>
+            <div class="feature-image placeholder" hidden$=[[resource.featureImage]]>
+              <stats4sd-upload directory="images/resources" key="[[resource.$key]]" upload-url="{{resource.featureImage}}" nodrop
+              max-files="1"></stats4sd-upload>
             </div>
 
           </div>
@@ -242,7 +239,7 @@
       static get observers() {
         return [
           '_setResourceSlug(resource.name)',
-          '_setFeatureImage(resource.type,allResourceTypesByKey)',
+          '_setDefaultImage(resource.type,allResourceTypesByKey)',
           '_listKeywords(resource.keywords,allKeywordsByKey)',
           '_resourceChanged(resource)',
 
@@ -313,13 +310,15 @@
           shortcode: shortcode,
           description: '',
           name: '',
+          collections: {},
           keywords: {},
           uploadedFiles: [],
           externalLinks: [],
           created: d,
-          modified: '',
+          modified: d,
           editedBy: {},
           featureImage: null,
+          defaultImage:null,
           type: null,
           deleted: false,
           public: true,
@@ -345,11 +344,11 @@
 
       }
 
-      _setFeatureImage(resourceType) {
+      _setDefaultImage(resourceType) {
         if (resourceType) {
           let type = this.allResourceTypesByKey[resourceType]
           //setting it as local image, could also set it to hosted image url
-          this.set('resource.featureImage', 'images/resourceTypes/' + type.slug + '.jpg')
+          this.set('resource.defaultImage', 'images/resourceTypes/' + type.slug + '.jpg')
         }
         // else {
         //   // default image - currently null with placeholder
@@ -489,57 +488,6 @@
         this.set('externalLinkUrl', e.model.link.url)
         this.removeLink(e)
       }
-
-
-      // fileupload(event) {
-      //   event.preventDefault();
-      //   //check resource name exists, give warning and remove files if not
-      //   //*******not implemented yet*****
-
-      //   //create file upload task
-      //   let file = event.detail.file;
-      //   let ssdResourcesApp = firebase.app('stats4sd-resources')
-      //   let ref = firebase.storage(ssdResourcesApp).ref().child('/resources/' + this.resource.$key + "/" + file.name)
-      //   let uploadTask = ref.put(file);
-      //   //handle updates from snapshot
-      //   uploadTask.on('state_changed', function (snapshot) {
-      //     let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      //     let vaadinUploads = document.querySelector('vaadin-upload')
-      //     let index = this.getCurrentIndex(file.name)
-      //     let temp = this.resource.uploadedFiles[index]
-      //     temp.progress = progress
-      //     this.set('resource.uploadedFiles.' + index, [])
-      //     this.set('resource.uploadedFiles.' + index, temp)
-      //   }.bind(this), function (error) {
-      //     console.log('error', error)
-      //     // Handle unsuccessful uploads
-      //   }, function () {
-      //     let index = this.getCurrentIndex(file.name);
-      //     console.log('index', index)
-      //     console.log('res', this.resource.uploadedFiles)
-      //     let res = this.resource.uploadedFiles[index]
-      //     console.log('res', res)
-      //     let temp = {
-      //       lastModified: res.lastModified,
-      //       name: res.name,
-      //       size: res.size,
-      //       type: res.type,
-      //       url: uploadTask.snapshot.downloadURL,
-      //       complete: true,
-      //       formDataName: "file",
-      //       progress: 100,
-      //     }
-      //     this.set('resource.uploadedFiles.' + index, [])
-      //     this.set('resource.uploadedFiles.' + index, temp)
-      //     console.log('resource', this.resource)
-      //   }.bind(this));
-      // }
-      // getCurrentIndex(fileName) {
-      //   var uploads = this.resource.uploadedFiles
-      //   for (var i = 0; i < uploads.length; i++) {
-      //     if (uploads[i].name == fileName) { return i }
-      //   }
-      // }
 
     }
 

@@ -3,7 +3,7 @@
 <dom-module id="resource-file-download">
   <template>
     <style>
-       :host {
+      :host {
         display: inline-block;
         width: 220px;
         height: 60px;
@@ -52,7 +52,9 @@
     </style>
     <a class="fileDownload" href="[[file.url]]" target="_blank" download>
       <div style="display:flex">
-        <div><img src="[[extensionImageSrc]]" on-error="fallbackImage"></div>
+        <div>
+          <img src="[[extensionImageSrc]]" on-error="fallbackImage">
+        </div>
         <div>
           <div class="title">[[displayName]]</div>
           <div style="font-size:x-small">Size: [[_toMb(file.size)]]</div>
@@ -85,18 +87,24 @@
         };
       }
       _computeExtension(filename) {
-        var split = filename.split('.')
-        var extension = split[split.length - 1]
-        this.extensionImageSrc = '/images/file-types/icons/' + extension + '.png'
-        return extension
+        if (filename) {
+          console.log('computing extension', filename)
+          var split = filename.split('.')
+          var extension = split[split.length - 1]
+          this.extensionImageSrc = '/images/file-types/icons/' + extension + '.png'
+          return extension
+        }
       }
       _computeDisplayName(filename) {
-        var temp = filename.split('.')
-        temp.pop()
-        temp.join('')
-        var displayName = temp[0]
-        console.log('displayName', displayName)
-        return displayName
+        if (filename) {
+          var temp = filename.split('.')
+          temp.pop()
+          temp.join('')
+          var displayName = temp[0]
+          console.log('displayName', displayName)
+          return displayName
+        }
+
       }
       _toMb(size) {
         //if less than 1MB, return size in kB
