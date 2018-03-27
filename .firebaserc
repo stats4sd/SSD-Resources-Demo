@@ -1,6 +1,7 @@
 {
   "projects": {
     "production": "stats4sd-resources",
-    "staging":"ssd-resources-demo"
+    "staging": "ssd-resources-demo",
+    "default": "ssd-resources-demo"
   }
 }

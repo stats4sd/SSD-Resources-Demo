@@ -223,7 +223,9 @@
         }
         else { this.showKeyword = false }
         // sort by date
-
+        resources=resources.sort((a,b)=>{
+          return b.modified-a.modified
+        })
         return resources
       }
 

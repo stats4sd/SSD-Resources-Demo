@@ -32,6 +32,7 @@
         border: 1px solid black;
         flex: 1;
         margin-left: 20px;
+        max-width:550px;
       }
 
       paper-toggle-button.preview-toggle {
@@ -40,6 +41,11 @@
         --paper-toggle-button-checked-bar-color: var(--paper-green-500);
         --paper-toggle-button-checked-button-color: var(--paper-green-500);
         --paper-toggle-button-checked-ink-color: var(--paper-green-500);
+      }
+
+      paper-button.publish-button {
+        color: var(--app-secondary-color);
+        font-weight: bold;
       }
 
       vaadin-combo-box.tag-box {
@@ -74,17 +80,14 @@
       }
     </style>
 
-    <!-- Firebase binding for live tag data -->
+    <!-- Firebase binding for live data, used for both tags and full resource -->
     <firebase-document id="firebaseDoc" path="[[firebaseDocPath]]" data="{{firebaseDocData}}" app-name="stats4sd-firebase"></firebase-document>
-
-    <!-- <firebase-document id="currentTag" app-name="stats4sd-firebase" data="{{currentTag}}" path=""></firebase-document> -->
     <div style="display: flex;flex-wrap:wrap">
       <paper-card style="padding:10px; width: 400px;">
         <paper-toggle-button checked="{{previewMode}}" class="preview-toggle"></paper-toggle-button>
         <div class="preview-toggle-label" on-tap="_togglePreview">Preview</div>
         <!-- Title and Description -->
         <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
-        <span class="url">[[origin]]/[[slug]]</span>
         <p>
           <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required
             always-float-label></paper-textarea>
@@ -92,8 +95,8 @@
 
         <!-- Keywords -->
         <vaadin-combo-box class="tag-box" label="Keywords" id="keywordsCombo" items="[[allKeywordsArray]]" item-value-path="$key"
-          filter="{{keywordFilterText}}" filtered-items="{{filteredKeywords}}" selected-item-changed="selectedKeywordChanged"
-          allow-custom-value on-custom-value-set="_addNewKeyword" on-change="_addKeyword" value="{{selectedKeyword}}">
+          filter="{{keywordFilterText}}" filtered-items="{{filteredKeywords}}" allow-custom-value on-custom-value-set="_addNewKeyword"
+          on-change="_addKeyword" value="{{selectedKeyword}}">
         </vaadin-combo-box>
         <div hidden$="[[!showAddKeywordText]]" style="margin-top:5px">Press Enter To Add Keyword:
           <strong>[[keywordFilterText]]</strong>
@@ -111,14 +114,12 @@
           item-value-path="$key" value="{{resource.type}}">
         </vaadin-combo-box>
 
-
-        <!-- **************************** possibly manage collections elsewhere? ************************ -->
         <!-- External Links -->
         <div style="margin-bottom:1em">
           <h4 style="margin-bottom: 0">External Links</h4>
           <template id="externalLinks" is="dom-repeat" items="[[resource.externalLinks]]" as="link">
             <div class='flex-container'>
-              <a href="{{link.url}}" target="_blank">
+              <a href="{{link.url}}" target="_blank" rel="noopener">
                 <span>[[link.url]]</span>
               </a>
               <paper-icon-button suffix on-tap="editLink" class="green" icon="mode-edit" alt="edit" title="edit">
@@ -151,7 +152,7 @@
         <!-- Uploaded files -->
         <h4>Uploaded Files</h4>
         <!-- the stats4sd uploader takes a main directory and subdirectory (key) and uploads files via its interface -->
-        <stats4sd-upload directory="resources" key="[[resource.$key]]" files="{{resource.uploadedFiles}}"></stats4sd-upload>
+        <stats4sd-upload directory="resources" key="[[resource._key]]" files="{{resource.uploadedFiles}}"></stats4sd-upload>
 
         <!-- default and custom images -->
         <div style="display: flex">
@@ -164,12 +165,19 @@
             <h4>Custom Image</h4>
             <img src="[[resource.featureImage]]" class="feature-image" hidden$=[[!resource.featureImage]]>
             <div class="feature-image placeholder" hidden$=[[resource.featureImage]]>
-              <stats4sd-upload directory="images/resources" key="[[resource.$key]]" upload-url="{{resource.featureImage}}" nodrop
-              max-files="1"></stats4sd-upload>
+              <stats4sd-upload directory="images/resources" key="[[resource._key]]" upload-url="{{resource.featureImage}}" nodrop max-files="1"></stats4sd-upload>
             </div>
 
           </div>
         </div>
+
+        <!-- Save draft and publish -->
+        <div style="margin-top:20px; text-align:right">
+          <paper-button on-tap="saveDraft">Save Draft</paper-button>
+          <paper-button on-tap="publish" class="publish-button">Publish</paper-button>
+          <div>[[saveMessage]]</div>
+        </div>
+
 
       </paper-card>
 
@@ -220,20 +228,6 @@
             type: String,
             observer: '_showAddKeywordText'
           }
-
-
-          // slug: {
-          //   type: String,
-          //   computed: '_toSlug(resource.name)'
-          // },
-          // origin: {
-          //   type: String,
-          //   value: function () { return window.origin + '/resource' }
-          // },
-          // externalLinkUrl: {
-          //   type: String,
-          //   value: ''
-          // }
         };
       }
       static get observers() {
@@ -241,9 +235,6 @@
           '_setResourceSlug(resource.name)',
           '_setDefaultImage(resource.type,allResourceTypesByKey)',
           '_listKeywords(resource.keywords,allKeywordsByKey)',
-          '_resourceChanged(resource)',
-
-
         ]
       }
       static get actions() {
@@ -263,9 +254,8 @@
         this.target = this.$.externalLinkInput
       }
 
-      _resourceChanged(resource) { console.log('resource changed', this.resource) }
-
       _listKeywords(resourceKeywords, allKeywordsByKey) {
+        // takes an object containing {keyword:true} statements and returns and array of full keyword data
         if (resourceKeywords && allKeywordsByKey) {
           let resourceKeywordsArray = []
           Object.keys(resourceKeywords).map(
@@ -277,14 +267,8 @@
         }
       }
 
-      _onFileInputChange(e) {
-        let files = e.target.inputElement.inputElement.files
-        console.log('file input change', files)
-        this.set('fileArray', files)
-        console.log('file array', this.fileArray)
-      }
-
       _setActiveResource(path, allResourcesBySlug) {
+        // loads a resource by the path given
         // if path contains a resource (/resources/resourceSlug), load it
         if (path && path.split('/')[2] && allResourcesBySlug) {
           // load existing for editing
@@ -302,24 +286,26 @@
       }
 
       _createNewResource() {
+        // boilerplat for new resources
         let id = this.generatePushID();
         var d = Date.now()
         var shortcode = this.generateShortCode()
         let newResource = {
-          $key: id,
+          _key: id,
           shortcode: shortcode,
-          description: '',
-          name: '',
-          collections: {},
-          keywords: {},
-          uploadedFiles: [],
-          externalLinks: [],
+          description: null,
+          name: null,
           created: d,
           modified: d,
           editedBy: {},
           featureImage: null,
-          defaultImage:null,
+          defaultImage: null,
           type: null,
+          collections: {},
+          keywords: {},
+          uploadedFiles: [],
+          externalLinks: [],
+          views: {},
           deleted: false,
           public: true,
           draft: true
@@ -327,13 +313,50 @@
         return newResource
       }
 
+      saveDraft() {
+        this.saveResource()
+      }
+      publish() {
+        this.set('resource.draft', false)
+        this.validateResource(this.resource).then(
+          res => this.saveResource(),
+          rej => this.saveMessage=rej
+        )
+      }
+      saveResource() {
+        this.$.firebaseDoc.reset()
+        this.set('firebaseDocPath', '')
+        this.set('firebaseDocData', this.resource)
+        // remove $key property as this will be automatically added by firebase
+        delete this.resource.$key
+        // set the path and id for the data and update data at the same time
+        this.$.firebaseDoc.saveValue('/resources', this.resource._key).then(
+          res => {this.saveMessage="Resource Saved"},
+          err => {this.saveMessage="Error saving: "+err}
+        )
+      }
+
+      validateResource(resource) {
+        // returns a promise as I thought we might need async calls (then remembered all resources by slug persisted)
+        // will still keep format in case we decide to add more async validation criteria later such as link checking
+        return new Promise((resolve, reject) => {
+          // check exists: name, description, resource type
+          if(!resource.name){reject('please provide a title for the resource')}
+          if(!resource.description){reject('please provide a description for the resource')}
+          if(!resource.type){reject('please provide a type for the resource')} 
+          // check slug unique
+          if(this.allResourcesBySlug[resource.slug]){reject('a resource with this name already exists')}
+          // check links work (?)
+
+          resolve()
+        })
+
+
+      }
+
+
       _setResourceSlug(name) {
-        if (!name) {
-          //new resource
-          // this.resource.slug = ""
-          // this.slug = ''
-        }
-        else {
+        if (name) {
           this.origin = window.origin
           //could definitely be combined into one expression but I suck at regex :( 
           //make lower case, replace all spaces with '-' and remove special
@@ -341,7 +364,6 @@
           this.resource.slug = slug
           this.slug = slug
         }
-
       }
 
       _setDefaultImage(resourceType) {
@@ -443,6 +465,8 @@
       }
 
       generateShortCode() {
+        // creates a 4 character shortcode which may be used in the future for sharing resources
+        // note, still needs method to ensure unique
         var text = "";
         var possible = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwyz123456789";
         for (var i = 0; i < 4; i++)
@@ -450,7 +474,10 @@
         return text;
       }
 
-      _togglePreview() { this.previewMode = !this.previewMode }
+      _togglePreview() {
+        this.previewMode = !this.previewMode;
+        console.log('resource', this.resource)
+      }
 
       _showAddKeywordText(filterText) {
         // quick method that checks the number of available filtered keywords when text input is changed
@@ -462,12 +489,8 @@
         else { this.showAddKeywordText = false }
       }
 
-      selectedKeywordChanged(k) {
-        console.log('k', k)
-      }
-
-
       _addExternalLink(e) {
+        // Adds external links to a resource
         if (!this.resource.externalLinks) {
           this.set('resource.externalLinks', [])
         }
@@ -478,7 +501,6 @@
           })
         }
         this.set('externalLinkUrl', "")
-        console.log('resource', this.resource)
       }
       removeLink(e) {
         var index = e.model.index;
@@ -498,8 +520,17 @@
 
 <!-- unused html
 
+  Part of incomplete uploader implementation using firebase-storage-multiupload
+  
+        _onFileInputChange(e) {
+        let files = e.target.inputElement.inputElement.files
+        console.log('file input change', files)
+        this.set('fileArray', files)
+        console.log('file array', this.fileArray)
+      }
 
-<paper-input type="file" id "customImageFile" on-change="_onFileInputChange"></paper-input>
+
+    <paper-input type="file" id "customImageFile" on-change="_onFileInputChange"></paper-input>
         <firebase-storage-multiupload path="/test" files="[[fileArray]]" upload-tasks="{{uploadTasks}}">
         </firebase-storage-multiupload>
         <template is="dom-repeat" items="[[uploadTasks]]">
