@@ -57,7 +57,6 @@
       <!-- use conditional dom-if to decide whether to show. Note the dom-if has to bind to a boolean variable or a function which returns one -->
       <template is="dom-if" if="{{_shouldShowAllResources(path)}}">
         <!-- All Resources heading -->
-        edit mode: [[editMode]]
         <div class="sub-section-heading" style="margin-top: 1em">
           <span>All Resources ([[filteredResourcesArray.length]])</span>
           <!-- show keyword query params, inlcudes link to remove  -->
@@ -219,12 +218,14 @@
           console.log('this.keyword', this.keyword)
           let keywordKey = allKeywordsBySlug[keyword]['$key']
           resources = resources.filter(r => {
-            return (r.tags && r.tags.Keywords && r.tags.Keywords.hasOwnProperty(keywordKey))
+            return (r.hasOwnProperty('keywords') && r.keywords.hasOwnProperty(keywordKey))
           })
         }
         else { this.showKeyword = false }
         // sort by date
-
+        resources=resources.sort((a,b)=>{
+          return b.modified-a.modified
+        })
         return resources
       }
 

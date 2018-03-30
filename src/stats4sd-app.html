@@ -160,6 +160,7 @@
           persistedKeywords: {
             type: Array,
             observer: function (tags) {
+              console.log('persisted keywords changed')
               return this.dispatch('updateTags', { type: 'keywords', tags: tags })
             }
           },
@@ -230,11 +231,12 @@
         return [
           '_routePageChanged(routeData.page)',
           '_pathChanged(route.path)',
-          '_queryParamsChanged(route.__queryParams)'
+          '_queryParamsChanged(route.__queryParams)',
+          // deep observer to catch when persisted key array is modified (e.g. adding a new key whilst in the resource editor)
+          '_persistedKeywordsChanged(persistedKeywords.splices)'
         ]
         // note, could use persistedFeatured.length to simply track number of items
       }
-
 
 
       constructor() {
@@ -259,11 +261,20 @@
         //   // window.addEventListener('online', (e) => this._notifyNetworkStatus(e));
         //   // window.addEventListener('offline', (e) => this._notifyNetworkStatus(e));
         // });
+
       }
 
       // path change observer updates the global store of the current path
       _pathChanged(path) {
         return this.dispatch('updatePath', path)
+      }
+
+      // deep observer to catch when persisted key array is modified (e.g. adding a new key whilst in the resource editor)
+      _persistedKeywordsChanged(splices) {
+        try {
+          let keywords = splices.indexSplices[0].object
+          this.dispatch('updateTags', { type: 'keywords', tags: keywords })
+        } catch (err) { }
       }
 
       // query params observer updates the global store of the current path

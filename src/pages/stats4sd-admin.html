@@ -1,4 +1,9 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../redux-mixin.html">
+
+<link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid-sorter.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="stats4sd-admin">
@@ -7,45 +12,64 @@
 
     <style include="shared-styles"></style>
     <style>
-       :host {
+      :host {
         /* padding: 10px */
       }
     </style>
-    <app-route route="[[route]]" pattern="/:slug" data="{{routeData}}"></app-route>
+
+    <!-- <template is="dom-if" if="{{signedIn}}">
+      <div on-tap="_signOut">
+        <a style="font-size: 16px; cursor:pointer">Sign Out</a>
+        <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
+      </div>
+      <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
+    </template>
 
     <template is="dom-if" if="{{signedIn}}">
-        <div on-tap="_signOut">
-          <a style="font-size: 16px; cursor:pointer">Sign Out</a>
-          <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
-        </div>
-        <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
-      </template>
+      <div on-tap="_signOut">
+        <a style="font-size: 16px; cursor:pointer">Sign Out</a>
+        <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
+      </div>
+      <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
+    </template> -->
 
-      <template is="dom-if" if="{{signedIn}}">
-          <div on-tap="_signOut">
-            <a style="font-size: 16px; cursor:pointer">Sign Out</a>
-            <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
-          </div>
-          <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
-        </template>
 
-        
-    <firebase-document path="/tags" data="{{liveTags}}" app-name="stats4sd-firebase"></firebase-document>
+    <!-- <firebase-document path="/tags" data="{{liveTags}}" app-name="stats4sd-firebase"></firebase-document> -->
     <firebase-document path="/resources" data="{{liveResources}}" app-name="stats4sd-firebase"></firebase-document>
 
     <div class="padding">
       <h1>Admin</h1>
-      <!-- <paper-button raised on-tap="_upgradeResources">Upgrade Resources (pre 0.9.5 format)</paper-button>
-      <paper-button raised on-tap="_upgradeTags">Upgrade Tags (pre 0.9.5 format)</paper-button> -->
-      <paper-button raised on-tap="_buttonTest">Test</paper-button>
+
+      <div>live resources: {{liveResources}}</div>
+      <paper-button raised on-tap="_upgradeResources">Upgrade Resources (pre 0.9.5 format)</paper-button>
+      <!-- <paper-button raised on-tap="_upgradeTags">Upgrade Tags (pre 0.9.5 format)</paper-button> -->
+
+
+      <vaadin-grid column-reordering-allowed items='[{"name": "John", "surname": "Lennon", "role": "singer"},
+{"name": "Ringo", "surname": "Starr", "role": "drums"}]'>
+        <vaadin-grid-column>
+          <template class="header">
+            <vaadin-grid-sorter path="name">Name</vaadin-grid-sorter>
+          </template>
+          <template>[[item.name]]</template>
+        </vaadin-grid-column>
+        <vaadin-grid-column>
+          <template class="header">Surname</template>
+          <template>[[item.surname]]</template>
+        </vaadin-grid-column>
+        <vaadin-grid-column>
+          <template class="header">Role</template>
+          <template>[[item.role]]</template>
+        </vaadin-grid-column>
+      </vaadin-grid>
+
     </div>
-    <div>slug: {{routeData.slug}}</div>
 
 
   </template>
 
   <script>
-    class stats4sdAdmin extends Polymer.Element {
+    class stats4sdAdmin extends ReduxMixin(Polymer.Element) {
 
       static get is() { return 'stats4sd-admin'; }
       static get observers() {
@@ -55,64 +79,124 @@
       }
       static get properties() {
         return {
-          persistedTags: {
-            type: Array,
+          liveResources: {
+            type: Object
           },
-          persistedResources: {
-            type: Array,
+          allResourceTypesByKey: {
+            type: Object,
+            statePath: 'persistedTags.byKey.resourceTypes',
           },
+
         }
       }
 
-      _complexChange(change) {
-        console.log('complex change', change)
-      }
-      _buttonTest(){
-        console.log('routeData',this.routeData)
-      }
 
       _upgradeResources() {
         // method to convert old tags format to newer, unlikely to be used again
         // first let's go through each resource
         let updates = 0
-        for (let resKey in this.liveResources) {
-          let resVal = this.liveResources[resKey]
-          // rewrite tags structure to be in 3 seperate sections, move old to tagsDeprecated
-          // only do this if hasn't already been done
-          if (this.liveResources[resKey].hasOwnProperty('tagsDeprecated')) {
-            console.log('skipping resource, already upgraded')
+        console.log('upgrading resources', this.liveResources)
+        Object.keys(this.liveResources).forEach(key => {
+          let resource = this.liveResources[key]
+          // add _key
+          if (resource.$key) {
+            resource._key = resource.$key
+            delete resource.$key
           }
-          else {
-            updates++
-            this.liveResources[resKey].tagsDeprecated = this.liveResources[resKey].tags
-            this.liveResources[resKey].tags = {
-              "Resource-Types": {},
-              "Keywords": {},
-              "Collections": {}
+          else { resource._key = key }
+          // remove tagdDeprecated
+          if (resource.tagsDeprecated) { delete resource.tagsDeprecated }
+          //split tags
+          if (resource.tags) {
+            if (resource.tags.Collections) {
+              resource.collections = resource.tags.Collections
             }
-            // populate tags2 from live tags data
-            for (let tagKey in resVal.tagsDeprecated) {
-              let tagVal = resVal.tagsDeprecated[tagKey]
-              if (tagVal == "Resource-Type") {
-                this.liveResources[resKey].tags["Resource-Types"][tagKey] = this.liveTags[tagKey]
-              }
-              else if (tagVal == "Collection") {
-                this.liveResources[resKey].tags["Collections"][tagKey] = this.liveTags[tagKey]
-              }
-              else if (tagVal == "Topic") {
-                this.liveResources[resKey].tags["Keywords"][tagKey] = this.liveTags[tagKey]
-              }
+            if (resource.tags['Resource-Types']) {
+              resource.type = Object.keys(resource.tags['Resource-Types'])[0]
             }
+            if (resource.tags.Keywords) {
+              resource.keywords = resource.tags.Keywords
+            }
+            delete resource.tags
           }
-        }
-        if (updates > 0) {
-          console.log('saving updated resource', this.liveResources)
-          // notify change
-          let temp = this.liveResources
-          this.liveResources = []
-          this.liveResources = temp
-        }
+          //set default and featured image
+          resource.featureImage = null
+          resource.defaultImage = null
+          if (resource.type) {
+            let type = this.allResourceTypesByKey[resource.type]
+            //setting it as local image, could also set it to hosted image url
+            resource.defaultImage = 'images/resourceTypes/' + type.slug + '.jpg'
+          }
+          // set public
+          resource.public = true
+
+        })
+        let upgraded = this.liveResources
+        this.liveResources = null
+        this.liveResources = upgraded
+        console.log('live resources', this.liveResources)
       }
+
+
+      /* current defaults:
+       let newResource = {
+      _key: id,
+      shortcode: shortcode,
+      description: null,
+      name: null,
+      created: d,
+      modified: d,
+      editedBy: {},
+      featureImage: null,
+      defaultImage: null,
+      type: null,
+      collections: {},
+      keywords: {},
+      uploadedFiles: [],
+      externalLinks: [],
+      views: {},
+      deleted: false,
+      public: true,
+      draft: true
+    }
+    */
+
+      // rewrite tags structure to be in 3 seperate sections, move old to tagsDeprecated
+      // only do this if hasn't already been done
+      //   if (this.liveResources[resKey].hasOwnProperty('tagsDeprecated')) {
+      //     console.log('skipping resource, already upgraded')
+      //   }
+      //   else {
+      //     updates++
+      //     this.liveResources[resKey].tagsDeprecated = this.liveResources[resKey].tags
+      //     this.liveResources[resKey].tags = {
+      //       "Resource-Types": {},
+      //       "Keywords": {},
+      //       "Collections": {}
+      //     }
+      //     // populate tags2 from live tags data
+      //     for (let tagKey in resVal.tagsDeprecated) {
+      //       let tagVal = resVal.tagsDeprecated[tagKey]
+      //       if (tagVal == "Resource-Type") {
+      //         this.liveResources[resKey].tags["Resource-Types"][tagKey] = this.liveTags[tagKey]
+      //       }
+      //       else if (tagVal == "Collection") {
+      //         this.liveResources[resKey].tags["Collections"][tagKey] = this.liveTags[tagKey]
+      //       }
+      //       else if (tagVal == "Topic") {
+      //         this.liveResources[resKey].tags["Keywords"][tagKey] = this.liveTags[tagKey]
+      //       }
+      //     }
+      //   }
+      // }
+      // if (updates > 0) {
+      //   console.log('saving updated resource', this.liveResources)
+      //   // notify change
+      //   let temp = this.liveResources
+      //   this.liveResources = []
+      //   this.liveResources = temp
+
+      //}
 
       _upgradeTags() {
         // change tags to be split type
@@ -120,7 +204,7 @@
         if (this.liveTags.hasOwnProperty('Resource-Types')) {
           console.log('skipping tags,already upgraded')
         }
-        else{
+        else {
           let temp = {
             "Resource-Types": {},
             "Collections": {},

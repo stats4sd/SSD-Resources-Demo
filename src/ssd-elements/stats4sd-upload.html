@@ -1,0 +1,139 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
+
+<dom-module id="stats4sd-upload">
+    <template>
+        <style>
+            /* :host {
+      } */
+        </style>
+
+        <vaadin-upload 
+        id="uploader" 
+        on-upload-before="fileupload" 
+        on-file-abort="uploadAbort" 
+        files="{{files}}" 
+        nodrop="[[nodrop]]"
+        max-files="maxFiles"></vaadin-upload>
+        <!-- <vaadin-upload class="image-drop" max-files="1" id="featureImageUpload" nodrop>
+        </vaadin-upload> -->
+    </template>
+
+    <script>
+        class Stats4sdUpload extends Polymer.Element {
+            static get is() { return 'stats4sd-upload'; }
+            static get properties() {
+                return {
+                    directory: {
+                        type: String,
+                    },
+                    key: {
+                        type: String
+                    },
+                    files: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        value: function () {
+                            return [];
+                        }
+                    },
+                    nodrop:{
+                        type:Boolean,
+                    },
+                    maxFiles:{
+                        type:Number,
+                    },
+                    // additional field to pass back a single file upload url (for custom/feature image upload)
+                    uploadUrl:{
+                        type:String,
+                        reflectToAttribute:true,
+                        notify:true,
+                    }
+                }
+
+            }
+            // https://cdn.vaadin.com/vaadin-upload/2.1.0/
+            fileupload(e) {
+                e.preventDefault();
+                //check resource name exists, give warning and remove files if not
+                //*******not implemented yet*****
+
+                //create file upload task
+                let file = e.detail.file;
+                if (!this.directory) { this.directory = 'temp' }
+                if (!this.key) { this.key = "key1" }
+                let filename = file.name
+                let app = firebase.app('stats4sd-firebase')
+                let ref = firebase.storage(app).ref().child('/' + this.directory + '/' + this.key + "/" + filename)
+                let uploadTask = ref.put(file);
+                //handle updates from snapshot - update values on this.files to reflect on vaadin uploader
+                uploadTask.on('state_changed', (snapshot) => {
+                    let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                    file.progress = progress
+                    file.status = 'uploading'
+                    this._notifyFileChanges(file)
+                    // handle errors
+                }, error => {
+                    console.log('error', error)
+                    // handle complete
+                }, () => {
+                    let index = this.files.indexOf(file)
+                    let temp = {
+                        lastModified: file.lastModified,
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        url: uploadTask.snapshot.downloadURL,
+                        complete: true,
+                        formDataName: "file",
+                        progress: 100,
+                    }
+                    this.set('files.' + index, [])
+                    this.set('files.' + index, temp)
+                    this.set('uploadUrl',this.files[0].url)
+                    // this._notifyFileChanges(file)
+                })
+            }
+            uploadAbort(e) {
+                // function to delete uplaoded files
+                let file = e.detail.file;
+                if (!this.directory) { this.directory = 'temp' }
+                if (!this.key) { this.key = "key1" }
+                let filename = file.name
+                let app = firebase.app('stats4sd-firebase')
+                let ref = firebase.storage(app).ref().child('/' + this.directory + '/' + this.key + "/" + filename)
+                ref.delete().then(
+                    res => {
+                        let index = this.files.indexOf(file)
+                        this.splice('files', index, 1)
+                    },
+                    err => {
+                        // error if file hadn't been fully uploaded, need to find a way to upload task
+                        // for now jsut using timeout to try get it when fully uploaded
+                        console.log('Retrying delete')
+                        setTimeout(() => {
+                            this.uploadAbort({
+                                detail:{
+                                    file:file
+                                }
+                            })
+                        }, 2000);
+                    }
+                )
+
+            }
+
+            _notifyFileChanges(file) {
+                let index = this.files.findIndex(f => { return f.name == file.name })
+                var p = 'files.' + index + '.';
+                for (var i in file) {
+                    if (file.hasOwnProperty(i)) {
+                        this.notifyPath(p + i, file[i]);
+                    }
+                }
+            }
+        }
+
+        window.customElements.define(Stats4sdUpload.is, Stats4sdUpload);
+    </script>
+</dom-module>

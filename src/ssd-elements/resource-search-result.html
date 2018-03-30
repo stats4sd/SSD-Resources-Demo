@@ -10,11 +10,14 @@
         cursor: pointer;
       }
 
-      a{text-decoration: unset}
+      a {
+        text-decoration: unset
+      }
 
       img {
         /*max-width: 20vw;*/
         height: 6.5em;
+        width: 8.5em;
         margin: auto;
         object-fit: cover;
         float: left;
@@ -132,12 +135,15 @@
       }
       _getImage(res) {
         // return feature image if exists. If not use resource type placeholder
-        if (res.featureImage != "") { return res.featureImage }
-        if (res.hasOwnProperty('tags') && res.tags.hasOwnProperty('Resource-Types')) {
-          let types = res.tags["Resource-Types"]
-          let slug = types[Object.keys(types)[0]].slug
-          return ('/images/resourceTypes/' + slug + '.jpg')
+        if (res.featureImage) { return res.featureImage }
+        else if(res.defaultImage){
+          return res.defaultImage
         }
+        // if (res.hasOwnProperty('tags') && res.tags.hasOwnProperty('Resource-Types')) {
+        //   let types = res.tags["Resource-Types"]
+        //   let slug = types[Object.keys(types)[0]].slug
+        //   return ('/images/resourceTypes/' + slug + '.jpg')
+        // }
         else {
           return '/images/resourceTypes/fallback-image.jpg'
         }

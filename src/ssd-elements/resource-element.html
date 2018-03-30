@@ -4,7 +4,10 @@
 <link rel="import" href="../ssd-elements/resource-file-download.html">
 <link rel="import" href="../ssd-elements/collection-element.html">
 <link rel="import" href="../../bower_components/google-youtube/google-youtube.html">
+<link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
 <link rel="import" href="../shared-styles.html">
+<link rel="import" href="../stats4sd-icons.html">
+
 
 <dom-module id="resource-element">
 
@@ -43,6 +46,12 @@
                 margin-bottom: 5px;
             }
 
+            table,
+            td,
+            th {
+                border: 1px solid rgba(0, 0, 0, 0.3);
+            }
+
             .deleted {
                 font-weight: 700;
                 font-size: large;
@@ -51,19 +60,23 @@
                 line-height: 2em;
                 text-align: center;
                 color: var(--paper-indigo-50);
-                background-color: var(--paper-indigo-500);
+                background-color: var(--paper-red-700);
                 padding: 5px;
+            }
+
+            paper-button.edit-resource-button {
+                /* position: absolute;
+                right:5px; */
             }
 
             @media(min-width:1048px) {
                 .meta-data {
-                    flex-wrap: nowrap;
+                    flex-wrap: wrap;
                     justify-content: space-between;
                 }
                 .files-container {
-                    margin-left: 50px;
-                    width: 100%;
-                    max-width: 500px;
+                    display: flex;
+                    flex-wrap: wrap;
                 }
             }
 
@@ -85,43 +98,68 @@
         </style>
 
         <template is="dom-if" if="[[resource]]">
-            <template is="dom-if" if="[[resource.deleted]]" class="deleted">
-                <div>This resource has been deleted</div>
+            <template is="dom-if" if="[[resource.deleted]]">
+                <div class="deleted">This resource has been deleted</div>
             </template>
+
             <div style="padding: 10px">
-                <!-- Title and Description -->
-                <h1 class="resource-title">[[resource.name]]</h1>
-                <div class="url">
-                    <a href="[[_getResourceUrl(resource)]]">[[_getResourceUrl(resource)]]</a>
+                <!-- Title and edit button-->
+                <div style="display: flex">
+                    <div style="flex:1">
+                        <h1 class="resource-title">[[resource.name]]</h1>
+                        <div class="url">
+                            <a href="[[_getResourceUrl()]]">[[_getResourceUrl()]]</a>
+                        </div>
+                    </div>
+                    <template is="dom-if" if="[[signedIn]]">
+                        <a href="[[_getEditResourceLink()]]" style="color:unset; text-decoration:none">
+                            <paper-button class="edit-resource-button">
+                                <iron-icon icon="editor:mode-edit"></iron-icon>
+                                <span>Edit Resource</span>
+                            </paper-button>
+                        </a>
+                    </template>
                 </div>
+                <!-- Description and files -->
                 <div class="meta-data">
-                    <div style="min-width: 300px; max-width:700px">
+                    <div style="min-width: 400px">
                         <div class="resource-meta-heading">Description</div>
                         <p>[[resource.description]]</p>
                     </div>
                     <!--  -->
-                    <div class="files-container" hidden$="[[!resource.uploadedFiles]]">
+                    <div hidden$="[[!resource.uploadedFiles]]" style="flex:1">
                         <div class="resource-meta-heading">Files: </div>
-                        <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
-                            <resource-file-download file="[[file]]"></resource-file-download>
-                        </template>
+                        <div class="files-container">
+                            <template is='dom-repeat' items="[[resource.uploadedFiles]]" as="file">
+                                <resource-file-download file="[[file]]"></resource-file-download>
+                            </template>
+                        </div>
+
                     </div>
                 </div>
                 <!-- Links and Videos -->
                 <div class="resource-meta-heading" hidden$="[[!resource.externalLinks]]">External Links </div>
-                <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
-                    <template is="dom-if" if="{{_isYoutube(link)}}">
-                        <google-youtube class="video-container" video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0"
-                            autoplay="0">
-                        </google-youtube>
+                <table style="border-collapse: collapse">
+                    <template is='dom-repeat' items="[[resource.externalLinks]]" as="link">
+                        <template is="dom-if" if="{{_isYoutube(link)}}">
+                            <google-youtube class="video-container" video-id="[[_getYoutubeID(link)]]" height="270px" width="480px" rel="0" start="0"
+                                autoplay="0">
+                            </google-youtube>
+                        </template>
+                        <tr>
+                            <td style="padding:10px">
+                                <a href="[[link.url]]" target="_blank" rel="noopener">
+                                    <iron-icon icon="language" prefix></iron-icon>
+                                    <span>[[link.url]]</span>
+                                </a>
+                            </td>
+                        </tr>
+
                     </template>
-                    <a href="[[link.url]]" target="_blank">
-                        <iron-icon icon="language" prefix></iron-icon>
-                        <span>[[link.url]]</span>
-                    </a>
-                </template>
+                </table>
+
                 <!-- keywords -->
-                <div hidden$="[[!resourceKeywords]]" class="keywords" style="margin-top: 2em; min-width:300px; max-width: 700px">
+                <div hidden$="[[!resourceKeywords]]" class="keywords" style="margin-top: 2em; min-width:250px; max-width: 400px">
                     <!-- For each keyword, display a button linking to the keyword query -->
                     <div class="resource-meta-heading" style="margin-bottom:1em;">Keywords</div>
                     <template is='dom-repeat' items='[[resourceKeywords]]' as='keyword'>
@@ -133,7 +171,7 @@
                     </template>
                 </div>
                 <!-- collections -->
-                <div hidden$="[[!resourceCollections]]" style="margin-top: 2em; min-width:300px; max-width: 700px">
+                <div hidden$="[[!resourceCollections]]" style="margin-top: 2em; min-width:250px; max-width: 400px">
                     <div class="resource-meta-heading" style="margin-bottom:1em;">This resource appears in the following collections:</div>
                     <template is='dom-repeat' items='[[resourceCollections]]' as='collection'>
                         <collection-element collection={{collection}}></collection-element>
@@ -156,11 +194,11 @@
                     },
                     resourceKeywords: {
                         type: Array,
-                        computed: '_getResourceTags(resource.tags.Keywords,allKeywordsByKey)'
+                        computed: '_getResourceTags(resource.keywords,allKeywordsByKey)'
                     },
                     resourceCollections: {
                         type: Array,
-                        computed: '_getResourceTags(resource.tags.Collections,allCollectionsByKey)'
+                        computed: '_getResourceTags(resource.collections,allCollectionsByKey)'
                     },
                     allKeywordsByKey: {
                         type: Object,
@@ -170,15 +208,24 @@
                         type: Object,
                         statePath: 'persistedTags.byKey.collections'
                     },
+                    signedIn: {
+                        type: Boolean,
+                        statePath: 'signedIn'
+                    },
                 }
             }
 
-            _getResourceUrl(resource) {
+            _getResourceUrl() {
                 return (window.location.origin + "/resources/" + this.resource.slug)
+            }
+            _getEditResourceLink() {
+                console.log('getting ')
+                let base = this._getResourceUrl()
+                return base + "?edit=true";
             }
 
             // resources have their tags stored as a json object with with keys corresponding to a tag id
-            // e.g. resource.tags.Collections = { collectionID1 : ... } or resource.tags.Keywords = {keywordID1:...}
+            // e.g. resource.collections = { collectionID1 : ... } or resource.keywords = {keywordID1:...}
             // This function takes the json object and the associated set of tag values from the store, and 
             // populates an array replacing the json key with the correct store lookup. A 'false' value is returned if there is no data
             _getResourceTags(tagsJson, allTagsByKey) {
@@ -202,7 +249,7 @@
             _isYoutube(link) {
                 return (link.url.indexOf('youtu.be') > -1 || link.url.indexOf('youtube.com') > -1)
             }
-            
+
             _getYoutubeID(link) {
                 console.log('getting youtube id', link)
                 let youtubeID = ''

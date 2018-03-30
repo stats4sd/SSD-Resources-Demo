@@ -192,7 +192,7 @@
         for (let k of this.allKeywordsArray) {
           if (k.label.toLowerCase() == searchText) {
             this.searchDetails.keyword[k.label] = this.allResourcesArray.filter((r) => {
-              if (r.tags.hasOwnProperty('Keywords') && r.tags.Keywords.hasOwnProperty(k.$key)) {
+              if (r.hasOwnProperty('keywords') && r.keywords.hasOwnProperty(k.$key)) {
                 this._addToSearchRank(r, 5)
                 return true
               }

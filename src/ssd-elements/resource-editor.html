@@ -1,117 +1,198 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../redux-mixin.html">
 
-<link rel="import" href="../../bower_components/polymerfire/firebase-storage-multiupload.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-storage-upload-task.html">
+<!-- <link rel="import" href="../../bower_components/polymerfire/firebase-storage-multiupload.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-storage-upload-task.html"> -->
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
+<link rel="import" href="../../bower_components/iron-icons/social-icons.html">
 
-
+<link rel="import" href="./resource-element.html">
+<link rel="import" href="./stats4sd-upload.html">
 <link rel="import" href="../shared-styles.html">
+<link rel="import" href="../stats4sd-icons.html">
 
 
 <dom-module id="resource-editor">
   <template>
-    <style include="vaadin-styles"></style>
     <style include="shared-styles">
       :host {
         display: block;
         padding: 10px;
       }
+
+      .resource-preview {
+        border: 1px solid black;
+        flex: 1;
+        margin-left: 20px;
+        max-width: 550px;
+      }
+
+      paper-toggle-button.preview-toggle {
+        float: right;
+        cursor: pointer;
+        --paper-toggle-button-checked-bar-color: var(--paper-green-500);
+        --paper-toggle-button-checked-button-color: var(--paper-green-500);
+        --paper-toggle-button-checked-ink-color: var(--paper-green-500);
+      }
+
+      paper-button.publish-button {
+        color: var(--app-secondary-color);
+        font-weight: bold;
+      }
+
+      vaadin-combo-box.tag-box {
+        display: block;
+        width: 200px;
+      }
+
+      .keywords-list {
+        margin: 10px 0;
+        font-size: small;
+      }
+
+      .preview-toggle-label {
+        float: right;
+        font-size: small;
+        padding-right: 5px;
+        cursor: pointer;
+      }
+
+      .feature-image {
+        width: 150px;
+        height: 150px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      .placeholder {
+        border: 1px dashed black;
+        border-radius: 20px;
+      }
     </style>
 
-    <!-- Firebase binding for live tag data -->
-    <!-- <firebase-document path="/tags" data="{{liveTags}}" app-name="stats4sd-firebase"></firebase-document>
-    <firebase-document id="currentTag" app-name="stats4sd-firebase" data="{{currentTag}}" path=""></firebase-document> -->
+    <!-- Firebase binding for live data, used for both tags and full resource -->
+    <firebase-document id="firebaseDoc" path="[[firebaseDocPath]]" data="{{firebaseDocData}}" app-name="stats4sd-firebase"></firebase-document>
+    <div style="display: flex;flex-wrap:wrap">
+      <paper-card style="padding:10px; width: 400px;">
+        <paper-toggle-button checked="{{previewMode}}" class="preview-toggle"></paper-toggle-button>
+        <div class="preview-toggle-label" on-tap="_togglePreview">Preview</div>
+        <!-- Title and Description -->
+        <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
+        <p>
+          <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required
+            always-float-label></paper-textarea>
+        </p>
 
-    <!-- Title and Description -->
-    <paper-input id="resourceName" value="{{resource.name}}" name="title" label="Title of Resource" required></paper-input>
-    <span class="url">[[origin]]/[[slug]]</span>
-    <p>
-      <paper-textarea id="resourceDescription" value="{{resource.description}}" name="description" label="Brief Description" required
-        always-float-label></paper-textarea>
-    </p>
+        <!-- Keywords -->
+        <vaadin-combo-box class="tag-box" label="Keywords" id="keywordsCombo" items="[[allKeywordsArray]]" item-value-path="$key"
+          filter="{{keywordFilterText}}" filtered-items="{{filteredKeywords}}" allow-custom-value on-custom-value-set="_addNewKeyword"
+          on-change="_addKeyword" value="{{selectedKeyword}}">
+        </vaadin-combo-box>
+        <div hidden$="[[!showAddKeywordText]]" style="margin-top:5px">Press Enter To Add Keyword:
+          <strong>[[keywordFilterText]]</strong>
+        </div>
+        <div class="keywords-list">
+          <template id="keywordsList" is="dom-repeat" as="keyword" items="[[resourceKeywordsArray]]">
+            <paper-button class="keyword-button">{{keyword.label}}
+              <iron-icon icon="close" on-tap="_removeKeyword" data-keyword$="[[keyword]]"></iron-icon>
+            </paper-button>
+          </template>
+        </div>
 
-    <!-- *** Need save function to track tags saved, possibly linked to combo change event to populate resource tags -->
+        <!-- Resource Type-->
+        <vaadin-combo-box class="tag-box" label="Resource Type" id="ResourceTypeCombo" items="[[allResourceTypesArray]]" item-label-path="label"
+          item-value-path="$key" value="{{resource.type}}">
+        </vaadin-combo-box>
 
-    <!-- Tags -->
-    <vaadin-combo-box label="Keywords" id="Keywords_Combo" items="[[allKeywordsArray]]" item-value-path="$key" allow-custom-value
-      on-custom-value-set="_addNewTag" on-change="_comboChange">
-    </vaadin-combo-box>
-    <template id="keywordsList" is="dom-repeat" as="tag" items="[[resource.tags.keywords]]">
-      <paper-button class="tag-button">{{tag.label}}
-        <iron-icon icon="close" on-tap="removeTag"></iron-icon>
-      </paper-button>
-    </template>
-    <vaadin-combo-box label="Resource Type" id="Resource-Types_Combo" items="[[allResourceTypesArray]]" item-label-path="label"
-      item-value-path="$key" value="{{resource.type}}">
-    </vaadin-combo-box>
+        <!-- External Links -->
+        <div style="margin-bottom:1em">
+          <h4 style="margin-bottom: 0">External Links</h4>
+          <template id="externalLinks" is="dom-repeat" items="[[resource.externalLinks]]" as="link">
+            <div class='flex-container'>
+              <a href="{{link.url}}" target="_blank" rel="noopener">
+                <span>[[link.url]]</span>
+              </a>
+              <paper-icon-button suffix on-tap="editLink" class="green" icon="mode-edit" alt="edit" title="edit">
+              </paper-icon-button>
+              <paper-icon-button on-tap="removeLink" class="red" icon="clear" alt="clear" title="clear">
+              </paper-icon-button>
+            </div>
+          </template>
+          <form style="display:flex; align-items:center">
+            <iron-icon icon="social:public" prefix style="margin-right:5px"></iron-icon>
+            <paper-input id="externalLinkInput" style="flex-basis:100%" label="add external links here" no-label-float value="{{externalLinkUrl}}"></paper-input>
+            <paper-icon-button suffix on-tap="_addExternalLink" style="color:green" icon="add" alt="add" title="add"></paper-icon-button>
+          </form>
+        </div>
+        <iron-a11y-keys id="a11y" target="[[externalInputTarget]]" keys="enter" on-keys-pressed="_addExternalLink"></iron-a11y-keys>
+
+        <!-- public/hidden Checkbox -->
+        <div class="flex">
+          <paper-toggle-button checked="{{resource.public}}" style="cursor: pointer"></paper-toggle-button>
+          <div hidden$="[[!resource.public]]">
+            <span>Public</span>
+            <iron-icon icon="visibility"></iron-icon>
+          </div>
+          <div hidden$="[[resource.public]]">
+            <span>Hidden</span>
+            <iron-icon icon="visibility-off"></iron-icon>
+          </div>
+        </div>
+
+        <!-- Uploaded files -->
+        <h4>Uploaded Files</h4>
+        <!-- the stats4sd uploader takes a main directory and subdirectory (key) and uploads files via its interface -->
+        <stats4sd-upload directory="resources" key="[[resource._key]]" files="{{resource.uploadedFiles}}"></stats4sd-upload>
+
+        <!-- default and custom images -->
+        <div style="display: flex">
+          <div>
+            <h4>Default Image</h4>
+            <img src="[[resource.defaultImage]]" class="feature-image placeholder" hidden$=[[!resource.defaultImage]]>
+            <div class="feature-image placeholder" hidden$=[[resource.defaultImage]]>Specify a resource type</div>
+          </div>
+          <div style="margin-left:20px">
+            <h4>Custom Image</h4>
+            <img src="[[resource.featureImage]]" class="feature-image" hidden$=[[!resource.featureImage]]>
+            <div class="feature-image placeholder" hidden$=[[resource.featureImage]]>
+              <stats4sd-upload directory="images/resources" key="[[resource._key]]" upload-url="{{resource.featureImage}}" nodrop max-files="1"></stats4sd-upload>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Delete, save draft and publish buttons-->
+        <div style="margin-top:20px; display:flex; justify-content:space-between">
+          <div>
+            <span hidden$="[[!updateMode]]">
+                <paper-button on-tap="delete" hidden$="[[resource.deleted]]" style="opacity:0.8">Delete</paper-button>
+                <paper-button on-tap="restore" hidden$="[[!resource.deleted]]" style="opacity:0.8">Restore</paper-button>
+            </span>
+          </div>
+          <div>
+            <paper-button on-tap="saveDraft">Save Draft</paper-button>
+            <paper-button on-tap="publish" class="publish-button" hidden$="[[updateMode]]">Publish</paper-button>
+            <paper-button on-tap="update" class="publish-button" hidden$="[[!updateMode]]">Update</paper-button>
+          </div>
+        </div>
+        <div>[[saveMessage]]</div>
+        <span><a href="/resources">View All Resources</a></span>
 
 
-    <!-- **************************** possibly manage collections elsewhere? ************************ -->
-    <!-- External Links -->
-    <h4>External Links</h4>
-    <template id="externalLinks" is="dom-repeat" items="[[resource.externalLinks]]" as="link">
-      <div class='flex-container'>
-        <a href="{{link.url}}" target="_blank">
-          <span>[[link.url]]</span>
-        </a>
-        <paper-icon-button suffix on-tap="editLink" class="green" icon="mode-edit" alt="edit" title="edit">
-        </paper-icon-button>
-        <paper-icon-button on-tap="removeLink" class="red" icon="clear" alt="clear" title="clear">
-        </paper-icon-button>
-      </div>
-    </template>
-    <div class="flex">
-      <iron-icon icon="public" prefix></iron-icon>
-      <paper-input style="flex-basis:100%" label="add external links here" no-label-float value="{{externalLinkUrl}}"></paper-input>
-      <paper-icon-button suffix on-tap="_addExternalLink" style="color:green" icon="add" alt="add" title="add"></paper-icon-button>
-    </div>
-    </paper-input>
+      </paper-card>
 
-    <!-- Draft/Published Checkbox -->
-    <div class="flex">
-      <paper-toggle-button checked="{{!resource.draft}}"></paper-toggle-button>
-      <div hidden$="[[resource.draft]]">
-        <span>Public</span>
-        <iron-icon icon="visibility"></iron-icon>
-      </div>
-      <div hidden$="[[!resource.draft]]">
-        <span>Draft</span>
-        <iron-icon icon="visibility-off"></iron-icon>
-      </div>
-    </div>
-
-    <h4>Uploaded Files</h4>
-    <vaadin-upload id="ssdResourceUpload" on-upload-before="fileupload" files="[[resource.uploadedFiles]]"></vaadin-upload>
-    <iron-icon slot="drop-label-icon" icon="description"></iron-icon>
-    <span slot="drop-label"></span>
-
-    <!-- default and custom images -->
-    <div style="display: flex">
-      <div>
-        <h4>Default Image</h4>
-        <img src="[[resource.featureImage]]" style="max-width:200px">
-      </div>
-      <div style="margin-left:20px">
-        <h4>Custom Image</h4>
-        <img src="[[resource.customImage]]" style="max-width:200px">
-        <!-- <vaadin-upload max-files="1" id="featureImageUpload" on-upload-before="featureImageUpload">
-        </vaadin-upload> -->
-        <paper-input type="file" id "customImageFile" on-change="_onFileInputChange"></paper-input>
-        <firebase-storage-multiupload path="/test" files="[[fileArray]]" upload-tasks="{{uploadTasks}}">
-        </firebase-storage-multiupload>
-        <template is="dom-repeat" items="[[uploadTasks]]">
-          <firebase-storage-upload-task task="[[item]]" bytes-transferred="{{item.bytesTransferred}}" total-bytes="{{item.totalBytes}}"
-            state="{{item.state}}" download-url="{{item.downloadUrl}}" metadata="{{item.metadata}}" path="{{item.path}}">
-          </firebase-storage-upload-task>
-          <div>task:[[item]], transferred:[[item.bytesTransferred]]</div>
-        </template>
-      </div>
+      <!-- resource preview -->
+      <resource-element resource="[[resource]]" hidden$="[[!previewMode]]" class="resource-preview"></resource-element>
     </div>
 
   </template>
@@ -137,6 +218,10 @@
             type: Array,
             statePath: 'persistedTags.array.keywords'
           },
+          allKeywordsByKey: {
+            type: Object,
+            statePath: 'persistedTags.byKey.keywords',
+          },
           allResourceTypesArray: {
             type: Array,
             statePath: 'persistedTags.array.resourceTypes',
@@ -145,75 +230,253 @@
             type: Object,
             statePath: 'persistedTags.byKey.resourceTypes',
           },
-
-
-          // slug: {
-          //   type: String,
-          //   computed: '_toSlug(resource.name)'
-          // },
-          // origin: {
-          //   type: String,
-          //   value: function () { return window.origin + '/resource' }
-          // },
-          // externalLinkUrl: {
-          //   type: String,
-          //   value: ''
-          // }
+          previewMode: {
+            type: Boolean,
+            value: true
+          },
+          keywordFilterText: {
+            type: String,
+            observer: '_showAddKeywordText'
+          }
         };
       }
       static get observers() {
         return [
           '_setResourceSlug(resource.name)',
-          '_setFeatureImage(resource.type,allResourceTypesByKey)',
+          '_setDefaultImage(resource.type,allResourceTypesByKey)',
+          '_listKeywords(resource.keywords,allKeywordsByKey)',
         ]
       }
+      static get actions() {
+        return {
+          updateTags(payload) {
+            return {
+              type: 'UPDATE_TAGS',
+              payload: payload
+            }
+          }
+        }
+      }
 
-      _onFileInputChange(e) {
-        let files = e.target.inputElement.inputElement.files
-        console.log('file input change', files)
-        this.set('fileArray',files)
-        console.log('file array',this.fileArray)
+      connectedCallback() {
+        // binding enter key for external link input
+        super.connectedCallback();
+        this.target = this.$.externalLinkInput
+      }
+
+      _listKeywords(resourceKeywords, allKeywordsByKey) {
+        // takes an object containing {keyword:true} statements and returns and array of full keyword data
+        if (resourceKeywords && allKeywordsByKey) {
+          let resourceKeywordsArray = []
+          Object.keys(resourceKeywords).map(
+            k => {
+              resourceKeywordsArray.push(this.allKeywordsByKey[k])
+            }
+          )
+          this.set('resourceKeywordsArray', resourceKeywordsArray)
+        }
       }
 
       _setActiveResource(path, allResourcesBySlug) {
+        console.log('setting active resource', path)
+        // loads a resource by the path given
         // if path contains a resource (/resources/resourceSlug), load it
         if (path && path.split('/')[2] && allResourcesBySlug) {
-          // load existing for editing
+          // load existing for editing, set mode to update so it allows resource overwrite
+          let slug = path.split('/')[2]
+          let resource = this.allResourcesBySlug[slug]
+          if (resource) {
+            // update vaadin combo as it seems to try and overwrite with blank value
+            this.$.ResourceTypeCombo.value = resource.type
+            this.updateMode = true
+            return resource
+          }
         }
         // otherwise create new blank resource
         else {
-          return this._createNewResource()
+          console.log('set active resource path', this.resource)
+          if (!this.resource) {
+            let resource = this._createNewResource()
+            return resource
+          }
+          else { return this.resource }
         }
       }
 
-      _generateEmptyResource() {
-        return {
-          name: 'test'
-        }
-      }
       _createNewResource() {
+        // boilerplat for new resources
         let id = this.generatePushID();
-        console.log('creating new resource', id)
         var d = Date.now()
         var shortcode = this.generateShortCode()
         let newResource = {
-          $key: id,
+          _key: id,
           shortcode: shortcode,
-          description: '',
-          name: '',
-          tags: {},
+          description: null,
+          name: null,
+          created: d,
+          modified: d,
+          editedBy: {},
+          featureImage: null,
+          defaultImage: null,
+          type: null,
+          collections: {},
+          keywords: {},
           uploadedFiles: [],
           externalLinks: [],
-          created: d,
-          modified: '',
-          editedBy: {},
-          featureImage: '',
-          type: null,
+          views: {},
           deleted: false,
-          draft: false
+          public: true,
+          draft: true
         }
-        console.log('new resource', newResource)
         return newResource
+      }
+
+      saveDraft() {
+        this.saveResource()
+      }
+
+      publish() {
+        this.set('resource.draft', false)
+        this.validateResource(this.resource).then(
+          res => this.saveResource(),
+          rej => this.saveMessage = rej
+        )
+      }
+
+      update() {
+        this.set('resource.modified', Date.now())
+        this.publish()
+      }
+
+      delete(){
+        this.set('resource.deleted',true)
+        this.publish()
+      }
+
+      restore(){
+        this.set('resource.deleted',false)
+        this.publish()
+      }
+
+      saveResource() {
+        this.$.firebaseDoc.reset()
+        this.set('firebaseDocPath', '')
+        this.set('firebaseDocData', this.resource)
+        // remove $key property as this will be automatically added by firebase
+        delete this.resource.$key
+        // set the path and id for the data and update data at the same time
+        this.$.firebaseDoc.saveValue('/resources', this.resource._key).then(
+          res => {
+            this.saveMessage = "Resource Saved"
+            if(this.resource.deleted){this.saveMessage = "Resource Deleted"}
+            // update revisions history
+            this.$.firebaseDoc.saveValue('/revisions/' + this.resource._key, this.resource.modified).then(
+              res => console.log('revision saved')
+            )
+            // navigate back to resources - Ideally should try use app route or custom event 
+            // as window.location methods force page refresh (not currently implemented)
+          },
+          err => { this.saveMessage = "Error saving: " + err }
+        )
+      }
+
+      validateResource(resource) {
+        // returns a promise as I thought we might need async calls (then remembered all resources by slug persisted)
+        // will still keep format in case we decide to add more async validation criteria later such as link checking
+        return new Promise((resolve, reject) => {
+          // check exists: name, description, resource type
+          if (!resource.name) { reject('please provide a title for the resource') }
+          if (!resource.description) { reject('please provide a description for the resource') }
+          if (!resource.type) { reject('please provide a type for the resource') }
+          // check slug unique (if adding for first time)
+          if (!this.updateMode) {
+            if (this.allResourcesBySlug[resource.slug]) { reject('a resource with this name already exists') }
+          }
+          // check links work (?)
+          resolve()
+        })
+      }
+
+      _setResourceSlug(name) {
+        if (name) {
+          this.origin = window.origin
+          //could definitely be combined into one expression but I suck at regex :( 
+          //make lower case, replace all spaces with '-' and remove special
+          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
+          if (!this.updateMode) {
+            this.resource.slug = slug
+            this.slug = slug
+          }
+          else { this.slug = this.resource.slug }
+
+        }
+      }
+
+      _setDefaultImage(resourceType) {
+        if (resourceType) {
+          let type = this.allResourceTypesByKey[resourceType]
+          //setting it as local image, could also set it to hosted image url
+          this.set('resource.defaultImage', 'images/resourceTypes/' + type.slug + '.jpg')
+        }
+        // else {
+        //   // default image - currently null with placeholder
+        //   return ''
+        // }
+      }
+
+      _addKeyword(e, keywordID = null) {
+        if (!keywordID) { keywordID = e.target.value }
+        this.set('resource.keywords.' + keywordID, true)
+        this._listKeywords(this.resource.keywords, this.allKeywordsByKey)
+        this.selectedKeyword = null
+      }
+
+      _addNewKeyword(e) {
+        e.preventDefault()
+        // only run if text specified
+        if (e.detail) {
+          // convert to Title Case (capital each word)
+          let label = this._toTitleCase(e.detail)
+          let keyword = {
+            type: 'Keyword',
+            label: label,
+            modified: Date.now(),
+            slug: this._toSlug(label),
+            key: this.generatePushID()
+          }
+          // set the firebase payload doc to the desired data
+          this.set('firebaseDocData', keyword)
+          // set the path and id for the data and update data at the same time
+          this.$.firebaseDoc.saveValue('/tags/Keywords', keyword.key).then(
+            () => {
+              // the change in keywords is automatically caugh by a deep observer on the main stats4sd-app element and 
+              // should refelct the state through. That way we can just add the keyword the same way as if in the dropdown menu originally
+              this._addKeyword(null, keyword.key)
+            }
+          )
+        }
+      }
+
+      _removeKeyword(e) {
+        try {
+          let keywordID = JSON.parse(e.target.dataset.keyword).$key
+          if (this.resource.keywords.hasOwnProperty(keywordID)) {
+            delete this.resource.keywords[keywordID]
+          }
+          this.notifyPath('resource.keywords')
+        } catch (error) {
+        }
+      }
+
+      _toSlug(name) {
+        if (!name) { return "" }
+        else {
+          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
+          return slug
+        }
+      }
+      _toTitleCase(str) {
+        return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
       }
 
       generatePushID() {
@@ -248,6 +511,8 @@
       }
 
       generateShortCode() {
+        // creates a 4 character shortcode which may be used in the future for sharing resources
+        // note, still needs method to ensure unique
         var text = "";
         var possible = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwyz123456789";
         for (var i = 0; i < 4; i++)
@@ -255,202 +520,70 @@
         return text;
       }
 
-      _setResourceSlug(name) {
-        this.origin = window.origin
-        if (!name) {
-          //new resource
-          this.resource.slug = ""
-          this.slug = ''
-        }
-        else {
-          //could definitely be combined into one expression but I suck at regex :( 
-          //make lower case, replace all spaces with '-' and remove special
-          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
-          this.resource.slug = slug
-          this.slug = slug
-        }
-
+      _togglePreview() {
+        this.previewMode = !this.previewMode;
+        console.log('resource', this.resource)
       }
 
-      _setFeatureImage(resourceType) {
-        console.log('setting feature image', resourceType)
-        if (resourceType) {
-          let type = this.allResourceTypesByKey[resourceType]
-          //setting it as local image, could also set it to hosted image url
-          this.set('resource.featureImage', 'images/resourceTypes/' + type.slug + '.jpg')
-          // this.set('resource.featureImage',type.image)
-          console.log('resource', this.resource)
+      _showAddKeywordText(filterText) {
+        // quick method that checks the number of available filtered keywords when text input is changed
+        // prompting the user to press enter to add a new keyword if none are available, displaying as title case
+        if (filterText.length > 0 && this.$.keywordsCombo.filteredItems.length == 0) {
+          this.showAddKeywordText = true
+          this.keywordFilterText = this._toTitleCase(this.keywordFilterText)
         }
-        else {
-          return ''
-        }
+        else { this.showAddKeywordText = false }
       }
 
-
-      // }
-      // _computeItems(tags, key) {
-      //   // take liveTags, select subset and put into correct format (un-nest json)
-      //   let items = tags[key]
-      //   let temp = []
-      //   for (let key in items) {
-      //     let t = items[key]
-      //     t.key = key
-      //     temp.push(t)
-      //   }
-      //   return temp
-      // }
-
-      // _addNewTag(e) {
-      //   let type = e.target.id.split('_')[0]
-      //   let label = e.target.filter
-      //   let tag = {
-      //     type: type,
-      //     label: label,
-      //     modified: Date.now(),
-      //     slug: this._toSlug(label),
-      //     key: this.generatePushID()
-      //   }
-      //   console.log('saving tag', tag)
-      //   let path = "/tags/" + type
-      //   this.set('currentTag', tag)
-      //   this.$.currentTag.saveValue(path, tag.key).then(function () {
-      //     //populate element
-      //     this.updateResourceTags(tag.key, this.currentTag, type)
-      //     this.$.currentTag.reset()
-      //   }.bind(this));
-      // }
-
-      // removeTag(e) {
-      //   // remove keyword tag bound to resource
-      //   // to generalise see older versions, or look at binding to e.target for info
-      //   var key = e.model.tag.key
-      //   delete this.resource.tags.Keywords[key]
-      //   //dirty override as doesn't detect when all tags removed
-      //   let tags = this.resource.tags
-      //   this.set('resource.tags', {})
-      //   this.set('resource.tags', tags)
-      // }
-      // _comboChange(e) {
-      //   // Use combo box change event to populate resource tag. Tracks which field to populate by taking all before '_' in id name
-      //   // If no item available then used to create new
-      //   let item = e.target.selectedItem
-      //   let type = e.target.id.split('_')[0]
-      //   if (type == "Keywords") { e.target.value = "" }
-      //   // if no item tag will be added through add new tag function called on combo custom value set
-      //   if (!item) { return }
-      //   let key = item.key
-      //   this.updateResourceTags(key, item, type)
-      // }
-      // updateResourceTags(key, value, type) {
-      //   if (!this.resource.hasOwnProperty('tags')) { this.resource.tags = {} }
-      //   if (!this.resource.tags.hasOwnProperty(type)) { this.resource.tags[type] = {} }
-      //   // override previous resource types if exist (tag unique only for resource types)
-      //   if (type == "Resource-Types") { this.resource.tags['Resource-Types'] = {} }
-      //   this.resource.tags[type][key] = value
-      //   // attempts to get keywords list to update and resource type image to render
-      //   let tags = this.resource.tags
-      //   this.set('resource.tags', {})
-      //   this.set('resource.tags', tags)
-      // }
-      // _addExternalLink(e) {
-      //   if (!this.resource.externalLinks) {
-      //     this.set('resource.externalLinks', [])
-      //   }
-      //   if (this.externalLinkUrl != '') {
-      //     this.push('resource.externalLinks', {
-      //       displayName: "",
-      //       url: this.externalLinkUrl
-      //     })
-      //   }
-      //   this.set('externalLinkUrl', "")
-      //   console.log('resource', this.resource)
-      // }
-      // removeLink(e) {
-      //   var index = e.model.index;
-      //   this.splice('resource.externalLinks', index, 1)
-      // }
-      // editLink(e) {
-      //   this.set('externalLinkUrl', e.model.link.url)
-      //   this.removeLink(e)
-      // }
-      // _getFeatureImage(tags) {
-      //   if (this.resource.featureImageUrl) { return this.resource.featureImageUrl }
-      //   console.log('getting feature image', tags)
-      //   if (tags && tags.hasOwnProperty('Resource-Types')) {
-      //     let key = Object.keys(tags['Resource-Types'])[0]
-      //     let url = '/images/resourceTypes/' + tags['Resource-Types'][key].slug + '.jpg'
-      //     return url
-      //   }
-      //   else {
-      //     return "/images/resourceTypes/fallback-image.jpg"
-      //   }
-      // }
-      // _tagsToArray(json, subProperty) {
-      //   //lookup full tag
-      //   if (!json) { return }
-      //   if (!json.hasOwnProperty(subProperty)) { return }
-      //   let tags = json[subProperty]
-      //   var tagsArray = []
-      //   for (var key in tags) {
-      //     if (tags.hasOwnProperty(key)) {
-      //       tagsArray.push(tags[key])
-      //     }
-      //   }
-      //   return tagsArray
-      // }
-
-      // fileupload(event) {
-      //   event.preventDefault();
-      //   //check resource name exists, give warning and remove files if not
-      //   //*******not implemented yet*****
-
-      //   //create file upload task
-      //   let file = event.detail.file;
-      //   let ssdResourcesApp = firebase.app('stats4sd-resources')
-      //   let ref = firebase.storage(ssdResourcesApp).ref().child('/resources/' + this.resource.$key + "/" + file.name)
-      //   let uploadTask = ref.put(file);
-      //   //handle updates from snapshot
-      //   uploadTask.on('state_changed', function (snapshot) {
-      //     let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      //     let vaadinUploads = document.querySelector('vaadin-upload')
-      //     let index = this.getCurrentIndex(file.name)
-      //     let temp = this.resource.uploadedFiles[index]
-      //     temp.progress = progress
-      //     this.set('resource.uploadedFiles.' + index, [])
-      //     this.set('resource.uploadedFiles.' + index, temp)
-      //   }.bind(this), function (error) {
-      //     console.log('error', error)
-      //     // Handle unsuccessful uploads
-      //   }, function () {
-      //     let index = this.getCurrentIndex(file.name);
-      //     console.log('index', index)
-      //     console.log('res', this.resource.uploadedFiles)
-      //     let res = this.resource.uploadedFiles[index]
-      //     console.log('res', res)
-      //     let temp = {
-      //       lastModified: res.lastModified,
-      //       name: res.name,
-      //       size: res.size,
-      //       type: res.type,
-      //       url: uploadTask.snapshot.downloadURL,
-      //       complete: true,
-      //       formDataName: "file",
-      //       progress: 100,
-      //     }
-      //     this.set('resource.uploadedFiles.' + index, [])
-      //     this.set('resource.uploadedFiles.' + index, temp)
-      //     console.log('resource', this.resource)
-      //   }.bind(this));
-      // }
-      // getCurrentIndex(fileName) {
-      //   var uploads = this.resource.uploadedFiles
-      //   for (var i = 0; i < uploads.length; i++) {
-      //     if (uploads[i].name == fileName) { return i }
-      //   }
-      // }
+      _addExternalLink(e) {
+        // Adds external links to a resource
+        if (!this.resource.externalLinks) {
+          this.set('resource.externalLinks', [])
+        }
+        if (this.externalLinkUrl != '') {
+          this.push('resource.externalLinks', {
+            displayName: "",
+            url: this.externalLinkUrl
+          })
+        }
+        this.set('externalLinkUrl', "")
+      }
+      removeLink(e) {
+        var index = e.model.index;
+        this.splice('resource.externalLinks', index, 1)
+      }
+      editLink(e) {
+        this.set('externalLinkUrl', e.model.link.url)
+        this.removeLink(e)
+      }
 
     }
 
     window.customElements.define(ResourceEditor.is, ResourceEditor);
   </script>
 </dom-module>
+
+
+<!-- unused html
+
+  Part of incomplete uploader implementation using firebase-storage-multiupload
+  
+        _onFileInputChange(e) {
+        let files = e.target.inputElement.inputElement.files
+        console.log('file input change', files)
+        this.set('fileArray', files)
+        console.log('file array', this.fileArray)
+      }
+
+
+    <paper-input type="file" id "customImageFile" on-change="_onFileInputChange"></paper-input>
+        <firebase-storage-multiupload path="/test" files="[[fileArray]]" upload-tasks="{{uploadTasks}}">
+        </firebase-storage-multiupload>
+        <template is="dom-repeat" items="[[uploadTasks]]">
+          <firebase-storage-upload-task task="[[item]]" bytes-transferred="{{item.bytesTransferred}}" total-bytes="{{item.totalBytes}}"
+            state="{{item.state}}" download-url="{{item.downloadUrl}}" metadata="{{item.metadata}}" path="{{item.path}}">
+          </firebase-storage-upload-task>
+          <div>task:[[item]], transferred:[[item.bytesTransferred]]</div>
+        </template>
+      
+      -->
