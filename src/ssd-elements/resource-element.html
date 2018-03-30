@@ -71,7 +71,7 @@
 
             @media(min-width:1048px) {
                 .meta-data {
-                    flex-wrap: nowrap;
+                    flex-wrap: wrap;
                     justify-content: space-between;
                 }
                 .files-container {
@@ -198,7 +198,7 @@
                     },
                     resourceCollections: {
                         type: Array,
-                        computed: '_getResourceTags(resource.tags.Collections,allCollectionsByKey)'
+                        computed: '_getResourceTags(resource.collections,allCollectionsByKey)'
                     },
                     allKeywordsByKey: {
                         type: Object,
@@ -225,7 +225,7 @@
             }
 
             // resources have their tags stored as a json object with with keys corresponding to a tag id
-            // e.g. resource.tags.Collections = { collectionID1 : ... } or resource.tags.Keywords = {keywordID1:...}
+            // e.g. resource.collections = { collectionID1 : ... } or resource.keywords = {keywordID1:...}
             // This function takes the json object and the associated set of tag values from the store, and 
             // populates an array replacing the json key with the correct store lookup. A 'false' value is returned if there is no data
             _getResourceTags(tagsJson, allTagsByKey) {

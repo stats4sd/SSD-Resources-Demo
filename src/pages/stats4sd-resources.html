@@ -218,7 +218,7 @@
           console.log('this.keyword', this.keyword)
           let keywordKey = allKeywordsBySlug[keyword]['$key']
           resources = resources.filter(r => {
-            return (r.tags && r.tags.Keywords && r.tags.Keywords.hasOwnProperty(keywordKey))
+            return (r.hasOwnProperty('keywords') && r.keywords.hasOwnProperty(keywordKey))
           })
         }
         else { this.showKeyword = false }
