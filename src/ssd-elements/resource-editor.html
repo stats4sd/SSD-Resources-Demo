@@ -32,7 +32,7 @@
         border: 1px solid black;
         flex: 1;
         margin-left: 20px;
-        max-width:550px;
+        max-width: 550px;
       }
 
       paper-toggle-button.preview-toggle {
@@ -110,7 +110,7 @@
         </div>
 
         <!-- Resource Type-->
-        <vaadin-combo-box class="tag-box" label="Resource Type" id="Resource-Types_Combo" items="[[allResourceTypesArray]]" item-label-path="label"
+        <vaadin-combo-box class="tag-box" label="Resource Type" id="ResourceTypeCombo" items="[[allResourceTypesArray]]" item-label-path="label"
           item-value-path="$key" value="{{resource.type}}">
         </vaadin-combo-box>
 
@@ -171,12 +171,21 @@
           </div>
         </div>
 
-        <!-- Save draft and publish -->
-        <div style="margin-top:20px; text-align:right">
-          <paper-button on-tap="saveDraft">Save Draft</paper-button>
-          <paper-button on-tap="publish" class="publish-button">Publish</paper-button>
-          <div>[[saveMessage]]</div>
+        <!-- Delete, save draft and publish buttons-->
+        <div style="margin-top:20px; display:flex; justify-content:space-between">
+          <div>
+            <span hidden$="[[!updateMode]]">
+                <paper-button on-tap="delete" hidden$="[[resource.deleted]]" style="opacity:0.8">Delete</paper-button>
+                <paper-button on-tap="restore" hidden$="[[!resource.deleted]]" style="opacity:0.8">Restore</paper-button>
+            </span>
+          </div>
+          <div>
+            <paper-button on-tap="saveDraft">Save Draft</paper-button>
+            <paper-button on-tap="publish" class="publish-button" hidden$="[[updateMode]]">Publish</paper-button>
+            <paper-button on-tap="update" class="publish-button" hidden$="[[!updateMode]]">Update</paper-button>
+          </div>
         </div>
+        <div>[[saveMessage]]</div>
 
 
       </paper-card>
@@ -268,10 +277,19 @@
       }
 
       _setActiveResource(path, allResourcesBySlug) {
+        console.log('setting active resource', path)
         // loads a resource by the path given
         // if path contains a resource (/resources/resourceSlug), load it
         if (path && path.split('/')[2] && allResourcesBySlug) {
-          // load existing for editing
+          // load existing for editing, set mode to update so it allows resource overwrite
+          let slug = path.split('/')[2]
+          let resource = this.allResourcesBySlug[slug]
+          if (resource) {
+            // update vaadin combo as it seems to try and overwrite with blank value
+            this.$.ResourceTypeCombo.value = resource.type
+            this.updateMode = true
+            return resource
+          }
         }
         // otherwise create new blank resource
         else {
@@ -281,7 +299,6 @@
             return resource
           }
           else { return this.resource }
-
         }
       }
 
@@ -316,13 +333,30 @@
       saveDraft() {
         this.saveResource()
       }
+
       publish() {
         this.set('resource.draft', false)
         this.validateResource(this.resource).then(
           res => this.saveResource(),
-          rej => this.saveMessage=rej
+          rej => this.saveMessage = rej
         )
       }
+
+      update() {
+        this.set('resource.modified', Date.now())
+        this.publish()
+      }
+
+      delete(){
+        this.set('resource.deleted',true)
+        this.publish()
+      }
+
+      restore(){
+        this.set('resource.deleted',false)
+        this.publish()
+      }
+
       saveResource() {
         this.$.firebaseDoc.reset()
         this.set('firebaseDocPath', '')
@@ -331,8 +365,17 @@
         delete this.resource.$key
         // set the path and id for the data and update data at the same time
         this.$.firebaseDoc.saveValue('/resources', this.resource._key).then(
-          res => {this.saveMessage="Resource Saved"},
-          err => {this.saveMessage="Error saving: "+err}
+          res => {
+            this.saveMessage = "Resource Saved"
+            if(this.resource.deleted){this.saveMessage = "Resource Deleted"}
+            // update revisions history
+            this.$.firebaseDoc.saveValue('/revisions/' + this.resource._key, this.resource.modified).then(
+              res => console.log('revision saved')
+            )
+            // navigate back to resources - Ideally should try use app route or custom event 
+            // as window.location methods force page refresh (not currently implemented)
+          },
+          err => { this.saveMessage = "Error saving: " + err }
         )
       }
 
@@ -341,19 +384,17 @@
         // will still keep format in case we decide to add more async validation criteria later such as link checking
         return new Promise((resolve, reject) => {
           // check exists: name, description, resource type
-          if(!resource.name){reject('please provide a title for the resource')}
-          if(!resource.description){reject('please provide a description for the resource')}
-          if(!resource.type){reject('please provide a type for the resource')} 
-          // check slug unique
-          if(this.allResourcesBySlug[resource.slug]){reject('a resource with this name already exists')}
+          if (!resource.name) { reject('please provide a title for the resource') }
+          if (!resource.description) { reject('please provide a description for the resource') }
+          if (!resource.type) { reject('please provide a type for the resource') }
+          // check slug unique (if adding for first time)
+          if (!this.updateMode) {
+            if (this.allResourcesBySlug[resource.slug]) { reject('a resource with this name already exists') }
+          }
           // check links work (?)
-
           resolve()
         })
-
-
       }
-
 
       _setResourceSlug(name) {
         if (name) {
@@ -361,8 +402,12 @@
           //could definitely be combined into one expression but I suck at regex :( 
           //make lower case, replace all spaces with '-' and remove special
           var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
-          this.resource.slug = slug
-          this.slug = slug
+          if (!this.updateMode) {
+            this.resource.slug = slug
+            this.slug = slug
+          }
+          else { this.slug = this.resource.slug }
+
         }
       }
 

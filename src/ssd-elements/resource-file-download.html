@@ -88,7 +88,6 @@
       }
       _computeExtension(filename) {
         if (filename) {
-          console.log('computing extension', filename)
           var split = filename.split('.')
           var extension = split[split.length - 1]
           this.extensionImageSrc = '/images/file-types/icons/' + extension + '.png'
@@ -101,7 +100,6 @@
           temp.pop()
           temp.join('')
           var displayName = temp[0]
-          console.log('displayName', displayName)
           return displayName
         }
 

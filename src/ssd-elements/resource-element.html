@@ -46,8 +46,6 @@
                 margin-bottom: 5px;
             }
 
-
-
             table,
             td,
             th {
@@ -62,12 +60,13 @@
                 line-height: 2em;
                 text-align: center;
                 color: var(--paper-indigo-50);
-                background-color: var(--paper-indigo-500);
+                background-color: var(--paper-red-700);
                 padding: 5px;
             }
 
-            paper-button.edit-resource-button{
-                float:right;
+            paper-button.edit-resource-button {
+                /* position: absolute;
+                right:5px; */
             }
 
             @media(min-width:1048px) {
@@ -99,23 +98,29 @@
         </style>
 
         <template is="dom-if" if="[[resource]]">
-            <template is="dom-if" if="[[resource.deleted]]" class="deleted">
-                <div>This resource has been deleted</div>
+            <template is="dom-if" if="[[resource.deleted]]">
+                <div class="deleted">This resource has been deleted</div>
             </template>
-            <template is="dom-if" if="[[signedIn]]">
-                <a href="[[_getAddResourceLink()]]">
-                    <paper-button class="edit-resource-button">
-                        <iron-icon icon="mode-edit"></iron-icon>
-                        <span>Edit Resource</span>
-                    </paper-button>
-                </a>
-            </template>
+
             <div style="padding: 10px">
-                <!-- Title and Description -->
-                <h1 class="resource-title">[[resource.name]]</h1>
-                <div class="url">
-                    <a href="[[_getResourceUrl(resource)]]">[[_getResourceUrl(resource)]]</a>
+                <!-- Title and edit button-->
+                <div style="display: flex">
+                    <div style="flex:1">
+                        <h1 class="resource-title">[[resource.name]]</h1>
+                        <div class="url">
+                            <a href="[[_getResourceUrl()]]">[[_getResourceUrl()]]</a>
+                        </div>
+                    </div>
+                    <template is="dom-if" if="[[signedIn]]">
+                        <a href="[[_getEditResourceLink()]]" style="color:unset; text-decoration:none">
+                            <paper-button class="edit-resource-button">
+                                <iron-icon icon="editor:mode-edit"></iron-icon>
+                                <span>Edit Resource</span>
+                            </paper-button>
+                        </a>
+                    </template>
                 </div>
+                <!-- Description and files -->
                 <div class="meta-data">
                     <div style="min-width: 400px">
                         <div class="resource-meta-heading">Description</div>
@@ -210,8 +215,13 @@
                 }
             }
 
-            _getResourceUrl(resource) {
+            _getResourceUrl() {
                 return (window.location.origin + "/resources/" + this.resource.slug)
+            }
+            _getEditResourceLink() {
+                console.log('getting ')
+                let base = this._getResourceUrl()
+                return base + "?edit=true";
             }
 
             // resources have their tags stored as a json object with with keys corresponding to a tag id
