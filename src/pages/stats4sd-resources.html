@@ -95,40 +95,6 @@
     <template is="dom-if" if="{{editMode}}">
       <resource-editor></resource-editor>
     </template>
-
-
-
-
-    <!-- <footer hidden$="[[!user.email]]" class="footer">
-      <div hidden$="{{!editMode}}" style="float:left">
-        <paper-button style="float:left" on-tap="_deleteResource" hidden$="{{resource.deleted}}">
-          <iron-icon icon="delete" aria-label="Delete Resource"></iron-icon>Delete Resource
-        </paper-button>
-        <paper-button style="float:left" on-tap="_restoreResource" hidden$="{{!resource.deleted}}">
-          <iron-icon icon="restore" aria-label="Restore Resource"></iron-icon>Restore Resource
-        </paper-button>
-      </div>
-      <paper-button style="float:right" on-tap="_editResource" hidden$="{{editMode}}">
-        <iron-icon icon="mode-edit" aria-label="Edit Resource"></iron-icon>Edit Resource
-      </paper-button>
-      <paper-button style="float:right" on-tap="_saveResource" hidden$="{{!editMode}}">
-        <iron-icon icon="save" aria-label="Save Resource"></iron-icon>Save Resource
-      </paper-button>
-      <paper-button style="float:right">
-        <a href="/collection" class="href-plain">
-          <iron-icon icon="view-module" aria-label="Manage Collections"></iron-icon>Manage Collections
-        </a>
-      </paper-button>
-    </footer> -->
-
-    <!-- Resource editor view (could be put into seperate component) -->
-    <!-- <template is="dom-if" if="{{editMode}}">
-      <resource-editor resource="{{resource}}" tags="{{persistedTags}}"></resource-editor>
-    </template>
-    <firebase-document id="firebaseResourceDoc" app-name="stats4sd-firebase" data="{{editableResource}}">
-    </firebase-document>
-    <firebase-document id="firebaseSlugDoc" app-name="stats4sd-firebase" data="{{editableSlug}}">
-    </firebase-document> -->
   </template>
 
   <script>
@@ -223,8 +189,8 @@
         }
         else { this.showKeyword = false }
         // sort by date
-        resources=resources.sort((a,b)=>{
-          return b.modified-a.modified
+        resources = resources.sort((a, b) => {
+          return b.modified - a.modified
         })
         return resources
       }
@@ -289,7 +255,7 @@
       //   return path == "/edit"
       // }
 
-    
+
 
 
       // _persistedResourcesChanged(resources) {
@@ -357,7 +323,7 @@
 
 
 
-      
+
 
       _tagsToArray(json, subProperty) {
         //lookup full tag
