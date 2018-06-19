@@ -3,6 +3,7 @@
 
 <link rel="import" href="../ssd-elements/resource-search-result.html">
 
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../bower_components/wysiwyg-e/wysiwyg-e.html">
 <link rel="import" href="../../bower_components/wysiwyg-e/tools/bold.html">
 <link rel="import" href="../../bower_components/wysiwyg-e/tools/italic.html">
@@ -39,74 +40,94 @@
       }
 
       paper-button.toggle {
-        background-color: var(--paper-green-300)
+        background-color: var(--paper-green-300);
+        margin: 2px 5px 1em 0
+      }
+
+      .collection-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      paper-button.add-collection-button {
+        font-size: 0.7em;
+        height: 90%;
+        bottom: 2px;
+        left: 10px;
+        background-color: var(--paper-green-500);
+        color: white;
+        margin: 3px 2px 2px 0;
+        text-transform: unset;
+        padding: 5px;
+        float: right;
       }
     </style>
-
-    <!-- app-route provides the name of the category (not used as location can be inconsistent when empty, using global store). -->
-    <!-- <app-location route="{{route}}"></app-location> 
-    <app-route route="{{route}}" pattern="/collection/:collectionSlug" data="{{routeData}}"></app-route>-->
-
-    <!-- live db binding for new resource -->
-    <!-- <firebase-document id="liveCollectionDocument" data="{{liveCollection}}" app-name="stats4sd-firebase"></firebase-document> -->
 
     <!-- Template for individual collection set -->
     <div hidden$="[[!activeCollection]]" style="margin-bottom:3em">
       <div hidden$="[[editMode]]">
         <div hidden$="!activeCollection.label">
-          <h1 style="display: inline-block">{{activeCollection.label}}</h1>
-          <template is="dom-if" if="{{user.email}}">
-            <paper-icon-button icon="mode-edit" on-tap="_editCollection"></paper-icon-button>
-          </template>
+          <div class="collection-header">
+            <h1 style="display: inline-block">{{activeCollection.label}}</h1>
+            <template is="dom-if" if="[[signedIn]]">
+              <a href="[[_getEditCollectionLink(activeCollection)]]" style="color:unset; text-decoration:none">
+                <paper-icon-button class="edit-resource-button" icon="stats4sd:edit">
+                  <span>Edit Collection</span>
+                </paper-icon-button>
+              </a>
+            </template>
+          </div>
           <div id="descriptionContainer" hidden$="[[!activeCollection.description]]"></div>
           <h2>Resources</h2>
           <template id="resourcesInCollection" is="dom-repeat" as="res" items="[[activeCollectionResources]]">
             <resource-search-result resource='[[res]]'></resource-search-result>
           </template>
-          <!-- admin only add resources -->
-          <!-- <template is="dom-if" if="{{user.email}}">
-            <a class="href-plain" on-tap="_collectionResourcesAdd">
-              <paper-button style="color:var(--paper-green-700)">
-                <iron-icon icon="add"></iron-icon>Add Resources
-              </paper-button>
-            </a>
-          </template> -->
         </div>
-
       </div>
     </div>
 
     <!-- show all collections for / or blank endpoint -->
-    <div>
-      <div class="sub-section-heading" style="margin-top:1em">All Collections</div>
-      <div class="flex wrap">
-        <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPublic">
-          <collection-element collection={{collection}}></collection-element>
-        </template>
-      </div>
-      <template is="dom-if" if="{{user.email}}">
-        <div class="sub-section-heading">Non-public Collections</div>
+    <div hidden$="[[editMode]]">
+      <div hidden$="[[activeCollection]]">
+        <div class="sub-section-heading" style="margin-top:1em">
+          <span>All Collections</span>
+          <!-- add collection button -->
+          <template is="dom-if" if="[[signedIn]]">
+            <a href="/collections?edit=true">
+              <paper-button class="add-collection-button">
+                <iron-icon icon="add"></iron-icon>
+                <span>Add Collection</span>
+              </paper-button>
+            </a>
+          </template>
+        </div>
         <div class="flex wrap">
-          <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPrivate">
+          <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPublic">
             <collection-element collection={{collection}}></collection-element>
           </template>
         </div>
-      </template>
+        <template is="dom-if" if="{{user.email}}">
+          <div class="sub-section-heading">Non-public Collections</div>
+          <div class="flex wrap">
+            <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPrivate">
+              <collection-element collection={{collection}}></collection-element>
+            </template>
+          </div>
+        </template>
+      </div>
     </div>
 
-
     <!-- Template for add/edit collection -->
-    <!-- *** add display none for when loading or similar (e.g. when resource updated) -->
-
-    <!-- <template is="dom-if" if="{{editMode}}">
-      <paper-input always-float-label label="Collection Name" value="{{liveCollection.label}}" style="padding-bottom:10px"></paper-input>
+    <template is="dom-if" if="{{editMode}}">
+      <paper-input always-float-label label="Collection Name" value="{{activeCollection.label}}" style="padding-bottom:10px"></paper-input>
       <div>Description</div>
       <div>
         <paper-button class="toggle" active="{{!visualEditor}}">Editor</paper-button>
         <paper-button class="toggle" active="{{visualEditor}}">Code</paper-button>
       </div>
       <paper-textarea id="descriptionCode" placeholder="Input html text here" value="{{editableDescription}}" hidden$="[[visualEditor]]"></paper-textarea>
-      <div hidden$="[[!visualEditor]]">
+      <div hidden$="[[!visualEditor]]" style="border: 1px solid gray">
         <wysiwyg-e style="width: 100%; height: 50vh;" value="{{editableDescription}}" target="{{wysiwygTarget}}">
           <paper-icon-button icon="save" on-tap="_saveVisualDescription"></paper-icon-button>
           <wysiwyg-tool-bold></wysiwyg-tool-bold>
@@ -128,15 +149,15 @@
           <wysiwyg-tool-heading h1 h2 h3 h4 h5 h6></wysiwyg-tool-heading>
           <wysiwyg-tool-blockquote></wysiwyg-tool-blockquote>
         </wysiwyg-e>
-      </div> -->
+      </div>
 
-      <!-- <div class="flex" style="padding:20px 0">
-        <paper-toggle-button checked="{{!liveCollection.draft}}"></paper-toggle-button>
-        <div hidden$="[[liveCollection.draft]]">
+      <div class="flex" style="padding:20px 0">
+        <paper-toggle-button checked="{{!activeCollection.draft}}"></paper-toggle-button>
+        <div hidden$="[[activeCollection.draft]]">
           <span>Public</span>
           <iron-icon icon="visibility"></iron-icon>
         </div>
-        <div hidden$="[[!liveCollection.draft]]">
+        <div hidden$="[[!activeCollection.draft]]">
           <span>Draft</span>
           <iron-icon icon="visibility-off"></iron-icon>
         </div>
@@ -144,8 +165,8 @@
       <div class="buttons">
         <paper-button on-tap="cancel">Cancel</paper-button>
         <paper-button on-tap="saveCollection">Save</paper-button>
-      </div> 
-    </template>-->
+      </div>
+    </template>
 
   </template>
 
@@ -174,62 +195,95 @@
             type: String,
             statePath: 'path'
           },
-
-          // properties computed automatically on changes
+          queryParams: {
+            type: Object,
+            statePath: 'queryParams'
+          },
           activeCollection: {
             type: Object,
-            computed: '_setActiveCollection(path,allCollectionsBySlug)',
+            statePath: 'activeCollection'
+          },
+          signedIn: {
+            type: Boolean,
+            statePath: 'signedIn'
+          },
+          // properties computed automatically on changes
+          editMode: {
+            type: Boolean,
+            computed: "_enableEditMode(queryParams,signedIn)"
           },
           activeCollectionResources: {
             type: Array,
-            computed: '_setActiveCollectionResources(activeCollection.resources,allResourcesByKey)'
+            computed: '_getActiveCollectionResources(activeCollection.resources,allResourcesByKey)'
           },
+          // other properties
+          visualEditor: {
+            type: Boolean,
+            value: true
+          }
 
-          // user: Object,
-          // liveCollection: {
-          //   type: Object,
-          //   notify: true
-          // },
-
-          // editMode: Boolean,
-          // visualEditor: {
-          //   type: Boolean,
-          //   value: true
-          // },
-          // editableDescription: {
-          //   type: String,
-          //   notify: true
-          // }
         }
       }
 
       static get observers() {
         return [
-          '_renderDescription(activeCollection.description)'
+          '_renderDescription(activeCollection.description)',
+          '_getActiveCollection(path,allCollectionsBySlug)',
+          '_addNewCollection(editMode,path)'
         ]
       }
 
-      _setActiveCollection(path, allCollectionsBySlug) {
-        // method runs when slug changed or persisted collections updated (e.g. first load)
-        // loads all collections on empty or / route, otherwise loads individual
-        if (!path || path == '/collections' || path == '/collections/') {
-          return null
-        }
-        else {
-          // want to get slug as first part after collection, could use app-route element with routeData however seems inconsistent
-          let slug = this.path.split('/')[2]
-          if (!this.allCollectionsBySlug || this.allCollectionsBySlug.length == 0) { return {} }
-          else {
-            console.log('collection', allCollectionsBySlug[slug])
-            // scroll to top (former method for reference, now all handled in app-layout element on any path change)
-            // dispatches an event titled 'scrollToTop', and a listener has been placed on the stats4sd-app-layout element to handle
-            // the bubbles:true, composed:true are required so it passes all the way up the dom tree (otherwise blocked at each shadow level)
-            // this.dispatchEvent(new CustomEvent('scrollToTop', { bubbles: true, composed: true, detail: 'hello' }));
-            return allCollectionsBySlug[slug]
-          }
+      static get actions() {
+        return {
+          setActiveCollection(collection) {
+            return {
+              type: 'SET_ACTIVE_COLLECTION',
+              payload: collection
+            }
+          },
         }
       }
 
+      // whenever path or all collections updated get the collection that corresponds to current path and update redux binding
+      _getActiveCollection(path, allCollectionsBySlug) {
+        if (path && path.split('/').length == 3) {
+          // want to get slug as first part after collection, could use app-route element with routeData however seems inconsistent
+          let slug = this.path.split('/')[2]
+          if (allCollectionsBySlug) {
+            if (allCollectionsBySlug[slug]) {
+              this.dispatch('setActiveCollection', allCollectionsBySlug[slug])
+            }
+            else {
+              this.dispatch('setActiveCollection', { label: 'error', description: 'Collection not found' })
+            }
+          }
+        }
+        else { this.dispatch('setActiveCollection', null) }
+      }
+
+      _getActiveCollectionResources(resourceKeys, allResourcesByKey) {
+        // method to filter resources for those that match current collection
+        // in future would be better to just keep track of the resource ids in the collection object
+        let resources = []
+        if (resourceKeys && allResourcesByKey) {
+          for (let key in resourceKeys) {
+            if (allResourcesByKey.hasOwnProperty(key)) {
+              resources.push(allResourcesByKey[key])
+            }
+          }
+        }
+        return resources
+      }
+
+      // monitor edit mode, when enabled at endpoint /collections (/collections?edit=true) create a new collection
+      _addNewCollection(editMode, path) {
+        if (editMode && path == '/collections') {
+          console.log('creating new collection')
+          this.dispatch('setActiveCollection', { draft: false })
+        }
+      }
+
+      // filter functions to determine whether public or not (used in dom repeat templates above)
       _isPrivate(c) { return (c.hasOwnProperty('draft') && c.draft === true) }
       _isPublic(c) { return (!(c.hasOwnProperty('draft') && c.draft === true)) }
 
@@ -240,21 +294,14 @@
         }
       }
 
-      _setActiveCollectionResources(resourceKeys, allResourcesByKey) {
-        // method to filter resources for those that match current collection
-        // in future would be better to just keep track of the resource ids in the collection object
-        let resources = []
-        if (resourceKeys && allResourcesByKey) {
-          console.log('setting active collection resources', resourceKeys, allResourcesByKey)
-          for (let key in resourceKeys) {
-            if (allResourcesByKey.hasOwnProperty(key)) {
-              resources.push(allResourcesByKey[key])
-            }
-          }
-          console.log('active collection resources', resources)
-        }
+      _getEditCollectionLink(collection) {
+        console.log('getting edit link', collection)
+        let base = window.location.origin + "/collections/" + collection.slug
+        return base + "?edit=true";
+      }
 
-        return resources
+      _enableEditMode(queryParams, signedIn) {
+        return (queryParams.edit === "true" && signedIn)
       }
 
 
@@ -269,105 +316,103 @@
         this.set('editableDescription', this.wysiwygTarget.innerHTML)
       }
 
-      _editCollection() {
-        console.log('live collection', this.liveCollection)
-        delete this.activeCollection.$key
-        console.log('active collection', this.activeCollection)
-        this.set('liveCollection', {})
-        this.set('liveCollection', this.activeCollection)
-        console.log('editing collection', this.liveCollection)
-        this.editMode = true;
-      }
-      _showIndividual(path, hide) {
-        // required for navigating back, collectionSlug change not detected. hide used to easily reverse condition
-        if (path == "" || path == "/") { return hide == 'true' }
-        else { return hide != 'true' }
-      }
+      // _editCollection() {
+      //   console.log('live collection', this.liveCollection)
+      //   delete this.activeCollection.$key
+      //   console.log('active collection', this.activeCollection)
+      //   this.set('liveCollection', {})
+      //   this.set('liveCollection', this.activeCollection)
+      //   console.log('editing collection', this.liveCollection)
+      //   this.editMode = true;
+      // }
+      // _showIndividual(path, hide) {
+      //   // required for navigating back, collectionSlug change not detected. hide used to easily reverse condition
+      //   if (path == "" || path == "/") { return hide == 'true' }
+      //   else { return hide != 'true' }
+      // }
 
+      // _addCollection() {
+      //   console.log('adding collection')
+      //   this.$.collectionDialog.open()
+      // }
+      // _collectionResourcesAdd() {
+      //   console.log('collection resource adding')
+      //   console.log('live collection', this.liveCollection)
+      //   delete this.activeCollection.$key
+      //   console.log('active collection', this.activeCollection)
+      //   this.set('liveCollection', {})
+      //   this.set('liveCollection', this.activeCollection)
+      //   console.log('editing collection', this.liveCollection)
 
+      //   this.dispatchEvent(new CustomEvent('collection-resources-add', {
+      //     bubbles: true, composed: true, detail: {
+      //       collection: this.collection,
+      //     }
+      //   }));
+      // }
 
-      _addCollection() {
-        console.log('adding collection')
-        this.$.collectionDialog.open()
-      }
-      _collectionResourcesAdd() {
-        console.log('collection resource adding')
-        console.log('live collection', this.liveCollection)
-        delete this.activeCollection.$key
-        console.log('active collection', this.activeCollection)
-        this.set('liveCollection', {})
-        this.set('liveCollection', this.activeCollection)
-        console.log('editing collection', this.liveCollection)
+      // saveCollection() {
+      //   // ****Need to decide what meta to track and bring in *********
+      //   // ****Also need to ensure form completed, and possibly way to update current page
+      //   this.editMode = false
+      //   this.liveCollection.type = "Collection";
+      //   this.liveCollection.modified = Date.now();
+      //   this.liveCollection.description = this.wysiwygTarget.innerHTML
+      //   this.liveCollection.slug = this._toSlug(this.liveCollection.label);
+      //   if (!this.liveCollection.hasOwnProperty('key')) {
+      //     this.liveCollection.key = this.generatePushID()
+      //   }
+      //   if (!this.liveCollection.hasOwnProperty('created')) {
+      //     this.liveCollection.created = Date.now();
+      //   }
+      //   if (!this.liveCollection.hasOwnProperty('resources')) {
+      //     this.liveCollection.resources = [];
+      //   }
+      //   console.log('creating collection', this.liveCollection)
+      //   let redirectURL = window.location.origin + '/collections/' + this.liveCollection.slug
+      //   this.$.liveCollectionDocument.saveValue('/tags/Collections', this.liveCollection.key)
 
-        this.dispatchEvent(new CustomEvent('collection-resources-add', {
-          bubbles: true, composed: true, detail: {
-            collection: this.collection,
-          }
-        }));
-      }
+      //     .then(() => {
+      //       // force refresh/newslug redirect to update local cache
+      //       // could probably be done without refresh by pushing/updating values and various callback, possibly improve later
+      //       window.location.replace(redirectURL);
+      //     })
+      //     .catch((err) => { console.log('err', err) })
+      // }
+      // cancel() { this.editMode = false }
 
-      saveCollection() {
-        // ****Need to decide what meta to track and bring in *********
-        // ****Also need to ensure form completed, and possibly way to update current page
-        this.editMode = false
-        this.liveCollection.type = "Collection";
-        this.liveCollection.modified = Date.now();
-        this.liveCollection.description = this.wysiwygTarget.innerHTML
-        this.liveCollection.slug = this._toSlug(this.liveCollection.label);
-        if (!this.liveCollection.hasOwnProperty('key')) {
-          this.liveCollection.key = this.generatePushID()
-        }
-        if (!this.liveCollection.hasOwnProperty('created')) {
-          this.liveCollection.created = Date.now();
-        }
-        if (!this.liveCollection.hasOwnProperty('resources')) {
-          this.liveCollection.resources = [];
-        }
-        console.log('creating collection', this.liveCollection)
-        let redirectURL = window.location.origin + '/collections/' + this.liveCollection.slug
-        this.$.liveCollectionDocument.saveValue('/tags/Collections', this.liveCollection.key)
+      // _getLiveCollectionPath(key) {
+      //   console.log('setting live collection path for key', key)
+      // }
+      // _toSlug(name) {
+      //   if (!name) { return "" }
+      //   else {
+      //     var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
+      //     return slug
+      //   }
+      // }
 
-          .then(() => {
-            // force refresh/newslug redirect to update local cache
-            // could probably be done without refresh by pushing/updating values and various callback, possibly improve later
-            window.location.replace(redirectURL);
-          })
-          .catch((err) => { console.log('err', err) })
-      }
-      cancel() { this.editMode = false }
+      // connectedCallback() {
+      //   super.connectedCallback();
+      //   this.isAttached = true;
+      // }
 
-      _getLiveCollectionPath(key) {
-        console.log('setting live collection path for key', key)
-      }
-      _toSlug(name) {
-        if (!name) { return "" }
-        else {
-          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
-          return slug
-        }
-      }
+      // disconnectedCallback() {
+      //   super.disconnectedCallback();
+      //   this.isAttached = false;
+      // }
 
-      connectedCallback() {
-        super.connectedCallback();
-        this.isAttached = true;
-      }
-
-      disconnectedCallback() {
-        super.disconnectedCallback();
-        this.isAttached = false;
-      }
-
-      _jsonToArray(json) {
-        // push json to array, including $key field as key identifier (in same manner as indexeddb)
-        if (!json) { return }
-        var tagsArray = []
-        for (var key in json) {
-          if (json.hasOwnProperty(key)) {
-            tagsArray.push(json[key])
-          }
-        }
-        return tagsArray
-      }
+      // _jsonToArray(json) {
+      //   // push json to array, including $key field as key identifier (in same manner as indexeddb)
+      //   if (!json) { return }
+      //   var tagsArray = []
+      //   for (var key in json) {
+      //     if (json.hasOwnProperty(key)) {
+      //       tagsArray.push(json[key])
+      //     }
+      //   }
+      //   return tagsArray
+      // }
       generatePushID() {
         var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
         var lastPushTime = 0;

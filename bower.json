@@ -1,10 +1,7 @@
 {
   "name": "stats4sd-resources",
   "version": "2.1.0",
-  "authors": [
-    "Chris Clarke",
-    "Dave Mills"
-  ],
+  "authors": ["Chris Clarke", "Dave Mills"],
   "private": true,
   "dependencies": {
     "polymer": "polymer/polymer#2.4.0",
@@ -15,6 +12,7 @@
     "iron-flex-layout": "polymerelements/iron-flex-layout#2.0.3",
     "iron-form": "polymerelements/iron-form#2.1.0",
     "iron-icon": "polymerelements/iron-icon#2.1.0",
+    "iron-icons": "PolymerElements/iron-icons#^2.1.1",
     "iron-iconset-svg": "polymerelements/iron-iconset-svg#2.2.0",
     "iron-media-query": "polymerelements/iron-media-query#2.1.0",
     "iron-overlay-behavior": "polymerelements/iron-overlay-behavior#2.3.3",
@@ -29,7 +27,7 @@
     "paper-toggle-button": "PolymerElements/paper-toggle-button#2.1.0",
     "google-youtube": "GoogleWebComponents/google-youtube#2.0.0",
     "paper-chip": "ThomasCybulski/paper-chip#2.0.17",
-    "wysiwyg-e": "miztroh/wysiwyg-e#2.0.5",
+    "wysiwyg-e": "miztroh/wysiwyg-e#v2.1.4",
     "web-animations-js": "^2.3.1",
     "vaadin-combo-box": "vaadin/vaadin-combo-box#^3.0.4",
     "vaadin-upload": "vaadin/vaadin-upload#^2.1.0",
@@ -41,5 +39,9 @@
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0"
+  },
+  "resolutions": {
+    "iron-component-page": "^3.0.0",
+    "iron-doc-viewer": "^3.0.0"
   }
 }

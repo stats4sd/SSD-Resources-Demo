@@ -33,22 +33,16 @@
 
       paper-button.sub-section-heading-button,
       paper-button.add-resource-button {
-        padding: 2px;
-        margin: 5;
         font-size: 0.7em;
         height: 90%;
         bottom: 2px;
         left: 10px;
-      }
-
-      paper-button.add-resource-button {
         background-color: var(--paper-green-500);
         color: white;
         margin: 3px 2px 2px 0;
         text-transform: unset;
         padding: 5px;
         float: right;
-
       }
     </style>
 
@@ -206,7 +200,6 @@
         return this.path
       }
       _removeKeyword(e) {
-        console.log('removing keyword', e)
         this.showKeyword = false
       }
 
@@ -219,111 +212,6 @@
       _enableEditMode(signedIn, queryParams) {
         return (signedIn && queryParams.edit == 'true')
       }
-
-
-      // static get observers() {
-      //   return [
-      //     '_persistedResourcesChanged(persistedResources)',
-      //     '_subrouteChange(subrouteData.slug)'
-      //   ]
-      // }
-      // connectedCallback() {
-      //   super.connectedCallback();
-      //   this.isAttached = true;
-      // }
-
-      // disconnectedCallback() {
-      //   super.disconnectedCallback();
-      //   this.isAttached = false;
-      // }
-      // _subrouteChange() {
-      //   //track when new resource created or edit mode enabled
-      //   if (this.subrouteData && this.subrouteData.edit == "edit") {
-      //     if (this.routeData.slug == "_") {
-
-      //       this._createNewResource()
-      //     }
-      //     console.log('editing resource', this.resource)
-      //     this.set('editMode', true)
-      //   }
-      // }
-      // _editResource() {
-      //   this.set('route.path', this.route.path + '/edit')
-      // }
-      // _editEnabled(path) {
-      //   // enable editing if /edit appears on resource subroute
-      //   return path == "/edit"
-      // }
-
-
-
-
-      // _persistedResourcesChanged(resources) {
-      //   // if page loaded directly then wait for persisted to populate and then filter for result
-      //   if (resources.length > 0 && this.resource == undefined) {
-      //     let resource = this._getResourceFromSlug(resources, this.routeData.slug)
-      //     this.set('resource', resource)
-      //   }
-      // }
-
-      // _getResourceFromSlug(resources, slug) {
-      //   // use route to get resource slug and lookup from resources array
-      //   // could be made more efficient from populated slug lookup db endpoint, or simply 
-      //   // letting slug be the resource id (although then will need to ensure all names unique)
-      //   for (let r of resources) {
-      //     if (r.slug == slug) {
-      //       return r
-      //     }
-      //   }
-      // }
-
-
-      // _saveResource() {
-      //   //prompt validation
-      //   if (this.resource.name == "" || this.resource.description == "") {
-      //     this.emptyReourceNoteOpen = true;
-      //     return;
-      //   }
-      //   else {
-      //     // $key automatically populated by persisted resources, or created on new resource generated
-      //     let key = this.resource.$key
-      //     delete this.resource.$key
-      //     this.resource.modified = Date.now()
-      //     if (!this.resource.editedBy) { this.resource.editedBy = {} }
-      //     this.resource.editedBy[Date.now()] = this.user.email
-      //     this.set('editableResource', this.resource)
-      //     this.$.firebaseResourceDoc.saveValue('/resources', key).then(function () {
-      //       //save revision 
-      //       this.$.firebaseResourceDoc.saveValue('/revisions/' + key, Date.now())
-      //       this.$.firebaseResourceDoc.reset();
-      //       this.$.firebaseSlugDoc.saveValue('/slugs', this.resource.slug).then(function () {
-      //         this.$.firebaseSlugDoc.reset();
-      //       }.bind(this))
-      //       //notify app to present toast, add back $key in case resource edited again before persisted sync
-      //       this.resource.$key = key
-      //       this.dispatchEvent(new CustomEvent('resource-saved', {
-      //         bubbles: true, composed: true, detail: {
-      //           resource: this.resource
-      //         }
-      //       }))
-      //     }.bind(this)).catch(function (err) {
-      //       console.log('err', err)
-      //     })
-      //   }
-      // }
-      // _deleteResource() {
-      //   this.set('resource.deleted', true)
-      //   this._saveResource()
-      // }
-      // _restoreResource() {
-      //   this.set('resource.deleted', false)
-      //   this._saveResource()
-      // }
-
-
-
-
-
 
       _tagsToArray(json, subProperty) {
         //lookup full tag
@@ -338,8 +226,6 @@
         }
         return tagsArray
       }
-
-
     }
 
     customElements.define(Stats4sdResources.is, Stats4sdResources);
