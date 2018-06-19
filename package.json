@@ -14,7 +14,9 @@
     "test": "polymer test",
     "start": "polymer serve --port 8081 | npm run watch",
     "test:integration": "polymer build # test that psk builds without error with the CLI",
-    "watch": "browser-sync start --proxy localhost:8081 --files \"src/**/*.*, index.html, *.js\""
+    "watch": "browser-sync start --proxy localhost:8081 --files \"src/**/*.*, index.html, *.js\"",
+    "deploy": "firebase use staging && polymer build",
+    "deploy:prod": "firebase use staging && polymer build && firebase deploy"
   },
   "dependencies": {
     "redux": "^3.7.2"
