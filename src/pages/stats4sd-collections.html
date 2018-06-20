@@ -1,28 +1,13 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../redux-mixin.html">
 
+<link rel="import" href="./stats4sd-search.html">
 <link rel="import" href="../ssd-elements/resource-search-result.html">
+<link rel="import" href="../ssd-elements/collection-editor.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 
-<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/wysiwyg-e.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/bold.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/italic.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/underline.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/strike.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/color.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/clear.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/code.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/link.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/image.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/audio.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/video.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/ordered.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/unordered.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/indent.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/outdent.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/justify.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/heading.html">
-<link rel="import" href="../../bower_components/wysiwyg-e/tools/blockquote.html">
+
+
 
 <dom-module id="stats4sd-collections">
 
@@ -35,15 +20,6 @@
       }
     </style>
     <style is="custom-style">
-      paper-button.toggle[active] {
-        background-color: var(--paper-grey-300);
-      }
-
-      paper-button.toggle {
-        background-color: var(--paper-green-300);
-        margin: 2px 5px 1em 0
-      }
-
       .collection-header {
         display: flex;
         align-items: center;
@@ -64,6 +40,11 @@
       }
     </style>
 
+    <!-- app location and route used to match slug alongside path (which triggers change)
+    *** note, unfortunately can't just watch route slug change as it isn't updated when back nav pressed https://github.com/PolymerElements/app-route/issues/137 -->
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="/collections/:slug" data="{{routeData}}"></app-route>
+
     <!-- Template for individual collection set -->
     <div hidden$="[[!activeCollection]]" style="margin-bottom:3em">
       <div hidden$="[[editMode]]">
@@ -72,9 +53,10 @@
             <h1 style="display: inline-block">{{activeCollection.label}}</h1>
             <template is="dom-if" if="[[signedIn]]">
               <a href="[[_getEditCollectionLink(activeCollection)]]" style="color:unset; text-decoration:none">
-                <paper-icon-button class="edit-resource-button" icon="stats4sd:edit">
-                  <span>Edit Collection</span>
-                </paper-icon-button>
+                <paper-button class="edit-resource-button">
+                  <iron-icon icon="stats4sd:edit"></iron-icon>
+                  <span style="margin-left:2px">Edit</span>
+                </paper-button>
               </a>
             </template>
           </div>
@@ -107,10 +89,18 @@
             <collection-element collection={{collection}}></collection-element>
           </template>
         </div>
-        <template is="dom-if" if="{{user.email}}">
-          <div class="sub-section-heading">Non-public Collections</div>
+        <template is="dom-if" if="[[signedIn]]">
+          <div class="sub-section-heading">Private Collections</div>
           <div class="flex wrap">
             <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isPrivate">
+              <collection-element collection={{collection}}></collection-element>
+            </template>
+          </div>
+        </template>
+        <template is="dom-if" if="[[signedIn]]">
+          <div class="sub-section-heading">Draft Collections</div>
+          <div class="flex wrap">
+            <template id="collectionsList" is="dom-repeat" as="collection" items="[[allCollections]]" filter="_isDraft">
               <collection-element collection={{collection}}></collection-element>
             </template>
           </div>
@@ -118,55 +108,13 @@
       </div>
     </div>
 
-    <!-- Template for add/edit collection -->
-    <template is="dom-if" if="{{editMode}}">
-      <paper-input always-float-label label="Collection Name" value="{{activeCollection.label}}" style="padding-bottom:10px"></paper-input>
-      <div>Description</div>
-      <div>
-        <paper-button class="toggle" active="{{!visualEditor}}">Editor</paper-button>
-        <paper-button class="toggle" active="{{visualEditor}}">Code</paper-button>
-      </div>
-      <paper-textarea id="descriptionCode" placeholder="Input html text here" value="{{editableDescription}}" hidden$="[[visualEditor]]"></paper-textarea>
-      <div hidden$="[[!visualEditor]]" style="border: 1px solid gray">
-        <wysiwyg-e style="width: 100%; height: 50vh;" value="{{editableDescription}}" target="{{wysiwygTarget}}">
-          <paper-icon-button icon="save" on-tap="_saveVisualDescription"></paper-icon-button>
-          <wysiwyg-tool-bold></wysiwyg-tool-bold>
-          <wysiwyg-tool-italic></wysiwyg-tool-italic>
-          <wysiwyg-tool-underline></wysiwyg-tool-underline>
-          <wysiwyg-tool-strike></wysiwyg-tool-strike>
-          <wysiwyg-tool-color></wysiwyg-tool-color>
-          <wysiwyg-tool-clear></wysiwyg-tool-clear>
-          <wysiwyg-tool-code></wysiwyg-tool-code>
-          <wysiwyg-tool-link></wysiwyg-tool-link>
-          <wysiwyg-tool-image></wysiwyg-tool-image>
-          <wysiwyg-tool-audio></wysiwyg-tool-audio>
-          <wysiwyg-tool-video></wysiwyg-tool-video>
-          <wysiwyg-tool-ordered></wysiwyg-tool-ordered>
-          <wysiwyg-tool-unordered></wysiwyg-tool-unordered>
-          <wysiwyg-tool-indent></wysiwyg-tool-indent>
-          <wysiwyg-tool-outdent></wysiwyg-tool-outdent>
-          <wysiwyg-tool-justify right center full></wysiwyg-tool-justify>
-          <wysiwyg-tool-heading h1 h2 h3 h4 h5 h6></wysiwyg-tool-heading>
-          <wysiwyg-tool-blockquote></wysiwyg-tool-blockquote>
-        </wysiwyg-e>
-      </div>
 
-      <div class="flex" style="padding:20px 0">
-        <paper-toggle-button checked="{{!activeCollection.draft}}"></paper-toggle-button>
-        <div hidden$="[[activeCollection.draft]]">
-          <span>Public</span>
-          <iron-icon icon="visibility"></iron-icon>
-        </div>
-        <div hidden$="[[!activeCollection.draft]]">
-          <span>Draft</span>
-          <iron-icon icon="visibility-off"></iron-icon>
-        </div>
-      </div>
-      <div class="buttons">
-        <paper-button on-tap="cancel">Cancel</paper-button>
-        <paper-button on-tap="saveCollection">Save</paper-button>
-      </div>
+    <template is="dom-if" if="[[editMode]]">
+      <collection-editor></collection-editor>
     </template>
+
+  </template>
+
 
   </template>
 
@@ -216,23 +164,9 @@
             type: Array,
             computed: '_getActiveCollectionResources(activeCollection.resources,allResourcesByKey)'
           },
-          // other properties
-          visualEditor: {
-            type: Boolean,
-            value: true
-          }
 
         }
       }
-
-      static get observers() {
-        return [
-          '_renderDescription(activeCollection.description)',
-          '_getActiveCollection(path,allCollectionsBySlug)',
-          '_addNewCollection(editMode,path)'
-        ]
-      }
-
       static get actions() {
         return {
           setActiveCollection(collection) {
@@ -244,18 +178,27 @@
         }
       }
 
+      static get observers() {
+        return [
+          '_renderDescription(activeCollection.description)',
+          '_getActiveCollection(path,allCollectionsBySlug, routeData.slug)',
+          '_addNewCollection(editMode,path)',
+        ]
+      }
+
       // whenever path or all collections updated get the collection that corresponds to current path and update redux binding
-      _getActiveCollection(path, allCollectionsBySlug) {
-        if (path && path.split('/').length == 3) {
-          // want to get slug as first part after collection, could use app-route element with routeData however seems inconsistent
-          let slug = this.path.split('/')[2]
-          if (allCollectionsBySlug) {
-            if (allCollectionsBySlug[slug]) {
-              this.dispatch('setActiveCollection', allCollectionsBySlug[slug])
-            }
-            else {
-              this.dispatch('setActiveCollection', { label: 'error', description: 'Collection not found' })
-            }
+      _getActiveCollection(path, allCollectionsBySlug, slug) {
+        this.errorMsg = null
+        if (Object.keys(allCollectionsBySlug).length == 0) {
+          // *** should ideally dispatch something to show a loader instead
+        }
+        else if (path.split('/').length == 3 && slug) {
+          if (allCollectionsBySlug[slug]) {
+            return this.dispatch('setActiveCollection', allCollectionsBySlug[slug])
+          }
+          else {
+            console.error('collection not found', slug)
+            return this.dispatch('setActiveCollection', { label: 'error', description: 'Collection not found' })
           }
         }
         else { this.dispatch('setActiveCollection', null) }
@@ -263,10 +206,9 @@
 
       _getActiveCollectionResources(resourceKeys, allResourcesByKey) {
         // method to filter resources for those that match current collection
-        // in future would be better to just keep track of the resource ids in the collection object
         let resources = []
         if (resourceKeys && allResourcesByKey) {
-          for (let key in resourceKeys) {
+          for (let key of resourceKeys) {
             if (allResourcesByKey.hasOwnProperty(key)) {
               resources.push(allResourcesByKey[key])
             }
@@ -279,169 +221,37 @@
       _addNewCollection(editMode, path) {
         if (editMode && path == '/collections') {
           console.log('creating new collection')
-          this.dispatch('setActiveCollection', { draft: false })
+          this.dispatch('setActiveCollection', { draft: true })
         }
       }
 
       // filter functions to determine whether public or not (used in dom repeat templates above)
-      _isPrivate(c) { return (c.hasOwnProperty('draft') && c.draft === true) }
-      _isPublic(c) { return (!(c.hasOwnProperty('draft') && c.draft === true)) }
+      _isPrivate(c) {
+        return c.private
+      }
+      _isPublic(c) {
+        return (!c.private && !c.draft)
+      }
+      _isDraft(c) {
+        return c.draft
+      }
 
       _renderDescription(description) {
         if (description) {
           this.$.descriptionContainer.innerHTML = description;
-          this.set('editableDescription', description)
+          this.set('activeCollection.description', description)
         }
       }
 
       _getEditCollectionLink(collection) {
-        console.log('getting edit link', collection)
-        let base = window.location.origin + "/collections/" + collection.slug
-        return base + "?edit=true";
+        if (collection && collection.slug) {
+          let base = window.location.origin + "/collections/" + collection.slug
+          return base + "?edit=true";
+        }
       }
 
       _enableEditMode(queryParams, signedIn) {
         return (queryParams.edit === "true" && signedIn)
-      }
-
-
-      /********************************************************************
-                        Chris - codechecking checkpoint 
-      *********************************************************************/
-
-
-
-      _saveVisualDescription() {
-        // manual method to force update/binding of editable description for case where inbuilt methods fail (e.g. on keyboard enter press)
-        this.set('editableDescription', this.wysiwygTarget.innerHTML)
-      }
-
-      // _editCollection() {
-      //   console.log('live collection', this.liveCollection)
-      //   delete this.activeCollection.$key
-      //   console.log('active collection', this.activeCollection)
-      //   this.set('liveCollection', {})
-      //   this.set('liveCollection', this.activeCollection)
-      //   console.log('editing collection', this.liveCollection)
-      //   this.editMode = true;
-      // }
-      // _showIndividual(path, hide) {
-      //   // required for navigating back, collectionSlug change not detected. hide used to easily reverse condition
-      //   if (path == "" || path == "/") { return hide == 'true' }
-      //   else { return hide != 'true' }
-      // }
-
-      // _addCollection() {
-      //   console.log('adding collection')
-      //   this.$.collectionDialog.open()
-      // }
-      // _collectionResourcesAdd() {
-      //   console.log('collection resource adding')
-      //   console.log('live collection', this.liveCollection)
-      //   delete this.activeCollection.$key
-      //   console.log('active collection', this.activeCollection)
-      //   this.set('liveCollection', {})
-      //   this.set('liveCollection', this.activeCollection)
-      //   console.log('editing collection', this.liveCollection)
-
-      //   this.dispatchEvent(new CustomEvent('collection-resources-add', {
-      //     bubbles: true, composed: true, detail: {
-      //       collection: this.collection,
-      //     }
-      //   }));
-      // }
-
-      // saveCollection() {
-      //   // ****Need to decide what meta to track and bring in *********
-      //   // ****Also need to ensure form completed, and possibly way to update current page
-      //   this.editMode = false
-      //   this.liveCollection.type = "Collection";
-      //   this.liveCollection.modified = Date.now();
-      //   this.liveCollection.description = this.wysiwygTarget.innerHTML
-      //   this.liveCollection.slug = this._toSlug(this.liveCollection.label);
-      //   if (!this.liveCollection.hasOwnProperty('key')) {
-      //     this.liveCollection.key = this.generatePushID()
-      //   }
-      //   if (!this.liveCollection.hasOwnProperty('created')) {
-      //     this.liveCollection.created = Date.now();
-      //   }
-      //   if (!this.liveCollection.hasOwnProperty('resources')) {
-      //     this.liveCollection.resources = [];
-      //   }
-      //   console.log('creating collection', this.liveCollection)
-      //   let redirectURL = window.location.origin + '/collections/' + this.liveCollection.slug
-      //   this.$.liveCollectionDocument.saveValue('/tags/Collections', this.liveCollection.key)
-
-      //     .then(() => {
-      //       // force refresh/newslug redirect to update local cache
-      //       // could probably be done without refresh by pushing/updating values and various callback, possibly improve later
-      //       window.location.replace(redirectURL);
-      //     })
-      //     .catch((err) => { console.log('err', err) })
-      // }
-      // cancel() { this.editMode = false }
-
-      // _getLiveCollectionPath(key) {
-      //   console.log('setting live collection path for key', key)
-      // }
-      // _toSlug(name) {
-      //   if (!name) { return "" }
-      //   else {
-      //     var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
-      //     return slug
-      //   }
-      // }
-
-      // connectedCallback() {
-      //   super.connectedCallback();
-      //   this.isAttached = true;
-      // }
-
-      // disconnectedCallback() {
-      //   super.disconnectedCallback();
-      //   this.isAttached = false;
-      // }
-
-      // _jsonToArray(json) {
-      //   // push json to array, including $key field as key identifier (in same manner as indexeddb)
-      //   if (!json) { return }
-      //   var tagsArray = []
-      //   for (var key in json) {
-      //     if (json.hasOwnProperty(key)) {
-      //       tagsArray.push(json[key])
-      //     }
-      //   }
-      //   return tagsArray
-      // }
-      generatePushID() {
-        var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
-        var lastPushTime = 0;
-        var lastRandChars = [];
-        var now = new Date().getTime();
-        var duplicateTime = (now === lastPushTime);
-        lastPushTime = now;
-        var timeStampChars = new Array(8);
-        for (var i = 7; i >= 0; i--) {
-          timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
-          now = Math.floor(now / 64);
-        }
-        if (now !== 0) throw new Error('We should have converted the entire timestamp.');
-        var id = timeStampChars.join('');
-        if (!duplicateTime) {
-          for (i = 0; i < 12; i++) {
-            lastRandChars[i] = Math.floor(Math.random() * 64);
-          }
-        } else {
-          for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
-            lastRandChars[i] = 0;
-          }
-          lastRandChars[i]++;
-        }
-        for (i = 0; i < 12; i++) {
-          id += PUSH_CHARS.charAt(lastRandChars[i]);
-        }
-        if (id.length != 20) throw new Error('Length should be 20.');
-        return id;
       }
     }
 

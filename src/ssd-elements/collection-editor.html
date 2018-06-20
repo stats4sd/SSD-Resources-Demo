@@ -1,0 +1,328 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../redux-mixin.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+
+<link rel="import" href="../../bower_components/wysiwyg-e/wysiwyg-e.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/bold.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/italic.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/underline.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/strike.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/color.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/clear.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/code.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/link.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/image.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/audio.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/video.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/ordered.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/unordered.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/indent.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/outdent.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/justify.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/heading.html">
+<link rel="import" href="../../bower_components/wysiwyg-e/tools/blockquote.html">
+
+
+<dom-module id="collection-editor">
+  <template>
+    <style>
+      paper-button.toggle[active] {
+        background-color: var(--paper-grey-300);
+      }
+
+      paper-button.toggle {
+        background-color: var(--paper-green-300);
+        margin: 2px 5px 1em 0
+      }
+
+      paper-button.remove-button {
+        color: var(--error-color);
+        float: left;
+        z-index: 2;
+      }
+
+      paper-button.publish-button {
+        background: var(--primary-color);
+        color: white;
+        float: right;
+      }
+
+      paper-button.save-button {
+        float: right;
+      }
+
+      paper-button.included-resources[active] {
+        font-weight: bold;
+        background: wheat;
+      }
+
+      paper-button.included-resources {
+        width: 100%;
+        justify-content: left;
+      }
+
+      .footer {
+        position: sticky;
+        height: 3em;
+        background: rgba(230, 228, 250, 0.4);
+        bottom: 1em;
+        float: right
+      }
+
+      .error-msg {
+        color: var(--error-color)
+      }
+    </style>
+
+    <!-- Firebase binding for live data, used for both tags and full resource -->
+    <firebase-document id="firebaseDoc" path="[[firebaseDocPath]]" data="{{firebaseDocData}}" app-name="stats4sd-firebase"></firebase-document>
+
+    <!-- Template for add/edit collection -->
+    <paper-input always-float-label label="Collection Name" value="{{activeCollection.label}}" style="padding-bottom:10px"></paper-input>
+    <div>Description</div>
+    <div>
+      <paper-button class="toggle" active="{{!visualEditor}}">Editor</paper-button>
+      <paper-button class="toggle" active="{{visualEditor}}">Code</paper-button>
+    </div>
+    <paper-textarea id="descriptionCode" placeholder="Input html text here" value="{{activeCollection.description}}" hidden$="[[visualEditor]]"></paper-textarea>
+    <div hidden$="[[!visualEditor]]" style="border: 1px solid gray">
+      <wysiwyg-e style="width: 100%; height: 50vh;" value="{{activeCollection.description}}" target="{{wysiwygTarget}}">
+        <wysiwyg-tool-bold></wysiwyg-tool-bold>
+        <wysiwyg-tool-italic></wysiwyg-tool-italic>
+        <wysiwyg-tool-underline></wysiwyg-tool-underline>
+        <wysiwyg-tool-strike></wysiwyg-tool-strike>
+        <wysiwyg-tool-color></wysiwyg-tool-color>
+        <wysiwyg-tool-clear></wysiwyg-tool-clear>
+        <wysiwyg-tool-code></wysiwyg-tool-code>
+        <wysiwyg-tool-link></wysiwyg-tool-link>
+        <wysiwyg-tool-image></wysiwyg-tool-image>
+        <wysiwyg-tool-audio></wysiwyg-tool-audio>
+        <wysiwyg-tool-video></wysiwyg-tool-video>
+        <wysiwyg-tool-ordered></wysiwyg-tool-ordered>
+        <wysiwyg-tool-unordered></wysiwyg-tool-unordered>
+        <wysiwyg-tool-indent></wysiwyg-tool-indent>
+        <wysiwyg-tool-outdent></wysiwyg-tool-outdent>
+        <wysiwyg-tool-justify right center full></wysiwyg-tool-justify>
+        <wysiwyg-tool-heading h1 h2 h3 h4 h5 h6></wysiwyg-tool-heading>
+        <wysiwyg-tool-blockquote></wysiwyg-tool-blockquote>
+      </wysiwyg-e>
+    </div>
+
+    <div style="margin-top:1em">Resources</div>
+    <template is="dom-repeat" items="[[allResourcesArray]]" as="resource" initial-count="10">
+      <div style="display: flex; justify-content: space-between">
+        <paper-button class="included-resources" active$="[[_collectionIncludes(resource.$key, activeCollection.resources)]]" on-tap="resourceToggle">[[resource.name]]</paper-button>
+      </div>
+
+    </template>
+    <!-- <stats4sd-search collection-mode></stats4sd-search> -->
+
+    <div class="flex" style="margin-top:1em">
+      <paper-toggle-button checked="{{!activeCollection.public}}"></paper-toggle-button>
+      <div hidden$="[[activeCollection.public]]">
+        <span>Public</span>
+        <iron-icon icon="stats4sd:visibility"></iron-icon>
+      </div>
+      <div hidden$="[[!activeCollection.public]]">
+        <span>Private</span>
+        <iron-icon icon="stats4sd:visibility-off"></iron-icon>
+      </div>
+    </div>
+    <div style="margin:3em 0">
+      <paper-button class="remove-button" on-tap="removeCollection">Delete</paper-button>
+    </div>
+    <div class="footer">
+      <paper-button class="publish-button" on-tap="publishCollection">Publish</paper-button>
+      <paper-button class="save-button" on-tap="saveDraft">Save Draft</paper-button>
+      <div class="error-msg">[[errorMsg]]</div>
+    </div>
+
+
+  </template>
+
+  <script>
+    class CollectionEditor extends ReduxMixin(Polymer.Element) {
+      static get is() { return 'collection-editor'; }
+      static get properties() {
+        return {
+          visualEditor: {
+            type: Boolean,
+            value: true
+          },
+          errorMsg: {
+            type: String
+          },
+          // properties updated by the redux global store
+          allCollections: {
+            type: Array,
+            statePath: 'persistedTags.array.collections',
+          },
+          allCollectionsBySlug: {
+            type: Array,
+            statePath: 'persistedTags.bySlug.collections',
+          },
+          allResourcesByKey: {
+            type: Array,
+            statePath: 'persistedResources.byKey'
+          },
+          allResourcesArray: {
+            type: Array,
+            statePath: 'persistedResources.array'
+          },
+          activeCollection: {
+            type: Object,
+            statePath: 'activeCollection'
+          },
+        };
+      }
+
+      static get actions() {
+        return {
+          setActiveCollection(collection) {
+            return {
+              type: 'SET_ACTIVE_COLLECTION',
+              payload: collection
+            }
+          },
+        }
+      }
+
+      resourceToggle(e) {
+        if (!this.activeCollection) { return }
+        const key = e.model.resource.$key
+        if (!this.activeCollection.resources) { this.activeCollection.resources = [] }
+        const index = this.activeCollection.resources.indexOf(key)
+        if (index == -1) {
+          this.push('activeCollection.resources', key)
+        }
+        else {
+          this.splice('activeCollection.resources', index, 1)
+        }
+        this.notifyPath('activeCollection.resources')
+      }
+
+      _collectionIncludes(key, collectionResources) {
+        return collectionResources && collectionResources.indexOf(key) > -1
+      }
+
+      saveDraft() {
+        this.activeCollection.draft = true
+        this.saveCollection()
+      }
+      publishCollection() {
+        this.activeCollection.draft = false
+        this.saveCollection()
+      }
+
+      saveCollection() {
+        this.errorMsg = null
+        let collection = this._updateCollectionMeta(this.activeCollection)
+        this.$.firebaseDoc.reset()
+        this.set('firebaseDocPath', '')
+        this.set('firebaseDocData', collection)
+        // remove $key property as this will be automatically added by firebase
+        // delete this.resource.$key
+        // set the path and id for the data and update data at the same time
+        this.$.firebaseDoc.saveValue('/tags/Collections', collection._key).then(
+          res => {
+            this.dispatch('setActiveCollection', collection)
+            location = "/collections"
+          },
+          err => {
+            this.errorMsg = "Error saving: " + err
+          }
+        )
+      }
+      _updateCollectionMeta(collection) {
+        if (!collection.label) {
+          this.errorMsg = 'Please include a name for the collection'
+          throw new Error('No Collection Name')
+        }
+        collection.type = "Collection";
+        collection.modified = Date.now();
+        collection.slug = this._toSlug(collection.label);
+        if (!collection.hasOwnProperty('created')) {
+          if (this.allCollectionsBySlug.hasOwnProperty(collection.slug)) {
+            this.errorMsg = "A collection with that name already exists"
+            throw new Error('A collection with that name already exists')
+          }
+          collection.created = Date.now();
+        }
+        if (!collection.hasOwnProperty('resources')) {
+          collection.resources = [];
+        }
+        if (collection.hasOwnProperty('$key')) {
+          collection._key = collection.$key
+          delete collection.$key
+        }
+        else {
+          collection._key = this.generatePushID()
+        }
+        return collection
+      }
+
+      // creates a backup in 'deleted' path and then deleted data
+      removeCollection() {
+        let collection = this.activeCollection
+        this.set('firebaseDocPath', '')
+        this.$.firebaseDoc.saveValue('/deleted/Collections', collection._key).then(
+          res => {
+            this.set('firebaseDocPath', '/tags/Collections/' + collection._key)
+            this.set('firebaseDocData', null)
+            this.dispatch('setActiveCollection', null)
+            location = "/collections"
+          },
+          err => {
+            console.err(err)
+          }
+        )
+      }
+
+      _toSlug(name) {
+        if (!name) { return "" }
+        else {
+          var slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^0-9a-z-]/g, "");
+          return slug
+        }
+      }
+
+      generatePushID() {
+        var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+        var lastPushTime = 0;
+        var lastRandChars = [];
+        var now = new Date().getTime();
+        var duplicateTime = (now === lastPushTime);
+        lastPushTime = now;
+        var timeStampChars = new Array(8);
+        for (var i = 7; i >= 0; i--) {
+          timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+          now = Math.floor(now / 64);
+        }
+        if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+        var id = timeStampChars.join('');
+        if (!duplicateTime) {
+          for (i = 0; i < 12; i++) {
+            lastRandChars[i] = Math.floor(Math.random() * 64);
+          }
+        } else {
+          for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
+            lastRandChars[i] = 0;
+          }
+          lastRandChars[i]++;
+        }
+        for (i = 0; i < 12; i++) {
+          id += PUSH_CHARS.charAt(lastRandChars[i]);
+        }
+        if (id.length != 20) throw new Error('Length should be 20.');
+        return id;
+      }
+    }
+
+
+    window.customElements.define(CollectionEditor.is, CollectionEditor);
+  </script>
+</dom-module>

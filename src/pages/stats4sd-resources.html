@@ -131,7 +131,7 @@
           // properties computed automatically on changes
           resource: {
             type: Object,
-            computed: '_setActiveResource(path,allResourcesBySlug)',
+            computed: '_setActiveResource(path,allResourcesBySlug,editMode)',
           },
           editMode: {
             type: Boolean,
@@ -140,7 +140,7 @@
         }
 
       }
-      _setActiveResource(path, allResourcesBySlug) {
+      _setActiveResource(path, allResourcesBySlug, editMode) {
         // method runs when slug changed or persisted collections updated (e.g. first load)
         // loads all collections on empty or / route, otherwise loads individual
         if (!path || path == '/resource' || path == '/resource/') {
