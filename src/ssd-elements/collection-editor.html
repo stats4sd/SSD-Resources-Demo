@@ -122,12 +122,12 @@
     <!-- <stats4sd-search collection-mode></stats4sd-search> -->
 
     <div class="flex" style="margin-top:1em">
-      <paper-toggle-button checked="{{!activeCollection.public}}"></paper-toggle-button>
-      <div hidden$="[[activeCollection.public]]">
+      <paper-toggle-button checked="{{activeCollection.public}}"></paper-toggle-button>
+      <div hidden$="[[!activeCollection.public]]">
         <span>Public</span>
         <iron-icon icon="stats4sd:visibility"></iron-icon>
       </div>
-      <div hidden$="[[!activeCollection.public]]">
+      <div hidden$="[[activeCollection.public]]">
         <span>Private</span>
         <iron-icon icon="stats4sd:visibility-off"></iron-icon>
       </div>

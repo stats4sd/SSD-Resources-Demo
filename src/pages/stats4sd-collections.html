@@ -221,16 +221,16 @@
       _addNewCollection(editMode, path) {
         if (editMode && path == '/collections') {
           console.log('creating new collection')
-          this.dispatch('setActiveCollection', { draft: true })
+          this.dispatch('setActiveCollection', { draft: true, public: true })
         }
       }
 
       // filter functions to determine whether public or not (used in dom repeat templates above)
       _isPrivate(c) {
-        return c.private
+        return (!c.public && !c.draft)
       }
       _isPublic(c) {
-        return (!c.private && !c.draft)
+        return (c.public && !c.draft)
       }
       _isDraft(c) {
         return c.draft
