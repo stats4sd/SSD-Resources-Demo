@@ -1,8 +1,7 @@
 # Stats4sd Resources Sites
+
 For specific information about the site or development please contact c.clarke@stats4sd.org.
 general installation information can be found below. If you wish to make a clone then please ensure the site is linked to a new firebase app.
-
-
 
 ### Setup
 
@@ -13,6 +12,7 @@ Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli
     npm install -g polymer-cli
 
 ##### Setup
+
     # Using CLI
     mkdir stats4sd
     cd stats4sd
@@ -30,26 +30,19 @@ Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli
     (of if you wish to use live-reload, install browser-sync globally and run custom start function)
     `npm run start`
 
+### Build and deploy
+
+Staging - default config
+`npm run deploy`
+
+Production - used only on resources.stats4sd.org (defined in environment/setConfig.js)
+`npm run deploy:prod`
+
 ### Run web-component-tester tests
 
     polymer test
 
-### Build
-1. Create the build  
-    $`polymer build`
-2. (recommended) Ensure correct firebase version in use  
-    $`firebase use`
-3. (recommended) Ensure correct environment defined in src/environment/setConfig.js 
-   
-4. (recommended) Test deploy environment  
-    $`firebase serve`
-5.  Deploy  
-    $`firebase deploy`        
-
-
-
-
-**_Note_** 
+**_Note_**
 Build process currently has issue when minifying firebase components [see issue #132](https://github.com/stats4sd/Stats4SD-Resources-Site/issues/132)
 
 Current workaround includes additional imports in polymer.json to maintain automatic process, however this should be reviewed at a later date to help minimise file sizes.
@@ -94,17 +87,17 @@ This command serves the `es6-unbundled` build version of the app:
     polymer serve build/es6-unbundled
 
 ### Preparing SSD-Elements for publishing
-Currently ssd-elements exist in 2 formats, simple to import direct into projects and ready to publish and import via bower.
-In future if wish to publish need to 
-1. change each element polymer import:
-$<link rel="import" href="../../bower_components/polymer/polymer-element.html">-><link rel="import" href="../polymer/polymer-element.html">
-2. override copy in the existing ssd-elements (bower publish version) folder
-3. change app import to be via bower component versions of ssd-elements
-(note, if running polymer lint will show up as error as paths won't resolve, this is fine and build should still work)
 
+Currently ssd-elements exist in 2 formats, simple to import direct into projects and ready to publish and import via bower.
+In future if wish to publish need to
+
+1.  change each element polymer import:
+    $<link rel="import" href="../../bower_components/polymer/polymer-element.html">-><link rel="import" href="../polymer/polymer-element.html">
+2.  override copy in the existing ssd-elements (bower publish version) folder
+3.  change app import to be via bower component versions of ssd-elements
+    (note, if running polymer lint will show up as error as paths won't resolve, this is fine and build should still work)
 
 ### Dev links
+
 Redux used to store global data:
 https://tur-nr.github.io/polymer-redux/docs
-
-
