@@ -66,12 +66,8 @@
         z-index: 3;
       }
     </style>
-    <!-- standard collections -->
-    <!--  we're binding to a dom-if so that when the collection is draft (and hence display:none), there isn't still 
-          remnants of the values available in the element inspector on the page.
-          Instead of using the 'draft' boolean value we're reinterpreting the isDraft function as dom-ifs aren't good with 'falsy'
-          logic (they render before evaluation and don't update unless restamp specified) -->
-    <template is="dom-if" if="[[!_isDraft(collection)]]">
+
+    <div>
       <a href="[[_getHref(collection)]]">
         <div class="container">
           <image id="img" class="background-image" src="[[_getFeatureImage(collection)]]" on-error="_onImgError"></image>
@@ -80,10 +76,7 @@
           <div class="bottom-bar">[[collection.resources.length]] Resources</div>
         </div>
       </a>
-    </template>
-
-    <!-- draft or deleted collections (to be built) -->
-
+    </div>
 
   </template>
 
@@ -99,15 +92,6 @@
             type: Boolean,
             statePath: 'signedIn'
           },
-          // compute whether the collection is in draft status. This value if reflected onto an attribute on the element
-          // (e.g. <collection-element draft></collection-element) and styled on the host
-          // currently draft collections are just hidden, later this should be replaced with something that takes into
-          // account if a user is signed in / has permission to see
-          draft: {
-            type: Boolean,
-            reflectToAttribute: true,
-            computed: '_isDraft(collection)',
-          }
         };
       }
       _onImgError() {
@@ -118,10 +102,6 @@
       }
       _getHref(collection) {
         return window.location.origin + '/collections/' + collection.slug
-      }
-      // currently treats draft and deleted the same way (hides) - to be improved
-      _isDraft(collection) {
-        return (collection.draft || collection.deleted)
       }
     }
 

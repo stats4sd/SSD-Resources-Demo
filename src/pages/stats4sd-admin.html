@@ -16,24 +16,6 @@
         /* padding: 10px */
       }
     </style>
-
-    <!-- <template is="dom-if" if="{{signedIn}}">
-      <div on-tap="_signOut">
-        <a style="font-size: 16px; cursor:pointer">Sign Out</a>
-        <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
-      </div>
-      <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
-    </template>
-
-    <template is="dom-if" if="{{signedIn}}">
-      <div on-tap="_signOut">
-        <a style="font-size: 16px; cursor:pointer">Sign Out</a>
-        <paper-icon-button icon="lock-open" style="color:white" aria-label$="Sign In"></paper-icon-button>
-      </div>
-      <div id="signedInHeader" hidden$="[[!signedIn]]">{{user.email}}</div>
-    </template> -->
-
-
     <!-- <firebase-document path="/tags" data="{{liveTags}}" app-name="stats4sd-firebase"></firebase-document> -->
     <firebase-document path="/resources" data="{{liveResources}}" app-name="stats4sd-firebase"></firebase-document>
 

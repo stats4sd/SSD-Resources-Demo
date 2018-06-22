@@ -30,7 +30,8 @@
         align-self: center;
         width: 50vw;
       }
-      .no-results{
+
+      .no-results {
         font-weight: bold
       }
 
@@ -45,7 +46,6 @@
           color: #727272;
           font-size: 2em;
         }
-        paper-badge {}
       }
 
       paper-dropdown-menu,
@@ -79,15 +79,27 @@
         <paper-input id="searchBox" value="{{searchText}}" name="search" label="search" auto-validate pattern="[a-zA-Z0-9 ']*" error-message="no special characters!"></paper-input>
         <div style="opacity: 0.7" hidden$="[[!_showSearchPlaceholder(searchText)]]">Input at least 3 characters</div>
       </div>
-      
+
     </div>
-    
+
     <div>
       <dom-repeat id="resourcesList" items="[[searchResults]]" as="res" initial-count="10" rendered-item-count="{{resourcesRendered}}"
         filter="_hideDraftDeleted">
         <template>
-          <resource-search-result resource="[[res]]" style="padding:5px" collection-add-mode="[[collectionAddMode]]" active-collection="{{activeCollection}}"
-            live-collection="{{liveCollection}}"></resource-search-result>
+          <div style="display: flex">
+            <resource-search-result resource="[[res]]" style="padding:5px" collection-add-mode="[[collectionAddMode]]" active-collection="{{activeCollection}}"
+              live-collection="{{liveCollection}}"></resource-search-result>
+            <div style="width:100px">
+              <paper-button on-tap="addToCollection" hidden$="{{res.included}}" style="height: 50px">
+                <iron-icon icon="stats4sd:add"></iron-icon>
+                <span style="margin-left:2px">Add to collection</span>
+              </paper-button>
+              <paper-button on-tap="removeFromCollection" hidden$="[[!res.included]]" style="height: 50px">
+                <iron-icon icon="stats4sd:blank"></iron-icon>
+                <span style="margin-left:2px; color:var(--app-secondary-color)">Included</span>
+              </paper-button>
+            </div>
+          </div>
           <hr>
         </template>
       </dom-repeat>
@@ -106,13 +118,6 @@
       }
       static get properties() {
         return {
-          // persistedTags: {
-          //   type: Array,
-          // },
-          // persistedResources: {
-          //   type: Array,
-          // },
-          // collectionAddMode: Boolean
           allResourcesArray: {
             type: Array,
             statePath: 'persistedResources.array',
@@ -155,8 +160,8 @@
       _showSearchPlaceholder(searchText) {
         return searchText.length > 2 ? false : true
       }
-      _showNoResources(searchText, resourcesRendered){
-        return searchText.length>2 && resourcesRendered==0
+      _showNoResources(searchText, resourcesRendered) {
+        return searchText.length > 2 && resourcesRendered == 0
       }
       _hideDraftDeleted(res) {
         // don't show resources marked as deleted or draft
@@ -165,6 +170,8 @@
         }
         else { return true }
       }
+
+
 
       // main search function
       search(searchText, detail = {}) {
