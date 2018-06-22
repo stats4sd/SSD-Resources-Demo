@@ -76,7 +76,7 @@
         <!-- some filtering options will come here at some point using paper-dropdown / vaadin combo or similar -->
 
         <template is='dom-repeat' items="[[filteredResourcesArray]]" as="resource">
-          <resource-search-result resource="[[resource]]" hidden$="[[resource.deleted || resource.draft]]"></resource-search-result>
+          <resource-search-result resource="[[resource]]" hidden$="[[_hideResource(resource)]]"></resource-search-result>
         </template>
       </template>
     </div>
@@ -193,6 +193,10 @@
       // we only want this to happen when no specific resource has been given
       _shouldShowAllResources(path) {
         return (path == '/resources' || path == '/resources/')
+      }
+
+      _hideResource(resource) {
+        return (resource.deleted || resource.draft)
       }
 
       // remove the keyword url from the path
