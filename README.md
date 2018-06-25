@@ -32,6 +32,8 @@ Install [polymer-cli](https://www.polymer-project.org/2.0/docs/tools/polymer-cli
 
 ### Build and deploy
 
+Optional - update version number on stats4sd-home.html
+
 Staging - default config
 `npm run deploy`
 
@@ -47,8 +49,6 @@ Build process currently has issue when minifying firebase components [see issue 
 
 Current workaround includes additional imports in polymer.json to maintain automatic process, however this should be reviewed at a later date to help minimise file sizes.
 Build should be tested via $firebase serve command and if auth still fails files may still need to be copied from bower_components/firebase and bower_components/polymerfire
-
-Note to self - ensure version number on stats4sd-home.html is updated accordingly to help identification
 
 Build presets provide an easy way to define common build configurations in your `polymer.json` file. There are 2 build presets we put in `polymer.json` file in stats4sd:
 

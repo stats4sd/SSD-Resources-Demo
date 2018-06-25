@@ -53,7 +53,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      
+
     }
 
     #preloader>h1 {
@@ -61,18 +61,18 @@
       margin: auto;
       padding-bottom: 200px;
     }
-    
+
     /* when the loaded class is added we fade the preloader away, and once faded shift it off the screen */
+
     .loaded>#preloader {
       opacity: 0;
       transform: translateY(-100%);
-      -webkit-transition: opacity 0.3s ease-out 0.6s, -webkit-transform 0s ease-out 1s; 
-      transition: opacity 0.3s ease-out 0.6s, transform 0s ease-out 1s ;
+      -webkit-transition: opacity 0.3s ease-out 0.6s, -webkit-transform 0s ease-out 1s;
+      transition: opacity 0.3s ease-out 0.6s, transform 0s ease-out 1s;
     }
 
     #mainApp {
       /* transform: translateY(100%); */
-
     }
 
     .loaded>#mainApp {
@@ -92,7 +92,7 @@
   <!-- The main app element. Everything else is in here (src/stats4sd-app) -->
   <stats4sd-app id="mainApp" unresolved></stats4sd-app>
 
-  <script src="bower_components/web-animations-js/web-animations-next-lite.min.js"></script>
+  <script src="bower_components/web-animations-js/web-animations.min.js"></script>
   <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
   <script src="node_modules/redux/dist/redux.js"></script>
   <link rel="import" href="src/stats4sd-app.html">

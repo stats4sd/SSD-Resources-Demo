@@ -10,10 +10,7 @@
     "src/pages/stats4sd-search.html",
     "src/lazy-resources.html"
   ],
-  "sources": [
-    "src/**/*",
-    "images/**/*"
-  ],
+  "sources": ["src/**/*", "images/**/*"],
   "extraDependencies": [
     "app.yaml",
     "manifest.json",
@@ -28,19 +25,23 @@
     "node_modules/redux/dist/redux.js"
   ],
   "lint": {
-    "rules": [
-      "polymer-2-hybrid"
-    ]
+    "rules": ["polymer-2-hybrid"]
   },
   "builds": [
     {
-      "preset": "es5-bundled",
+      "name": "bundled",
       "bundle": {
         "excludes": [
           "bower_components/webcomponentsjs/*",
           "bower_components/web-animations-js/*"
         ]
-      }
+      },
+      "js": { "minify": false },
+      "css": { "minify": false },
+      "html": { "minify": false },
+      "addServiceWorker": true,
+      "addPushManifest": true,
+      "insertPrefetchLinks": true
     }
   ]
 }
