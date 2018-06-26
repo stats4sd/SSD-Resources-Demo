@@ -5,6 +5,7 @@
 <link rel="import" href="../ssd-elements/resource-search-result.html">
 
 <link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../../bower_components/sortable-list/sortable-list.html">
@@ -79,6 +80,11 @@
       .error-msg {
         color: var(--error-color)
       }
+
+      .excluded-resources {
+        padding: 5px;
+        cursor: pointer;
+      }
     </style>
 
     <!-- Firebase binding for live data, used for both tags and full resource -->
@@ -116,23 +122,30 @@
     </div>
 
     <div style="margin:1em 0">Resources in this collection (drag to change order)</div>
-    <sortable-list on-sort-finish="_resourcesSorted" dragging="{{dragging}}" sortable=".resource-item" items="{{sortedResources}}">
-      <template is="dom-repeat" id="includedResources" as="resource" items="{{allResourcesArray}}" filter="resourceIncluded" observe="included">
-        <div class="resource-item" id$=[[resource.$key]]>
-          <resource-search-result resource="[[resource]]" style="pointer-events:none"></resource-search-result>
-          <hr>
+    <sortable-list sortable=".resource-item" items="{{sortedResources}}">
+      <template is="dom-repeat" id="includedResources" as="resourceKey" items="[[activeCollection.resources]]">
+        <div class="resource-item" id$=[[resourceKey]] style="display: flex; border-bottom: 1px solid rgba(0, 0, 0, 0.3)">
+          <resource-search-result key$="[[resourceKey]]" style="pointer-events:none; margin-top:1em"></resource-search-result>
+          <paper-icon-button icon="stats4sd:close" on-tap="resourceToggle"></paper-icon-button>
         </div>
       </template>
     </sortable-list>
 
-    <div style="margin:1em 0">Add resources to this collection</div>
-    <template is="dom-repeat" as="resource" items="[[allResourcesArray]]" filter="resourceNotIncluded" observe="included">
-      <div>[[resource.name]]</div>
-
-    </template>
-
-
-
+    <paper-button id="button" style="margin:1em 0" on-click="_toggleAllResourceCollapse">Add resources to this collection</paper-button>
+    <iron-collapse id="allResourcesCollapse">
+      <template is="dom-repeat" as="resource" items="[[allResourcesArray]]" filter="_resourceNotIncluded" sort="_sortByName" observe="included"
+        delay="200">
+        <div style="display: flex;  border-bottom: 1px solid rgba(0, 0, 0, 0.3); max-width: 500px">
+          <div style="flex:1">
+            <div class="resource-item excluded-resources" on-tap="_toggleResourceDescription">[[resource.name]]</div>
+            <iron-collapse resource$="[[resource.$key]]">
+              [[resource.description]]
+            </iron-collapse>
+          </div>
+          <paper-icon-button icon="stats4sd:add" on-tap="resourceToggle"></paper-icon-button>
+        </div>
+      </template>
+    </iron-collapse>
 
 
     <div class="flex" style="margin-top:1em">
@@ -212,9 +225,11 @@
       }
 
       resourceToggle(e) {
+        console.log('resource toggle', e.model)
         if (!this.activeCollection) { return }
-        const key = e.model.resource.$key
-        if (!this.activeCollection.resources) { this.activeCollection.resources = [] }
+        // sometimes we bind to full resource and sometimes only to key (could be tidied, but for now just switch between what exists)
+        const key = e.model.resourceKey ? e.model.resourceKey : e.model.resource.$key
+        if (!this.activeCollection.resources) { this.set('activeCollection.resources', []) }
         const index = this.activeCollection.resources.indexOf(key)
         if (index == -1) {
           this.push('activeCollection.resources', key)
@@ -223,32 +238,47 @@
           this.splice('activeCollection.resources', index, 1)
         }
         this.notifyPath('activeCollection.resources')
+        console.log('resources', this.activeCollection.resources)
       }
 
-      // on collection resources change
+      // on collection resources change want to attach included property to each resource to make for easy filtering
       _computeIncludedResources(collectionResources, allResources) {
-        if (collectionResources && collectionResources.length > 0 && allResources && allResources.length > 0) {
+        if (collectionResources && allResources && allResources.length > 0) {
           this.allResourcesArray.forEach((resource, i) => {
             if (collectionResources.indexOf(resource.$key) > -1) {
               this.set('allResourcesArray.' + i + '.included', true)
+            }
+            else {
+              this.set('allResourcesArray.' + i + '.included', false)
             }
           })
         }
       }
 
-      // update active collection when resource order changed via drag and drop
-      _resourcesSorted() {
+      // ideally want to simply bind to active collection resources when drag/drop complete, but the sort element doesn't actually keep
+      // track of the changed array (pr #16 made so might change in future). therefore will just get updated list on save/publish
+      _getSortedResources() {
         const sorted = this.sortedResources.map(node => {
           return node.id
         })
-        this.set('activeCollection.resources', sorted)
+        return sorted
       }
-
-      resourceIncluded(res) {
-        return res.included
+      _sortByName(a, b) {
+        return a.name > b.name ? 1 : -1
       }
-      resourceNotIncluded(res) {
+      _resourceNotIncluded(res) {
         return !res.included
+      }
+      _toggleAllResourceCollapse() {
+        this.$.allResourcesCollapse.toggle();
+      }
+      // we've attached a custom [resource] attribute to the resource iron-collapse elements so they can be queried and toggled
+      _toggleResourceDescription(e) {
+        const id = e.model.resource.$key
+        // as id's are dynamic need to use shadowRoot query and not just load from saved mapping (via this.$.)
+        const collapse = this.shadowRoot.querySelector('iron-collapse[resource="' + id + '"]')
+        console.log('collapse', collapse)
+        collapse.toggle()
       }
 
 
@@ -273,7 +303,7 @@
         this.$.firebaseDoc.saveValue('/tags/Collections', collection._key).then(
           res => {
             this.dispatch('setActiveCollection', collection)
-            location = "/collections"
+            location = "/collections/" + collection.slug
           },
           err => {
             this.errorMsg = "Error saving: " + err
@@ -288,6 +318,7 @@
         collection.type = "Collection";
         collection.modified = Date.now();
         collection.slug = this._toSlug(collection.label);
+        collection.resources = this._getSortedResources()
         if (!collection.hasOwnProperty('created')) {
           if (this.allCollectionsBySlug.hasOwnProperty(collection.slug)) {
             this.errorMsg = "A collection with that name already exists"
