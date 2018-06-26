@@ -1,7 +1,10 @@
 {
   "name": "stats4sd-resources",
   "version": "2.1.0",
-  "authors": ["Chris Clarke", "Dave Mills"],
+  "authors": [
+    "Chris Clarke",
+    "Dave Mills"
+  ],
   "private": true,
   "dependencies": {
     "polymer": "polymer/polymer#2.4.0",
@@ -35,7 +38,9 @@
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.3",
     "vaadin-lumo-styles": "/vaadin/vaadin-lumo-styles#^1.0.0-beta2",
     "paper-card": "PolymerElements/paper-card#^2.1.0",
-    "vaadin-grid": "vaadin/vaadin-grid#^4.1.7"
+    "vaadin-grid": "vaadin/vaadin-grid#^4.1.7",
+    "sortable-list": "sharedlabs/sortable-list#^1.0.2",
+    "iron-collapse": "PolymerElements/iron-collapse#^2.2.1"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0"

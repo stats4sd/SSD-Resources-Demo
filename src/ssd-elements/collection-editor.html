@@ -2,9 +2,12 @@
 <link rel="import" href="../redux-mixin.html">
 
 <link rel="import" href="../shared-styles.html">
+<link rel="import" href="../ssd-elements/resource-search-result.html">
 
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../../bower_components/sortable-list/sortable-list.html">
 
 <link rel="import" href="../../bower_components/wysiwyg-e/wysiwyg-e.html">
 <link rel="import" href="../../bower_components/wysiwyg-e/tools/bold.html">
@@ -112,14 +115,25 @@
       </wysiwyg-e>
     </div>
 
-    <div style="margin-top:1em">Resources</div>
-    <template is="dom-repeat" items="[[allResourcesArray]]" as="resource" initial-count="10">
-      <div style="display: flex; justify-content: space-between">
-        <paper-button class="included-resources" active$="[[_collectionIncludes(resource.$key, activeCollection.resources)]]" on-tap="resourceToggle">[[resource.name]]</paper-button>
-      </div>
+    <div style="margin:1em 0">Resources in this collection (drag to change order)</div>
+    <sortable-list on-sort-finish="_resourcesSorted" dragging="{{dragging}}" sortable=".resource-item" items="{{sortedResources}}">
+      <template is="dom-repeat" id="includedResources" as="resource" items="{{allResourcesArray}}" filter="resourceIncluded" observe="included">
+        <div class="resource-item" id$=[[resource.$key]]>
+          <resource-search-result resource="[[resource]]" style="pointer-events:none"></resource-search-result>
+          <hr>
+        </div>
+      </template>
+    </sortable-list>
+
+    <div style="margin:1em 0">Add resources to this collection</div>
+    <template is="dom-repeat" as="resource" items="[[allResourcesArray]]" filter="resourceNotIncluded" observe="included">
+      <div>[[resource.name]]</div>
 
     </template>
-    <!-- <stats4sd-search collection-mode></stats4sd-search> -->
+
+
+
+
 
     <div class="flex" style="margin-top:1em">
       <paper-toggle-button checked="{{activeCollection.public}}"></paper-toggle-button>
@@ -175,9 +189,15 @@
           },
           activeCollection: {
             type: Object,
-            statePath: 'activeCollection'
+            statePath: 'activeCollection',
           },
         };
+      }
+
+      static get observers() {
+        return [
+          '_computeIncludedResources(activeCollection.resources,allResourcesArray)',
+        ]
       }
 
       static get actions() {
@@ -205,9 +225,32 @@
         this.notifyPath('activeCollection.resources')
       }
 
-      _collectionIncludes(key, collectionResources) {
-        return collectionResources && collectionResources.indexOf(key) > -1
+      // on collection resources change
+      _computeIncludedResources(collectionResources, allResources) {
+        if (collectionResources && collectionResources.length > 0 && allResources && allResources.length > 0) {
+          this.allResourcesArray.forEach((resource, i) => {
+            if (collectionResources.indexOf(resource.$key) > -1) {
+              this.set('allResourcesArray.' + i + '.included', true)
+            }
+          })
+        }
       }
+
+      // update active collection when resource order changed via drag and drop
+      _resourcesSorted() {
+        const sorted = this.sortedResources.map(node => {
+          return node.id
+        })
+        this.set('activeCollection.resources', sorted)
+      }
+
+      resourceIncluded(res) {
+        return res.included
+      }
+      resourceNotIncluded(res) {
+        return !res.included
+      }
+
 
       saveDraft() {
         this.activeCollection.draft = true

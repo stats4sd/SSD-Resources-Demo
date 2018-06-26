@@ -38,7 +38,7 @@
 
       @media (max-width: 763px) {
         .collection {
-          height: 384px;
+          min-height: 384px;
         }
         .keywords {
           max-height: 110px;
@@ -47,7 +47,7 @@
 
       @media (min-width: 764px) {
         .collection {
-          height: 192px;
+          min-height: 192px;
         }
         .keywords {
           max-height: 37px;
@@ -165,8 +165,8 @@
         return newest
       }
 
-      _sortByLabel(a,b){
-        return(a.label>b.label)
+      _sortByLabel(a, b) {
+        return (a.label > b.label)
       }
 
     }

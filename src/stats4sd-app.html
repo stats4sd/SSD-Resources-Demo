@@ -324,14 +324,13 @@
       }
 
       // Function involved in the loading of pages / elements.
-      // (Degm- I have no idea what this does, but it works!)
+      // import lazy-loaded resources after main page paint complete, 
+      // register service worker if supported and not on localhost
       _ensureLazyLoaded() {
-        // load lazy resources after render and set `loadComplete` when done.
         if (!this.loadComplete) {
           Polymer.RenderStatus.afterNextRender(this, () => {
             Polymer.importHref(this.resolveUrl('lazy-resources.html'), () => {
-              // Register service worker if supported.
-              if ('serviceWorker' in navigator) {
+              if ('serviceWorker' in navigator && location.hostname != "localhost") {
                 navigator.serviceWorker.register('service-worker.js', { scope: '/' });
               }
               // this._notifyNetworkStatus();
